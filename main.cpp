@@ -28,6 +28,7 @@ using namespace std;
 
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
+GLMmodel *cube = NULL;
 
 int width, height;
 int start_x, start_y;
@@ -40,6 +41,30 @@ bool ridingMode = false;
 float delta_x = 0.0, delta_y = 0.0, delta_z = 0.0;
 float angle=0;
 
+GLfloat vertices[][3] =
+    {{-0.5,-0.5,-0.5},
+    {0.5,-0.5,-0.5},
+    {0.5,0.5,-0.5},
+    {-0.5,0.5,-0.5},
+    {-0.5,-0.5,0.5},
+    {0.5,-0.5,0.5},
+    {0.5,0.5,0.5},
+    {-0.5,0.5,0.5}};
+
+GLfloat colors[][3] =
+    {{1.0,1.0,1.0},
+    {1.0,1.0,1.0},
+	{1.0,1.0,1.0},
+	{1.0,1.0,1.0},
+	{1.0,1.0,1.0},
+	{1.0,1.0,1.0},
+	{1.0,1.0,1.0},
+	{1.0,1.0,1.0}};
+
+	GLfloat normals[][3] = {{-1.0,-1.0,-1.0},{1.0,-1.0,-1.0},
+	{1.0,1.0,-1.0}, {-1.0,1.0,-1.0}, {-1.0,-1.0,1.0},
+	{1.0,-1.0,1.0}, {1.0,1.0,1.0}, {-1.0,1.0,1.0}};
+
 GLdouble lightTheta = 10.0;
 //GLfloat light0_pos[]={100.0, 100.0, 100.0, 1.0};
 //GLfloat light0_ambient[] = {0.9, 0.9, 0.9, 1.0};
@@ -50,11 +75,42 @@ GLfloat light0_ambient[]={1.0, 1.0, 1.0, 1.0};
 GLfloat light0_specular[]={1.0, 1.0, 1.0, 1.0};
 GLfloat light0_pos[]={0.0, 0.0, 10.0, 1.0};
 
+GLfloat min_x, max_x, min_y, max_y, min_z, max_z;
+GLfloat bound_size[3];
+GLfloat bound_center[3];
+
 vector<int> *point_tri = NULL;
 
 bool show = true;
 
-GLfloat model_center[3] = {0.0 , 0.0 , 0.0};
+//GLfloat model_center[3] = {0.0 , 0.0 , 0.0};
+
+void polygon(int a, int b, int c , int d)
+{
+/* draw a polygon via list of vertices */
+    glBegin(GL_POLYGON);
+        //glColor3fv(vertices[a]);
+        glVertex3fv(vertices[a]);
+        //glColor3fv(vertices[b]);
+        glVertex3fv(vertices[b]);
+        //glColor3fv(vertices[c]);
+        glVertex3fv(vertices[c]);
+        //glColor3fv(vertices[d]);
+        glVertex3fv(vertices[d]);
+    glEnd();
+}
+
+void colorcube(void)
+{
+/* map vertices to faces */
+
+	polygon(0,3,2,1);
+	polygon(2,3,7,6);
+	polygon(0,4,7,3);
+	polygon(1,2,6,5);
+	polygon(4,5,6,7);
+	polygon(0,1,5,4);
+}
 
 void drawObj(GLMmodel *myObj)
 {
@@ -176,6 +232,18 @@ void display(void)
     //printf("%f\n", myObj_inner->vertices[5]);
     //glScalef(2.0,2.0,2.0);
     //glTranslatef(0.0, 0.0, 10.0);
+
+    glTranslatef(bound_center[0], bound_center[1], bound_center[2]);    //Dragon
+    glScalef(bound_size[0],bound_size[1],bound_size[2]);
+    glPolygonMode(GL_FRONT, GL_LINE);
+    glPolygonMode(GL_BACK, GL_LINE);
+    colorcube();
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_BACK, GL_FILL);
+    //glmDraw(myObj_inner,GLM_SMOOTH);
+    //printf("%f\n", myObj_inner->vertices[5]);
+    glScalef(1/bound_size[0],1/bound_size[1],1/bound_size[2]);
+    glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -361,18 +429,42 @@ void myReshape(int w, int h)
 void init()
 {
     //cout << myObj->vertices[3 * 1 + 0] << " " << myObj->vertices[3 * 1 + 1] << " " << myObj->vertices[3 * 1 + 2] << endl;
+    min_x = max_x = myObj->vertices[3 * 1 + 0];
+    min_y = max_y = myObj->vertices[3 * 1 + 1];
+    min_z = max_z = myObj->vertices[3 * 1 + 2];
+
     for(int i = 1 ; i <= myObj->numvertices ; i += 1)
     {
-        model_center[0] += myObj->vertices[3 * i + 0];
-        model_center[1] += myObj->vertices[3 * i + 1];
-        model_center[2] += myObj->vertices[3 * i + 2];
+        if (myObj->vertices[3 * i + 0] < min_x) min_x = myObj->vertices[3 * i + 0];
+        if (myObj->vertices[3 * i + 0] > max_x) max_x = myObj->vertices[3 * i + 0];
+        if (myObj->vertices[3 * i + 1] < min_y) min_y = myObj->vertices[3 * i + 1];
+        if (myObj->vertices[3 * i + 1] > max_y) max_y = myObj->vertices[3 * i + 1];
+        if (myObj->vertices[3 * i + 2] < min_z) min_z = myObj->vertices[3 * i + 2];
+        if (myObj->vertices[3 * i + 2] > max_z) max_z = myObj->vertices[3 * i + 2];
+//        model_center[0] += myObj->vertices[3 * i + 0];
+//        model_center[1] += myObj->vertices[3 * i + 1];
+//        model_center[2] += myObj->vertices[3 * i + 2];
     }
 
-    model_center[0] = model_center[0]/myObj->numvertices;
-    model_center[1] = model_center[1]/myObj->numvertices;
-    model_center[2] = model_center[2]/myObj->numvertices;
+//    cout << max_x << " " << max_y << " " << max_z << endl;
+//    cout << min_x << " " << min_y << " " << min_z << endl;
 
-    cout << model_center[0] << " " << model_center[1] << " " << model_center[2] << endl;
+    bound_size[0] = max_x - min_x;
+    bound_size[1] = max_y - min_y;
+    bound_size[2] = max_z - min_z;
+
+    bound_center[0] = (max_x + min_x)/2.0;
+    bound_center[1] = (max_y + min_y)/2.0;
+    bound_center[2] = (max_z + min_z)/2.0;
+
+    cout << bound_size[0] << " " << bound_size[1] << " " << bound_size[2] << endl;
+    cout << bound_center[0] << " " << bound_center[1] << " " << bound_center[2] << endl;
+
+//    model_center[0] = model_center[0]/myObj->numvertices;
+//    model_center[1] = model_center[1]/myObj->numvertices;
+//    model_center[2] = model_center[2]/myObj->numvertices;
+
+//    cout << model_center[0] << " " << model_center[1] << " " << model_center[2] << endl;
 
     //if(myObj->numnormals == 0)
     point_tri = new vector<int>[myObj->numvertices + 1];
@@ -526,6 +618,8 @@ int main(int argc, char **argv)
     myObj = glmReadOBJ("cube.obj");
     //myObj = glmReadOBJ("alduin.obj");
     myObj_inner = glmReadOBJ("cube.obj");
+
+    cube = glmReadOBJ("cube.obj");
 
 //    glmUnitize(myObj);
 //    glmUnitize(myObj_inner);
