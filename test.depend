@@ -57,3 +57,15 @@
 	<GL/glut.h>
 	"glm.h"
 
+1476071744 source:e:\pieceofshit\glm.cpp
+	<windows.h>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	"glm.h"
+
+1476071745 e:\pieceofshit\glm.h
+	<GL/glut.h>
+

@@ -28,7 +28,6 @@ using namespace std;
 
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
-GLMmodel *cube = NULL;
 
 int width, height;
 int start_x, start_y;
@@ -51,20 +50,6 @@ GLfloat vertices[][3] =
     {0.5,0.5,0.5},
     {-0.5,0.5,0.5}};
 
-GLfloat colors[][3] =
-    {{1.0,1.0,1.0},
-    {1.0,1.0,1.0},
-	{1.0,1.0,1.0},
-	{1.0,1.0,1.0},
-	{1.0,1.0,1.0},
-	{1.0,1.0,1.0},
-	{1.0,1.0,1.0},
-	{1.0,1.0,1.0}};
-
-	GLfloat normals[][3] = {{-1.0,-1.0,-1.0},{1.0,-1.0,-1.0},
-	{1.0,1.0,-1.0}, {-1.0,1.0,-1.0}, {-1.0,-1.0,1.0},
-	{1.0,-1.0,1.0}, {1.0,1.0,1.0}, {-1.0,1.0,1.0}};
-
 GLdouble lightTheta = 10.0;
 //GLfloat light0_pos[]={100.0, 100.0, 100.0, 1.0};
 //GLfloat light0_ambient[] = {0.9, 0.9, 0.9, 1.0};
@@ -83,24 +68,18 @@ vector<int> *point_tri = NULL;
 
 bool show = true;
 
-//GLfloat model_center[3] = {0.0 , 0.0 , 0.0};
-
 void polygon(int a, int b, int c , int d)
 {
 /* draw a polygon via list of vertices */
     glBegin(GL_POLYGON);
-        //glColor3fv(vertices[a]);
         glVertex3fv(vertices[a]);
-        //glColor3fv(vertices[b]);
         glVertex3fv(vertices[b]);
-        //glColor3fv(vertices[c]);
         glVertex3fv(vertices[c]);
-        //glColor3fv(vertices[d]);
         glVertex3fv(vertices[d]);
     glEnd();
 }
 
-void colorcube(void)
+void cube(void)
 {
 /* map vertices to faces */
 
@@ -209,41 +188,29 @@ void display(void)
     glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
     glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
 
+    glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
+
     if(show){
-        //glTranslatef(0.0, 0.0, -10.0);    //Dragon
-        //glScalef(4,4,4);
 //        glPolygonMode(GL_FRONT, GL_LINE);
 //        glPolygonMode(GL_BACK, GL_LINE);
-
         drawObj(myObj);
         //glmDraw(myObj,GLM_SMOOTH);
-
 //        glPolygonMode(GL_FRONT, GL_FILL);
 //        glPolygonMode(GL_BACK, GL_FILL);
-        //glScalef(0.25,0.25,0.25);
-        //glTranslatef(0.0, 0.0, 10.0);
-        //printf("%f\n", myObj->vertices[5]);
     }
 
-    //glTranslatef(0.0, 0.0, -10.0);    //Dragon
-    //glScalef(0.5,0.5,0.5);
-    drawObj(myObj_inner);
-    //glmDraw(myObj_inner,GLM_SMOOTH);
-    //printf("%f\n", myObj_inner->vertices[5]);
-    //glScalef(2.0,2.0,2.0);
-    //glTranslatef(0.0, 0.0, 10.0);
 
-    glTranslatef(bound_center[0], bound_center[1], bound_center[2]);    //Dragon
+    drawObj(myObj_inner);
+    glTranslatef(bound_center[0], bound_center[1], bound_center[2]);
+
+
     glScalef(bound_size[0],bound_size[1],bound_size[2]);
     glPolygonMode(GL_FRONT, GL_LINE);
     glPolygonMode(GL_BACK, GL_LINE);
-    colorcube();
+    cube();
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_FILL);
-    //glmDraw(myObj_inner,GLM_SMOOTH);
-    //printf("%f\n", myObj_inner->vertices[5]);
     glScalef(1/bound_size[0],1/bound_size[1],1/bound_size[2]);
-    glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -441,13 +408,7 @@ void init()
         if (myObj->vertices[3 * i + 1] > max_y) max_y = myObj->vertices[3 * i + 1];
         if (myObj->vertices[3 * i + 2] < min_z) min_z = myObj->vertices[3 * i + 2];
         if (myObj->vertices[3 * i + 2] > max_z) max_z = myObj->vertices[3 * i + 2];
-//        model_center[0] += myObj->vertices[3 * i + 0];
-//        model_center[1] += myObj->vertices[3 * i + 1];
-//        model_center[2] += myObj->vertices[3 * i + 2];
     }
-
-//    cout << max_x << " " << max_y << " " << max_z << endl;
-//    cout << min_x << " " << min_y << " " << min_z << endl;
 
     bound_size[0] = max_x - min_x;
     bound_size[1] = max_y - min_y;
@@ -457,85 +418,31 @@ void init()
     bound_center[1] = (max_y + min_y)/2.0;
     bound_center[2] = (max_z + min_z)/2.0;
 
-    cout << bound_size[0] << " " << bound_size[1] << " " << bound_size[2] << endl;
-    cout << bound_center[0] << " " << bound_center[1] << " " << bound_center[2] << endl;
-
-//    model_center[0] = model_center[0]/myObj->numvertices;
-//    model_center[1] = model_center[1]/myObj->numvertices;
-//    model_center[2] = model_center[2]/myObj->numvertices;
-
-//    cout << model_center[0] << " " << model_center[1] << " " << model_center[2] << endl;
-
-    //if(myObj->numnormals == 0)
     point_tri = new vector<int>[myObj->numvertices + 1];
-    //cout << point_tri[0].size() << endl;
-
-    //cout << point_tri[myObj->numvertices-1].size() << endl;
-
-//        for(int i = 0 ; i < myObj->numtriangles ; i += 1)
-//        {
-//            cout << i + 1 << " : ";
-//            for(int j = 0 ; j < 3 ; j += 1)
-//            {
-//                cout << myObj->triangles[i].vindices[j] << " ";
-//            }
-//
-//            cout << endl << "Normal : ";
-//
-//            for(int j = 0 ; j < 3 ; j += 1)
-//            {
-//                cout << myObj->facetnorms[3 * ( i + 1 ) + j] << " ";
-//            }
-//
-//            cout << endl;
-//        }
-//
-//         cout << endl;
 
     for(int i = 0 ; i < myObj->numtriangles ; i += 1)
     {
         for(int j = 0 ; j < 3 ; j += 1)
         {
             bool add = true;
-            //cout << myObj->triangles[i].vindices[j] << " ";
             for(int k = 0 ; k < point_tri[myObj->triangles[i].vindices[j]].size() ; k += 1)
             {
-                //cout << point_tri[myObj->triangles[i].vindices[j]][k] << " ";
                 GLfloat *temp = &myObj->facetnorms[3 * point_tri[myObj->triangles[i].vindices[j]][k]];
-                //cout << myObj->facetnorms[3 * point_tri[myObj->triangles[i].vindices[j]][k]] << endl;
-
-                //cout <<  *temp << " " << *(temp + 1) << " " << *(temp + 2) << endl;
                 if(*temp == myObj->facetnorms[3 * (i+1) + 0] && *(temp + 1) == myObj->facetnorms[3 * (i+1) + 1] && *(temp + 2) == myObj->facetnorms[3 * (i+1) + 2])
                 {
                     add = false;
                     break;
-                    //cout << "in" << endl;
                 }
-                //point_tri[myObj->triangles[i].vindices[j]].push_back(i + 1);
             }
-            //cout << endl;
             if(add)
                 point_tri[myObj->triangles[i].vindices[j]].push_back(i + 1);
         }
-        //cout << endl;
     }
-    //cout << endl;
 
     for(int i = 1 ; i <= myObj->numvertices ; i += 1)
     {
         sort(point_tri[i].begin(),point_tri[i].begin() + point_tri[i].size());
     }
-
-//        for(int j = 1 ; j <= myObj->numvertices ; j += 1)
-//        {
-//            cout << j << " : ";
-//            for(int i = 0 ; i < point_tri[j].size() ; i += 1)
-//            {
-//                cout << point_tri[j][i] << " ";
-//            }
-//            cout << endl;
-//        }
-    //cout << point_tri[1].size() << endl;
 
     myObj->numnormals = myObj->numvertices;
     myObj->normals = new GLfloat[3 * (myObj->numnormals + 1)];
@@ -557,7 +464,6 @@ void init()
         myObj->normals[3 * i + 1] = temp[1];
         myObj->normals[3 * i + 2] = temp[2];
 
-        //cout << temp[0] << " " << temp[1] << " " << temp[2] << endl;
     }
 
     myObj_inner->numnormals = myObj_inner->numvertices;
@@ -586,94 +492,18 @@ void init()
 
         myObj_inner->facetnorms[3 * i + 2] =  -1 * myObj->facetnorms[3 * i + 2];
     }
-    //cout << myObj->numvertices << " " << myObj->numnormals << endl;
-
-
-
-    //GLfloat model_center2[3] = {0.0 , 0.0 , 0.0};
-//    GLfloat model_center2[3];
-//    model_center2[0] = 0.0;
-//    model_center2[1] = 0.0;
-//    model_center2[2] = 0.0;
-//    cout << model_center2[0] << " " << model_center2[1] << " " << model_center2[2] << endl;
-//    for(int i = 1 ; i <= myObj_inner->numvertices ; i += 1)
-//    {
-//        model_center2[0] += myObj_inner->vertices[3 * i + 0];
-//        model_center2[1] += myObj_inner->vertices[3 * i + 1];
-//        model_center2[2] += myObj_inner->vertices[3 * i + 2];
-//        //cout << myObj_inner->vertices[3 * i + 0] << " " << myObj_inner->vertices[3 * i + 1] << " " << myObj_inner->vertices[3 * i + 2] << endl;
-//    }
-//    cout << model_center2[0] << " " << model_center2[1] << " " << model_center2[2] << endl;
-//
-//    model_center2[0] = model_center2[0]/myObj_inner->numvertices;
-//    model_center2[1] = model_center2[1]/myObj_inner->numvertices;
-//    model_center2[2] = model_center2[2]/myObj_inner->numvertices;
-//
-//    cout << model_center2[0] << " " << model_center2[1] << " " << model_center2[2] << endl;
 }
 
 int main(int argc, char **argv)
 {
     //myObj = glmReadOBJ("test_model/sponza.obj");
-    myObj = glmReadOBJ("test_model/cube.obj");
+    myObj = glmReadOBJ("test_model/alduin.obj");
     //myObj = glmReadOBJ("test_model/alduin.obj");
-    myObj_inner = glmReadOBJ("test_model/cube.obj");
-
-    cube = glmReadOBJ("test_model/cube.obj");
-
-//    glmUnitize(myObj);
-//    glmUnitize(myObj_inner);
+    myObj_inner = glmReadOBJ("test_model/alduin.obj");
 
     glmFacetNormals(myObj);
-    //glmFacetNormals(myObj_inner);
-
-    myObj->position[0] = 0.0;
-    myObj->position[1] = 0.0;
-    myObj->position[2] = 0.0;
-
-    myObj_inner->position[0] = 0.0;
-    myObj_inner->position[1] = 0.0;
-    myObj_inner->position[2] = 0.0;
-
-//    myObj->position[0] = model_center[0];
-//    myObj->position[1] = model_center[1];
-//    myObj->position[2] = model_center[2];
-//
-//    myObj_inner->position[0] = model_center[0];
-//    myObj_inner->position[1] = model_center[1];
-//    myObj_inner->position[2] = model_center[2];
-
-//    for(int i = 1 ; i <= myObj->numfacetnorms ; i += 1)
-//    {
-//        cout << myObj->facetnorms[3 * i + 0] << " " << myObj->facetnorms[3 * i + 1] << " " << myObj->facetnorms[3 * i + 2] << endl;
-//    }
-//    for(int i = 1 ; i <= myObj->numvertices ; i += 1)
-//    {
-//        cout << myObj->vertices[3 * i + 0] << " " << myObj->vertices[3 * i + 1] << " " << myObj->vertices[3 * i + 2] << endl;
-//    }
 
     init();
-
-//    eye_x = model_center[0];
-//    eye_y = model_center[1];
-//    eye_z = model_center[2];
-
-    //glmVertexNormals(myObj,150.0);
-    //printf("%d %d \n",myObj->numtriangles,myObj->numfacetnorms);
-//    cout << endl;
-    //cout << myObj->numtriangles << " " << myObj->numfacetnorms << endl;
-
-
-//    for(int i = 0 ; i < myObj_inner->numfacetnorms ; i += 1)
-//    {
-//        cout << myObj_inner->facetnorms[3 * i + 0] << " " << myObj_inner->facetnorms[3 * i + 1] << " " << myObj_inner->facetnorms[3 * i + 2] << endl;
-//    }
-
-    //glmVertexNormals(myObj_inner,150.0);
-
-    //cout << myObj_inner->numtriangles << " " << myObj_inner->numfacetnorms << endl;
-
-    //point_tri = new
 
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowSize(1000,1000);
