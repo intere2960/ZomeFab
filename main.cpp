@@ -32,7 +32,7 @@ GLMmodel *myObj_inner = NULL;
 int width, height;
 int start_x, start_y;
 GLdouble theta = -PI/2, phi = PI / 2;
-GLdouble eye_x = 0.0, eye_y = 0.0, eye_z = 10.0,
+GLdouble eye_x = 0.0, eye_y = 0.0, eye_z = 0.0,
          center_x = eye_x + sin(phi) * cos(theta), center_y = eye_y + cos(phi), center_z = 4*sin(phi) * sin(theta),
          up_x = 0.0, up_y = 1.0, up_z = 0.0;
 
@@ -233,11 +233,11 @@ void mouseMotion(int x, int y)
     GLdouble tmp = phi;
     phi += 2 * static_cast<double> (y - start_y) / height;
     if(phi > 0 && phi < PI)
-        center_y = eye_y + cos(phi);
+        center_y = eye_y  + bound_size[1] * cos(phi);
     else
         phi = tmp;
-    center_x = eye_x + sin(phi) * cos(theta);
-    center_z = eye_z + sin(phi) * sin(theta);
+    center_x = eye_x + bound_size[0] * sin(phi) * cos(theta);
+    center_z = eye_z + bound_size[2] * sin(phi) * sin(theta);
     start_x = x;
     start_y = y;
 }
@@ -254,75 +254,52 @@ void keyboard(unsigned char key,int x,int y)
     }
     if(key == 'w' || key == 'W') //move forward
     {
-        if(!ridingMode)
-        {
-            eye_x += 0.1 * sin(phi) * cos(theta);
-            eye_y += 0.1 * cos(phi);
-            eye_z += 0.1 * sin(phi) * sin(theta);
-            center_x += 0.1 * sin(phi) * cos(theta);
-            center_y += 0.1 * cos(phi);
-            center_z += 0.1 * sin(phi) * sin(theta);
-        }
-        else
-            delta_z += 0.2;
+        eye_x += 0.1 * bound_size[0] * sin(phi) * cos(theta);
+        eye_y += 0.1 * bound_size[1] * cos(phi);
+        eye_z += 0.1 * bound_size[2] * sin(phi) * sin(theta);
+        center_x += 0.1 * bound_size[0] * sin(phi) * cos(theta);
+        center_y += 0.1 * bound_size[1] * cos(phi);
+        center_z += 0.1 * bound_size[2] * sin(phi) * sin(theta);
     }
     if(key == 's' || key == 'S') //move backward
     {
-        if(!ridingMode)
-        {
-            eye_x -= 0.1 * sin(phi) * cos(theta);
-            eye_y -= 0.1 * cos(phi);
-            eye_z -= 0.1 * sin(phi) * sin(theta);
-            center_x -= 0.1 * sin(phi) * cos(theta);
-            center_y -= 0.1 * cos(phi);
-            center_z -= 0.1 * sin(phi) * sin(theta);
-        }
-        else
-            delta_z -= 0.2;
-    }
+        eye_x -= 0.1 * bound_size[0] * sin(phi) * cos(theta);
+        eye_y -= 0.1 * bound_size[1] * cos(phi);
+        eye_z -= 0.1 * bound_size[2] * sin(phi) * sin(theta);
+        center_x -= 0.1 * bound_size[0] * sin(phi) * cos(theta);
+        center_y -= 0.1 * bound_size[1] * cos(phi);
+        center_z -= 0.1 * bound_size[2] * sin(phi) * sin(theta);
+     }
     if(key == 'a' || key == 'A') //move left
     {
-        if(!ridingMode)
-        {
-            eye_x += 0.1 * sin(phi) * sin(theta);
-            eye_z += -0.1 * sin(phi) * cos(theta);
-            center_x += 0.1 * sin(phi) * sin(theta);
-            center_z += -0.1 * sin(phi) * cos(theta);
-        }
-        else
-            delta_x += 0.2;
+        eye_x += 0.1 * bound_size[0] * sin(phi) * sin(theta);
+        eye_z += -0.1 * bound_size[2] * sin(phi) * cos(theta);
+        center_x += 0.1 * bound_size[0] * sin(phi) * sin(theta);
+        center_z += -0.1 * bound_size[2] * sin(phi) * cos(theta);
     }
     if(key == 'd' || key == 'D') //move right
     {
-        if(!ridingMode)
-        {
-            eye_x += -0.1 * sin(phi) * sin(theta);
-            eye_z += 0.1 * sin(phi) * cos(theta);
-            center_x += -0.1 * sin(phi) * sin(theta);
-            center_z += 0.1 * sin(phi) * cos(theta);
-        }
-        else
-            delta_x -= 0.2;
+        eye_x += -0.1 * bound_size[0] * sin(phi) * sin(theta);
+        eye_z += 0.1 * bound_size[2] * sin(phi) * cos(theta);
+        center_x += -0.1 * bound_size[0] * sin(phi) * sin(theta);
+        center_z += 0.1 * bound_size[2] * sin(phi) * cos(theta);
     }
     if(key == 'r' || key == 'R') // up
     {
-        if(!ridingMode)
-        {
-            eye_y += 0.1;
-            center_y += 0.1;
-        }
-        else
-            delta_y -= 0.2;
+        eye_y += 0.1 * bound_size[1];
+        center_y += 0.1 * bound_size[1];
     }
     if(key == 'f' || key == 'F') // down
     {
-        if(!ridingMode)
-        {
-            eye_y -= 0.1;
-            center_y -= 0.1;
-        }
-        else
-            delta_y += 0.2;
+        eye_y -= 0.1 * bound_size[1];
+        center_y -= 0.1 * bound_size[1];
+    }
+
+    if(key == 'z' || key == 'Z')
+    {
+        theta = -PI/2, phi = PI / 2;
+        eye_x = 0.0, eye_y = 0.0, eye_z = 0.0 + 2.0 * bound_size[2],
+        center_x = eye_x + sin(phi) * cos(theta), center_y = eye_y + cos(phi), center_z = 4*sin(phi) * sin(theta);
     }
 
     if(key == 'b' || key == 'B') // down
@@ -354,31 +331,17 @@ void special(int key, int x, int y)
         if(phi + 0.02 < PI) phi += 0.02;
     if(key == GLUT_KEY_LEFT) // turn left
     {
-        if(!ridingMode)
-        {
-            theta -= 0.1;
-            if(theta <= -2 * PI) theta += 2 * PI;
-        }
-        else
-        {
-            angle += 1;
-        }
+        theta -= 0.1;
+        if(theta <= -2 * PI) theta += 2 * PI;
     }
     if(key == GLUT_KEY_RIGHT) // turn right
     {
-        if(!ridingMode)
-        {
-            theta += 0.1;
-            if(theta >= 2 * PI) theta -= 2 * PI;
-        }
-        else
-        {
-            angle -= 1;
-        }
+        theta += 0.1;
+        if(theta >= 2 * PI) theta -= 2 * PI;
     }
-    center_x = eye_x + sin(phi) * cos(theta);
-    center_y = eye_y + cos(phi);
-    center_z = eye_z + sin(phi) * sin(theta);
+    center_x = eye_x + bound_size[0] * sin(phi) * cos(theta);
+    center_y = eye_y + bound_size[1] * cos(phi);
+    center_z = eye_z + bound_size[2] * sin(phi) * sin(theta);
 }
 
 void myReshape(int w, int h)
@@ -417,6 +380,8 @@ void init()
     bound_center[0] = (max_x + min_x)/2.0;
     bound_center[1] = (max_y + min_y)/2.0;
     bound_center[2] = (max_z + min_z)/2.0;
+
+    eye_z = eye_z + 2.0 * bound_size[2];
 
     point_tri = new vector<int>[myObj->numvertices + 1];
 
