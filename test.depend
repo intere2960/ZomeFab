@@ -1,0 +1,59 @@
+# depslib dependency file v1.0
+1387801150 source:c:\users\rock\desktop\computer-graphic-project\test\glm.cpp
+	<windows.h>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	"glm.h"
+
+955130284 c:\users\rock\desktop\computer-graphic-project\test\glm.h
+	<GL/glut.h>
+
+1385998420 source:c:\users\rock\desktop\computer-graphic-project\test\textfile.cpp
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1475030968 source:c:\users\rock\desktop\computer-graphic-project\test\main.cpp
+	<Windows.h>
+	<wingdi.h>
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<GL/glew.h>
+	<GL/glut.h>
+	"glm.h"
+	"textfile.h"
+	"imageIO.cpp"
+
+1352680676 c:\users\rock\desktop\computer-graphic-project\test\textfile.h
+
+1387951858 c:\users\rock\desktop\computer-graphic-project\test\imageio.cpp
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+
+1387801150 source:c:\users\rock\desktop\test\glm.cpp
+	<windows.h>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	"glm.h"
+
+955130284 c:\users\rock\desktop\test\glm.h
+	<GL/glut.h>
+
+1475047826 source:c:\users\rock\desktop\test\main.cpp
+	<Windows.h>
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<GL/glew.h>
+	<GL/glut.h>
+	"glm.h"
+

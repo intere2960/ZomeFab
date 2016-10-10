@@ -614,12 +614,12 @@ void init()
 
 int main(int argc, char **argv)
 {
-    //myObj = glmReadOBJ("sponza.obj");
-    myObj = glmReadOBJ("cube.obj");
-    //myObj = glmReadOBJ("alduin.obj");
-    myObj_inner = glmReadOBJ("cube.obj");
+    //myObj = glmReadOBJ("test_model/sponza.obj");
+    myObj = glmReadOBJ("test_model/cube.obj");
+    //myObj = glmReadOBJ("test_model/alduin.obj");
+    myObj_inner = glmReadOBJ("test_model/cube.obj");
 
-    cube = glmReadOBJ("cube.obj");
+    cube = glmReadOBJ("test_model/cube.obj");
 
 //    glmUnitize(myObj);
 //    glmUnitize(myObj_inner);
