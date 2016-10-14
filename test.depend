@@ -69,3 +69,22 @@
 1476071745 e:\pieceofshit\glm.h
 	<GL/glut.h>
 
+1476431902 source:e:\pieceofshit\main.cpp
+	<Windows.h>
+	<stdlib.h>
+	<cmath>
+	<iostream>
+	<algorithm>
+	<vector>
+	<GL/glew.h>
+	<GL/glut.h>
+	"textfile.h"
+	"glm.h"
+
+1476430881 source:e:\pieceofshit\textfile.cpp
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1476430950 e:\pieceofshit\textfile.h
+

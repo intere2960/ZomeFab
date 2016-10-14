@@ -20,6 +20,7 @@ are the same as the vertex values */
 #include <GL/glew.h>
 #include <GL/glut.h>
 
+#include "textfile.h"
 #include "glm.h"
 
 #define PI 3.1415926535897
@@ -58,7 +59,7 @@ GLdouble lightTheta = 10.0;
 GLfloat light0_diffuse[]={1.0, 1.0, 1.0, 1.0};
 GLfloat light0_ambient[]={1.0, 1.0, 1.0, 1.0};
 GLfloat light0_specular[]={1.0, 1.0, 1.0, 1.0};
-GLfloat light0_pos[]={0.0, 0.0, 10.0, 1.0};
+GLfloat light0_pos[]={0.0, 0.0, 0.0, 1.0};
 
 GLfloat min_x, max_x, min_y, max_y, min_z, max_z;
 GLfloat bound_size[3];
@@ -89,6 +90,17 @@ void cube(void)
 	polygon(1,2,6,5);
 	polygon(4,5,6,7);
 	polygon(0,1,5,4);
+}
+
+void draw_bounding_box()
+{
+    glScalef(bound_size[0],bound_size[1],bound_size[2]);
+    glPolygonMode(GL_FRONT, GL_LINE);
+    glPolygonMode(GL_BACK, GL_LINE);
+    cube();
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_BACK, GL_FILL);
+    glScalef(1/bound_size[0],1/bound_size[1],1/bound_size[2]);
 }
 
 void drawObj(GLMmodel *myObj)
@@ -128,42 +140,42 @@ void drawObj(GLMmodel *myObj)
     glEnd();
 }
 
-//void setShaders()
-//{
-//    GLhandleARB v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB),
-//                f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB),
-//                p;
-//
-//	char *vs = NULL, *fs = NULL;
-//
-//	vs = textFileRead("myshader.v");
-//    fs = textFileRead("myshader.f");
-//
-//	const char * vv = vs;
-//	const char * ff = fs;
-//
-//	glShaderSourceARB(v, 1, &vv, NULL);
-//	glShaderSourceARB(f, 1, &ff, NULL);
-//
-//	free(vs);free(fs);
-//
-//	glCompileShaderARB(v);
-//	glCompileShaderARB(f);
-//
-//    p = glCreateProgramObjectARB();
-//	glAttachObjectARB(p,v);
-//	glAttachObjectARB(p,f);
-//
-//	glLinkProgramARB(p);
-//	glUseProgramObjectARB(p);
-//
-//    glUniform1iARB(glGetUniformLocationARB(p, "texture"), 0);
-//    glUniform3fARB(glGetUniformLocationARB(p, "light"), light0_pos[0], light0_pos[1], light0_pos[2]);
-//
-//    glUniform4fARB(glGetUniformLocationARB(p, "l_ambient"), 1.4, 1.4, 1.4, 1.0 );
-//    glUniform4fARB(glGetUniformLocationARB(p, "l_diffuse"), 0.7, 0.7, 0.7, 1.0 );
-//    glUniform4fARB(glGetUniformLocationARB(p, "l_specular"), 0.7, 0.7, 0.7, 1.0 );
-//}
+void setShaders()
+{
+    GLhandleARB v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB),
+                f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB),
+                p;
+
+	char *vs = NULL, *fs = NULL;
+
+	vs = textFileRead("myshader.vert");
+    fs = textFileRead("myshader.frag");
+
+	const char * vv = vs;
+	const char * ff = fs;
+
+	glShaderSourceARB(v, 1, &vv, NULL);
+	glShaderSourceARB(f, 1, &ff, NULL);
+
+	free(vs);free(fs);
+
+	glCompileShaderARB(v);
+	glCompileShaderARB(f);
+
+    p = glCreateProgramObjectARB();
+	glAttachObjectARB(p,v);
+	glAttachObjectARB(p,f);
+
+	glLinkProgramARB(p);
+	glUseProgramObjectARB(p);
+
+    glUniform1iARB(glGetUniformLocationARB(p, "texture"), 0);
+    glUniform3fARB(glGetUniformLocationARB(p, "light"), light0_pos[0], light0_pos[1], light0_pos[2]);
+
+    glUniform4fARB(glGetUniformLocationARB(p, "l_ambient"), light0_ambient[0], light0_ambient[1], light0_ambient[2], light0_ambient[3] );
+    glUniform4fARB(glGetUniformLocationARB(p, "l_diffuse"), light0_diffuse[0], light0_diffuse[1], light0_diffuse[2], light0_diffuse[3] );
+    glUniform4fARB(glGetUniformLocationARB(p, "l_specular"), light0_specular[0], light0_specular[1], light0_specular[2], light0_specular[3] );
+}
 
 void display(void)
 {
@@ -188,6 +200,8 @@ void display(void)
     glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
     glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
 
+    setShaders();
+
     glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     if(show){
@@ -203,14 +217,7 @@ void display(void)
     drawObj(myObj_inner);
     glTranslatef(bound_center[0], bound_center[1], bound_center[2]);
 
-
-    glScalef(bound_size[0],bound_size[1],bound_size[2]);
-    glPolygonMode(GL_FRONT, GL_LINE);
-    glPolygonMode(GL_BACK, GL_LINE);
-    cube();
-    glPolygonMode(GL_FRONT, GL_FILL);
-    glPolygonMode(GL_BACK, GL_FILL);
-    glScalef(1/bound_size[0],1/bound_size[1],1/bound_size[2]);
+    //draw_bounding_box();
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -356,7 +363,7 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-void init()
+void bounding_box()
 {
     //cout << myObj->vertices[3 * 1 + 0] << " " << myObj->vertices[3 * 1 + 1] << " " << myObj->vertices[3 * 1 + 2] << endl;
     min_x = max_x = myObj->vertices[3 * 1 + 0];
@@ -383,6 +390,13 @@ void init()
 
     eye_z = eye_z + 2.0 * bound_size[2];
 
+    light0_pos[0] += 1.25 * bound_size[0];
+    light0_pos[1] += 1.25 * bound_size[1];
+    light0_pos[2] += 1.25 * bound_size[2];
+}
+
+void recount_normal()
+{
     point_tri = new vector<int>[myObj->numvertices + 1];
 
     for(int i = 0 ; i < myObj->numtriangles ; i += 1)
@@ -433,7 +447,10 @@ void init()
 
     myObj_inner->numnormals = myObj_inner->numvertices;
     myObj_inner->normals = new GLfloat[3 * (myObj_inner->numnormals + 1)];
+}
 
+void process_inner()
+{
     for(int i = 1 ; i <= myObj_inner->numvertices ; i += 1)
     {
         myObj_inner->vertices[3 * i + 0] = myObj->vertices[3 * i + 0] - 0.05 * myObj->normals[3 * i + 0];
@@ -459,12 +476,19 @@ void init()
     }
 }
 
+void init()
+{
+    bounding_box();
+    recount_normal();
+    process_inner();
+}
+
 int main(int argc, char **argv)
 {
     //myObj = glmReadOBJ("test_model/sponza.obj");
-    myObj = glmReadOBJ("test_model/alduin.obj");
+    myObj = glmReadOBJ("test_model/cube.obj");
     //myObj = glmReadOBJ("test_model/alduin.obj");
-    myObj_inner = glmReadOBJ("test_model/alduin.obj");
+    myObj_inner = glmReadOBJ("test_model/cube.obj");
 
     glmFacetNormals(myObj);
 
