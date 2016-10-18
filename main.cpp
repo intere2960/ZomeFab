@@ -175,6 +175,8 @@ void setShaders()
     glUniform4fARB(glGetUniformLocationARB(p, "l_ambient"), light0_ambient[0], light0_ambient[1], light0_ambient[2], light0_ambient[3] );
     glUniform4fARB(glGetUniformLocationARB(p, "l_diffuse"), light0_diffuse[0], light0_diffuse[1], light0_diffuse[2], light0_diffuse[3] );
     glUniform4fARB(glGetUniformLocationARB(p, "l_specular"), light0_specular[0], light0_specular[1], light0_specular[2], light0_specular[3] );
+
+    //glVertexAttrib3fARB(glGetAttribLocationARB(p, "light"), light0_pos[0], light0_pos[1], light0_pos[2]);
 }
 
 void display(void)
@@ -214,10 +216,10 @@ void display(void)
     }
 
 
-    drawObj(myObj_inner);
+    //drawObj(myObj_inner);
     glTranslatef(bound_center[0], bound_center[1], bound_center[2]);
 
-    //draw_bounding_box();
+    draw_bounding_box();
 
     glutSwapBuffers();
     glutPostRedisplay();
