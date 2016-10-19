@@ -53,13 +53,14 @@ GLfloat vertices[][3] =
 
 GLdouble lightTheta = 10.0;
 //GLfloat light0_pos[]={100.0, 100.0, 100.0, 1.0};
-//GLfloat light0_ambient[] = {0.9, 0.9, 0.9, 1.0};
-//GLfloat light0_diffuse[] = {0.7, 0.7, 0.7, 1.0};
-//GLfloat light0_specular[] = {0.7, 0.7, 0.7, 1.0};
-GLfloat light0_diffuse[]={1.0, 1.0, 1.0, 1.0};
-GLfloat light0_ambient[]={1.0, 1.0, 1.0, 1.0};
-GLfloat light0_specular[]={1.0, 1.0, 1.0, 1.0};
+GLfloat light0_ambient[] = {0.9, 0.9, 0.9, 1.0};
+GLfloat light0_diffuse[] = {0.7, 0.7, 0.7, 1.0};
+GLfloat light0_specular[] = {0.7, 0.7, 0.7, 1.0};
+//GLfloat light0_diffuse[]={1.0, 1.0, 1.0, 1.0};
+//GLfloat light0_ambient[]={1.0, 1.0, 1.0, 1.0};
+//GLfloat light0_specular[]={1.0, 1.0, 1.0, 1.0};
 GLfloat light0_pos[]={0.0, 0.0, 0.0, 1.0};
+GLfloat light0_shininess = 50;
 
 GLfloat min_x, max_x, min_y, max_y, min_z, max_z;
 GLfloat bound_size[3];
@@ -107,37 +108,36 @@ void drawObj(GLMmodel *myObj)
 {
     if (! myObj) return;
 
-//    GLMgroup *groups = myObj->groups;
-//    //int j=0;
-//    while(groups)
-//    {
-//        //glBindTexture(GL_TEXTURE_2D, textureid[j]);
-//        glBegin(GL_TRIANGLES);
-//        //glBegin(GL_POINTS);
-//        for(int i=0;i<groups->numtriangles;i+=1)
-//        {
-//            for (int v=0; v<3; v+=1)
-//            {
-//                //glColor3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].vindices[v]*3 ]);
-//                glNormal3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].nindices[v]*3 ]);
-//                //glTexCoord2fv(& myObj->texcoords[myObj->triangles[groups->triangles[i]].tindices[v]*2 ]);
-//                glVertex3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].vindices[v]*3 ]);
-//            }
-//        }
-//        groups=groups->next;
-//        j+=1;
-//        glEnd();
-//    }
+    GLMgroup *groups = myObj->groups;
+
     glBegin(GL_TRIANGLES);
-    for (int i=0; i<myObj->numtriangles; i+=1) {
-        for (int v=0; v<3; v+=1) {
-		    glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
-		    //glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
-		    glNormal3fv( & myObj->facetnorms[3 * (i+1)]);
-		    glVertex3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
+    while(groups)
+    {
+        //glBindTexture(GL_TEXTURE_2D, textureid[j]);
+        for(int i=0;i<groups->numtriangles;i+=1)
+        {
+            for (int v=0; v<3; v+=1)
+            {
+                //glColor3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].vindices[v]*3 ]);
+                glNormal3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].nindices[v]*3 ]);
+                //glTexCoord2fv(& myObj->texcoords[myObj->triangles[groups->triangles[i]].tindices[v]*2 ]);
+                glVertex3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].vindices[v]*3 ]);
+            }
         }
+        groups=groups->next;
     }
     glEnd();
+
+//    glBegin(GL_TRIANGLES);
+//    for (int i=0; i<myObj->numtriangles; i+=1) {
+//        for (int v=0; v<3; v+=1) {
+//		    //glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
+//		    glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
+//		    //glNormal3fv( & myObj->facetnorms[3 * (i+1)]);
+//		    glVertex3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
+//        }
+//    }
+//    glEnd();
 }
 
 void setShaders()
@@ -175,6 +175,7 @@ void setShaders()
     glUniform4fARB(glGetUniformLocationARB(p, "l_ambient"), light0_ambient[0], light0_ambient[1], light0_ambient[2], light0_ambient[3] );
     glUniform4fARB(glGetUniformLocationARB(p, "l_diffuse"), light0_diffuse[0], light0_diffuse[1], light0_diffuse[2], light0_diffuse[3] );
     glUniform4fARB(glGetUniformLocationARB(p, "l_specular"), light0_specular[0], light0_specular[1], light0_specular[2], light0_specular[3] );
+    glUniform1fARB(glGetUniformLocationARB(p, "l_shininess"), light0_shininess );
 
     //glVertexAttrib3fARB(glGetAttribLocationARB(p, "light"), light0_pos[0], light0_pos[1], light0_pos[2]);
 }
@@ -204,20 +205,28 @@ void display(void)
 
     setShaders();
 
+    glPushMatrix();
+
     glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     if(show){
 //        glPolygonMode(GL_FRONT, GL_LINE);
 //        glPolygonMode(GL_BACK, GL_LINE);
-        drawObj(myObj);
-        //glmDraw(myObj,GLM_SMOOTH);
+//        drawObj(myObj);
+//        glmDraw(myObj, GLM_FLAT);
+        glmDraw(myObj,GLM_SMOOTH);
+//        glmDraw(myObj,GLM_NONE);
 //        glPolygonMode(GL_FRONT, GL_FILL);
 //        glPolygonMode(GL_BACK, GL_FILL);
     }
 
 
-    //drawObj(myObj_inner);
-    glTranslatef(bound_center[0], bound_center[1], bound_center[2]);
+//    drawObj(myObj_inner);
+//    glmDraw(myObj_inner, GLM_FLAT);
+//    glmDraw(myObj_inner,GLM_SMOOTH);
+//    glmDraw(myObj_inner,GLM_NONE);
+
+    glPopMatrix();
 
     draw_bounding_box();
 
@@ -513,3 +522,4 @@ int main(int argc, char **argv)
 	glutMainLoop();
     return 0;
 }
+

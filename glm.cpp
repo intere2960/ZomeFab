@@ -11,7 +11,6 @@
 
 */
 
-#include <windows.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -26,8 +25,8 @@
 
 /* _GLMnode: general purpose node */
 typedef struct _GLMnode {
-    GLuint         index;
-    GLboolean      averaged;
+    GLuint index;
+    GLboolean averaged;
     struct _GLMnode* next;
 } GLMnode;
 
@@ -127,8 +126,8 @@ GLfloat*
 glmWeldVectors(GLfloat* vectors, GLuint* numvectors, GLfloat epsilon)
 {
     GLfloat* copies;
-    GLuint   copied;
-    GLuint   i, j;
+    GLuint copied;
+    GLuint i, j;
 
     copies = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (*numvectors + 1));
     memcpy(copies, vectors, (sizeof(GLfloat) * 3 * (*numvectors + 1)));
@@ -149,7 +148,7 @@ glmWeldVectors(GLfloat* vectors, GLuint* numvectors, GLfloat epsilon)
         copied++;
 
 duplicate:
-/* set the first component of this vector to point at the correct
+        /* set the first component of this vector to point at the correct
         index into the new copies array */
         vectors[3 * i + 0] = (GLfloat)j;
     }
@@ -255,7 +254,7 @@ glmReadMTL(GLMmodel* model, char* name)
     FILE* file;
     char* dir;
     char* filename;
-    char    buf[128];
+    char buf[128];
     GLuint nummaterials, i;
 
     dir = glmDirName(model->pathname);
@@ -434,13 +433,13 @@ glmWriteMTL(GLMmodel* model, char* modelpath, char* mtllibname)
 static GLvoid
 glmFirstPass(GLMmodel* model, FILE* file)
 {
-    GLuint  numvertices;        /* number of vertices in model */
-    GLuint  numnormals;         /* number of normals in model */
-    GLuint  numtexcoords;       /* number of texcoords in model */
-    GLuint  numtriangles;       /* number of triangles in model */
-    GLMgroup* group;            /* current group */
-    unsigned    v, n, t;
-    char        buf[128];
+    GLuint numvertices;        /* number of vertices in model */
+    GLuint numnormals;         /* number of normals in model */
+    GLuint numtexcoords;       /* number of texcoords in model */
+    GLuint numtriangles;       /* number of triangles in model */
+    GLMgroup* group;           /* current group */
+    int v, n, t;
+    char buf[128];
 
     /* make a default group */
     group = glmAddGroup(model, "default");
@@ -574,17 +573,17 @@ glmFirstPass(GLMmodel* model, FILE* file)
 static GLvoid
 glmSecondPass(GLMmodel* model, FILE* file)
 {
-    GLuint  numvertices;        /* number of vertices in model */
-    GLuint  numnormals;         /* number of normals in model */
-    GLuint  numtexcoords;       /* number of texcoords in model */
-    GLuint  numtriangles;       /* number of triangles in model */
-    GLfloat*    vertices;           /* array of vertices  */
-    GLfloat*    normals;            /* array of normals */
-    GLfloat*    texcoords;          /* array of texture coordinates */
-    GLMgroup* group;            /* current group pointer */
-    GLuint  material;           /* current material */
-    GLuint  v, n, t;
-    char        buf[128];
+    GLuint numvertices;        /* number of vertices in model */
+    GLuint numnormals;         /* number of normals in model */
+    GLuint numtexcoords;       /* number of texcoords in model */
+    GLuint numtriangles;       /* number of triangles in model */
+    GLfloat* vertices;         /* array of vertices  */
+    GLfloat* normals;          /* array of normals */
+    GLfloat* texcoords;        /* array of texture coordinates */
+    GLMgroup* group;           /* current group pointer */
+    GLuint material;           /* current material */
+    int v, n, t;
+    char buf[128];
 
     /* set the pointer shortcuts */
     vertices       = model->vertices;
@@ -650,14 +649,14 @@ glmSecondPass(GLMmodel* model, FILE* file)
                 if (strstr(buf, "//")) {
                     /* v//n */
                     sscanf(buf, "%d//%d", &v, &n);
-                    T(numtriangles).vindices[0] = v;
-                    T(numtriangles).nindices[0] = n;
+                    T(numtriangles).vindices[0] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).nindices[0] = n < 0 ? n + numnormals : n;
                     fscanf(file, "%d//%d", &v, &n);
-                    T(numtriangles).vindices[1] = v;
-                    T(numtriangles).nindices[1] = n;
+                    T(numtriangles).vindices[1] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).nindices[1] = n < 0 ? n + numnormals : n;
                     fscanf(file, "%d//%d", &v, &n);
-                    T(numtriangles).vindices[2] = v;
-                    T(numtriangles).nindices[2] = n;
+                    T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d//%d", &v, &n) > 0) {
@@ -665,24 +664,24 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).nindices[0] = T(numtriangles-1).nindices[0];
                         T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
                         T(numtriangles).nindices[1] = T(numtriangles-1).nindices[2];
-                        T(numtriangles).vindices[2] = v;
-                        T(numtriangles).nindices[2] = n;
+                        T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+                        T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
                 } else if (sscanf(buf, "%d/%d/%d", &v, &t, &n) == 3) {
                     /* v/t/n */
-                    T(numtriangles).vindices[0] = v;
-                    T(numtriangles).tindices[0] = t;
-                    T(numtriangles).nindices[0] = n;
+                    T(numtriangles).vindices[0] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).tindices[0] = t < 0 ? t + numtexcoords : t;
+                    T(numtriangles).nindices[0] = n < 0 ? n + numnormals : n;
                     fscanf(file, "%d/%d/%d", &v, &t, &n);
-                    T(numtriangles).vindices[1] = v;
-                    T(numtriangles).tindices[1] = t;
-                    T(numtriangles).nindices[1] = n;
+                    T(numtriangles).vindices[1] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).tindices[1] = t < 0 ? t + numtexcoords : t;
+                    T(numtriangles).nindices[1] = n < 0 ? n + numnormals : n;
                     fscanf(file, "%d/%d/%d", &v, &t, &n);
-                    T(numtriangles).vindices[2] = v;
-                    T(numtriangles).tindices[2] = t;
-                    T(numtriangles).nindices[2] = n;
+                    T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
+                    T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d/%d/%d", &v, &t, &n) > 0) {
@@ -692,22 +691,22 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
                         T(numtriangles).tindices[1] = T(numtriangles-1).tindices[2];
                         T(numtriangles).nindices[1] = T(numtriangles-1).nindices[2];
-                        T(numtriangles).vindices[2] = v;
-                        T(numtriangles).tindices[2] = t;
-                        T(numtriangles).nindices[2] = n;
+                        T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+                        T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
+                        T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
                 } else if (sscanf(buf, "%d/%d", &v, &t) == 2) {
                     /* v/t */
-                    T(numtriangles).vindices[0] = v;
-                    T(numtriangles).tindices[0] = t;
+                    T(numtriangles).vindices[0] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).tindices[0] = t < 0 ? t + numtexcoords : t;
                     fscanf(file, "%d/%d", &v, &t);
-                    T(numtriangles).vindices[1] = v;
-                    T(numtriangles).tindices[1] = t;
+                    T(numtriangles).vindices[1] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).tindices[1] = t < 0 ? t + numtexcoords : t;
                     fscanf(file, "%d/%d", &v, &t);
-                    T(numtriangles).vindices[2] = v;
-                    T(numtriangles).tindices[2] = t;
+                    T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+                    T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d/%d", &v, &t) > 0) {
@@ -715,25 +714,25 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).tindices[0] = T(numtriangles-1).tindices[0];
                         T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
                         T(numtriangles).tindices[1] = T(numtriangles-1).tindices[2];
-                        T(numtriangles).vindices[2] = v;
-                        T(numtriangles).tindices[2] = t;
+                        T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+                        T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
                 } else {
                     /* v */
                     sscanf(buf, "%d", &v);
-                    T(numtriangles).vindices[0] = v;
+                    T(numtriangles).vindices[0] = v < 0 ? v + numvertices : v;
                     fscanf(file, "%d", &v);
-                    T(numtriangles).vindices[1] = v;
+                    T(numtriangles).vindices[1] = v < 0 ? v + numvertices : v;
                     fscanf(file, "%d", &v);
-                    T(numtriangles).vindices[2] = v;
+                    T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d", &v) > 0) {
                         T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
                         T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
-                        T(numtriangles).vindices[2] = v;
+                        T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
@@ -770,7 +769,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 GLfloat
 glmUnitize(GLMmodel* model)
 {
-    GLuint  i;
+    GLuint i;
     GLfloat maxx, minx, maxy, miny, maxz, minz;
     GLfloat cx, cy, cz, w, h, d;
     GLfloat scale;
@@ -997,14 +996,14 @@ glmFacetNormals(GLMmodel* model)
 GLvoid
 glmVertexNormals(GLMmodel* model, GLfloat angle)
 {
-    GLMnode*    node;
-    GLMnode*    tail;
+    GLMnode* node;
+    GLMnode* tail;
     GLMnode** members;
-    GLfloat*    normals;
-    GLuint  numnormals;
+    GLfloat* normals;
+    GLuint numnormals;
     GLfloat average[3];
     GLfloat dot, cos_angle;
-    GLuint  i, avg;
+    GLuint i, avg;
 
     assert(model);
     assert(model->facetnorms);
@@ -1303,7 +1302,7 @@ GLMmodel*
 glmReadOBJ(char* filename)
 {
     GLMmodel* model;
-    FILE*   file;
+    FILE* file;
 
     /* open the file */
     file = fopen(filename, "r");
@@ -1382,8 +1381,8 @@ glmReadOBJ(char* filename)
 GLvoid
 glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
 {
-    GLuint  i;
-    FILE*   file;
+    GLuint i;
+    FILE* file;
     GLMgroup* group;
 
     assert(model);
@@ -1483,7 +1482,7 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
     /* spit out the texture coordinates */
     if (mode & GLM_TEXTURE) {
         fprintf(file, "\n");
-        fprintf(file, "# %f texcoords\n", *model->texcoords);
+        fprintf(file, "# %d texcoords\n", model->numtexcoords);
         for (i = 1; i <= model->numtexcoords; i++) {
             fprintf(file, "vt %f %f\n",
                 model->texcoords[2 * i + 0],
@@ -1505,14 +1504,14 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
             if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
                 fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                     T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).nindices[0],
                     T(group->triangles[i]).tindices[0],
+                    T(group->triangles[i]).nindices[0],
                     T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).nindices[1],
                     T(group->triangles[i]).tindices[1],
+                    T(group->triangles[i]).nindices[1],
                     T(group->triangles[i]).vindices[2],
-                    T(group->triangles[i]).nindices[2],
-                    T(group->triangles[i]).tindices[2]);
+                    T(group->triangles[i]).tindices[2],
+                    T(group->triangles[i]).nindices[2]);
             } else if (mode & GLM_FLAT && mode & GLM_TEXTURE) {
                 fprintf(file, "f %d/%d %d/%d %d/%d\n",
                     T(group->triangles[i]).vindices[0],
@@ -1716,8 +1715,8 @@ glmWeld(GLMmodel* model, GLfloat epsilon)
 {
     GLfloat* vectors;
     GLfloat* copies;
-    GLuint   numvectors;
-    GLuint   i;
+    GLuint numvectors;
+    GLuint i;
 
     /* vertices */
     numvectors = model->numvertices;
