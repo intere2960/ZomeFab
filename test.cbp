@@ -31,8 +31,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="algebra3.cpp" />
+		<Unit filename="algebra3.h" />
 		<Unit filename="glm.cpp" />
 		<Unit filename="glm.h" />
+		<Unit filename="glui_internal.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="myshader.frag" />
 		<Unit filename="myshader.vert" />
