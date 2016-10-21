@@ -57,7 +57,7 @@
 	<GL/glut.h>
 	"glm.h"
 
-1476862557 source:e:\pieceofshit\glm.cpp
+1476901583 source:e:\pieceofshit\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -69,7 +69,7 @@
 	<GLUT/glut.h>
 	<GL/glut.h>
 
-1476879560 source:e:\pieceofshit\main.cpp
+1476947371 source:e:\pieceofshit\main.cpp
 	<Windows.h>
 	<stdlib.h>
 	<cmath>
@@ -81,10 +81,24 @@
 	"textfile.h"
 	"glm.h"
 
-1476430881 source:e:\pieceofshit\textfile.cpp
+1476946650 source:e:\pieceofshit\textfile.cpp
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 
 1476430950 e:\pieceofshit\textfile.h
+
+1477040001 source:e:\pieceofshit\algebra3.cpp
+	"algebra3.h"
+	"glui_internal.h"
+	<cmath>
+
+1477039999 e:\pieceofshit\algebra3.h
+	<cmath>
+	<cstdio>
+	<cstdlib>
+
+1477032062 e:\pieceofshit\glui_internal.h
+	<cstdio>
+	<cmath>
 

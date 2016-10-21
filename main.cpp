@@ -22,6 +22,8 @@ are the same as the vertex values */
 
 #include "textfile.h"
 #include "glm.h"
+#include "algebra3.h"
+#include "glui_internal.h"
 
 #define PI 3.1415926535897
 
@@ -39,7 +41,7 @@ GLdouble eye_x = 0.0, eye_y = 0.0, eye_z = 0.0,
 
 bool ridingMode = false;
 float delta_x = 0.0, delta_y = 0.0, delta_z = 0.0;
-float angle=0;
+GLfloat angle=0;
 
 GLfloat vertices[][3] =
     {{-0.5,-0.5,-0.5},
@@ -66,7 +68,10 @@ GLfloat min_x, max_x, min_y, max_y, min_z, max_z;
 GLfloat bound_size[3];
 GLfloat bound_center[3];
 
+//GLfloat angle = 0.0;
+
 vector<int> *point_tri = NULL;
+//vec3 *all_point;
 
 bool show = true;
 
@@ -119,7 +124,7 @@ void drawObj(GLMmodel *myObj)
             for (int v=0; v<3; v+=1)
             {
                 //glColor3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].vindices[v]*3 ]);
-                glNormal3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].nindices[v]*3 ]);
+                glNormal3fv(& myObj->normals[myObj->triangles[groups->triangles[i]].nindices[v]*3 ]);
                 //glTexCoord2fv(& myObj->texcoords[myObj->triangles[groups->triangles[i]].tindices[v]*2 ]);
                 glVertex3fv(& myObj->vertices[myObj->triangles[groups->triangles[i]].vindices[v]*3 ]);
             }
@@ -177,6 +182,14 @@ void setShaders()
     glUniform4fARB(glGetUniformLocationARB(p, "l_specular"), light0_specular[0], light0_specular[1], light0_specular[2], light0_specular[3] );
     glUniform1fARB(glGetUniformLocationARB(p, "l_shininess"), light0_shininess );
 
+//	glEnableClientState(GL_VERTEX_ARRAY);
+//	glEnableVertexAttribArray(glGetAttribLocation(p,"position"));
+//	glVertexPointer(3,GL_FLOAT,0,all_point);
+
+	//glVertexAttribPointer(glGetAttribLocation(p,"position"),3,GL_FLOAT,0,0,all_point);
+
+//    glUniform1fARB(glGetUniformLocationARB(p, "angle"), angle );
+
     //glVertexAttrib3fARB(glGetAttribLocationARB(p, "light"), light0_pos[0], light0_pos[1], light0_pos[2]);
 }
 
@@ -203,7 +216,7 @@ void display(void)
     glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
     glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
 
-    setShaders();
+//    setShaders();
 
     glPushMatrix();
 
@@ -215,6 +228,7 @@ void display(void)
 //        drawObj(myObj);
 //        glmDraw(myObj, GLM_FLAT);
         glmDraw(myObj,GLM_SMOOTH);
+        //angle += 1.0;
 //        glmDraw(myObj,GLM_NONE);
 //        glPolygonMode(GL_FRONT, GL_FILL);
 //        glPolygonMode(GL_BACK, GL_FILL);
@@ -225,6 +239,8 @@ void display(void)
 //    glmDraw(myObj_inner, GLM_FLAT);
 //    glmDraw(myObj_inner,GLM_SMOOTH);
 //    glmDraw(myObj_inner,GLM_NONE);
+
+//    glTranslatef(bound_center[0], bound_center[1], bound_center[2]);
 
     glPopMatrix();
 
@@ -492,6 +508,14 @@ void init()
     bounding_box();
     recount_normal();
     process_inner();
+
+//    all_point = new vec3[myObj->numvertices];
+//
+//    for(int i = 0 ; i < myObj->numvertices ; i += 1)
+//    {
+//        all_point[i] = vec3(myObj->vertices[3 * (i + 1) + 0],myObj->vertices[3 * (i + 1 ) + 1],myObj->vertices[3 * (i + 1) + 2]);
+////        cout << all_point[i][0] << " " << all_point[i][1] << " " << all_point[i][2] << endl;
+//    }
 }
 
 int main(int argc, char **argv)
@@ -518,6 +542,8 @@ int main(int argc, char **argv)
 	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
 
 	glewInit();
+
+	setShaders();
 
 	glutMainLoop();
     return 0;

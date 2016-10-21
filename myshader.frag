@@ -36,7 +36,7 @@ void main (void)
     float specularLightWeighting = 0.0;
 
     vec3 eyeDirection = normalize(-v);
-    vec3 reflectionDirection = normalize(-reflect(L,N));
+    vec3 reflectionDirection = normalize(-reflect(lightDirection,normal));
 
     specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), l_shininess);
 

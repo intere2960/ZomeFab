@@ -34,6 +34,10 @@
 		<Unit filename="glm.cpp" />
 		<Unit filename="glm.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="myshader.frag" />
+		<Unit filename="myshader.vert" />
+		<Unit filename="textfile.cpp" />
+		<Unit filename="textfile.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
