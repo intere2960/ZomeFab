@@ -37,8 +37,11 @@
 		<Unit filename="glm.h" />
 		<Unit filename="glui_internal.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="main.h" />
 		<Unit filename="myshader.frag" />
 		<Unit filename="myshader.vert" />
+		<Unit filename="shell.cpp" />
+		<Unit filename="shell.h" />
 		<Unit filename="textfile.cpp" />
 		<Unit filename="textfile.h" />
 		<Extensions>
