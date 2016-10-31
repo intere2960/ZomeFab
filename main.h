@@ -47,8 +47,8 @@ GLfloat light0_specular[] = {0.7, 0.7, 0.7, 1.0};
 GLfloat light0_pos[] = {0.0, 0.0, 0.0, 1.0};
 GLfloat light0_shininess = 50;
 
-GLfloat min_x, max_x, min_y, max_y, min_z, max_z;
-
+vec3 bounding_max;
+vec3 bounding_min;
 vec3 bound_size;
 vec3 bound_center;
 
@@ -95,27 +95,27 @@ void draw_bounding_box()
 void bounding_box()
 {
     //cout << myObj->vertices[3 * 1 + 0] << " " << myObj->vertices[3 * 1 + 1] << " " << myObj->vertices[3 * 1 + 2] << endl;
-    min_x = max_x = myObj->vertices[3 * 1 + 0];
-    min_y = max_y = myObj->vertices[3 * 1 + 1];
-    min_z = max_z = myObj->vertices[3 * 1 + 2];
+    bounding_min[0] = bounding_max[0] = myObj->vertices[3 * 1 + 0];
+    bounding_min[1] = bounding_max[1] = myObj->vertices[3 * 1 + 1];
+    bounding_min[2] = bounding_max[2] = myObj->vertices[3 * 1 + 2];
 
     for(int i = 1 ; i <= myObj->numvertices ; i += 1)
     {
-        if (myObj->vertices[3 * i + 0] < min_x) min_x = myObj->vertices[3 * i + 0];
-        if (myObj->vertices[3 * i + 0] > max_x) max_x = myObj->vertices[3 * i + 0];
-        if (myObj->vertices[3 * i + 1] < min_y) min_y = myObj->vertices[3 * i + 1];
-        if (myObj->vertices[3 * i + 1] > max_y) max_y = myObj->vertices[3 * i + 1];
-        if (myObj->vertices[3 * i + 2] < min_z) min_z = myObj->vertices[3 * i + 2];
-        if (myObj->vertices[3 * i + 2] > max_z) max_z = myObj->vertices[3 * i + 2];
+        if (myObj->vertices[3 * i + 0] < bounding_min[0]) bounding_min[0] = myObj->vertices[3 * i + 0];
+        if (myObj->vertices[3 * i + 0] > bounding_max[0]) bounding_max[0] = myObj->vertices[3 * i + 0];
+        if (myObj->vertices[3 * i + 1] < bounding_min[1]) bounding_min[1] = myObj->vertices[3 * i + 1];
+        if (myObj->vertices[3 * i + 1] > bounding_max[1]) bounding_max[1] = myObj->vertices[3 * i + 1];
+        if (myObj->vertices[3 * i + 2] < bounding_min[2]) bounding_min[2] = myObj->vertices[3 * i + 2];
+        if (myObj->vertices[3 * i + 2] > bounding_max[2]) bounding_max[2] = myObj->vertices[3 * i + 2];
     }
 
-    bound_size[0] = max_x - min_x;
-    bound_size[1] = max_y - min_y;
-    bound_size[2] = max_z - min_z;
+    bound_size[0] = bounding_max[0] - bounding_min[0];
+    bound_size[1] = bounding_max[1] - bounding_min[1];
+    bound_size[2] = bounding_max[2] - bounding_min[2];
 
-    bound_center[0] = (max_x + min_x)/2.0;
-    bound_center[1] = (max_y + min_y)/2.0;
-    bound_center[2] = (max_z + min_z)/2.0;
+    bound_center[0] = (bounding_max[0] + bounding_min[0])/2.0;
+    bound_center[1] = (bounding_max[1] + bounding_min[1])/2.0;
+    bound_center[2] = (bounding_max[2] + bounding_min[2])/2.0;
 }
 
 //shader
