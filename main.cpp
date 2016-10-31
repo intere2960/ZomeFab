@@ -106,6 +106,59 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
+vector<vec2> *temp_edge = NULL;
+
+void test()
+{
+    temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
+    for(int i = 0; i < myObj->numtriangles ; i += 1){
+//        cout << "tri : ";
+//        cout << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
+
+        int min_index = myObj->triangles[i].vindices[0] , temp_index = 0;
+
+        if(min(min_index, (int)myObj->triangles[i].vindices[1]) == myObj->triangles[i].vindices[1]){
+            min_index = myObj->triangles[i].vindices[1];
+            temp_index = 1;
+        }
+        if(min(min_index, (int)myObj->triangles[i].vindices[2]) == myObj->triangles[i].vindices[2]){
+            min_index = myObj->triangles[i].vindices[2];
+            temp_index = 2;
+        }
+
+        vec2 push_index1(min_index, myObj->triangles[i].vindices[(temp_index + 1) % 3]), push_index2(min_index, myObj->triangles[i].vindices[(temp_index + 2) % 3]);
+
+        bool add1 = true, add2 = true;
+
+        for(int j = 0; j < temp_edge[min_index].size(); j += 1){
+            if(push_index1[1] == temp_edge[min_index][j][1]){
+                add1 = false;
+                break;
+            }
+        }
+        for(int j = 0; j < temp_edge[min_index].size(); j += 1){
+            if(push_index2[1] == temp_edge[min_index][j][1]){
+                add2 = false;
+                break;
+            }
+        }
+
+        if(add1)
+            temp_edge[min_index].push_back(push_index1);
+
+        if(add2)
+            temp_edge[min_index].push_back(push_index2);
+
+    }
+
+//    for(int j = 0; j < myObj->numvertices + 1; j += 1){
+//        for(int k = 0; k < temp_edge[j].size(); k += 1)
+//            cout << temp_edge[j][k][0] << " " << temp_edge[j][k][1] << endl;
+//    }
+
+    delete temp_edge;
+}
+
 void init()
 {
     bounding_box();
@@ -115,6 +168,7 @@ void init()
     recount_normal(myObj, point_tri);
     process_inner(myObj, myObj_inner);
 
+    test();
 }
 
 int main(int argc, char **argv)
@@ -126,23 +180,23 @@ int main(int argc, char **argv)
 
     init();
 
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1000,1000);
-
-    glutCreateWindow("Zometool");
-	glutDisplayFunc(display);
-	glutReshapeFunc(myReshape);
-	glutMouseFunc(mouse);
-    glutMotionFunc(mouseMotion);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special);
-	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-
-	glewInit();
-
-	setShaders();
-
-	glutMainLoop();
+//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+//	glutInitWindowSize(1000,1000);
+//
+//    glutCreateWindow("Zometool");
+//	glutDisplayFunc(display);
+//	glutReshapeFunc(myReshape);
+//	glutMouseFunc(mouse);
+//    glutMotionFunc(mouseMotion);
+//    glutKeyboardFunc(keyboard);
+//    glutSpecialFunc(special);
+//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+//
+//	glewInit();
+//
+//	setShaders();
+//
+//	glutMainLoop();
     return 0;
 }
 
