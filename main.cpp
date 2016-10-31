@@ -107,13 +107,13 @@ void myReshape(int w, int h)
 }
 
 vector<vec2> *temp_edge = NULL;
+vector<edge> all_edge;
 
 void test()
 {
+    int count = 0;
     temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
     for(int i = 0; i < myObj->numtriangles ; i += 1){
-//        cout << "tri : ";
-//        cout << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
 
         int min_index = myObj->triangles[i].vindices[0] , temp_index = 0;
 
@@ -143,18 +143,25 @@ void test()
             }
         }
 
-        if(add1)
+        if(add1){
             temp_edge[min_index].push_back(push_index1);
+            count +=1;
+        }
 
-        if(add2)
+        if(add2){
             temp_edge[min_index].push_back(push_index2);
-
+            count +=1;
+        }
     }
 
-//    for(int j = 0; j < myObj->numvertices + 1; j += 1){
-//        for(int k = 0; k < temp_edge[j].size(); k += 1)
-//            cout << temp_edge[j][k][0] << " " << temp_edge[j][k][1] << endl;
-//    }
+    for(int i = 0; i < myObj->numvertices + 1; i += 1){
+        for(int j = 0; j < temp_edge[i].size(); j += 1){
+            vec3 p1(myObj->vertices[(int)temp_edge[i][j][0] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 2]);
+            vec3 p2(myObj->vertices[(int)temp_edge[i][j][1] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 2]);
+            edge temp((int)temp_edge[i][j][0], p1, (int)temp_edge[i][j][1], p2);
+            all_edge.push_back(temp);
+        }
+    }
 
     delete temp_edge;
 }

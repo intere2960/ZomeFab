@@ -33,6 +33,8 @@
 		</Compiler>
 		<Unit filename="algebra3.cpp" />
 		<Unit filename="algebra3.h" />
+		<Unit filename="bisect.cpp" />
+		<Unit filename="bisect.h" />
 		<Unit filename="glm.cpp" />
 		<Unit filename="glm.h" />
 		<Unit filename="glui_internal.h" />

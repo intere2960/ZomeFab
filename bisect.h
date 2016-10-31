@@ -7,18 +7,17 @@
 
 class edge
 {
-protected:
-    vec3 point[2];
-    int index[2];
-    int dir;
-    float l;
-
 public:
     edge();
-    edge(int &i1, vec3 &p1, int &i2, vec3 &p2);
+    edge(int i1, vec3 &p1, int i2, vec3 &p2);
 
     void plane_dir(float plane[4]);
     float length();
+
+    vec3 point[2];
+    int index[2];
+    int dir[2];
+    float l;
 };
 
 #endif // BISECT_H_INCLUDED

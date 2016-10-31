@@ -16,6 +16,7 @@
 #include "glui_internal.h"
 
 #include "shell.h"
+#include "bisect.h"
 
 using namespace std;
 
