@@ -164,6 +164,14 @@ void test()
     }
 
     delete temp_edge;
+
+    float plane[4] = {0.0, 1.0, 0.0, 0.0};
+    for(int i = 0; i < all_edge.size(); i +=1){
+        all_edge[i].plane_dir(plane);
+//        cout << all_edge[i].point[0][0] << " " << all_edge[i].point[0][1] << " " << all_edge[i].point[0][2] << " : " << all_edge[i].dir[0] << endl;
+//        cout << all_edge[i].point[1][0] << " " << all_edge[i].point[1][1] << " " << all_edge[i].point[1][2] << " : " << all_edge[i].dir[1] << endl;
+//        cout << endl;
+    }
 }
 
 void init()
