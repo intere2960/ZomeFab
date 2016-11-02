@@ -239,9 +239,7 @@ void keyboard(unsigned char key,int x,int y)
         center[0] += -0.1 * bound_size[0] * sin(phi) * sin(theta);
         center[2] += 0.1 * bound_size[2] * sin(phi) * cos(theta);
     }
-    if(key == 'r' || key == 'R') // upglmDelete(myObj);
-        glmDelete(myObj_inner);
-        delete point_tri;
+    if(key == 'r' || key == 'R') // up
     {
         eye_pos[1] += 0.1 * bound_size[1];
         center[1] += 0.1 * bound_size[1];

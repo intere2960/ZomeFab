@@ -8,6 +8,8 @@ edge::edge()
     point[1] = zero;
     index[0] = 0;
     index[1] = 0;
+    face_id[0] = -1;
+    face_id[1] = -1;
     l = length();
 }
 
@@ -17,6 +19,8 @@ edge::edge(int i1, vec3 &p1, int i2, vec3 &p2)
     point[0] = p1;
     index[1] = i2;
     point[1] = p2;
+    face_id[0] = -1;
+    face_id[1] = -1;
     l = length();
 }
 

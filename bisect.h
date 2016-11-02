@@ -14,6 +14,7 @@ public:
 
     vec3 point[2];
     int index[2];
+    int face_id[2];
     float l;
 };
 

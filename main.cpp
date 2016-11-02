@@ -115,6 +115,8 @@ void collect_edge()
     temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
     for(int i = 0; i < myObj->numtriangles ; i += 1){
 
+//        cout << i << " : " << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
+
         int min_index = myObj->triangles[i].vindices[0] , temp_index = 0;
 
         if(min(min_index, (int)myObj->triangles[i].vindices[1]) == myObj->triangles[i].vindices[1]){
@@ -124,6 +126,11 @@ void collect_edge()
         if(min(min_index, (int)myObj->triangles[i].vindices[2]) == myObj->triangles[i].vindices[2]){
             min_index = myObj->triangles[i].vindices[2];
             temp_index = 2;
+        }
+
+        int mid_index = myObj->triangles[i].vindices[(temp_index + 1) % 3];
+        if(mid_index > myObj->triangles[i].vindices[(temp_index + 2) % 3]){
+            mid_index = myObj->triangles[i].vindices[(temp_index + 2) % 3];
         }
 
         vec2 push_index1(min_index, myObj->triangles[i].vindices[(temp_index + 1) % 3]), push_index2(min_index, myObj->triangles[i].vindices[(temp_index + 2) % 3]);
@@ -145,12 +152,12 @@ void collect_edge()
 
         if(add1){
             temp_edge[min_index].push_back(push_index1);
-            count +=1;
+            count += 1;
         }
 
         if(add2){
             temp_edge[min_index].push_back(push_index2);
-            count +=1;
+            count += 1;
         }
     }
 
@@ -162,6 +169,43 @@ void collect_edge()
             all_edge.push_back(temp);
         }
     }
+
+    for(int i = 0; i < myObj->numtriangles ; i += 1){
+        int index1 = myObj->triangles[i].vindices[0], index2 = myObj->triangles[i].vindices[1], index3 = myObj->triangles[i].vindices[2];
+
+        for(int j = 0; j < all_edge.size(); j += 1){
+            if((all_edge[j].index[0] == index1 && all_edge[j].index[1] == index2) || (all_edge[j].index[0] == index2 && all_edge[j].index[1] == index1)){
+                if(all_edge[j].face_id[0] != -1){
+                    all_edge[j].face_id[1] = i;
+                }
+                else{
+                    all_edge[j].face_id[0] = i;
+                }
+            }
+            if((all_edge[j].index[0] == index1 && all_edge[j].index[1] == index3) || (all_edge[j].index[0] == index3 && all_edge[j].index[1] == index1)){
+                if(all_edge[j].face_id[0] != -1){
+                    all_edge[j].face_id[1] = i;
+                }
+                else{
+                    all_edge[j].face_id[0] = i;
+                }
+            }
+            if((all_edge[j].index[0] == index2 && all_edge[j].index[1] == index3) || (all_edge[j].index[0] == index3 && all_edge[j].index[1] == index2)){
+                if(all_edge[j].face_id[0] != -1){
+                    all_edge[j].face_id[1] = i;
+                }
+                else{
+                    all_edge[j].face_id[0] = i;
+                }
+            }
+        }
+    }
+
+//    cout << endl;
+//
+//    for(int i = 0; i < all_edge.size(); i += 1){
+//        cout << all_edge[i].index[0] << " " << all_edge[i].index[1] << " " << all_edge[i].face_id[0] << " " << all_edge[i].face_id[1] << endl;
+//    }
 
     delete temp_edge;
 }
@@ -291,23 +335,23 @@ int main(int argc, char **argv)
 
     init();
 
-//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitWindowSize(1000,1000);
-//
-//    glutCreateWindow("Zometool");
-//	glutDisplayFunc(display);
-//	glutReshapeFunc(myReshape);
-//	glutMouseFunc(mouse);
-//    glutMotionFunc(mouseMotion);
-//    glutKeyboardFunc(keyboard);
-//    glutSpecialFunc(special);
-//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-//
-//	glewInit();
-//
-//	setShaders();
-//
-//	glutMainLoop();
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1000,1000);
+
+    glutCreateWindow("Zometool");
+	glutDisplayFunc(display);
+	glutReshapeFunc(myReshape);
+	glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
+	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+
+	glewInit();
+
+	setShaders();
+
+	glutMainLoop();
     return 0;
 }
 
