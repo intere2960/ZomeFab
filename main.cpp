@@ -109,7 +109,7 @@ void myReshape(int w, int h)
 vector<vec2> *temp_edge = NULL;
 vector<edge> all_edge;
 
-void test()
+void collect_edge()
 {
     int count = 0;
     temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
@@ -164,13 +164,108 @@ void test()
     }
 
     delete temp_edge;
+}
 
-    float plane[4] = {0.0, 1.0, 0.0, 0.0};
+void plane_dir(edge &temp, float plane[4], int dir[2])
+{
+    float judge1 = plane[0] * temp.point[0][0] + plane[1] * temp.point[0][1] + plane[2] * temp.point[0][2] - plane[3];
+    float judge2 = plane[0] * temp.point[1][0] + plane[1] * temp.point[1][1] + plane[2] * temp.point[1][2] - plane[3];
+
+    if(judge1 > 0)
+        dir[0] = 1;
+    else if(judge1 == 0)
+        dir[0] = 0;
+    else
+        dir[0] = -1;
+
+    if(judge2 > 0)
+        dir[1] = 1;
+    else if(judge2 == 0)
+        dir[1] = 0;
+    else
+        dir[1] = -1;
+}
+
+void plane_dist(edge &temp, float plane[4], float dist[2])
+{
+    float judge1 = plane[0] * temp.point[0][0] + plane[1] * temp.point[0][1] + plane[2] * temp.point[0][2] - plane[3];
+    float judge2 = plane[0] * temp.point[1][0] + plane[1] * temp.point[1][1] + plane[2] * temp.point[1][2] - plane[3];
+
+    dist[0] = abs(judge1) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
+    dist[1] = abs(judge2) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
+}
+
+float test_plane[4] = {0.0, 1.0, 0.0, 0.0};
+
+void split()
+{
     for(int i = 0; i < all_edge.size(); i +=1){
-        all_edge[i].plane_dir(plane);
-//        cout << all_edge[i].point[0][0] << " " << all_edge[i].point[0][1] << " " << all_edge[i].point[0][2] << " : " << all_edge[i].dir[0] << endl;
-//        cout << all_edge[i].point[1][0] << " " << all_edge[i].point[1][1] << " " << all_edge[i].point[1][2] << " : " << all_edge[i].dir[1] << endl;
-//        cout << endl;
+        int dir[2];
+        float dist[2];
+        plane_dir(all_edge[i], test_plane, dir);
+        plane_dist(all_edge[i], test_plane, dist);
+
+        if(dir[0] && dir[1] && (dir[0] != dir[1])){
+            float edge_ratio = dist[0] / (dist[0] + dist[1]);
+            vec3 new_point = all_edge[i].point[0] + edge_ratio * (all_edge[i].point[1] - all_edge[i].point[0]);
+        }
+        else if(dir[0] == 0 || dir[1] == 0){
+        }
+
+//if (side[0] && side[1] && (side[0] != side[1])) {
+//			const float e_fac = fabsf(dist[0]) / fabsf(dist[0] - dist[1]);
+//			BMVert *v_new;
+//
+//			if (e->l) {
+//				BMLoop *l_iter, *l_first;
+//				l_iter = l_first = e->l;
+//				do {
+//					if (!face_in_stack_test(l_iter->f)) {
+//						face_in_stack_enable(l_iter->f);
+//						BLI_LINKSTACK_PUSH(face_stack, l_iter->f);
+//					}
+//				} while ((l_iter = l_iter->radial_next) != l_first);
+//			}
+//
+//			v_new = BM_edge_split(bm, e, e->v1, NULL, e_fac);
+//			vert_is_center_enable(v_new);
+//			if (oflag_center) {
+//				BMO_elem_flag_enable(bm, v_new, oflag_center);
+//			}
+//
+//			BM_VERT_DIR(v_new) = 0;
+//			BM_VERT_DIST(v_new) = 0.0f;
+//		}
+//		else if (side[0] == 0 || side[1] == 0) {
+//			/* check if either edge verts are aligned,
+//			 * if so - tag and push all faces that use it into the stack */
+//			unsigned int j;
+//			BM_ITER_ELEM_INDEX (v, &iter, e, BM_VERTS_OF_EDGE, j) {
+//				if (side[j] == 0) {
+//					if (vert_is_center_test(v) == 0) {
+//						BMIter itersub;
+//						BMLoop *l_iter;
+//
+//						vert_is_center_enable(v);
+//
+//						BM_ITER_ELEM (l_iter, &itersub, v, BM_LOOPS_OF_VERT) {
+//							if (!face_in_stack_test(l_iter->f)) {
+//								face_in_stack_enable(l_iter->f);
+//								BLI_LINKSTACK_PUSH(face_stack, l_iter->f);
+//							}
+//						}
+//
+//					}
+//				}
+//			}
+//
+//			/* if both verts are on the center - tag it */
+//			if (oflag_center) {
+//				if (side[0] == 0 && side[1] == 0) {
+//					BMO_elem_flag_enable(bm, e, oflag_center);
+//				}
+//			}
+//		}
     }
 }
 
@@ -183,7 +278,8 @@ void init()
     recount_normal(myObj, point_tri);
     process_inner(myObj, myObj_inner);
 
-    test();
+    collect_edge();
+    split();
 }
 
 int main(int argc, char **argv)
