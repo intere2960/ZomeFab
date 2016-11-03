@@ -224,6 +224,7 @@ void plane_dist(edge &temp, float plane[4], float dist[2])
 }
 
 float test_plane[4] = {0.0, 1.0, 0.0, 0.0};
+vector<int> split_edge_index;
 
 void split()
 {
@@ -236,64 +237,23 @@ void split()
         if(dir[0] && dir[1] && (dir[0] != dir[1])){
             float edge_ratio = dist[0] / (dist[0] + dist[1]);
             vec3 new_point = all_edge[i].point[0] + edge_ratio * (all_edge[i].point[1] - all_edge[i].point[0]);
+            all_edge[i].is_split = true;
+            all_edge[i].split_point = new_point;
+
+            split_edge_index.push_back(i);
         }
         else if(dir[0] == 0 || dir[1] == 0){
-        }
+            all_edge[i].is_split = true;
 
-//if (side[0] && side[1] && (side[0] != side[1])) {
-//			const float e_fac = fabsf(dist[0]) / fabsf(dist[0] - dist[1]);
-//			BMVert *v_new;
-//
-//			if (e->l) {
-//				BMLoop *l_iter, *l_first;
-//				l_iter = l_first = e->l;
-//				do {
-//					if (!face_in_stack_test(l_iter->f)) {
-//						face_in_stack_enable(l_iter->f);
-//						BLI_LINKSTACK_PUSH(face_stack, l_iter->f);
-//					}
-//				} while ((l_iter = l_iter->radial_next) != l_first);
-//			}
-//
-//			v_new = BM_edge_split(bm, e, e->v1, NULL, e_fac);
-//			vert_is_center_enable(v_new);
-//			if (oflag_center) {
-//				BMO_elem_flag_enable(bm, v_new, oflag_center);
-//			}
-//
-//			BM_VERT_DIR(v_new) = 0;
-//			BM_VERT_DIST(v_new) = 0.0f;
-//		}
-//		else if (side[0] == 0 || side[1] == 0) {
-//			/* check if either edge verts are aligned,
-//			 * if so - tag and push all faces that use it into the stack */
-//			unsigned int j;
-//			BM_ITER_ELEM_INDEX (v, &iter, e, BM_VERTS_OF_EDGE, j) {
-//				if (side[j] == 0) {
-//					if (vert_is_center_test(v) == 0) {
-//						BMIter itersub;
-//						BMLoop *l_iter;
-//
-//						vert_is_center_enable(v);
-//
-//						BM_ITER_ELEM (l_iter, &itersub, v, BM_LOOPS_OF_VERT) {
-//							if (!face_in_stack_test(l_iter->f)) {
-//								face_in_stack_enable(l_iter->f);
-//								BLI_LINKSTACK_PUSH(face_stack, l_iter->f);
-//							}
-//						}
-//
-//					}
-//				}
-//			}
-//
-//			/* if both verts are on the center - tag it */
-//			if (oflag_center) {
-//				if (side[0] == 0 && side[1] == 0) {
-//					BMO_elem_flag_enable(bm, e, oflag_center);
-//				}
-//			}
-//		}
+            if(dir[0] == 0)
+                all_edge[i].split_point = all_edge[i].point[0];
+            else if(dir[1] == 0)
+                all_edge[i].split_point = all_edge[i].point[1];
+
+            split_edge_index.push_back(i);
+
+            //whether judge align (dir[0] == 0 && dir[1] == 0) condition ?
+        }
     }
 }
 

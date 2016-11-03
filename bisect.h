@@ -16,6 +16,8 @@ public:
     int index[2];
     int face_id[2];
     float l;
+    bool is_split = false;
+    vec3 split_point;
 };
 
 #endif // BISECT_H_INCLUDED
