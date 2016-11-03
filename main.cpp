@@ -113,9 +113,9 @@ void collect_edge()
 {
     int count = 0;
     temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
-    for(int i = 0; i < myObj->numtriangles ; i += 1){
+    vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
 
-//        cout << i << " : " << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
+    for(int i = 0; i < myObj->numtriangles ; i += 1){
 
         int min_index = myObj->triangles[i].vindices[0] , temp_index = 0;
 
@@ -159,6 +159,11 @@ void collect_edge()
             temp_edge[min_index].push_back(push_index2);
             count += 1;
         }
+
+        for(int j = 0 ; j < 3 ; j += 1)
+        {
+            temp_point_tri[myObj->triangles[i].vindices[j]].push_back(i);
+        }
     }
 
     for(int i = 0; i < myObj->numvertices + 1; i += 1){
@@ -170,44 +175,23 @@ void collect_edge()
         }
     }
 
-    for(int i = 0; i < myObj->numtriangles ; i += 1){
-        int index1 = myObj->triangles[i].vindices[0], index2 = myObj->triangles[i].vindices[1], index3 = myObj->triangles[i].vindices[2];
-
-        for(int j = 0; j < all_edge.size(); j += 1){
-            if((all_edge[j].index[0] == index1 && all_edge[j].index[1] == index2) || (all_edge[j].index[0] == index2 && all_edge[j].index[1] == index1)){
-                if(all_edge[j].face_id[0] != -1){
-                    all_edge[j].face_id[1] = i;
-                }
-                else{
-                    all_edge[j].face_id[0] = i;
-                }
-            }
-            if((all_edge[j].index[0] == index1 && all_edge[j].index[1] == index3) || (all_edge[j].index[0] == index3 && all_edge[j].index[1] == index1)){
-                if(all_edge[j].face_id[0] != -1){
-                    all_edge[j].face_id[1] = i;
-                }
-                else{
-                    all_edge[j].face_id[0] = i;
-                }
-            }
-            if((all_edge[j].index[0] == index2 && all_edge[j].index[1] == index3) || (all_edge[j].index[0] == index3 && all_edge[j].index[1] == index2)){
-                if(all_edge[j].face_id[0] != -1){
-                    all_edge[j].face_id[1] = i;
-                }
-                else{
-                    all_edge[j].face_id[0] = i;
-                }
-            }
-        }
+    for(int i = 1; i <= myObj->numvertices; i += 1){
+        sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
     }
 
-//    cout << endl;
-//
-//    for(int i = 0; i < all_edge.size(); i += 1){
-//        cout << all_edge[i].index[0] << " " << all_edge[i].index[1] << " " << all_edge[i].face_id[0] << " " << all_edge[i].face_id[1] << endl;
-//    }
+    for(int i = 0; i < all_edge.size(); i += 1){
+        vector<int> temp_vector(temp_point_tri[all_edge[i].index[0]].size() + temp_point_tri[all_edge[i].index[1]].size());
+        vector<int>::iterator it;
+
+        it = set_intersection(temp_point_tri[all_edge[i].index[0]].begin(), temp_point_tri[all_edge[i].index[0]].begin() + temp_point_tri[all_edge[i].index[0]].size(), temp_point_tri[all_edge[i].index[1]].begin(), temp_point_tri[all_edge[i].index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
+        temp_vector.resize(it - temp_vector.begin());
+
+        all_edge[i].face_id[0] = temp_vector[0];
+        all_edge[i].face_id[1] = temp_vector[1];
+    }
 
     delete temp_edge;
+    delete temp_point_tri;
 }
 
 void plane_dir(edge &temp, float plane[4], int dir[2])

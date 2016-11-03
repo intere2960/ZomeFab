@@ -63,7 +63,7 @@
 	<GLUT/glut.h>
 	<GL/glut.h>
 
-1477984338 source:e:\pieceofshit\main.cpp
+1478150829 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1477884417 source:e:\pieceofshit\textfile.cpp
@@ -89,13 +89,13 @@
 
 1477883110 e:\pieceofshit\shell.h
 
-1477884476 source:e:\pieceofshit\shell.cpp
+1478143907 source:e:\pieceofshit\shell.cpp
 	<algorithm>
 	<vector>
 	"glm.h"
 	<cmath>
 
-1477976892 e:\pieceofshit\main.h
+1478091784 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<algorithm>
@@ -110,10 +110,10 @@
 	"shell.h"
 	"bisect.h"
 
-1477980947 source:e:\pieceofshit\bisect.cpp
+1478091784 source:e:\pieceofshit\bisect.cpp
 	"bisect.h"
 
-1477981098 e:\pieceofshit\bisect.h
+1478091784 e:\pieceofshit\bisect.h
 	"glm.h"
 	"algebra3.h"
 	"glui_internal.h"

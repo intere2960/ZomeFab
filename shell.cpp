@@ -17,7 +17,7 @@ void recount_normal(GLMmodel *myObj,std::vector<int> *point_tri)
             for(int k = 0 ; k < point_tri[myObj->triangles[i].vindices[j]].size() ; k += 1)
             {
                 GLfloat *temp = &myObj->facetnorms[3 * point_tri[myObj->triangles[i].vindices[j]][k]];
-                if(*temp == myObj->facetnorms[3 * (i+1) + 0] && *(temp + 1) == myObj->facetnorms[3 * (i+1) + 1] && *(temp + 2) == myObj->facetnorms[3 * (i+1) + 2])
+                if(*temp == myObj->facetnorms[3 * (i + 1) + 0] && *(temp + 1) == myObj->facetnorms[3 * (i + 1) + 1] && *(temp + 2) == myObj->facetnorms[3 * (i + 1) + 2])
                 {
                     add = false;
                     break;
@@ -52,7 +52,6 @@ void recount_normal(GLMmodel *myObj,std::vector<int> *point_tri)
         myObj->normals[3 * i + 0] = temp[0];
         myObj->normals[3 * i + 1] = temp[1];
         myObj->normals[3 * i + 2] = temp[2];
-
     }
 }
 
