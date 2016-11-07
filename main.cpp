@@ -255,6 +255,17 @@ void split()
             //whether judge align (dir[0] == 0 && dir[1] == 0) condition ?
         }
     }
+
+//    for(unsigned int i = 0; i < all_edge.size(); i +=1){
+//        cout << all_edge[i].index[0] << " " << all_edge[i].index[1] << " : " << all_edge[i].face_id[0] << " " << all_edge[i].face_id[1] << endl;
+//    }
+//    cout << endl;
+    for(unsigned int i = 0; i < split_edge_index.size(); i +=1){
+        cout << split_edge_index[i] << " : ";
+        cout << all_edge[split_edge_index[i]].index[0] << " " << all_edge[split_edge_index[i]].index[1] << " : " << all_edge[split_edge_index[i]].face_id[0] << " " << all_edge[split_edge_index[i]].face_id[1] << endl;
+    }
+
+    glmFacetNormals(myObj);
 }
 
 void init()
