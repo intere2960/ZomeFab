@@ -25,7 +25,7 @@ void drawObj(GLMmodel *myObj)
 //    glEnd();
 
     glBegin(GL_TRIANGLES);
-    for (int i=0; i<myObj->numtriangles; i+=1) {
+    for (unsigned int i=0; i<myObj->numtriangles; i+=1) {
         for (int v=0; v<3; v+=1) {
 		    //glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
 		    //glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
@@ -67,15 +67,15 @@ void display(void)
     glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     if(show){
-//        glPolygonMode(GL_FRONT, GL_LINE);
-//        glPolygonMode(GL_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT, GL_LINE);
+        glPolygonMode(GL_BACK, GL_LINE);
         drawObj(myObj);
 //        glmDraw(myObj, GLM_FLAT);
 //        glmDraw(myObj,GLM_SMOOTH);
         //angle += 1.0;
 //        glmDraw(myObj,GLM_NONE);
-//        glPolygonMode(GL_FRONT, GL_FILL);
-//        glPolygonMode(GL_BACK, GL_FILL);
+        glPolygonMode(GL_FRONT, GL_FILL);
+        glPolygonMode(GL_BACK, GL_FILL);
     }
 
 
@@ -115,7 +115,7 @@ void collect_edge()
     temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
     vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
 
-    for(int i = 0; i < myObj->numtriangles ; i += 1){
+    for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
 
         int min_index = myObj->triangles[i].vindices[0] , temp_index = 0;
 
@@ -137,13 +137,13 @@ void collect_edge()
 
         bool add1 = true, add2 = true;
 
-        for(int j = 0; j < temp_edge[min_index].size(); j += 1){
+        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
             if(push_index1[1] == temp_edge[min_index][j][1]){
                 add1 = false;
                 break;
             }
         }
-        for(int j = 0; j < temp_edge[min_index].size(); j += 1){
+        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
             if(push_index2[1] == temp_edge[min_index][j][1]){
                 add2 = false;
                 break;
@@ -166,8 +166,8 @@ void collect_edge()
         }
     }
 
-    for(int i = 0; i < myObj->numvertices + 1; i += 1){
-        for(int j = 0; j < temp_edge[i].size(); j += 1){
+    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
+        for(unsigned int j = 0; j < temp_edge[i].size(); j += 1){
             vec3 p1(myObj->vertices[(int)temp_edge[i][j][0] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 2]);
             vec3 p2(myObj->vertices[(int)temp_edge[i][j][1] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 2]);
             edge temp((int)temp_edge[i][j][0], p1, (int)temp_edge[i][j][1], p2);
@@ -175,11 +175,11 @@ void collect_edge()
         }
     }
 
-    for(int i = 1; i <= myObj->numvertices; i += 1){
+    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
         sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
     }
 
-    for(int i = 0; i < all_edge.size(); i += 1){
+    for(unsigned int i = 0; i < all_edge.size(); i += 1){
         vector<int> temp_vector(temp_point_tri[all_edge[i].index[0]].size() + temp_point_tri[all_edge[i].index[1]].size());
         vector<int>::iterator it;
 
@@ -228,7 +228,7 @@ vector<int> split_edge_index;
 
 void split()
 {
-    for(int i = 0; i < all_edge.size(); i +=1){
+    for(unsigned int i = 0; i < all_edge.size(); i +=1){
         int dir[2];
         float dist[2];
         plane_dir(all_edge[i], test_plane, dir);
@@ -296,6 +296,8 @@ int main(int argc, char **argv)
 	setShaders();
 
 	glutMainLoop();
+
+
     return 0;
 }
 

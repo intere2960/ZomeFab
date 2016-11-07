@@ -100,7 +100,7 @@ void bounding_box()
     bounding_min[1] = bounding_max[1] = myObj->vertices[3 * 1 + 1];
     bounding_min[2] = bounding_max[2] = myObj->vertices[3 * 1 + 2];
 
-    for(int i = 1 ; i <= myObj->numvertices ; i += 1)
+    for(unsigned int i = 1 ; i <= myObj->numvertices ; i += 1)
     {
         if (myObj->vertices[3 * i + 0] < bounding_min[0]) bounding_min[0] = myObj->vertices[3 * i + 0];
         if (myObj->vertices[3 * i + 0] > bounding_max[0]) bounding_max[0] = myObj->vertices[3 * i + 0];

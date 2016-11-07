@@ -122,15 +122,20 @@ glmEqual(GLfloat* u, GLfloat* v, GLfloat epsilon)
  * epsilon     - maximum difference between vectors
  *
  */
-GLfloat*
-glmWeldVectors(GLfloat* vectors, GLuint* numvectors, GLfloat epsilon)
+//GLfloat*
+std::vector<GLfloat>
+glmWeldVectors(std::vector<GLfloat> vectors, GLuint* numvectors, GLfloat epsilon)
+//glmWeldVectors(GLfloat* vectors, GLuint* numvectors, GLfloat epsilon)
 {
-    GLfloat* copies;
+//    GLfloat* copies;
+//    std::vector<GLfloat> copies(3 * (*numvectors + 1));
+    std::vector<GLfloat> copies;
     GLuint copied;
     GLuint i, j;
 
-    copies = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (*numvectors + 1));
-    memcpy(copies, vectors, (sizeof(GLfloat) * 3 * (*numvectors + 1)));
+//    copies = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (*numvectors + 1));
+//    memcpy(copies, vectors, (sizeof(GLfloat) * 3 * (*numvectors + 1)));
+    copies = vectors;
 
     copied = 1;
     for (i = 1; i <= *numvectors; i++) {
@@ -577,7 +582,8 @@ glmSecondPass(GLMmodel* model, FILE* file)
     GLuint numnormals;         /* number of normals in model */
     GLuint numtexcoords;       /* number of texcoords in model */
     GLuint numtriangles;       /* number of triangles in model */
-    GLfloat* vertices;         /* array of vertices  */
+//    GLfloat* vertices;         /* array of vertices  */
+    std::vector<GLfloat> vertices;         /* array of vertices  */
     GLfloat* normals;          /* array of normals */
     GLfloat* texcoords;        /* array of texture coordinates */
     GLMgroup* group;           /* current group pointer */
@@ -586,7 +592,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
     char buf[128];
 
     /* set the pointer shortcuts */
-    vertices       = model->vertices;
+//    vertices       = model->vertices;
     normals    = model->normals;
     texcoords    = model->texcoords;
     group      = model->groups;
@@ -605,10 +611,14 @@ glmSecondPass(GLMmodel* model, FILE* file)
         case 'v':               /* v, vn, vt */
             switch(buf[1]) {
             case '\0':          /* vertex */
+//                fscanf(file, "%f %f %f",
+//                    &vertices[3 * numvertices + 0],
+//                    &vertices[3 * numvertices + 1],
+//                    &vertices[3 * numvertices + 2]);
                 fscanf(file, "%f %f %f",
-                    &vertices[3 * numvertices + 0],
-                    &vertices[3 * numvertices + 1],
-                    &vertices[3 * numvertices + 2]);
+                    &model->vertices[3 * numvertices + 0],
+                    &model->vertices[3 * numvertices + 1],
+                    &model->vertices[3 * numvertices + 2]);
                 numvertices++;
                 break;
             case 'n':           /* normal */
@@ -775,7 +785,7 @@ glmUnitize(GLMmodel* model)
     GLfloat scale;
 
     assert(model);
-    assert(model->vertices);
+//    assert(model->vertices);
 
     /* get the max/mins */
     maxx = minx = model->vertices[3 + 0];
@@ -837,7 +847,7 @@ glmDimensions(GLMmodel* model, GLfloat* dimensions)
     GLfloat maxx, minx, maxy, miny, maxz, minz;
 
     assert(model);
-    assert(model->vertices);
+//    assert(model->vertices);
     assert(dimensions);
 
     /* get the max/mins */
@@ -944,16 +954,17 @@ glmFacetNormals(GLMmodel* model)
     GLfloat v[3];
 
     assert(model);
-    assert(model->vertices);
+//    assert(model->vertices);
 
     /* clobber any old facetnormals */
-    if (model->facetnorms)
-        free(model->facetnorms);
+    if (!model->facetnorms.empty())
+        model->facetnorms.clear();
 
     /* allocate memory for the new facet normals */
     model->numfacetnorms = model->numtriangles;
-    model->facetnorms = (GLfloat*)malloc(sizeof(GLfloat) *
-                       3 * (model->numfacetnorms + 1));
+//    model->facetnorms = (GLfloat*)malloc(sizeof(GLfloat) *
+//                       3 * (model->numfacetnorms + 1));
+    model->facetnorms.resize(3 * (model->numfacetnorms + 1));
 
     for (i = 0; i < model->numtriangles; i++) {
         model->triangles[i].findex = i+1;
@@ -1006,7 +1017,7 @@ glmVertexNormals(GLMmodel* model, GLfloat angle)
     GLuint i, avg;
 
     assert(model);
-    assert(model->facetnorms);
+//    assert(model->facetnorms);
 
     /* calculate the cosine of the angle (in degrees) */
     cos_angle = cos(angle * M_PI / 180.0);
@@ -1271,11 +1282,11 @@ glmDelete(GLMmodel* model)
 
     if (model->pathname)     free(model->pathname);
     if (model->mtllibname) free(model->mtllibname);
-    if (model->vertices)     free(model->vertices);
+//    if (model->vertices)     free(model->vertices);
     if (model->normals)  free(model->normals);
     if (model->texcoords)  free(model->texcoords);
-    if (model->facetnorms) free(model->facetnorms);
-    if (model->triangles)  free(model->triangles);
+//    if (model->facetnorms) free(model->facetnorms);
+    //if (model->triangles)  free(model->triangles);
     if (model->materials) {
         for (i = 0; i < model->nummaterials; i++)
             free(model->materials[i].name);
@@ -1317,15 +1328,15 @@ glmReadOBJ(char* filename)
     model->pathname    = strdup(filename);
     model->mtllibname    = NULL;
     model->numvertices   = 0;
-    model->vertices    = NULL;
+//    model->vertices    = NULL;
     model->numnormals    = 0;
     model->normals     = NULL;
     model->numtexcoords  = 0;
     model->texcoords       = NULL;
     model->numfacetnorms = 0;
-    model->facetnorms    = NULL;
+//    model->facetnorms    = NULL;
     model->numtriangles  = 0;
-    model->triangles       = NULL;
+//    model->triangles       = NULL;
     model->nummaterials  = 0;
     model->materials       = NULL;
     model->numgroups       = 0;
@@ -1336,13 +1347,17 @@ glmReadOBJ(char* filename)
 
     /* make a first pass through the file to get a count of the number
     of vertices, normals, texcoords & triangles */
+
     glmFirstPass(model, file);
 
     /* allocate memory */
-    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
-        3 * (model->numvertices + 1));
-    model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
-        model->numtriangles);
+//    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
+//        3 * (model->numvertices + 1));
+    model->vertices.resize(3 * (model->numvertices + 1));
+//    model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
+//        model->numtriangles);
+    model->triangles.resize(model->numtriangles);
+
     if (model->numnormals) {
         model->normals = (GLfloat*)malloc(sizeof(GLfloat) *
             3 * (model->numnormals + 1));
@@ -1388,7 +1403,8 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
     assert(model);
 
     /* do a bit of warning */
-    if (mode & GLM_FLAT && !model->facetnorms) {
+//    if (mode & GLM_FLAT && !model->facetnorms) {
+    if (mode & GLM_FLAT && model->facetnorms.empty()) {
         printf("glmWriteOBJ() warning: flat normal output requested "
             "with no facet normals defined.\n");
         mode &= ~GLM_FLAT;
@@ -1581,10 +1597,11 @@ glmDraw(GLMmodel* model, GLuint mode)
     static GLMmaterial* material;
 
     assert(model);
-    assert(model->vertices);
+//    assert(model->vertices);
 
     /* do a bit of warning */
-    if (mode & GLM_FLAT && !model->facetnorms) {
+//    if (mode & GLM_FLAT && !model->facetnorms) {
+    if (mode & GLM_FLAT && model->facetnorms.empty()) {
         printf("glmDraw() warning: flat render mode requested "
             "with no facet normals defined.\n");
         mode &= ~GLM_FLAT;
@@ -1713,8 +1730,10 @@ glmList(GLMmodel* model, GLuint mode)
 GLvoid
 glmWeld(GLMmodel* model, GLfloat epsilon)
 {
-    GLfloat* vectors;
-    GLfloat* copies;
+//    GLfloat* vectors;
+    std::vector<GLfloat> vectors;
+//    GLfloat* copies;
+    std::vector<GLfloat> copies;
     GLuint numvectors;
     GLuint i;
 
@@ -1735,12 +1754,13 @@ glmWeld(GLMmodel* model, GLfloat epsilon)
     }
 
     /* free space for old vertices */
-    free(vectors);
+//    free(vectors);
 
     /* allocate space for the new vertices */
     model->numvertices = numvectors;
-    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
-        3 * (model->numvertices + 1));
+//    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
+//        3 * (model->numvertices + 1));
+    model->vertices.resize(3 * (model->numvertices + 1));
 
     /* copy the optimized vertices into the actual vertex list */
     for (i = 1; i <= model->numvertices; i++) {
@@ -1749,7 +1769,7 @@ glmWeld(GLMmodel* model, GLfloat epsilon)
         model->vertices[3 * i + 2] = copies[3 * i + 2];
     }
 
-    free(copies);
+//    free(copies);
 }
 
 /* glmReadPPM: read a PPM raw (type P6) file.  The PPM file has a header

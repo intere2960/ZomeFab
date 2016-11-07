@@ -2,6 +2,7 @@
 #include <vector>
 #include "glm.h"
 #include <cmath>
+#include <vector>
 
 void recount_normal(GLMmodel *myObj,std::vector<int> *point_tri)
 {
@@ -72,7 +73,9 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
     }
 
     myObj_inner->numfacetnorms = myObj->numfacetnorms;
-    myObj_inner->facetnorms = new GLfloat[3 * (myObj_inner->numfacetnorms + 1)];
+//    myObj_inner->facetnorms = new GLfloat[3 * (myObj_inner->numfacetnorms + 1)];
+    std::vector<GLfloat> temp_facenormal(3 * (myObj_inner->numfacetnorms + 1));
+    myObj_inner->facetnorms = temp_facenormal;
 
     for(int i = 1 ; i <= myObj->numfacetnorms ; i += 1)
     {

@@ -21,6 +21,8 @@
 #include <GL/glut.h>
 #endif
 
+#include <vector>
+
 
 #ifndef M_PI
 #define M_PI 3.14159265f
@@ -72,7 +74,8 @@ typedef struct _GLMmodel {
   char*    mtllibname;          /* name of the material library */
 
   GLuint   numvertices;         /* number of vertices in model */
-  GLfloat* vertices;            /* array of vertices  */
+//  GLfloat* vertices;            /* array of vertices  */
+  std::vector<GLfloat> vertices;            /* array of vertices  */
 
   GLuint   numnormals;          /* number of normals in model */
   GLfloat* normals;             /* array of normals */
@@ -81,10 +84,12 @@ typedef struct _GLMmodel {
   GLfloat* texcoords;           /* array of texture coordinates */
 
   GLuint   numfacetnorms;       /* number of facetnorms in model */
-  GLfloat* facetnorms;          /* array of facetnorms */
+//  GLfloat* facetnorms;          /* array of facetnorms */
+  std::vector<GLfloat> facetnorms;          /* array of facetnorms */
 
   GLuint       numtriangles;    /* number of triangles in model */
-  GLMtriangle* triangles;       /* array of triangles */
+//  GLMtriangle* triangles;       /* vector of triangles */
+  std::vector<GLMtriangle> triangles;       /* vector of triangles */
 
   GLuint       nummaterials;    /* number of materials in model */
   GLMmaterial* materials;       /* array of materials */
