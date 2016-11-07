@@ -264,6 +264,38 @@ void split()
         cout << split_edge_index[i] << " : ";
         cout << all_edge[split_edge_index[i]].index[0] << " " << all_edge[split_edge_index[i]].index[1] << " : " << all_edge[split_edge_index[i]].face_id[0] << " " << all_edge[split_edge_index[i]].face_id[1] << endl;
     }
+    cout << myObj->numvertices << endl;
+
+    //split one face
+    myObj->vertices.push_back(all_edge[split_edge_index[0]].split_point[0]);
+    myObj->vertices.push_back(all_edge[split_edge_index[0]].split_point[1]);
+    myObj->vertices.push_back(all_edge[split_edge_index[0]].split_point[2]);
+    myObj->numvertices += 1;
+
+    myObj->vertices.push_back(all_edge[split_edge_index[1]].split_point[0]);
+    myObj->vertices.push_back(all_edge[split_edge_index[1]].split_point[1]);
+    myObj->vertices.push_back(all_edge[split_edge_index[1]].split_point[2]);
+    myObj->numvertices += 1;
+
+    GLMtriangle temp1,temp2;
+
+    temp1.vindices[0] = myObj->numvertices - 1;
+    temp1.vindices[1] = myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[1];
+    temp1.vindices[2] = myObj->numvertices;
+    myObj->triangles.push_back(temp1);
+    myObj->numtriangles += 1;
+
+    temp2.vindices[0] = myObj->numvertices ;
+    temp2.vindices[1] = myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[1];
+    temp2.vindices[2] = myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[2];
+    myObj->triangles.push_back(temp2);
+    myObj->numtriangles += 1;
+
+    myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[0] = all_edge[split_edge_index[0]].index[0];
+    myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[1] = myObj->numvertices - 1;
+    myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[2] = myObj->numvertices;
+    myObj->numtriangles += 1;
+
 
     glmFacetNormals(myObj);
 }
