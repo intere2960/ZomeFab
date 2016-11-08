@@ -193,6 +193,20 @@ void collect_edge()
         all_edge[i].face_id[0] = temp_vector[0];
         all_edge[i].face_id[1] = temp_vector[1];
 
+        for(int j = 0; j < 2; j += 1){
+            if(myObj->triangles[temp_vector[0]].edge_index[j] == -1){
+                myObj->triangles[temp_vector[0]].edge_index[j] = i;
+                break;
+            }
+        }
+
+        for(int j = 0; j < 2; j += 1){
+            if(myObj->triangles[temp_vector[1]].edge_index[j] == -1){
+                myObj->triangles[temp_vector[1]].edge_index[j] = i;
+                break;
+            }
+        }
+
     }
 
     delete temp_edge;
@@ -285,15 +299,22 @@ void split()
         }
     }
 
+//    for(unsigned int i = 0; i < myObj->numtriangles; i +=1){
+//        cout << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
+//        cout << myObj->triangles[i].edge_index[0] << " " << myObj->triangles[i].edge_index[1] << endl;
+//    }
+//
+//    cout << endl;
 //    for(unsigned int i = 0; i < all_edge.size(); i +=1){
-//        cout << all_edge[i].index[0] << " " << all_edge[i].index[1] << " : " << all_edge[i].face_id[0] << " " << all_edge[i].face_id[1] << endl;
+//        cout << i << " : " << all_edge[i].index[0] << " " << all_edge[i].index[1] << " : " << all_edge[i].face_id[0] << " " << all_edge[i].face_id[1] << endl;
 //    }
 //    cout << endl;
-    for(unsigned int i = 0; i < split_edge_index.size(); i +=1){
-        cout << split_edge_index[i] << " : ";
-        cout << all_edge[split_edge_index[i]].index[0] << " " << all_edge[split_edge_index[i]].index[1] << " : " << all_edge[split_edge_index[i]].face_id[0] << " " << all_edge[split_edge_index[i]].face_id[1] << endl;
-    }
-    cout << myObj->numvertices << endl;
+
+//    for(unsigned int i = 0; i < split_edge_index.size(); i +=1){
+//        cout << split_edge_index[i] << " : ";
+//        cout << all_edge[split_edge_index[i]].index[0] << " " << all_edge[split_edge_index[i]].index[1] << " : " << all_edge[split_edge_index[i]].face_id[0] << " " << all_edge[split_edge_index[i]].face_id[1] << endl;
+//    }
+//    cout << myObj->numvertices << endl;
 
     //bool is_face_split[myObj->numtriangles];
 
@@ -341,7 +362,7 @@ void split()
     myObj->triangles.push_back(temp1);
     myObj->numtriangles += 1;
 
-    temp2.vindices[0] = myObj->numvertices ;
+    temp2.vindices[0] = myObj->numvertices;
     temp2.vindices[1] = myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[1];
     temp2.vindices[2] = myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[2];
     myObj->triangles.push_back(temp2);

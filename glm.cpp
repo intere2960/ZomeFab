@@ -667,6 +667,11 @@ glmSecondPass(GLMmodel* model, FILE* file)
                     fscanf(file, "%d//%d", &v, &n);
                     T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                     T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
+
+
+                    T(numtriangles).edge_index[0] = -1;
+                    T(numtriangles).edge_index[1] = -1;
+
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d//%d", &v, &n) > 0) {
@@ -676,6 +681,11 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).nindices[1] = T(numtriangles-1).nindices[2];
                         T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                         T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
+
+
+                        T(numtriangles).edge_index[0] = -1;
+                        T(numtriangles).edge_index[1] = -1;
+
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
@@ -692,6 +702,10 @@ glmSecondPass(GLMmodel* model, FILE* file)
                     T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                     T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
                     T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
+
+                    T(numtriangles).edge_index[0] = -1;
+                    T(numtriangles).edge_index[1] = -1;
+
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d/%d/%d", &v, &t, &n) > 0) {
@@ -704,6 +718,10 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                         T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
                         T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
+
+                        T(numtriangles).edge_index[0] = -1;
+                        T(numtriangles).edge_index[1] = -1;
+
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
@@ -717,6 +735,10 @@ glmSecondPass(GLMmodel* model, FILE* file)
                     fscanf(file, "%d/%d", &v, &t);
                     T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                     T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
+
+                    T(numtriangles).edge_index[0] = -1;
+                    T(numtriangles).edge_index[1] = -1;
+
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d/%d", &v, &t) > 0) {
@@ -726,6 +748,10 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).tindices[1] = T(numtriangles-1).tindices[2];
                         T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                         T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
+
+                        T(numtriangles).edge_index[0] = -1;
+                        T(numtriangles).edge_index[1] = -1;
+
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
@@ -737,12 +763,21 @@ glmSecondPass(GLMmodel* model, FILE* file)
                     T(numtriangles).vindices[1] = v < 0 ? v + numvertices : v;
                     fscanf(file, "%d", &v);
                     T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+
+                    T(numtriangles).edge_index[0] = -1;
+                    T(numtriangles).edge_index[1] = -1;
+
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
                     while(fscanf(file, "%d", &v) > 0) {
                         T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
                         T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
                         T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+
+
+                        T(numtriangles).edge_index[0] = -1;
+                        T(numtriangles).edge_index[1] = -1;
+
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
                     }
