@@ -108,16 +108,20 @@ void myReshape(int w, int h)
 
 vector<vec2> *temp_edge = NULL;
 vector<edge> all_edge;
+bool *is_face_split= NULL;
 
 void collect_edge()
 {
     int count = 0;
-    temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
+    temp_edge = new vector<vec2>[myObj->numvertices + 1];
     vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
+
+    is_face_split = new bool[myObj->numtriangles];
 
     for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
 
         int min_index = myObj->triangles[i].vindices[0] , temp_index = 0;
+        is_face_split[i] = true;
 
         if(min(min_index, (int)myObj->triangles[i].vindices[1]) == myObj->triangles[i].vindices[1]){
             min_index = myObj->triangles[i].vindices[1];
@@ -188,10 +192,25 @@ void collect_edge()
 
         all_edge[i].face_id[0] = temp_vector[0];
         all_edge[i].face_id[1] = temp_vector[1];
+
     }
 
     delete temp_edge;
     delete temp_point_tri;
+}
+
+float plane_dir_point(vec3 &point, float plane[4])
+{
+    float judge = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+
+    if(judge > 0)
+        judge = 1;
+    else if(judge == 0)
+        judge = 0;
+    else
+        judge = -1;
+
+    return judge;
 }
 
 void plane_dir(edge &temp, float plane[4], int dir[2])
@@ -241,6 +260,11 @@ void split()
             all_edge[i].split_point = new_point;
 
             split_edge_index.push_back(i);
+
+            if(is_face_split[all_edge[i].face_id[0]])
+                is_face_split[all_edge[i].face_id[0]] = false;
+            if(is_face_split[all_edge[i].face_id[1]])
+                is_face_split[all_edge[i].face_id[1]] = false;
         }
         else if(dir[0] == 0 || dir[1] == 0){
             all_edge[i].is_split = true;
@@ -251,6 +275,11 @@ void split()
                 all_edge[i].split_point = all_edge[i].point[1];
 
             split_edge_index.push_back(i);
+
+            if(is_face_split[all_edge[i].face_id[0]])
+                is_face_split[all_edge[i].face_id[0]] = false;
+            if(is_face_split[all_edge[i].face_id[1]])
+                is_face_split[all_edge[i].face_id[1]] = false;
 
             //whether judge align (dir[0] == 0 && dir[1] == 0) condition ?
         }
@@ -265,6 +294,33 @@ void split()
         cout << all_edge[split_edge_index[i]].index[0] << " " << all_edge[split_edge_index[i]].index[1] << " : " << all_edge[split_edge_index[i]].face_id[0] << " " << all_edge[split_edge_index[i]].face_id[1] << endl;
     }
     cout << myObj->numvertices << endl;
+
+    //bool is_face_split[myObj->numtriangles];
+
+//    for(int i = 0; i < myObj->numtriangles)
+    vec3 point_dir;
+    int dir_count[3] = {0, 0, 0};
+    for(int j = 0; j < 3; j += 1){
+//        vec3 temp(myObj->vertices[3 * (myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[j]) + 0], myObj->vertices[3 * (myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[j]) + 1], myObj->vertices[3 * (myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[j]) + 2]);
+        vec3 temp(myObj->vertices[3 * (myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[j]) + 0], myObj->vertices[3 * (myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[j]) + 1], myObj->vertices[3 * (myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[j]) + 2]);
+        point_dir[j] = plane_dir_point(temp,test_plane);
+        dir_count[(int)point_dir[j] + 1] += 1;
+    }
+
+    int choose_dir = -1;
+    if(dir_count[2] == 1)
+        choose_dir = 1;
+
+    int choose_index = 0;
+    for(int j = 0; j < 3; j += 1){
+        if(point_dir[j] == choose_dir)
+            choose_index = j;
+    }
+
+    cout << point_dir[0] << " " << point_dir[1] << " " << point_dir[2] << endl;
+    cout << choose_index << endl;
+
+    //search??????
 
     //split one face
     myObj->vertices.push_back(all_edge[split_edge_index[0]].split_point[0]);
@@ -296,8 +352,14 @@ void split()
     myObj->triangles[all_edge[split_edge_index[0]].face_id[0]].vindices[2] = myObj->numvertices;
     myObj->numtriangles += 1;
 
+//    cout << endl;
+//    for(int i = 0; i < myObj->numtriangles; i += 1){
+//        cout << is_face_split[i] << " ";
+//    }
+//    cout << endl;
 
     glmFacetNormals(myObj);
+    delete is_face_split;
 }
 
 void init()
