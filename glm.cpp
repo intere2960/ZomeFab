@@ -671,6 +671,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                     T(numtriangles).edge_index[0] = -1;
                     T(numtriangles).edge_index[1] = -1;
+                    T(numtriangles).edge_index[2] = -1;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -685,6 +686,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                         T(numtriangles).edge_index[0] = -1;
                         T(numtriangles).edge_index[1] = -1;
+                        T(numtriangles).edge_index[2] = -1;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
@@ -705,6 +707,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                     T(numtriangles).edge_index[0] = -1;
                     T(numtriangles).edge_index[1] = -1;
+                    T(numtriangles).edge_index[2] = -1;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -721,6 +724,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                         T(numtriangles).edge_index[0] = -1;
                         T(numtriangles).edge_index[1] = -1;
+                        T(numtriangles).edge_index[2] = -1;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
@@ -738,6 +742,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                     T(numtriangles).edge_index[0] = -1;
                     T(numtriangles).edge_index[1] = -1;
+                    T(numtriangles).edge_index[2] = -1;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -751,6 +756,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                         T(numtriangles).edge_index[0] = -1;
                         T(numtriangles).edge_index[1] = -1;
+                        T(numtriangles).edge_index[2] = -1;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
@@ -766,6 +772,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                     T(numtriangles).edge_index[0] = -1;
                     T(numtriangles).edge_index[1] = -1;
+                    T(numtriangles).edge_index[2] = -1;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -777,6 +784,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
                         T(numtriangles).edge_index[0] = -1;
                         T(numtriangles).edge_index[1] = -1;
+                        T(numtriangles).edge_index[2] = -1;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;

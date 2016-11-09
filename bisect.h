@@ -18,6 +18,7 @@ public:
     float l;
     bool is_split;
     vec3 split_point;
+    int vertex_push_index;
 };
 
 #endif // BISECT_H_INCLUDED
