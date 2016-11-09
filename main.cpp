@@ -60,22 +60,22 @@ void display(void)
     glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
     glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
 
-    setShaders();
+//    setShaders();
 
     glPushMatrix();
 
     glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     if(show){
-        glPolygonMode(GL_FRONT, GL_LINE);
-        glPolygonMode(GL_BACK, GL_LINE);
+//        glPolygonMode(GL_FRONT, GL_LINE);
+//        glPolygonMode(GL_BACK, GL_LINE);
         drawObj(myObj);
 //        glmDraw(myObj, GLM_FLAT);
 //        glmDraw(myObj,GLM_SMOOTH);
         //angle += 1.0;
 //        glmDraw(myObj,GLM_NONE);
-        glPolygonMode(GL_FRONT, GL_FILL);
-        glPolygonMode(GL_BACK, GL_FILL);
+//        glPolygonMode(GL_FRONT, GL_FILL);
+//        glPolygonMode(GL_BACK, GL_FILL);
     }
 
 
@@ -187,13 +187,20 @@ void collect_edge()
             vec3 p1(myObj->vertices[(int)temp_edge[i][j][0] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 2]);
             vec3 p2(myObj->vertices[(int)temp_edge[i][j][1] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 2]);
             edge temp((int)temp_edge[i][j][0], p1, (int)temp_edge[i][j][1], p2);
+//            cout << temp.index[0] << " " << temp.index[1] << endl;
             all_edge.push_back(temp);
         }
     }
 
-    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
+    for(unsigned int i = 1; i <= myObj->numvertices; i += 1)
         sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
-    }
+
+//    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
+//        for(unsigned int j = 0; j < temp_point_tri[i].size(); j += 1){
+//            cout << temp_point_tri[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
 
     for(unsigned int i = 0; i < all_edge.size(); i += 1){
         vector<int> temp_vector(temp_point_tri[all_edge[i].index[0]].size() + temp_point_tri[all_edge[i].index[1]].size());
@@ -401,6 +408,9 @@ void split()
                 all_edge[choose_edge[1]].vertex_push_index = myObj->numvertices;
             }
 
+            cout << choose_index << endl;
+            cout << "origin : " << myObj->triangles[i].vindices[choose_index] << " " << myObj->triangles[i].vindices[(choose_index + 1) % 3] << " " << myObj->triangles[i].vindices[(choose_index + 2) % 3] << endl;
+
             GLMtriangle temp1,temp2;
 
             temp1.vindices[0] = all_edge[choose_edge[0]].vertex_push_index;
@@ -409,15 +419,21 @@ void split()
             myObj->triangles.push_back(temp1);
             myObj->numtriangles += 1;
 
+            cout << "1 : " << all_edge[choose_edge[0]].vertex_push_index << " " << myObj->triangles[i].vindices[(choose_index + 1) % 3] << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
+
             temp2.vindices[0] = all_edge[choose_edge[1]].vertex_push_index;
             temp2.vindices[1] = myObj->triangles[i].vindices[(choose_index + 1) % 3];
             temp2.vindices[2] = myObj->triangles[i].vindices[(choose_index + 2) % 3];
             myObj->triangles.push_back(temp2);
             myObj->numtriangles += 1;
 
+            cout << "2 : " << all_edge[choose_edge[1]].vertex_push_index << " " << myObj->triangles[i].vindices[(choose_index + 1) % 3] << " " << myObj->triangles[i].vindices[(choose_index + 2) % 3] << endl;
+
             myObj->triangles[i].vindices[0] = myObj->triangles[i].vindices[choose_index];
             myObj->triangles[i].vindices[1] = all_edge[choose_edge[0]].vertex_push_index;
             myObj->triangles[i].vindices[2] = all_edge[choose_edge[1]].vertex_push_index;
+
+            cout << "3 : " << myObj->triangles[i].vindices[choose_index] << " " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
 
         }
     }
