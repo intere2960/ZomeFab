@@ -281,7 +281,7 @@ void plane_dist(edge &temp, float plane[4], float dist[2])
     dist[1] = fabs(judge2) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
 }
 
-float test_plane[4] = {0.0, 1.0, 0.0, 0.0};
+float test_plane[4] = {0.0, 1.0, 0.0, -1.0};
 vector<int> split_edge_index;
 
 void split()
@@ -308,10 +308,14 @@ void split()
         else if(dir[0] == 0 || dir[1] == 0){
             all_edge[i].is_split = true;
 
-            if(dir[0] == 0)
+            if(dir[0] == 0){
                 all_edge[i].split_point = all_edge[i].point[0];
-            else if(dir[1] == 0)
+                all_edge[i].vertex_push_index = all_edge[i].index[0];
+            }
+            else if(dir[1] == 0){
                 all_edge[i].split_point = all_edge[i].point[1];
+                all_edge[i].vertex_push_index = all_edge[i].index[1];
+            }
 
             split_edge_index.push_back(i);
 
@@ -348,9 +352,6 @@ void split()
     for(unsigned int i = 0; i < current_numtri; i += 1){
         if(!is_face_split[i]){
 
-//            cout << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
-//            cout << myObj->triangles[i].edge_index[0] << " " << myObj->triangles[i].edge_index[1] << endl;
-
             vec3 point_dir;
             int dir_count[3] = {0, 0, 0};
             for(int j = 0; j < 3; j += 1){
@@ -374,9 +375,9 @@ void split()
             vec2 choose_vertex_index(-1,-1);
             int x = 0;
 
-//            cout << choose_index << endl;
-//            cout << myObj->triangles[i].vindices[choose_index] << endl;
-//            cout << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 2] << endl;
+            cout << choose_index << endl;
+            cout << myObj->triangles[i].vindices[choose_index] << endl;
+            cout << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 2] << endl;
 
             for(int j = 0; j < 3; j += 1){
                 if(all_edge[myObj->triangles[i].edge_index[j]].index[0] == myObj->triangles[i].vindices[choose_index]){
@@ -405,8 +406,8 @@ void split()
 //                cout << choose_edge[0] << " " << choose_edge[1] << endl;
             }
 
-//            cout << choose_edge[0] << " " << choose_edge[1] << endl;
-//            cout << choose_vertex_index[0] << " " << choose_vertex_index[1] << endl;
+            cout << choose_edge[0] << " " << choose_edge[1] << endl;
+            cout << choose_vertex_index[0] << " " << choose_vertex_index[1] << endl;
 
             if(all_edge[choose_edge[0]].vertex_push_index == -1){
                 myObj->vertices.push_back(all_edge[choose_edge[0]].split_point[0]);
@@ -424,11 +425,11 @@ void split()
                 all_edge[choose_edge[1]].vertex_push_index = myObj->numvertices;
             }
 
-//            cout << "edge : " << myObj->triangles[i].edge_index[0] << " " << myObj->triangles[i].edge_index[1] << " " << myObj->triangles[i].edge_index[2] << endl;
-//            cout << "choose edge : " << choose_edge[0] << " " << choose_edge[1] << endl;
-//            cout << "edge info 1 : " << all_edge[choose_edge[0]].index[0] << " " << all_edge[choose_edge[0]].index[1] << " " << all_edge[choose_edge[0]].vertex_push_index << endl;
-//            cout << "edge info 2 : " << all_edge[choose_edge[1]].index[0] << " " << all_edge[choose_edge[1]].index[1] << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
-//            cout << "origin : " << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
+            cout << "edge : " << myObj->triangles[i].edge_index[0] << " " << myObj->triangles[i].edge_index[1] << " " << myObj->triangles[i].edge_index[2] << endl;
+            cout << "choose edge : " << choose_edge[0] << " " << choose_edge[1] << endl;
+            cout << "edge info 1 : " << all_edge[choose_edge[0]].index[0] << " " << all_edge[choose_edge[0]].index[1] << " " << all_edge[choose_edge[0]].vertex_push_index << endl;
+            cout << "edge info 2 : " << all_edge[choose_edge[1]].index[0] << " " << all_edge[choose_edge[1]].index[1] << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
+            cout << "origin : " << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
 
             GLMtriangle temp1,temp2;
 
@@ -438,7 +439,7 @@ void split()
             myObj->triangles.push_back(temp1);
             myObj->numtriangles += 1;
 
-//            cout << "1 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << endl;
+            cout << "1 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << endl;
 
             temp2.vindices[0] = all_edge[choose_edge[0]].vertex_push_index;
             temp2.vindices[1] = all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]];
@@ -446,14 +447,14 @@ void split()
             myObj->triangles.push_back(temp2);
             myObj->numtriangles += 1;
 
-//            cout << "2 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].index[(int)choose_vertex_index[0]] << endl;
+            cout << "2 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].index[(int)choose_vertex_index[0]] << endl;
 
-            myObj->triangles[i].vindices[0] = all_edge[choose_edge[1]].index[1 - (int)choose_vertex_index[1]];
+            myObj->triangles[i].vindices[0] = myObj->triangles[i].vindices[choose_index];
             myObj->triangles[i].vindices[1] = all_edge[choose_edge[0]].vertex_push_index;
             myObj->triangles[i].vindices[2] = all_edge[choose_edge[1]].vertex_push_index;
 
-//            cout << "3 : " << all_edge[choose_edge[1]].index[1 - (int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
-//            cout << endl;
+            cout << "3 : " << all_edge[choose_edge[1]].index[1 - (int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
+            cout << endl;
         }
     }
 
