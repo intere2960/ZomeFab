@@ -88,7 +88,7 @@ void display(void)
 
     glPopMatrix();
 
-    draw_bounding_box();
+//    draw_bounding_box();
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -277,8 +277,8 @@ void plane_dist(edge &temp, float plane[4], float dist[2])
     float judge1 = plane[0] * temp.point[0][0] + plane[1] * temp.point[0][1] + plane[2] * temp.point[0][2] - plane[3];
     float judge2 = plane[0] * temp.point[1][0] + plane[1] * temp.point[1][1] + plane[2] * temp.point[1][2] - plane[3];
 
-    dist[0] = abs(judge1) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
-    dist[1] = abs(judge2) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
+    dist[0] = fabs(judge1) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
+    dist[1] = fabs(judge2) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
 }
 
 float test_plane[4] = {0.0, 1.0, 0.0, 0.0};
@@ -374,9 +374,9 @@ void split()
             vec2 choose_vertex_index(-1,-1);
             int x = 0;
 
-            cout << choose_index << endl;
-            cout << myObj->triangles[i].vindices[choose_index] << endl;
-            cout << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 2] << endl;
+//            cout << choose_index << endl;
+//            cout << myObj->triangles[i].vindices[choose_index] << endl;
+//            cout << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[choose_index]) + 2] << endl;
 
             for(int j = 0; j < 3; j += 1){
                 if(all_edge[myObj->triangles[i].edge_index[j]].index[0] == myObj->triangles[i].vindices[choose_index]){
@@ -405,8 +405,8 @@ void split()
 //                cout << choose_edge[0] << " " << choose_edge[1] << endl;
             }
 
-            cout << choose_edge[0] << " " << choose_edge[1] << endl;
-            cout << choose_vertex_index[0] << " " << choose_vertex_index[1] << endl;
+//            cout << choose_edge[0] << " " << choose_edge[1] << endl;
+//            cout << choose_vertex_index[0] << " " << choose_vertex_index[1] << endl;
 
             if(all_edge[choose_edge[0]].vertex_push_index == -1){
                 myObj->vertices.push_back(all_edge[choose_edge[0]].split_point[0]);
@@ -424,11 +424,11 @@ void split()
                 all_edge[choose_edge[1]].vertex_push_index = myObj->numvertices;
             }
 
-            cout << "edge : " << myObj->triangles[i].edge_index[0] << " " << myObj->triangles[i].edge_index[1] << " " << myObj->triangles[i].edge_index[2] << endl;
-            cout << "choose edge : " << choose_edge[0] << " " << choose_edge[1] << endl;
-            cout << "edge info 1 : " << all_edge[choose_edge[0]].index[0] << " " << all_edge[choose_edge[0]].index[1] << " " << all_edge[choose_edge[0]].vertex_push_index << endl;
-            cout << "edge info 2 : " << all_edge[choose_edge[1]].index[0] << " " << all_edge[choose_edge[1]].index[1] << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
-            cout << "origin : " << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
+//            cout << "edge : " << myObj->triangles[i].edge_index[0] << " " << myObj->triangles[i].edge_index[1] << " " << myObj->triangles[i].edge_index[2] << endl;
+//            cout << "choose edge : " << choose_edge[0] << " " << choose_edge[1] << endl;
+//            cout << "edge info 1 : " << all_edge[choose_edge[0]].index[0] << " " << all_edge[choose_edge[0]].index[1] << " " << all_edge[choose_edge[0]].vertex_push_index << endl;
+//            cout << "edge info 2 : " << all_edge[choose_edge[1]].index[0] << " " << all_edge[choose_edge[1]].index[1] << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
+//            cout << "origin : " << myObj->triangles[i].vindices[0] << " " << myObj->triangles[i].vindices[1] << " " << myObj->triangles[i].vindices[2] << endl;
 
             GLMtriangle temp1,temp2;
 
@@ -438,7 +438,7 @@ void split()
             myObj->triangles.push_back(temp1);
             myObj->numtriangles += 1;
 
-            cout << "1 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << endl;
+//            cout << "1 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << endl;
 
             temp2.vindices[0] = all_edge[choose_edge[0]].vertex_push_index;
             temp2.vindices[1] = all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]];
@@ -446,14 +446,14 @@ void split()
             myObj->triangles.push_back(temp2);
             myObj->numtriangles += 1;
 
-            cout << "2 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].index[(int)choose_vertex_index[0]] << endl;
+//            cout << "2 : " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].index[(int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].index[(int)choose_vertex_index[0]] << endl;
 
             myObj->triangles[i].vindices[0] = all_edge[choose_edge[1]].index[1 - (int)choose_vertex_index[1]];
             myObj->triangles[i].vindices[1] = all_edge[choose_edge[0]].vertex_push_index;
             myObj->triangles[i].vindices[2] = all_edge[choose_edge[1]].vertex_push_index;
 
-            cout << "3 : " << all_edge[choose_edge[1]].index[1 - (int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
-            cout << endl;
+//            cout << "3 : " << all_edge[choose_edge[1]].index[1 - (int)choose_vertex_index[1]] << " " << all_edge[choose_edge[0]].vertex_push_index << " " << all_edge[choose_edge[1]].vertex_push_index << endl;
+//            cout << endl;
         }
     }
 
@@ -489,6 +489,7 @@ int main(int argc, char **argv)
 {
     //myObj = glmReadOBJ("test_model/sponza.obj");
     myObj = glmReadOBJ("test_model/cube.obj");
+//    myObj = glmReadOBJ("test_model/bunny.obj");
     //myObj = glmReadOBJ("test_model/alduin.obj");
     myObj_inner = glmReadOBJ("test_model/cube.obj");
 
