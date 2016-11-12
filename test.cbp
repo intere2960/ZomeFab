@@ -46,6 +46,7 @@
 		<Unit filename="shell.h" />
 		<Unit filename="textfile.cpp" />
 		<Unit filename="textfile.h" />
+		<Unit filename="to do list.txt" />
 		<Extensions>
 			<code_completion />
 			<envvars />

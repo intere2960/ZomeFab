@@ -1,0 +1,4 @@
+. fix glm bug
+. fix split tri-normal
+. modify multiple plane split (ex: every check is_face_split...)
+. mix outfit & inner model
