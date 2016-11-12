@@ -16,7 +16,6 @@ public:
     int index[2];
     int face_id[2];
     float l;
-    bool is_split;
     vec3 split_point;
     int vertex_push_index;
 };
