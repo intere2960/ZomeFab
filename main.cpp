@@ -281,8 +281,8 @@ void plane_dist(edge &temp, float plane[4], float dist[2])
     dist[1] = fabs(judge2) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
 }
 
-float test_plane[4] = {0.0, 1.0, 0.0, -1.0};
-vector<int> split_edge_index;
+float test_plane[4] = {0.0, 1.0, 0.0, 1.0};
+//vector<int> split_edge_index;
 
 void split()
 {
@@ -298,7 +298,7 @@ void split()
             all_edge[i].is_split = true;
             all_edge[i].split_point = new_point;
 
-            split_edge_index.push_back(i);
+//            split_edge_index.push_back(i);
 
             if(is_face_split[all_edge[i].face_id[0]])
                 is_face_split[all_edge[i].face_id[0]] = false;
@@ -306,26 +306,79 @@ void split()
                 is_face_split[all_edge[i].face_id[1]] = false;
         }
         else if(dir[0] == 0 || dir[1] == 0){
-            all_edge[i].is_split = true;
 
-            if(dir[0] == 0){
-                all_edge[i].split_point = all_edge[i].point[0];
-                all_edge[i].vertex_push_index = all_edge[i].index[0];
+//            if(!(dir[0] == 0 && dir[1] == 0)){
+//                all_edge[i].is_split = true;
+//
+//                if(dir[0] == 0){
+//                    all_edge[i].split_point = all_edge[i].point[0];
+//                    all_edge[i].vertex_push_index = all_edge[i].index[0];
+//                }
+//                else if(dir[1] == 0){
+//                    all_edge[i].split_point = all_edge[i].point[1];
+//                    all_edge[i].vertex_push_index = all_edge[i].index[1];
+//                }
+
+//                split_edge_index.push_back(i);
+            vec3 face_vertex1[3];
+            //all_edge[i].face_id[0]
+            for(int j = 0; j < 3; j += 1){
+                for(int k = 0; k < 3; k += 1){
+                    face_vertex1[j][k] = myObj->vertices[3 * (myObj->triangles[all_edge[i].face_id[0]].vindices[j]) + k];
+//                        cout << myObj->vertices[3 * (myObj->triangles[all_edge[i].face_id[0]].vindices[j]) + k] << " ";
+//                        cout << face_vertex[j][k] << " ";
+                }
+//                    cout << endl;
             }
-            else if(dir[1] == 0){
-                all_edge[i].split_point = all_edge[i].point[1];
-                all_edge[i].vertex_push_index = all_edge[i].index[1];
-            }
 
-            split_edge_index.push_back(i);
+            int dir_count1[3] = {0, 0, 0};
+            dir_count1[(int)plane_dir_point(face_vertex1[0], test_plane) + 1] += 1;
+            dir_count1[(int)plane_dir_point(face_vertex1[1], test_plane) + 1] += 1;
+            dir_count1[(int)plane_dir_point(face_vertex1[2], test_plane) + 1] += 1;
 
-            if(is_face_split[all_edge[i].face_id[0]])
+//                cout << dir_count1[0] << " " << dir_count1[1] << " " << dir_count1[2] << endl;
+            if(dir_count1[0] == 1 && dir_count1[1] == 1 && dir_count1[2] == 1)
                 is_face_split[all_edge[i].face_id[0]] = false;
-            if(is_face_split[all_edge[i].face_id[1]])
+
+            vec3 face_vertex2[3];
+            //all_edge[i].face_id[0]
+            for(int j = 0; j < 3; j += 1){
+                for(int k = 0; k < 3; k += 1){
+                    face_vertex2[j][k] = myObj->vertices[3 * (myObj->triangles[all_edge[i].face_id[1]].vindices[j]) + k];
+//                        cout << myObj->vertices[3 * (myObj->triangles[all_edge[i].face_id[0]].vindices[j]) + k] << " ";
+//                        cout << face_vertex[j][k] << " ";
+                }
+//                    cout << endl;
+            }
+
+            int dir_count2[3] = {0, 0, 0};
+            dir_count2[(int)plane_dir_point(face_vertex2[0], test_plane) + 1] += 1;
+            dir_count2[(int)plane_dir_point(face_vertex2[1], test_plane) + 1] += 1;
+            dir_count2[(int)plane_dir_point(face_vertex2[2], test_plane) + 1] += 1;
+
+            if(dir_count2[0] == 1 && dir_count2[1] == 1 && dir_count2[2] == 1)
                 is_face_split[all_edge[i].face_id[1]] = false;
 
-            //whether judge align (dir[0] == 0 && dir[1] == 0) condition ?
+//                cout << dir_count2[0] << " " << dir_count2[1] << " " << dir_count2[2] << endl;
+//
+//                cout << endl;
+
+
+//                if(is_face_split[all_edge[i].face_id[0]])
+//                    is_face_split[all_edge[i].face_id[0]] = false;
+//                if(is_face_split[all_edge[i].face_id[1]])
+//                    is_face_split[all_edge[i].face_id[1]] = false;
+
+                //whether judge align (dir[0] == 0 && dir[1] == 0) condition ?
+//            }
         }
+    }
+
+    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
+        cout << is_face_split[i] << endl;
+//        cout << myObj->vertices[3 * (myObj->triangles[i].vindices[0]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[0]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[0]) + 2] << endl;
+//        cout << myObj->vertices[3 * (myObj->triangles[i].vindices[1]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[1]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[1]) + 2] << endl;
+//        cout << myObj->vertices[3 * (myObj->triangles[i].vindices[2]) + 0] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[2]) + 1] << " " << myObj->vertices[3 * (myObj->triangles[i].vindices[2]) + 2] << endl;
     }
 
 //    for(unsigned int i = 0; i < myObj->numtriangles; i +=1){
@@ -345,7 +398,7 @@ void split()
 //    }
 //    cout << myObj->numvertices << endl;
 
-    //bool is_face_split[myObj->numtriangles];
+
 //    cout << endl;
 
     unsigned int current_numtri = myObj->numtriangles;
