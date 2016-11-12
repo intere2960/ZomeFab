@@ -1,10 +1,6 @@
 #ifndef BISECT_H_INCLUDED
 #define BISECT_H_INCLUDED
 
-#include "glm.h"
-#include "algebra3.h"
-#include "glui_internal.h"
-
 class edge
 {
 public:
@@ -19,5 +15,11 @@ public:
     vec3 split_point;
     int vertex_push_index;
 };
+
+float plane_dir_point(vec3 &point, float plane[4]);
+void plane_dir(edge &temp, float plane[4], int dir[2]);
+void plane_dist(edge &temp, float plane[4], float dist[2]);
+void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, float plane[4]);
+void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, float plane[4]);
 
 #endif // BISECT_H_INCLUDED

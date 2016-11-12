@@ -49,7 +49,7 @@
 	<GL/glut.h>
 	<vector>
 
-1478713639 source:c:\users\rock\desktop\test\main.cpp
+1478970094 source:c:\users\rock\desktop\test\main.cpp
 	"main.h"
 
 1478697590 source:e:\pieceofshit\glm.cpp
@@ -147,15 +147,16 @@
 	<stdlib.h>
 	<string.h>
 
-1478706624 source:c:\users\rock\desktop\test\bisect.cpp
-	"bisect.h"
-
-1478706624 c:\users\rock\desktop\test\bisect.h
+1478970692 source:c:\users\rock\desktop\test\bisect.cpp
+	<vector>
 	"glm.h"
 	"algebra3.h"
 	"glui_internal.h"
+	"bisect.h"
 
-1478529768 c:\users\rock\desktop\test\main.h
+1478970756 c:\users\rock\desktop\test\bisect.h
+
+1478970814 c:\users\rock\desktop\test\main.h
 	<Windows.h>
 	<iostream>
 	<algorithm>
@@ -172,5 +173,5 @@
 
 1477935605 c:\users\rock\desktop\test\textfile.h
 
-1477935605 c:\users\rock\desktop\test\shell.h
+1478970756 c:\users\rock\desktop\test\shell.h
 

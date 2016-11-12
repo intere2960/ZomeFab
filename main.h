@@ -23,6 +23,9 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
+char model_source[] = "test_model/cube.obj";
+//sponza bunny alduin
+
 int width, height;
 int start_x, start_y;
 GLdouble theta = -M_PI/2, phi = M_PI / 2;
@@ -41,6 +44,9 @@ GLfloat vertices[][3] =
     {0.5,0.5,0.5},
     {-0.5,0.5,0.5}};
 
+char vertex_shader[] = "myshader.vert",
+     fragment_shader[] = "myshader.frag";
+
 GLdouble lightTheta = 10.0;
 GLfloat light0_ambient[] = {0.9, 0.9, 0.9, 1.0};
 GLfloat light0_diffuse[] = {0.7, 0.7, 0.7, 1.0};
@@ -56,6 +62,11 @@ vec3 bound_center;
 vector<int> *point_tri = NULL;
 
 bool show = true;
+
+float test_plane[4] = {0.0, 1.0, -2.0, 0.0};
+vector<edge> all_edge;
+vector<bool> is_face_split;
+
 
 //bounding box
 
@@ -95,7 +106,6 @@ void draw_bounding_box()
 
 void bounding_box()
 {
-    //cout << myObj->vertices[3 * 1 + 0] << " " << myObj->vertices[3 * 1 + 1] << " " << myObj->vertices[3 * 1 + 2] << endl;
     bounding_min[0] = bounding_max[0] = myObj->vertices[3 * 1 + 0];
     bounding_min[1] = bounding_max[1] = myObj->vertices[3 * 1 + 1];
     bounding_min[2] = bounding_max[2] = myObj->vertices[3 * 1 + 2];
@@ -119,6 +129,121 @@ void bounding_box()
     bound_center[2] = (bounding_max[2] + bounding_min[2])/2.0;
 }
 
+
+void collect_edge()
+{
+    int count = 0;
+    vector<vec2> *temp_edge = NULL;
+    temp_edge = new vector<vec2>[myObj->numvertices + 1];
+    vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
+
+    is_face_split.resize(myObj->numtriangles);
+
+    for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
+
+        int min_index = myObj->triangles[i].vindices[0], temp_index = 0;
+        is_face_split[i] = true;
+
+        if((unsigned int)min(min_index, (int)myObj->triangles[i].vindices[1]) == myObj->triangles[i].vindices[1]){
+            min_index = myObj->triangles[i].vindices[1];
+            temp_index = 1;
+        }
+        if((unsigned int)min(min_index, (int)myObj->triangles[i].vindices[2]) == myObj->triangles[i].vindices[2]){
+            min_index = myObj->triangles[i].vindices[2];
+            temp_index = 2;
+        }
+
+        unsigned int mid_index = myObj->triangles[i].vindices[(temp_index + 1) % 3], temp_mid_index = (temp_index + 1) % 3;
+        if(mid_index > myObj->triangles[i].vindices[(temp_index + 2) % 3]){
+            mid_index = myObj->triangles[i].vindices[(temp_index + 2) % 3];
+            temp_mid_index = (temp_index + 2) % 3;
+        }
+
+        vec2 push_index1(min_index, mid_index), push_index2(min_index, myObj->triangles[i].vindices[(3 - temp_index - temp_mid_index) % 3]), push_index3(mid_index, myObj->triangles[i].vindices[(3 - temp_index - temp_mid_index) % 3]);
+
+        bool add1 = true, add2 = true, add3 = true;
+
+        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
+            if(push_index1[1] == temp_edge[min_index][j][1]){
+                add1 = false;
+                break;
+            }
+        }
+        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
+            if(push_index2[1] == temp_edge[min_index][j][1]){
+                add2 = false;
+                break;
+            }
+        }
+        for(unsigned int j = 0; j < temp_edge[mid_index].size(); j += 1){
+            if(push_index3[1] == temp_edge[mid_index][j][1]){
+                add3 = false;
+                break;
+            }
+        }
+
+        if(add1){
+            temp_edge[min_index].push_back(push_index1);
+            count += 1;
+        }
+
+        if(add2){
+            temp_edge[min_index].push_back(push_index2);
+            count += 1;
+        }
+
+        if(add3){
+            temp_edge[mid_index].push_back(push_index3);
+            count += 1;
+        }
+
+        for(int j = 0 ; j < 3 ; j += 1)
+        {
+            temp_point_tri[myObj->triangles[i].vindices[j]].push_back(i);
+        }
+    }
+
+    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
+        for(unsigned int j = 0; j < temp_edge[i].size(); j += 1){
+            vec3 p1(myObj->vertices[(int)temp_edge[i][j][0] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 2]);
+            vec3 p2(myObj->vertices[(int)temp_edge[i][j][1] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 2]);
+            edge temp((int)temp_edge[i][j][0], p1, (int)temp_edge[i][j][1], p2);
+            all_edge.push_back(temp);
+        }
+    }
+
+    for(unsigned int i = 1; i <= myObj->numvertices; i += 1)
+        sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
+
+    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+        vector<int> temp_vector(temp_point_tri[all_edge[i].index[0]].size() + temp_point_tri[all_edge[i].index[1]].size());
+        vector<int>::iterator it;
+
+        it = set_intersection(temp_point_tri[all_edge[i].index[0]].begin(), temp_point_tri[all_edge[i].index[0]].begin() + temp_point_tri[all_edge[i].index[0]].size(), temp_point_tri[all_edge[i].index[1]].begin(), temp_point_tri[all_edge[i].index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
+        temp_vector.resize(it - temp_vector.begin());
+
+        all_edge[i].face_id[0] = temp_vector[0];
+        all_edge[i].face_id[1] = temp_vector[1];
+
+        for(int j = 0; j < 3; j += 1){
+            if(myObj->triangles[temp_vector[0]].edge_index[j] == -1){
+                myObj->triangles[temp_vector[0]].edge_index[j] = i;
+                break;
+            }
+        }
+
+        for(int j = 0; j < 3; j += 1){
+            if(myObj->triangles[temp_vector[1]].edge_index[j] == -1){
+                myObj->triangles[temp_vector[1]].edge_index[j] = i;
+                break;
+            }
+        }
+    }
+
+    delete temp_edge;
+    delete temp_point_tri;
+}
+
 //shader
 
 void setShaders()
@@ -129,8 +254,8 @@ void setShaders()
 
 	char *vs = NULL, *fs = NULL;
 
-	vs = textFileRead("myshader.vert");
-    fs = textFileRead("myshader.frag");
+	vs = textFileRead(vertex_shader);
+    fs = textFileRead(fragment_shader);
 
 	const char * vv = vs;
 	const char * ff = fs;
