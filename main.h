@@ -23,8 +23,8 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
-char model_source[] = "test_model/cube.obj";
-//sponza bunny alduin
+char model_source[] = "test_model/alduin.obj";
+//sponza bunny alduin TestBall kitten dolphin Column4 ateneav0525
 
 int width, height;
 int start_x, start_y;
@@ -63,7 +63,7 @@ vector<int> *point_tri = NULL;
 
 bool show = true;
 
-float test_plane[4] = {0.0, 1.0, -2.0, 0.0};
+float test_plane[4] = {0.0, 1.0, 0.0, 0.0};
 vector<edge> all_edge;
 vector<bool> is_face_split;
 
