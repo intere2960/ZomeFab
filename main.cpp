@@ -30,7 +30,7 @@ void drawObj(GLMmodel *myObj)
 		    //glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
 		    //glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
 		    //glColor3f(& myObj->vertices[ myObj->triangles[i].vindices[v]*3 ]);
-		    glNormal3fv( & myObj->facetnorms[3 * (i+1)]);
+		    glNormal3fv( & myObj->facetnorms[3 * (i + 1)]);
 		    glVertex3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
         }
     }
@@ -106,6 +106,33 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
+void combine_inner_outfit()
+{
+    for(unsigned int i = 0; i < myObj_inner->numtriangles; i += 1){
+        GLMtriangle temp;
+        temp.vindices[0] = myObj_inner->triangles[i].vindices[0] + myObj->numvertices;
+        temp.vindices[1] = myObj_inner->triangles[i].vindices[1] + myObj->numvertices;
+        temp.vindices[2] = myObj_inner->triangles[i].vindices[2] + myObj->numvertices;
+        temp.findex = myObj_inner->triangles[i].findex + myObj->numfacetnorms;
+        myObj->triangles.push_back(temp);
+        myObj->numtriangles += 1;
+    }
+
+    for(unsigned int i = 1; i <= myObj_inner->numvertices; i += 1){
+        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 0]);
+        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 1]);
+        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 2]);
+        myObj->numvertices += 1;
+    }
+
+    for(unsigned int i = 1; i <= myObj_inner->numfacetnorms; i += 1){
+        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 0]);
+        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 1]);
+        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 2]);
+        myObj->numfacetnorms += 1;
+    }
+}
+
 void init()
 {
     bounding_box();
@@ -114,6 +141,8 @@ void init()
 
     recount_normal(myObj, point_tri);
     process_inner(myObj, myObj_inner);
+
+    combine_inner_outfit();
 
     collect_edge();
     split_face(myObj, all_edge, is_face_split, test_plane);

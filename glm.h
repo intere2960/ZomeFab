@@ -55,6 +55,7 @@ typedef struct _GLMtriangle {
   GLuint nindices[3];           /* array of triangle normal indices */
   GLuint tindices[3];           /* array of triangle texcoord indices*/
   GLuint findex;                /* index of triangle facet normal */
+
   int edge_index[3];
 } GLMtriangle;
 

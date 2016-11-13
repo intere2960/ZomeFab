@@ -23,8 +23,8 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
-char model_source[] = "test_model/alduin.obj";
-//sponza bunny alduin TestBall kitten dolphin Column4 ateneav0525
+char model_source[] = "test_model/cube.obj";
+//cube sponza bunny alduin TestBall kitten dolphin Column4 ateneav0525
 
 int width, height;
 int start_x, start_y;
