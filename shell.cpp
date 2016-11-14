@@ -15,17 +15,17 @@ void recount_normal(GLMmodel *myObj,std::vector<int> *point_tri)
         for(int j = 0 ; j < 3 ; j += 1)
         {
             bool add = true;
-            for(unsigned int k = 0 ; k < point_tri[myObj->triangles[i].vindices[j]].size() ; k += 1)
+            for(unsigned int k = 0 ; k < point_tri[myObj->triangles.at(i).vindices[j]].size() ; k += 1)
             {
-                GLfloat *temp = &myObj->facetnorms[3 * point_tri[myObj->triangles[i].vindices[j]][k]];
-                if(*temp == myObj->facetnorms[3 * (i + 1) + 0] && *(temp + 1) == myObj->facetnorms[3 * (i + 1) + 1] && *(temp + 2) == myObj->facetnorms[3 * (i + 1) + 2])
+                GLfloat *temp = &myObj->facetnorms[3 * point_tri[myObj->triangles.at(i).vindices[j]][k]];
+                if(*temp == myObj->facetnorms.at(3 * (i + 1) + 0) && *(temp + 1) == myObj->facetnorms.at(3 * (i + 1) + 1) && *(temp + 2) == myObj->facetnorms.at(3 * (i + 1) + 2))
                 {
                     add = false;
                     break;
                 }
             }
             if(add)
-                point_tri[myObj->triangles[i].vindices[j]].push_back(i + 1);
+                point_tri[myObj->triangles.at(i).vindices[j]].push_back(i + 1);
         }
     }
 
@@ -41,9 +41,9 @@ void recount_normal(GLMmodel *myObj,std::vector<int> *point_tri)
         GLfloat temp[3] = {0.0 , 0.0 , 0.0};
         for(unsigned int j = 0 ; j < point_tri[i].size() ; j += 1)
         {
-            temp[0] += myObj->facetnorms[3 * point_tri[i][j] + 0];
-            temp[1] += myObj->facetnorms[3 * point_tri[i][j] + 1];
-            temp[2] += myObj->facetnorms[3 * point_tri[i][j] + 2];
+            temp[0] += myObj->facetnorms.at(3 * point_tri[i].at(j) + 0);
+            temp[1] += myObj->facetnorms.at(3 * point_tri[i].at(j) + 1);
+            temp[2] += myObj->facetnorms.at(3 * point_tri[i].at(j) + 2);
         }
         GLfloat normal_length = sqrt(pow(temp[0],2) + pow(temp[1],2) + pow(temp[2],2));
         temp[0] /= normal_length;
@@ -62,13 +62,13 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
     myObj_inner->normals = new GLfloat[3 * (myObj_inner->numnormals + 1)];
     for(unsigned int i = 1 ; i <= myObj_inner->numvertices ; i += 1)
     {
-        myObj_inner->vertices[3 * i + 0] = myObj->vertices[3 * i + 0] - 0.05 * myObj->normals[3 * i + 0];
+        myObj_inner->vertices.at(3 * i + 0) = myObj->vertices.at(3 * i + 0) - 0.05 * myObj->normals[3 * i + 0];
         myObj_inner->normals[3 * i + 0] =  -1 * myObj->normals[3 * i + 0];
 
-        myObj_inner->vertices[3 * i + 1] = myObj->vertices[3 * i + 1] - 0.05 * myObj->normals[3 * i + 1];
+        myObj_inner->vertices.at(3 * i + 1) = myObj->vertices.at(3 * i + 1) - 0.05 * myObj->normals[3 * i + 1];
         myObj_inner->normals[3 * i + 1] =  -1 * myObj->normals[3 * i + 1];
 
-        myObj_inner->vertices[3 * i + 2] = myObj->vertices[3 * i + 2] - 0.05 * myObj->normals[3 * i + 2];
+        myObj_inner->vertices.at(3 * i + 2) = myObj->vertices.at(3 * i + 2) - 0.05 * myObj->normals[3 * i + 2];
         myObj_inner->normals[3 * i + 2] =  -1 * myObj->normals[3 * i + 2];
     }
 
@@ -79,10 +79,8 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
 
     for(unsigned int i = 1 ; i <= myObj->numfacetnorms ; i += 1)
     {
-        myObj_inner->facetnorms[3 * i + 0] =  -1 * myObj->facetnorms[3 * i + 0];
-
-        myObj_inner->facetnorms[3 * i + 1] =  -1 * myObj->facetnorms[3 * i + 1];
-
-        myObj_inner->facetnorms[3 * i + 2] =  -1 * myObj->facetnorms[3 * i + 2];
+        myObj_inner->facetnorms.at(3 * i + 0) =  -1 * myObj->facetnorms.at(3 * i + 0);
+        myObj_inner->facetnorms.at(3 * i + 1) =  -1 * myObj->facetnorms.at(3 * i + 1);
+        myObj_inner->facetnorms.at(3 * i + 2) =  -1 * myObj->facetnorms.at(3 * i + 2);
     }
 }

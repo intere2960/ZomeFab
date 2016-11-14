@@ -20,7 +20,8 @@
 #include "glm.h"
 
 
-#define T(x) (model->triangles[(x)])
+//#define T(x) (model->triangles[(x)])
+#define T(x) (model->triangles.at(x))
 
 
 /* _GLMnode: general purpose node */
@@ -616,9 +617,9 @@ glmSecondPass(GLMmodel* model, FILE* file)
 //                    &vertices[3 * numvertices + 1],
 //                    &vertices[3 * numvertices + 2]);
                 fscanf(file, "%f %f %f",
-                    &model->vertices[3 * numvertices + 0],
-                    &model->vertices[3 * numvertices + 1],
-                    &model->vertices[3 * numvertices + 2]);
+                    &model->vertices.at(3 * numvertices + 0),
+                    &model->vertices.at(3 * numvertices + 1),
+                    &model->vertices.at(3 * numvertices + 2));
                 numvertices++;
                 break;
             case 'n':           /* normal */
@@ -1012,22 +1013,22 @@ glmFacetNormals(GLMmodel* model)
     for (i = 0; i < model->numtriangles; i++) {
         model->triangles[i].findex = i+1;
 
-        u[0] = model->vertices[3 * T(i).vindices[1] + 0] -
-            model->vertices[3 * T(i).vindices[0] + 0];
-        u[1] = model->vertices[3 * T(i).vindices[1] + 1] -
-            model->vertices[3 * T(i).vindices[0] + 1];
-        u[2] = model->vertices[3 * T(i).vindices[1] + 2] -
-            model->vertices[3 * T(i).vindices[0] + 2];
+        u[0] = model->vertices.at(3 * T(i).vindices[1] + 0) -
+            model->vertices.at(3 * T(i).vindices[0] + 0);
+        u[1] = model->vertices.at(3 * T(i).vindices[1] + 1) -
+            model->vertices.at(3 * T(i).vindices[0] + 1);
+        u[2] = model->vertices.at(3 * T(i).vindices[1] + 2) -
+            model->vertices.at(3 * T(i).vindices[0] + 2);
 
-        v[0] = model->vertices[3 * T(i).vindices[2] + 0] -
-            model->vertices[3 * T(i).vindices[0] + 0];
-        v[1] = model->vertices[3 * T(i).vindices[2] + 1] -
-            model->vertices[3 * T(i).vindices[0] + 1];
-        v[2] = model->vertices[3 * T(i).vindices[2] + 2] -
-            model->vertices[3 * T(i).vindices[0] + 2];
+        v[0] = model->vertices.at(3 * T(i).vindices[2] + 0) -
+            model->vertices.at(3 * T(i).vindices[0] + 0);
+        v[1] = model->vertices.at(3 * T(i).vindices[2] + 1) -
+            model->vertices.at(3 * T(i).vindices[0] + 1);
+        v[2] = model->vertices.at(3 * T(i).vindices[2] + 2) -
+            model->vertices.at(3 * T(i).vindices[0] + 2);
 
-        glmCross(u, v, &model->facetnorms[3 * (i+1)]);
-        glmNormalize(&model->facetnorms[3 * (i+1)]);
+        glmCross(u, v, &model->facetnorms.at(3 * (i+1)));
+        glmNormalize(&model->facetnorms.at(3 * (i+1)));
     }
 }
 

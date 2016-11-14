@@ -106,18 +106,18 @@ void draw_bounding_box()
 
 void bounding_box()
 {
-    bounding_min[0] = bounding_max[0] = myObj->vertices[3 * 1 + 0];
-    bounding_min[1] = bounding_max[1] = myObj->vertices[3 * 1 + 1];
-    bounding_min[2] = bounding_max[2] = myObj->vertices[3 * 1 + 2];
+    bounding_min[0] = bounding_max[0] = myObj->vertices.at(3 * 1 + 0);
+    bounding_min[1] = bounding_max[1] = myObj->vertices.at(3 * 1 + 1);
+    bounding_min[2] = bounding_max[2] = myObj->vertices.at(3 * 1 + 2);
 
     for(unsigned int i = 1 ; i <= myObj->numvertices ; i += 1)
     {
-        if (myObj->vertices[3 * i + 0] < bounding_min[0]) bounding_min[0] = myObj->vertices[3 * i + 0];
-        if (myObj->vertices[3 * i + 0] > bounding_max[0]) bounding_max[0] = myObj->vertices[3 * i + 0];
-        if (myObj->vertices[3 * i + 1] < bounding_min[1]) bounding_min[1] = myObj->vertices[3 * i + 1];
-        if (myObj->vertices[3 * i + 1] > bounding_max[1]) bounding_max[1] = myObj->vertices[3 * i + 1];
-        if (myObj->vertices[3 * i + 2] < bounding_min[2]) bounding_min[2] = myObj->vertices[3 * i + 2];
-        if (myObj->vertices[3 * i + 2] > bounding_max[2]) bounding_max[2] = myObj->vertices[3 * i + 2];
+        if (myObj->vertices.at(3 * i + 0) < bounding_min[0]) bounding_min[0] = myObj->vertices.at(3 * i + 0);
+        if (myObj->vertices.at(3 * i + 0) > bounding_max[0]) bounding_max[0] = myObj->vertices.at(3 * i + 0);
+        if (myObj->vertices.at(3 * i + 1) < bounding_min[1]) bounding_min[1] = myObj->vertices.at(3 * i + 1);
+        if (myObj->vertices.at(3 * i + 1) > bounding_max[1]) bounding_max[1] = myObj->vertices.at(3 * i + 1);
+        if (myObj->vertices.at(3 * i + 2) < bounding_min[2]) bounding_min[2] = myObj->vertices.at(3 * i + 2);
+        if (myObj->vertices.at(3 * i + 2) > bounding_max[2]) bounding_max[2] = myObj->vertices.at(3 * i + 2);
     }
 
     bound_size[0] = bounding_max[0] - bounding_min[0];
@@ -133,50 +133,49 @@ void bounding_box()
 void collect_edge()
 {
     int count = 0;
-    vector<vec2> *temp_edge = NULL;
-    temp_edge = new vector<vec2>[myObj->numvertices + 1];
+    vector<vec2> *temp_edge = new vector<vec2>[myObj->numvertices + 1];
     vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
 
     is_face_split.resize(myObj->numtriangles);
 
     for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
 
-        int min_index = myObj->triangles[i].vindices[0], temp_index = 0;
-        is_face_split[i] = true;
+        int min_index = myObj->triangles.at(i).vindices[0], temp_index = 0;
+        is_face_split.at(i) = true;
 
-        if((unsigned int)min(min_index, (int)myObj->triangles[i].vindices[1]) == myObj->triangles[i].vindices[1]){
-            min_index = myObj->triangles[i].vindices[1];
+        if((unsigned int)min(min_index, (int)myObj->triangles.at(i).vindices[1]) == myObj->triangles.at(i).vindices[1]){
+            min_index = myObj->triangles.at(i).vindices[1];
             temp_index = 1;
         }
-        if((unsigned int)min(min_index, (int)myObj->triangles[i].vindices[2]) == myObj->triangles[i].vindices[2]){
-            min_index = myObj->triangles[i].vindices[2];
+        if((unsigned int)min(min_index, (int)myObj->triangles.at(i).vindices[2]) == myObj->triangles.at(i).vindices[2]){
+            min_index = myObj->triangles.at(i).vindices[2];
             temp_index = 2;
         }
 
-        unsigned int mid_index = myObj->triangles[i].vindices[(temp_index + 1) % 3], temp_mid_index = (temp_index + 1) % 3;
-        if(mid_index > myObj->triangles[i].vindices[(temp_index + 2) % 3]){
-            mid_index = myObj->triangles[i].vindices[(temp_index + 2) % 3];
+        unsigned int mid_index = myObj->triangles.at(i).vindices[(temp_index + 1) % 3], temp_mid_index = (temp_index + 1) % 3;
+        if(mid_index > myObj->triangles.at(i).vindices[(temp_index + 2) % 3]){
+            mid_index = myObj->triangles.at(i).vindices[(temp_index + 2) % 3];
             temp_mid_index = (temp_index + 2) % 3;
         }
 
-        vec2 push_index1(min_index, mid_index), push_index2(min_index, myObj->triangles[i].vindices[(3 - temp_index - temp_mid_index) % 3]), push_index3(mid_index, myObj->triangles[i].vindices[(3 - temp_index - temp_mid_index) % 3]);
+        vec2 push_index1(min_index, mid_index), push_index2(min_index, myObj->triangles.at(i).vindices[(3 - temp_index - temp_mid_index) % 3]), push_index3(mid_index, myObj->triangles.at(i).vindices[(3 - temp_index - temp_mid_index) % 3]);
 
         bool add1 = true, add2 = true, add3 = true;
 
         for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
-            if(push_index1[1] == temp_edge[min_index][j][1]){
+            if(push_index1[1] == temp_edge[min_index].at(j)[1]){
                 add1 = false;
                 break;
             }
         }
         for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
-            if(push_index2[1] == temp_edge[min_index][j][1]){
+            if(push_index2[1] == temp_edge[min_index].at(j)[1]){
                 add2 = false;
                 break;
             }
         }
         for(unsigned int j = 0; j < temp_edge[mid_index].size(); j += 1){
-            if(push_index3[1] == temp_edge[mid_index][j][1]){
+            if(push_index3[1] == temp_edge[mid_index].at(j)[1]){
                 add3 = false;
                 break;
             }
@@ -199,15 +198,15 @@ void collect_edge()
 
         for(int j = 0 ; j < 3 ; j += 1)
         {
-            temp_point_tri[myObj->triangles[i].vindices[j]].push_back(i);
+            temp_point_tri[myObj->triangles.at(i).vindices[j]].push_back(i);
         }
     }
 
     for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
         for(unsigned int j = 0; j < temp_edge[i].size(); j += 1){
-            vec3 p1(myObj->vertices[(int)temp_edge[i][j][0] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][0] * 3 + 2]);
-            vec3 p2(myObj->vertices[(int)temp_edge[i][j][1] * 3 + 0], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 1], myObj->vertices[(int)temp_edge[i][j][1] * 3 + 2]);
-            edge temp((int)temp_edge[i][j][0], p1, (int)temp_edge[i][j][1], p2);
+            vec3 p1(myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 0), myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 1), myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 2));
+            vec3 p2(myObj->vertices.at((int)temp_edge[i][j][1] * 3 + 0), myObj->vertices.at((int)temp_edge[i].at(j)[1] * 3 + 1), myObj->vertices.at((int)temp_edge[i].at(j)[1] * 3 + 2));
+            edge temp((int)temp_edge[i].at(j)[0], p1, (int)temp_edge[i].at(j)[1], p2);
             all_edge.push_back(temp);
         }
     }
@@ -216,25 +215,25 @@ void collect_edge()
         sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
 
     for(unsigned int i = 0; i < all_edge.size(); i += 1){
-        vector<int> temp_vector(temp_point_tri[all_edge[i].index[0]].size() + temp_point_tri[all_edge[i].index[1]].size());
+        vector<int> temp_vector(temp_point_tri[all_edge.at(i).index[0]].size() + temp_point_tri[all_edge.at(i).index[1]].size());
         vector<int>::iterator it;
 
-        it = set_intersection(temp_point_tri[all_edge[i].index[0]].begin(), temp_point_tri[all_edge[i].index[0]].begin() + temp_point_tri[all_edge[i].index[0]].size(), temp_point_tri[all_edge[i].index[1]].begin(), temp_point_tri[all_edge[i].index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
+        it = set_intersection(temp_point_tri[all_edge.at(i).index[0]].begin(), temp_point_tri[all_edge.at(i).index[0]].begin() + temp_point_tri[all_edge.at(i).index[0]].size(), temp_point_tri[all_edge.at(i).index[1]].begin(), temp_point_tri[all_edge.at(i).index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
         temp_vector.resize(it - temp_vector.begin());
 
-        all_edge[i].face_id[0] = temp_vector[0];
-        all_edge[i].face_id[1] = temp_vector[1];
+        all_edge.at(i).face_id[0] = temp_vector[0];
+        all_edge.at(i).face_id[1] = temp_vector[1];
 
         for(int j = 0; j < 3; j += 1){
-            if(myObj->triangles[temp_vector[0]].edge_index[j] == -1){
-                myObj->triangles[temp_vector[0]].edge_index[j] = i;
+            if(myObj->triangles.at(temp_vector[0]).edge_index[j] == -1){
+                myObj->triangles.at(temp_vector[0]).edge_index[j] = i;
                 break;
             }
         }
 
         for(int j = 0; j < 3; j += 1){
-            if(myObj->triangles[temp_vector[1]].edge_index[j] == -1){
-                myObj->triangles[temp_vector[1]].edge_index[j] = i;
+            if(myObj->triangles.at(temp_vector[1]).edge_index[j] == -1){
+                myObj->triangles.at(temp_vector[1]).edge_index[j] = i;
                 break;
             }
         }

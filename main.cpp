@@ -30,8 +30,8 @@ void drawObj(GLMmodel *myObj)
 		    //glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
 		    //glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
 		    //glColor3f(& myObj->vertices[ myObj->triangles[i].vindices[v]*3 ]);
-		    glNormal3fv( & myObj->facetnorms[3 * (i + 1)]);
-		    glVertex3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
+		    glNormal3fv( & myObj->facetnorms.at(3 * (i + 1)));
+		    glVertex3fv( & myObj->vertices.at( myObj->triangles.at(i).vindices[v]*3 ) );
         }
     }
     glEnd();
@@ -110,10 +110,13 @@ void combine_inner_outfit()
 {
     for(unsigned int i = 0; i < myObj_inner->numtriangles; i += 1){
         GLMtriangle temp;
-        temp.vindices[0] = myObj_inner->triangles[i].vindices[0] + myObj->numvertices;
-        temp.vindices[1] = myObj_inner->triangles[i].vindices[1] + myObj->numvertices;
-        temp.vindices[2] = myObj_inner->triangles[i].vindices[2] + myObj->numvertices;
-        temp.findex = myObj_inner->triangles[i].findex + myObj->numfacetnorms;
+        temp.vindices[0] = myObj_inner->triangles.at(i).vindices[0] + myObj->numvertices;
+        temp.vindices[1] = myObj_inner->triangles.at(i).vindices[1] + myObj->numvertices;
+        temp.vindices[2] = myObj_inner->triangles.at(i).vindices[2] + myObj->numvertices;
+        temp.findex = myObj_inner->triangles.at(i).findex + myObj->numfacetnorms;
+        temp.edge_index[0] = -1;
+        temp.edge_index[1] = -1;
+        temp.edge_index[2] = -1;
         myObj->triangles.push_back(temp);
         myObj->numtriangles += 1;
     }
