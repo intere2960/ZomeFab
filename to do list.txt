@@ -1,5 +1,4 @@
 . fix glm bug
 . fix split tri-normal
-. modify multiple plane split (ex: every check is_face_split...)
-. mix outfit & inner model (fix)
+. modify multiple plane split (ex: every cut check is_face_split or use vector record cut face)
 . fill model method

@@ -669,7 +669,6 @@ glmSecondPass(GLMmodel* model, FILE* file)
                     T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                     T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
 
-
                     T(numtriangles).edge_index[0] = -1;
                     T(numtriangles).edge_index[1] = -1;
                     T(numtriangles).edge_index[2] = -1;
@@ -683,7 +682,6 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         T(numtriangles).nindices[1] = T(numtriangles-1).nindices[2];
                         T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
                         T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
-
 
                         T(numtriangles).edge_index[0] = -1;
                         T(numtriangles).edge_index[1] = -1;

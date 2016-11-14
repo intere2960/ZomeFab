@@ -73,7 +73,6 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
     }
 
     myObj_inner->numfacetnorms = myObj->numfacetnorms;
-//    myObj_inner->facetnorms = new GLfloat[3 * (myObj_inner->numfacetnorms + 1)];
     std::vector<GLfloat> temp_facenormal(3 * (myObj_inner->numfacetnorms + 1));
     myObj_inner->facetnorms = temp_facenormal;
 
@@ -82,5 +81,32 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
         myObj_inner->facetnorms.at(3 * i + 0) =  -1 * myObj->facetnorms.at(3 * i + 0);
         myObj_inner->facetnorms.at(3 * i + 1) =  -1 * myObj->facetnorms.at(3 * i + 1);
         myObj_inner->facetnorms.at(3 * i + 2) =  -1 * myObj->facetnorms.at(3 * i + 2);
+    }
+}
+
+void combine_inner_outfit(GLMmodel *myObj,GLMmodel *myObj_inner)
+{
+    for(unsigned int i = 0; i < myObj_inner->numtriangles; i += 1){
+        GLMtriangle temp = myObj_inner->triangles.at(i);
+        temp.vindices[0] += myObj->numvertices;
+        temp.vindices[1] += myObj->numvertices;
+        temp.vindices[2] += myObj->numvertices;
+        temp.findex += myObj->numfacetnorms;
+        myObj->triangles.push_back(temp);
+        myObj->numtriangles += 1;
+    }
+
+    for(unsigned int i = 1; i <= myObj_inner->numvertices; i += 1){
+        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 0]);
+        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 1]);
+        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 2]);
+        myObj->numvertices += 1;
+    }
+
+    for(unsigned int i = 1; i <= myObj_inner->numfacetnorms; i += 1){
+        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 0]);
+        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 1]);
+        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 2]);
+        myObj->numfacetnorms += 1;
     }
 }

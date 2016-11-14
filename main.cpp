@@ -106,36 +106,6 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-void combine_inner_outfit()
-{
-    for(unsigned int i = 0; i < myObj_inner->numtriangles; i += 1){
-        GLMtriangle temp;
-        temp.vindices[0] = myObj_inner->triangles.at(i).vindices[0] + myObj->numvertices;
-        temp.vindices[1] = myObj_inner->triangles.at(i).vindices[1] + myObj->numvertices;
-        temp.vindices[2] = myObj_inner->triangles.at(i).vindices[2] + myObj->numvertices;
-        temp.findex = myObj_inner->triangles.at(i).findex + myObj->numfacetnorms;
-        temp.edge_index[0] = -1;
-        temp.edge_index[1] = -1;
-        temp.edge_index[2] = -1;
-        myObj->triangles.push_back(temp);
-        myObj->numtriangles += 1;
-    }
-
-    for(unsigned int i = 1; i <= myObj_inner->numvertices; i += 1){
-        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 0]);
-        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 1]);
-        myObj->vertices.push_back(myObj_inner->vertices[3 * i + 2]);
-        myObj->numvertices += 1;
-    }
-
-    for(unsigned int i = 1; i <= myObj_inner->numfacetnorms; i += 1){
-        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 0]);
-        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 1]);
-        myObj->facetnorms.push_back(myObj_inner->facetnorms[3 * i + 2]);
-        myObj->numfacetnorms += 1;
-    }
-}
-
 void init()
 {
     bounding_box();
@@ -145,7 +115,7 @@ void init()
     recount_normal(myObj, point_tri);
     process_inner(myObj, myObj_inner);
 
-    combine_inner_outfit();
+    combine_inner_outfit(myObj, myObj_inner);
 
     collect_edge();
     split_face(myObj, all_edge, is_face_split, test_plane);
