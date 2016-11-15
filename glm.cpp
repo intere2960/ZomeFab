@@ -1026,6 +1026,7 @@ glmFacetNormals(GLMmodel* model)
 
         glmCross(u, v, &model->facetnorms.at(3 * (i+1)));
         glmNormalize(&model->facetnorms.at(3 * (i+1)));
+
     }
 }
 

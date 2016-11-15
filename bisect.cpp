@@ -3,7 +3,6 @@
 #include "algebra3.h"
 #include "glui_internal.h"
 #include "bisect.h"
-#include <iostream>
 
 edge::edge()
 {
@@ -136,13 +135,11 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &
 
             vec3 point_dir;
             int dir_count[3] = {0, 0, 0};
-//            std::cout << "in ";
             for(int j = 0; j < 3; j += 1){
                 vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 2));
                 point_dir[j] = plane_dir_point(temp,plane);
                 dir_count[(int)point_dir[j] + 1] += 1;
             }
-//            std::cout << "out" << std::endl;
             int choose_dir = -1;
             if(dir_count[0] == 1 && dir_count[1] == 1 && dir_count[2] == 1)
                 choose_dir = 0;

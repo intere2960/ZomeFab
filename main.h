@@ -134,6 +134,9 @@ void collect_edge()
     vector<vec2> *temp_edge = new vector<vec2>[myObj->numvertices + 1];
     vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
 
+    if(!is_face_split.empty())
+        is_face_split.clear();
+
     is_face_split.resize(myObj->numtriangles);
 
     for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){

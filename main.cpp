@@ -115,7 +115,7 @@ void init()
     recount_normal(myObj);
     process_inner(myObj, myObj_inner);
 
-//    combine_inner_outfit(myObj, myObj_inner);
+    combine_inner_outfit(myObj, myObj_inner);
 
     collect_edge();
     split_face(myObj, all_edge, is_face_split, test_plane);

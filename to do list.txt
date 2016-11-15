@@ -1,5 +1,5 @@
 . fix glm bug
-. modify multiple plane split (how to judge face & back piece?)
+. modify multiple plane split (how to judge face & back piece? each vertex judge plane,then intersection)
 . fill model method
 . free vector memory
 . viewing cut plane in other viewer (output obj file)
