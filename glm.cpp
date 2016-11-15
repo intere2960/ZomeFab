@@ -584,7 +584,6 @@ glmSecondPass(GLMmodel* model, FILE* file)
     GLuint numtexcoords;       /* number of texcoords in model */
     GLuint numtriangles;       /* number of triangles in model */
 //    GLfloat* vertices;         /* array of vertices  */
-    std::vector<GLfloat> vertices;         /* array of vertices  */
     GLfloat* normals;          /* array of normals */
     GLfloat* texcoords;        /* array of texture coordinates */
     GLMgroup* group;           /* current group pointer */

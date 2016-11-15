@@ -4,11 +4,11 @@
 #include <cmath>
 #include <vector>
 
-void recount_normal(GLMmodel *myObj,std::vector<int> *point_tri)
+void recount_normal(GLMmodel *myObj)
 {
     glmFacetNormals(myObj);
 
-    point_tri = new std::vector<int>[myObj->numvertices + 1];
+    std::vector<int> *point_tri = new std::vector<int>[myObj->numvertices + 1];
 
     for(unsigned int i = 0 ; i < myObj->numtriangles ; i += 1)
     {

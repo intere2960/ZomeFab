@@ -1,4 +1,5 @@
 . fix glm bug
-. fix split tri-normal
-. modify multiple plane split (ex: every cut check is_face_split or use vector record cut face)
+. modify multiple plane split (how to judge face & back piece?)
 . fill model method
+. free vector memory
+. viewing cut plane in other viewer (output obj file)
