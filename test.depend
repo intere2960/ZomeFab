@@ -52,7 +52,7 @@
 1478970094 source:c:\users\rock\desktop\test\main.cpp
 	"main.h"
 
-1479214945 source:e:\pieceofshit\glm.cpp
+1479284924 source:e:\pieceofshit\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -65,7 +65,7 @@
 	<GL/glut.h>
 	<vector>
 
-1479214963 source:e:\pieceofshit\main.cpp
+1479286523 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1477884417 source:e:\pieceofshit\textfile.cpp
@@ -89,16 +89,16 @@
 	<cstdio>
 	<cmath>
 
-1479183703 e:\pieceofshit\shell.h
+1479286122 e:\pieceofshit\shell.h
 
-1479183697 source:e:\pieceofshit\shell.cpp
+1479286727 source:e:\pieceofshit\shell.cpp
 	<algorithm>
 	<vector>
 	"glm.h"
 	<cmath>
 	<vector>
 
-1479214989 e:\pieceofshit\main.h
+1479286706 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<algorithm>

@@ -1,4 +1,4 @@
-. fix glm bug
+. fix glm bug (can't read same file twice, current use combine_inner_outfit2(in shell.cpp) temporary fix it)
 . modify multiple plane split (how to judge face & back piece? each vertex judge plane,then intersection)
 . fill model method
 . free vector memory

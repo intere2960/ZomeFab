@@ -110,3 +110,31 @@ void combine_inner_outfit(GLMmodel *myObj,GLMmodel *myObj_inner)
         myObj->numfacetnorms += 1;
     }
 }
+
+void combine_inner_outfit2(GLMmodel *myObj)
+{
+    unsigned int curr_tri = myObj->numtriangles, curr_vertex = myObj->numvertices, curr_facenorm = myObj->numfacetnorms;
+    for(unsigned int i = 0; i < curr_tri; i += 1){
+        GLMtriangle temp = myObj->triangles.at(i);
+        temp.vindices[0] += curr_vertex;
+        temp.vindices[1] += curr_vertex;
+        temp.vindices[2] += curr_vertex;
+        temp.findex += myObj->numfacetnorms;
+        myObj->triangles.push_back(temp);
+        myObj->numtriangles += 1;
+    }
+
+    for(unsigned int i = 1; i <= curr_vertex; i += 1){
+        myObj->vertices.push_back(myObj->vertices[3 * i + 0] - 0.05 * myObj->normals[3 * i + 0]);
+        myObj->vertices.push_back(myObj->vertices[3 * i + 1] - 0.05 * myObj->normals[3 * i + 1]);
+        myObj->vertices.push_back(myObj->vertices[3 * i + 2] - 0.05 * myObj->normals[3 * i + 2]);
+        myObj->numvertices += 1;
+    }
+
+    for(unsigned int i = 1; i <= curr_facenorm; i += 1){
+        myObj->facetnorms.push_back(myObj->facetnorms[3 * i + 0]);
+        myObj->facetnorms.push_back(myObj->facetnorms[3 * i + 1]);
+        myObj->facetnorms.push_back(myObj->facetnorms[3 * i + 2]);
+        myObj->numfacetnorms += 1;
+    }
+}

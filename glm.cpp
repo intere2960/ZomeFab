@@ -998,8 +998,10 @@ glmFacetNormals(GLMmodel* model)
 //    assert(model->vertices);
 
     /* clobber any old facetnormals */
-    if (!model->facetnorms.empty())
-        model->facetnorms.clear();
+    if (!model->facetnorms.empty()){
+        std::vector<GLfloat> v;
+        model->facetnorms.swap(v);
+    }
 
     /* allocate memory for the new facet normals */
     model->numfacetnorms = model->numtriangles;
@@ -1325,10 +1327,22 @@ glmDelete(GLMmodel* model)
     if (model->pathname)     free(model->pathname);
     if (model->mtllibname) free(model->mtllibname);
 //    if (model->vertices)     free(model->vertices);
+    if (!model->vertices.empty()){
+        std::vector<GLfloat> v;
+        model->vertices.swap(v);
+    }
     if (model->normals)  free(model->normals);
     if (model->texcoords)  free(model->texcoords);
 //    if (model->facetnorms) free(model->facetnorms);
+    if (!model->facetnorms.empty()){
+        std::vector<GLfloat> v;
+        model->facetnorms.swap(v);
+    }
     //if (model->triangles)  free(model->triangles);
+    if (!model->triangles.empty()){
+        std::vector<GLMtriangle> v;
+        model->triangles.swap(v);
+    }
     if (model->materials) {
         for (i = 0; i < model->nummaterials; i++)
             free(model->materials[i].name);

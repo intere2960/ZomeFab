@@ -23,8 +23,8 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
-char model_source[] = "test_model/cube.obj";
-//cube sponza bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
+char model_source[] = "test_model/bunny.obj";
+//cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 
 int width, height;
 int start_x, start_y;
@@ -134,15 +134,15 @@ void collect_edge()
     vector<vec2> *temp_edge = new vector<vec2>[myObj->numvertices + 1];
     vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
 
-    if(!is_face_split.empty())
-        is_face_split.clear();
-
-    is_face_split.resize(myObj->numtriangles);
+    if(!is_face_split.empty()){
+        vector<bool> v;
+        is_face_split.swap(v);
+    }
 
     for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
 
         int min_index = myObj->triangles.at(i).vindices[0], temp_index = 0;
-        is_face_split.at(i) = true;
+        is_face_split.push_back(true);
 
         if((unsigned int)min(min_index, (int)myObj->triangles.at(i).vindices[1]) == myObj->triangles.at(i).vindices[1]){
             min_index = myObj->triangles.at(i).vindices[1];
@@ -204,8 +204,10 @@ void collect_edge()
         }
     }
 
-    if(!all_edge.empty())
-        all_edge.clear();
+    if(!all_edge.empty()){
+        vector<edge> v;
+        all_edge.swap(v);
+    }
 
     for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
         for(unsigned int j = 0; j < temp_edge[i].size(); j += 1){
@@ -252,23 +254,34 @@ void collect_edge()
 
         for(int j = 0; j < 3; j += 1){
             bool judge1,judge2;
-            judge1 = (myObj->triangles.at(i).vindices[0] == all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[1] == all_edge.at(temp_edge_index[j]).index[1]);
-            judge2 = (myObj->triangles.at(i).vindices[0] == all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[1] == all_edge.at(temp_edge_index[j]).index[0]);
+            judge1 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
+            judge2 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
             if(judge1 || judge2){
                 myObj->triangles.at(i).edge_index[0] = temp_edge_index[j];
             }
 
-            judge1 = (myObj->triangles.at(i).vindices[1] == all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[2] == all_edge.at(temp_edge_index[j]).index[1]);
-            judge2 = (myObj->triangles.at(i).vindices[1] == all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[2] == all_edge.at(temp_edge_index[j]).index[0]);
+            judge1 = (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
+            judge2 = (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
             if(judge1 || judge2){
                 myObj->triangles.at(i).edge_index[1] = temp_edge_index[j];
             }
 
-            judge1 = (myObj->triangles.at(i).vindices[2] == all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[0] == all_edge.at(temp_edge_index[j]).index[1]);
-            judge2 = (myObj->triangles.at(i).vindices[2] == all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[0] == all_edge.at(temp_edge_index[j]).index[0]);
+            judge1 = (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
+            judge2 = (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
             if(judge1 || judge2){
                 myObj->triangles.at(i).edge_index[2] = temp_edge_index[j];
             }
+        }
+    }
+
+    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
+        if(!temp_edge[i].empty()){
+            vector<vec2> v;
+            temp_edge[i].swap(v);
+        }
+        if(!temp_point_tri[i].empty()){
+            vector<int> v;
+            temp_point_tri[i].swap(v);
         }
     }
 
@@ -360,8 +373,7 @@ void keyboard(unsigned char key,int x,int y)
     if(key == 'q' || key == 'Q') //quit
     {
         glmDelete(myObj);
-        glmDelete(myObj_inner);
-//        delete point_tri;
+//        glmDelete(myObj_inner);
         exit(0);
     }
     if(key == 'w' || key == 'W') //move forward
@@ -432,8 +444,7 @@ void keyboard(unsigned char key,int x,int y)
     if(key==27)
     {
         glmDelete(myObj);
-        glmDelete(myObj_inner);
-//        delete point_tri;
+//        glmDelete(myObj_inner);
         exit(0);
     }
 }
