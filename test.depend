@@ -65,7 +65,7 @@
 	<GL/glut.h>
 	<vector>
 
-1479286523 source:e:\pieceofshit\main.cpp
+1479298605 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1477884417 source:e:\pieceofshit\textfile.cpp
@@ -98,7 +98,7 @@
 	<cmath>
 	<vector>
 
-1479286706 e:\pieceofshit\main.h
+1479298994 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<algorithm>

@@ -113,9 +113,9 @@ void init()
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
     recount_normal(myObj);
-//    process_inner(myObj, myObj_inner);
-//    combine_inner_outfit(myObj, myObj_inner);
-    combine_inner_outfit2(myObj);
+    process_inner(myObj, myObj_inner);
+    combine_inner_outfit(myObj, myObj_inner);
+//    combine_inner_outfit2(myObj);
     collect_edge();
     split_face(myObj, all_edge, is_face_split, test_plane);
     collect_edge();
@@ -124,6 +124,9 @@ void init()
 int main(int argc, char **argv)
 {
     myObj = glmReadOBJ(model_source);
+    GLMmodel temp = *myObj;
+    myObj_inner = &temp;
+
 //    myObj_inner = glmReadOBJ(model_source);
 
     init();
