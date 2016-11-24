@@ -3,4 +3,5 @@
 . fill model method
 . free vector memory
 . viewing cut plane in other viewer (output obj file)
-. modify glmWriteOBJ
+. modify glmWriteOBJ (temporary fix it, but maybe use group to represent split piece in future)
+. modify glmDelete

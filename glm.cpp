@@ -1567,64 +1567,118 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
     fprintf(file, "# %d faces (triangles)\n", model->numtriangles);
     fprintf(file, "\n");
 
+//    group = model->groups;
+//    while(group) {
+//        fprintf(file, "g %s\n", group->name);
+//        if (mode & GLM_MATERIAL)
+//            fprintf(file, "usemtl %s\n", model->materials[group->material].name);
+//        for (i = 0; i < group->numtriangles; i++) {
+//            if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
+//                fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+//                    T(group->triangles[i]).vindices[0],
+//                    T(group->triangles[i]).tindices[0],
+//                    T(group->triangles[i]).nindices[0],
+//                    T(group->triangles[i]).vindices[1],
+//                    T(group->triangles[i]).tindices[1],
+//                    T(group->triangles[i]).nindices[1],
+//                    T(group->triangles[i]).vindices[2],
+//                    T(group->triangles[i]).tindices[2],
+//                    T(group->triangles[i]).nindices[2]);
+//            } else if (mode & GLM_FLAT && mode & GLM_TEXTURE) {
+//                fprintf(file, "f %d/%d %d/%d %d/%d\n",
+//                    T(group->triangles[i]).vindices[0],
+//                    T(group->triangles[i]).findex,
+//                    T(group->triangles[i]).vindices[1],
+//                    T(group->triangles[i]).findex,
+//                    T(group->triangles[i]).vindices[2],
+//                    T(group->triangles[i]).findex);
+//            } else if (mode & GLM_TEXTURE) {
+//                fprintf(file, "f %d/%d %d/%d %d/%d\n",
+//                    T(group->triangles[i]).vindices[0],
+//                    T(group->triangles[i]).tindices[0],
+//                    T(group->triangles[i]).vindices[1],
+//                    T(group->triangles[i]).tindices[1],
+//                    T(group->triangles[i]).vindices[2],
+//                    T(group->triangles[i]).tindices[2]);
+//            } else if (mode & GLM_SMOOTH) {
+//                fprintf(file, "f %d//%d %d//%d %d//%d\n",
+//                    T(group->triangles[i]).vindices[0],
+//                    T(group->triangles[i]).nindices[0],
+//                    T(group->triangles[i]).vindices[1],
+//                    T(group->triangles[i]).nindices[1],
+//                    T(group->triangles[i]).vindices[2],
+//                    T(group->triangles[i]).nindices[2]);
+//            } else if (mode & GLM_FLAT) {
+//                fprintf(file, "f %d//%d %d//%d %d//%d\n",
+//                    T(group->triangles[i]).vindices[0],
+//                    T(group->triangles[i]).findex,
+//                    T(group->triangles[i]).vindices[1],
+//                    T(group->triangles[i]).findex,
+//                    T(group->triangles[i]).vindices[2],
+//                    T(group->triangles[i]).findex);
+//            } else {
+//                fprintf(file, "f %d %d %d\n",
+//                    T(group->triangles[i]).vindices[0],
+//                    T(group->triangles[i]).vindices[1],
+//                    T(group->triangles[i]).vindices[2]);
+//            }
+//        }
+//        fprintf(file, "\n");
+//        group = group->next;
+//    }
     group = model->groups;
-    while(group) {
-        fprintf(file, "g %s\n", group->name);
+    for(unsigned int i = 0; i < model->numtriangles; i += 1) {
         if (mode & GLM_MATERIAL)
             fprintf(file, "usemtl %s\n", model->materials[group->material].name);
-        for (i = 0; i < group->numtriangles; i++) {
-            if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
-                fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
-                    T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).tindices[0],
-                    T(group->triangles[i]).nindices[0],
-                    T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).tindices[1],
-                    T(group->triangles[i]).nindices[1],
-                    T(group->triangles[i]).vindices[2],
-                    T(group->triangles[i]).tindices[2],
-                    T(group->triangles[i]).nindices[2]);
-            } else if (mode & GLM_FLAT && mode & GLM_TEXTURE) {
-                fprintf(file, "f %d/%d %d/%d %d/%d\n",
-                    T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).findex,
-                    T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).findex,
-                    T(group->triangles[i]).vindices[2],
-                    T(group->triangles[i]).findex);
-            } else if (mode & GLM_TEXTURE) {
-                fprintf(file, "f %d/%d %d/%d %d/%d\n",
-                    T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).tindices[0],
-                    T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).tindices[1],
-                    T(group->triangles[i]).vindices[2],
-                    T(group->triangles[i]).tindices[2]);
-            } else if (mode & GLM_SMOOTH) {
-                fprintf(file, "f %d//%d %d//%d %d//%d\n",
-                    T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).nindices[0],
-                    T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).nindices[1],
-                    T(group->triangles[i]).vindices[2],
-                    T(group->triangles[i]).nindices[2]);
-            } else if (mode & GLM_FLAT) {
-                fprintf(file, "f %d//%d %d//%d %d//%d\n",
-                    T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).findex,
-                    T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).findex,
-                    T(group->triangles[i]).vindices[2],
-                    T(group->triangles[i]).findex);
-            } else {
-                fprintf(file, "f %d %d %d\n",
-                    T(group->triangles[i]).vindices[0],
-                    T(group->triangles[i]).vindices[1],
-                    T(group->triangles[i]).vindices[2]);
-            }
+        if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
+            fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+                T(i).vindices[0],
+                T(i).tindices[0],
+                T(i).nindices[0],
+                T(i).vindices[1],
+                T(i).tindices[1],
+                T(i).nindices[1],
+                T(i).vindices[2],
+                T(i).tindices[2],
+                T(i).nindices[2]);
+        } else if (mode & GLM_FLAT && mode & GLM_TEXTURE) {
+            fprintf(file, "f %d/%d %d/%d %d/%d\n",
+                T(i).vindices[0],
+                T(i).findex,
+                T(i).vindices[1],
+                T(i).findex,
+                T(i).vindices[2],
+                T(i).findex);
+        } else if (mode & GLM_TEXTURE) {
+            fprintf(file, "f %d/%d %d/%d %d/%d\n",
+                T(i).vindices[0],
+                T(i).tindices[0],
+                T(i).vindices[1],
+                T(i).tindices[1],
+                T(i).vindices[2],
+                T(i).tindices[2]);
+        } else if (mode & GLM_SMOOTH) {
+            fprintf(file, "f %d//%d %d//%d %d//%d\n",
+                T(i).vindices[0],
+                T(i).nindices[0],
+                T(i).vindices[1],
+                T(i).nindices[1],
+                T(i).vindices[2],
+                T(i).nindices[2]);
+        } else if (mode & GLM_FLAT) {
+            fprintf(file, "f %d//%d %d//%d %d//%d\n",
+                T(i).vindices[0],
+                T(i).findex,
+                T(i).vindices[1],
+                T(i).findex,
+                T(i).vindices[2],
+                T(i).findex);
+        } else {
+            fprintf(file, "f %d %d %d\n",
+                T(i).vindices[0],
+                T(i).vindices[1],
+                T(i).vindices[2]);
         }
-        fprintf(file, "\n");
-        group = group->next;
     }
 
     fclose(file);

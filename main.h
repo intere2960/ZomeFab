@@ -451,7 +451,8 @@ void keyboard(unsigned char key,int x,int y)
 
     if(key==27)
     {
-        glmDelete(myObj);
+//        glmWriteOBJ(myObj, model_out, GLM_FLAT);
+//        glmDelete(myObj);
 //        glmDelete(myObj_inner);
         exit(0);
     }

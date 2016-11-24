@@ -140,7 +140,7 @@ void test(){
                 j -= 1;
             }
             else{
-                if(j != face_split_by_plane.size() - 1)
+                if(i != planes.size() - 1)
                     myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.push_back(i);
             }
         }
@@ -155,8 +155,8 @@ void init()
 
 //    planes.push_back(test_plane1);
     recount_normal(myObj);
-//    process_inner(myObj, myObj_inner);
-//    combine_inner_outfit(myObj, myObj_inner);
+    process_inner(myObj, myObj_inner);
+    combine_inner_outfit(myObj, myObj_inner);
 //    combine_inner_outfit2(myObj);
 
     collect_edge();
