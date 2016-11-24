@@ -57,6 +57,8 @@ typedef struct _GLMtriangle {
   GLuint findex;                /* index of triangle facet normal */
 
   int edge_index[3];
+  std::vector<int> splite_face_id;
+
 } GLMtriangle;
 
 /* GLMgroup: Structure that defines a group in a model.

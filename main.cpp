@@ -106,19 +106,76 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
+void test(){
+    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
+        vec3 point_dir;
+        int dir_count[3] = {0, 0, 0};
+        for(int j = 0; j < 3; j += 1){
+            vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 2));
+            point_dir[j] = plane_dir_point(temp, planes.at(0));
+            dir_count[(int)point_dir[j] + 1] += 1;
+        }
+        if(dir_count[(planes.at(0).dir * -1) + 1] != 3){
+            face_split_by_plane.push_back(i);
+            myObj->triangles.at(i).splite_face_id.push_back(0);
+        }
+    }
+
+    for(unsigned int i = 1; i < planes.size(); i += 1){
+        for(unsigned int j = 0; j < face_split_by_plane.size(); j += 1){
+            vec3 point_dir;
+            int dir_count[3] = {0, 0, 0};
+            for(int k = 0; k < 3; k += 1){
+                vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 2));
+                point_dir[k] = plane_dir_point(temp, planes.at(i));
+                dir_count[(int)point_dir[k] + 1] += 1;
+            }
+
+            if(dir_count[planes.at(i).dir + 1] == 0 && dir_count[1] == 0){
+                if(!myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.empty()){
+                    vector<int> v;
+                    myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.swap(v);
+                }
+                face_split_by_plane.erase(face_split_by_plane.begin() + j);
+                j -= 1;
+            }
+            else{
+                if(j != face_split_by_plane.size() - 1)
+                    myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.push_back(i);
+            }
+        }
+    }
+}
+
 void init()
 {
     bounding_box();
 
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
+//    planes.push_back(test_plane1);
     recount_normal(myObj);
-    process_inner(myObj, myObj_inner);
-    combine_inner_outfit(myObj, myObj_inner);
+//    process_inner(myObj, myObj_inner);
+//    combine_inner_outfit(myObj, myObj_inner);
 //    combine_inner_outfit2(myObj);
+
     collect_edge();
-    split_face(myObj, all_edge, is_face_split, test_plane);
-    collect_edge();
+
+    planes.push_back(test_plane1);
+    planes.push_back(test_plane2);
+    planes.push_back(test_plane3);
+    planes.push_back(test_plane4);
+    planes.push_back(test_plane5);
+
+    test();
+//    split_face(myObj, all_edge, is_face_split, planes.at(0));
+//    collect_edge();
+//    split_face(myObj, all_edge, is_face_split, planes.at(1));
+//    collect_edge();
+//    split_face(myObj, all_edge, is_face_split, planes.at(2));
+//    collect_edge();
+//    split_face(myObj, all_edge, is_face_split, planes.at(3));
+//    collect_edge();
 }
 
 int main(int argc, char **argv)
@@ -130,25 +187,25 @@ int main(int argc, char **argv)
 //    myObj_inner = glmReadOBJ(model_source);
 
     init();
+//
+//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+//	glutInitWindowSize(1000,1000);
+//
+//    glutCreateWindow("Zometool");
+//	glutDisplayFunc(display);
+//	glutReshapeFunc(myReshape);
+//	glutMouseFunc(mouse);
+//    glutMotionFunc(mouseMotion);
+//    glutKeyboardFunc(keyboard);
+//    glutSpecialFunc(special);
+//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+//
+//	glewInit();
+//
+//	setShaders();
+//
+//	glutMainLoop();
 
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1000,1000);
-
-    glutCreateWindow("Zometool");
-	glutDisplayFunc(display);
-	glutReshapeFunc(myReshape);
-	glutMouseFunc(mouse);
-    glutMotionFunc(mouseMotion);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special);
-	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-
-	glewInit();
-
-	setShaders();
-
-	glutMainLoop();
-
-    return 0;
+  return 0;
 }
 

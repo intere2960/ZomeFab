@@ -16,10 +16,19 @@ public:
     int vertex_push_index;
 };
 
-float plane_dir_point(vec3 &point, float plane[4]);
-void plane_dir(edge &temp, float plane[4], int dir[2]);
-void plane_dist(edge &temp, float plane[4], float dist[2]);
-void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, float plane[4]);
-void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, float plane[4]);
+class plane
+{
+public:
+    plane();
+    plane(float a, float b, float c, float d,int e);
+    float plane_par[4]; // ax+by+cz=d  e->cut dir
+    int dir;
+};
+
+float plane_dir_point(vec3 &point, plane plane);
+void plane_dir_edge(edge &temp, plane plane, int dir[2]);
+void plane_dist_edge(edge &temp, plane plane, float dist[2]);
+void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane);
+void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane);
 
 #endif // BISECT_H_INCLUDED

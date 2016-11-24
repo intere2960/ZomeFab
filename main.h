@@ -25,6 +25,7 @@ GLMmodel *myObj_inner = NULL;
 
 char model_source[] = "test_model/cube.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
+char model_out[] = "test_model/out/out.obj";
 
 int width, height;
 int start_x, start_y;
@@ -61,9 +62,16 @@ vec3 bound_center;
 
 bool show = true;
 
-float test_plane[4] = {0.0, 1.0, 0.0, 0.0};
+plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
+plane test_plane2(0.0, 1.0, 0.0, -0.5 , 1);
+plane test_plane3(1.0, 0.0, 0.0, 0.5, -1);
+plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);
+plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
+vector<plane> planes;
+
 vector<edge> all_edge;
 vector<bool> is_face_split;
+vector<int> face_split_by_plane;
 
 
 //bounding box
@@ -370,12 +378,12 @@ void mouseMotion(int x, int y)
 void keyboard(unsigned char key,int x,int y)
 {
     //²¾°Ê
-    if(key == 'q' || key == 'Q') //quit
-    {
-        glmDelete(myObj);
+//    if(key == 'q' || key == 'Q') //quit
+//    {
+//        glmDelete(myObj);
 //        glmDelete(myObj_inner);
-        exit(0);
-    }
+//        exit(0);
+//    }
     if(key == 'w' || key == 'W') //move forward
     {
         eye_pos[0] += 0.1 * bound_size[0] * sin(phi) * cos(theta);

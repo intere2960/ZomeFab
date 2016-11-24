@@ -35,9 +35,25 @@ float edge::length()
     return temp.length();
 }
 
-float plane_dir_point(vec3 &point, float plane[4])
+plane::plane(){
+    plane_par[0] = 0.0;
+    plane_par[1] = 0.0;
+    plane_par[2] = 0.0;
+    plane_par[3] = 0.0;
+    dir = 0;
+}
+
+plane::plane(float a, float b, float c, float d,int e){
+    plane_par[0] = a;
+    plane_par[1] = b;
+    plane_par[2] = c;
+    plane_par[3] = d;
+    dir = e;
+}
+
+float plane_dir_point(vec3 &point, plane plane)
 {
-    float judge = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+    float judge = plane.plane_par[0] * point[0] + plane.plane_par[1] * point[1] + plane.plane_par[2] * point[2] - plane.plane_par[3];
 
     if(judge > 0)
         judge = 1;
@@ -49,28 +65,28 @@ float plane_dir_point(vec3 &point, float plane[4])
     return judge;
 }
 
-void plane_dir(edge &temp, float plane[4], int dir[2])
+void plane_dir_edge(edge &temp, plane plane, int dir[2])
 {
     dir[0] = plane_dir_point(temp.point[0], plane);
     dir[1] = plane_dir_point(temp.point[1], plane);
 }
 
-void plane_dist(edge &temp, float plane[4], float dist[2])
+void plane_dist_edge(edge &temp, plane plane, float dist[2])
 {
-    float judge1 = plane[0] * temp.point[0][0] + plane[1] * temp.point[0][1] + plane[2] * temp.point[0][2] - plane[3];
-    float judge2 = plane[0] * temp.point[1][0] + plane[1] * temp.point[1][1] + plane[2] * temp.point[1][2] - plane[3];
+    float judge1 = plane.plane_par[0] * temp.point[0][0] + plane.plane_par[1] * temp.point[0][1] + plane.plane_par[2] * temp.point[0][2] - plane.plane_par[3];
+    float judge2 = plane.plane_par[0] * temp.point[1][0] + plane.plane_par[1] * temp.point[1][1] + plane.plane_par[2] * temp.point[1][2] - plane.plane_par[3];
 
-    dist[0] = fabs(judge1) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
-    dist[1] = fabs(judge2) / sqrt(pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2));
+    dist[0] = fabs(judge1) / sqrt(pow(plane.plane_par[0],2) + pow(plane.plane_par[1],2) + pow(plane.plane_par[2],2));
+    dist[1] = fabs(judge2) / sqrt(pow(plane.plane_par[0],2) + pow(plane.plane_par[1],2) + pow(plane.plane_par[2],2));
 }
 
-void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, float plane[4])
+void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane)
 {
     for(unsigned int i = 0; i < all_edge.size(); i +=1){
         int dir[2];
         float dist[2];
-        plane_dir(all_edge.at(i), plane, dir);
-        plane_dist(all_edge.at(i), plane, dist);
+        plane_dir_edge(all_edge.at(i), plane, dir);
+        plane_dist_edge(all_edge.at(i), plane, dist);
 
         if(dir[0] && dir[1] && (dir[0] != dir[1])){
             float edge_ratio = dist[0] / (dist[0] + dist[1]);
@@ -125,7 +141,7 @@ void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<boo
     }
 }
 
-void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, float plane[4])
+void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane)
 {
     split_all_edge(myObj, all_edge, is_face_split, plane);
 
