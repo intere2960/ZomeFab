@@ -1058,7 +1058,7 @@ glmOneFacetNormals(GLMmodel* model, int tri_index)
     glmCross(u, v, temp);
     glmNormalize(temp);
 
-    if(tri_index + 1 > model->numfacetnorms){
+    if((unsigned int)(tri_index + 1) > model->numfacetnorms){
         model->triangles[tri_index].findex = model->numfacetnorms + 1;
         model->numfacetnorms += 1;
         model->facetnorms.push_back(temp[0]);

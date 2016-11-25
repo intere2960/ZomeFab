@@ -117,7 +117,7 @@ void test(){
         }
         if(dir_count[(planes.at(0).dir * -1) + 1] != 3){
             face_split_by_plane.push_back(i);
-            myObj->triangles.at(i).splite_face_id.push_back(0);
+            myObj->triangles.at(i).splite_plane_id.push_back(0);
         }
     }
 
@@ -132,19 +132,36 @@ void test(){
             }
 
             if(dir_count[planes.at(i).dir + 1] == 0 && dir_count[1] == 0){
-                if(!myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.empty()){
+                if(!myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.empty()){
                     vector<int> v;
-                    myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.swap(v);
+                    myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.swap(v);
                 }
                 face_split_by_plane.erase(face_split_by_plane.begin() + j);
                 j -= 1;
             }
             else{
-                if(i != planes.size() - 1)
-                    myObj->triangles.at(face_split_by_plane.at(j)).splite_face_id.push_back(i);
+//                if(i != planes.size() - 1)
+                    myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.push_back(i);
             }
         }
     }
+
+    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes);
+
+//    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
+//        cout << face_split_by_plane.at(i) << " : ";
+//        for(unsigned int j = 0; j < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); j += 1){
+//            cout << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(j) << " ";
+//        }
+//        cout << endl;
+//    }
+//
+//    cout << endl;
+
+//    for(unsigned int i = 0; i < is_face_split.size(); i += 1){
+//        cout << i << " : " << is_face_split.at(i);
+//        cout << endl;
+//    }
 }
 
 void init()
@@ -155,21 +172,21 @@ void init()
 
 //    planes.push_back(test_plane1);
     recount_normal(myObj);
-    process_inner(myObj, myObj_inner);
-    combine_inner_outfit(myObj, myObj_inner);
+//    process_inner(myObj, myObj_inner);
+//    combine_inner_outfit(myObj, myObj_inner);
 //    combine_inner_outfit2(myObj);
 
     collect_edge();
 
     planes.push_back(test_plane1);
-    planes.push_back(test_plane2);
-    planes.push_back(test_plane3);
-    planes.push_back(test_plane4);
-    planes.push_back(test_plane5);
+//    planes.push_back(test_plane2);
+//    planes.push_back(test_plane3);
+//    planes.push_back(test_plane4);
+//    planes.push_back(test_plane5);
 
-//    test();
-    split_face(myObj, all_edge, is_face_split, planes.at(0));
-    collect_edge();
+    test();
+//    split_face(myObj, all_edge, is_face_split, planes.at(0));
+//    collect_edge();
 //    split_face(myObj, all_edge, is_face_split, planes.at(1));
 //    collect_edge();
 //    split_face(myObj, all_edge, is_face_split, planes.at(2));

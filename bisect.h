@@ -1,6 +1,8 @@
 #ifndef BISECT_H_INCLUDED
 #define BISECT_H_INCLUDED
 
+#include <iostream>
+
 class edge
 {
 public:
@@ -29,6 +31,8 @@ float plane_dir_point(vec3 &point, plane plane);
 void plane_dir_edge(edge &temp, plane plane, int dir[2]);
 void plane_dist_edge(edge &temp, plane plane, float dist[2]);
 void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane);
+bool split_edge_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,int split_tri_id, plane plane);
 void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane);
+void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,std::vector<int> &face_split_by_plane, std::vector<plane> &planes);
 
 #endif // BISECT_H_INCLUDED
