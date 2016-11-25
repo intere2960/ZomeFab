@@ -166,6 +166,11 @@ glmFacetNormals(GLMmodel* model);
  * model - initialized GLMmodel structure
  * angle - maximum angle (in degrees) to smooth across
  */
+
+ /*one face normals*/
+GLvoid
+glmOneFacetNormals(GLMmodel* model, int tri_index);
+
 GLvoid
 glmVertexNormals(GLMmodel* model, GLfloat angle);
 

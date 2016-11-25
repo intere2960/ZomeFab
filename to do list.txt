@@ -5,3 +5,4 @@
 . viewing cut plane in other viewer (output obj file)
 . modify glmWriteOBJ (temporary fix it, but maybe use group to represent split piece in future)
 . modify glmDelete
+. modify collect_edge() (when done split, modify all_edge data)

@@ -226,17 +226,20 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &
                 temp1.vindices[1] = all_edge.at(choose_edge[0]).vertex_push_index;
                 temp1.vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
                 myObj->triangles.push_back(temp1);
+                glmOneFacetNormals(myObj, myObj->numtriangles);
                 myObj->numtriangles += 1;
 
                 temp2.vindices[0] = all_edge.at(choose_edge[0]).vertex_push_index;
                 temp2.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
                 temp2.vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
                 myObj->triangles.push_back(temp2);
+                glmOneFacetNormals(myObj, myObj->numtriangles);
                 myObj->numtriangles += 1;
 
                 myObj->triangles.at(i).vindices[0] = myObj->triangles.at(i).vindices[choose_index];
                 myObj->triangles.at(i).vindices[1] = all_edge.at(choose_edge[0]).vertex_push_index;
                 myObj->triangles.at(i).vindices[2] = all_edge.at(choose_edge[1]).vertex_push_index;
+                glmOneFacetNormals(myObj, i);
             }
             else{
                 if(all_edge.at(choose_edge[2]).vertex_push_index == -1){
@@ -253,14 +256,14 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &
                 temp.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
                 temp.vindices[2] = all_edge.at(choose_edge[2]).vertex_push_index;
                 myObj->triangles.push_back(temp);
+                glmOneFacetNormals(myObj, myObj->numtriangles);
                 myObj->numtriangles += 1;
 
                 myObj->triangles.at(i).vindices[0] = myObj->triangles.at(i).vindices[choose_index];
                 myObj->triangles.at(i).vindices[1] = all_edge.at(choose_edge[2]).vertex_push_index;
                 myObj->triangles.at(i).vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
+                glmOneFacetNormals(myObj, i);
             }
         }
     }
-
-    glmFacetNormals(myObj);
 }

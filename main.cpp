@@ -167,9 +167,9 @@ void init()
     planes.push_back(test_plane4);
     planes.push_back(test_plane5);
 
-    test();
-//    split_face(myObj, all_edge, is_face_split, planes.at(0));
-//    collect_edge();
+//    test();
+    split_face(myObj, all_edge, is_face_split, planes.at(0));
+    collect_edge();
 //    split_face(myObj, all_edge, is_face_split, planes.at(1));
 //    collect_edge();
 //    split_face(myObj, all_edge, is_face_split, planes.at(2));
@@ -187,24 +187,24 @@ int main(int argc, char **argv)
 //    myObj_inner = glmReadOBJ(model_source);
 
     init();
-//
-//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitWindowSize(1000,1000);
-//
-//    glutCreateWindow("Zometool");
-//	glutDisplayFunc(display);
-//	glutReshapeFunc(myReshape);
-//	glutMouseFunc(mouse);
-//    glutMotionFunc(mouseMotion);
-//    glutKeyboardFunc(keyboard);
-//    glutSpecialFunc(special);
-//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-//
-//	glewInit();
-//
-//	setShaders();
-//
-//	glutMainLoop();
+
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1000,1000);
+
+    glutCreateWindow("Zometool");
+	glutDisplayFunc(display);
+	glutReshapeFunc(myReshape);
+	glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
+	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+
+	glewInit();
+
+	setShaders();
+
+	glutMainLoop();
 
   return 0;
 }

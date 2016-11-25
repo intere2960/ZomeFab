@@ -1032,6 +1032,46 @@ glmFacetNormals(GLMmodel* model)
     }
 }
 
+/*one face normals*/
+
+GLvoid
+glmOneFacetNormals(GLMmodel* model, int tri_index)
+{
+    GLfloat u[3];
+    GLfloat v[3];
+    GLfloat temp[3];
+
+    u[0] = model->vertices.at(3 * T(tri_index).vindices[1] + 0) -
+        model->vertices.at(3 * T(tri_index).vindices[0] + 0);
+    u[1] = model->vertices.at(3 * T(tri_index).vindices[1] + 1) -
+        model->vertices.at(3 * T(tri_index).vindices[0] + 1);
+    u[2] = model->vertices.at(3 * T(tri_index).vindices[1] + 2) -
+        model->vertices.at(3 * T(tri_index).vindices[0] + 2);
+
+    v[0] = model->vertices.at(3 * T(tri_index).vindices[2] + 0) -
+        model->vertices.at(3 * T(tri_index).vindices[0] + 0);
+    v[1] = model->vertices.at(3 * T(tri_index).vindices[2] + 1) -
+        model->vertices.at(3 * T(tri_index).vindices[0] + 1);
+    v[2] = model->vertices.at(3 * T(tri_index).vindices[2] + 2) -
+        model->vertices.at(3 * T(tri_index).vindices[0] + 2);
+
+    glmCross(u, v, temp);
+    glmNormalize(temp);
+
+    if(tri_index + 1 > model->numfacetnorms){
+        model->triangles[tri_index].findex = model->numfacetnorms + 1;
+        model->numfacetnorms += 1;
+        model->facetnorms.push_back(temp[0]);
+        model->facetnorms.push_back(temp[1]);
+        model->facetnorms.push_back(temp[2]);
+    }
+    else{
+        model->facetnorms.at(model->triangles[tri_index].findex * 3 + 0) = temp[0];
+        model->facetnorms.at(model->triangles[tri_index].findex * 3 + 1) = temp[1];
+        model->facetnorms.at(model->triangles[tri_index].findex * 3 + 2) = temp[2];
+    }
+}
+
 /* glmVertexNormals: Generates smooth vertex normals for a model.
  * First builds a list of all the triangles each vertex is in.   Then
  * loops through each vertex in the the list averaging all the facet
