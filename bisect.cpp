@@ -35,6 +35,20 @@ float edge::length()
     return temp.length();
 }
 
+bool operator==(const edge &lhs,const edge &rhs){
+    if((lhs.point[0] != rhs.point[0]) || (lhs.point[1] != rhs.point[1]))
+        return false;
+    if((lhs.index[0] != rhs.index[0]) || (lhs.index[1] != rhs.index[1]))
+        return false;
+    if((lhs.face_id[0] != rhs.face_id[0]) || (lhs.face_id[1] != rhs.face_id[1]))
+        return false;
+    if(lhs.vertex_push_index != rhs.vertex_push_index)
+        return false;
+    if(lhs.l != rhs.l)
+        return false;
+    return true;
+}
+
 plane::plane(){
     plane_par[0] = 0.0;
     plane_par[1] = 0.0;
@@ -317,9 +331,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &
 void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,std::vector<int> &face_split_by_plane, std::vector<plane> &planes) // split face not in range have to erace
 {
     for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
-//    for(unsigned int i = 0; i < 1; i += 1){
-//        for(unsigned int j = 0; j < myObj->triangles.at(i).splite_plane_id.size(); j += 1){
-        for(unsigned int j = 0; j < 1; j += 1){
+        for(unsigned int j = 0; j < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); j += 1){
             bool test = split_edge_test(myObj, all_edge, is_face_split, face_split_by_plane.at(i), planes.at(j));
 
             if(test){
@@ -432,6 +444,18 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
 //                    std::cout << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[2]+0] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[2]+1] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[2]+2] << std::endl;
 //                    std::cout << std::endl;
 //                    std::cout << std::endl;
+                    if(is_face_split[all_edge.at(choose_edge[0]).face_id[0]] || is_face_split[all_edge.at(choose_edge[0]).face_id[1]]){
+                        if(is_face_split[all_edge.at(choose_edge[0]).face_id[0]])
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[0]).face_id[0], all_edge.at(choose_edge[0]));
+                        if(is_face_split[all_edge.at(choose_edge[0]).face_id[1]])
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[0]).face_id[1], all_edge.at(choose_edge[0]));
+                    }
+                    if(is_face_split[all_edge.at(choose_edge[1]).face_id[0]] || is_face_split[all_edge.at(choose_edge[1]).face_id[1]]){
+                        if(is_face_split[all_edge.at(choose_edge[1]).face_id[0]])
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[1]).face_id[0], all_edge.at(choose_edge[1]));
+                        if(is_face_split[all_edge.at(choose_edge[1]).face_id[1]])
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[1]).face_id[1], all_edge.at(choose_edge[1]));
+                    }
                 }
                 else{
                     if(all_edge.at(choose_edge[2]).vertex_push_index == -1){
@@ -444,7 +468,7 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
 
                     GLMtriangle temp;
 
-                    temp.vindices[0] = myObj->triangles.at(i).vindices[choose_index];
+                    temp.vindices[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index];
                     temp.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
                     temp.vindices[2] = all_edge.at(choose_edge[2]).vertex_push_index;
                     myObj->triangles.push_back(temp);
@@ -455,9 +479,70 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[1] = all_edge.at(choose_edge[2]).vertex_push_index;
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
                     glmOneFacetNormals(myObj, face_split_by_plane.at(i));
+
+                    if(is_face_split[all_edge.at(choose_edge[2]).face_id[0]] || is_face_split[all_edge.at(choose_edge[2]).face_id[1]]){
+                        if(is_face_split[all_edge.at(choose_edge[2]).face_id[0]])
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[0], all_edge.at(choose_edge[2]));
+                        if(is_face_split[all_edge.at(choose_edge[2]).face_id[1]])
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[1], all_edge.at(choose_edge[2]));
+                    }
                 }
             }
         }
     }
+}
 
+void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge){
+    int current_index;
+    for(int i = 0; i < 3; i += 1){
+        if(all_edge.at(myObj->triangles.at(face_id).edge_index[i]) == splited_edge){
+            current_index = i;
+            break;
+        }
+    }
+
+    int choose_index[2] = {myObj->triangles.at(face_id).edge_index[(current_index + 2) % 3], myObj->triangles.at(face_id).edge_index[(current_index + 1) % 3]};
+    int top_index;
+    int choose_vertex_index[2] = {-1, -1};
+    bool judge1,judge2;
+    judge1 = all_edge.at(choose_index[0]).index[0] == all_edge.at(choose_index[1]).index[0];
+    judge2 = all_edge.at(choose_index[0]).index[0] == all_edge.at(choose_index[1]).index[1];
+    if(judge1){
+        top_index = 0;
+        choose_vertex_index[0] = 1;
+        choose_vertex_index[1] = 1;
+    }
+    if(judge2){
+        top_index = 0;
+        choose_vertex_index[0] = 1;
+        choose_vertex_index[1] = 0;
+    }
+    if(choose_vertex_index[0] == -1 && choose_vertex_index[1] == -1){
+        judge1 = all_edge.at(choose_index[0]).index[1] == all_edge.at(choose_index[1]).index[0];
+        judge2 = all_edge.at(choose_index[0]).index[1] == all_edge.at(choose_index[1]).index[1];
+        if(judge1){
+            top_index = 1;
+            choose_vertex_index[0] = 0;
+            choose_vertex_index[1] = 1;
+        }
+        if(judge2){
+            top_index = 1;
+            choose_vertex_index[0] = 0;
+            choose_vertex_index[1] = 0;
+        }
+    }
+
+    GLMtriangle temp;
+
+    temp.vindices[0] = all_edge.at(choose_index[0]).index[top_index];
+    temp.vindices[1] = all_edge.at(choose_index[0]).index[choose_vertex_index[0]];
+    temp.vindices[2] = splited_edge.vertex_push_index;
+    myObj->triangles.push_back(temp);
+    glmOneFacetNormals(myObj, myObj->numtriangles);
+    myObj->numtriangles += 1;
+
+    myObj->triangles.at(face_id).vindices[0] = all_edge.at(choose_index[0]).index[top_index];
+    myObj->triangles.at(face_id).vindices[1] = splited_edge.vertex_push_index;
+    myObj->triangles.at(face_id).vindices[2] = all_edge.at(choose_index[1]).index[choose_vertex_index[1]];
+    glmOneFacetNormals(myObj, face_id);
 }

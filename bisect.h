@@ -9,6 +9,7 @@ public:
     edge();
     edge(int i1, vec3 &p1, int i2, vec3 &p2);
     float length();
+    friend bool operator==(const edge &lhs,const edge &rhs);
 
     vec3 point[2];
     int index[2];
@@ -34,5 +35,6 @@ void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<boo
 bool split_edge_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,int split_tri_id, plane plane);
 void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane);
 void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,std::vector<int> &face_split_by_plane, std::vector<plane> &planes);
+void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge);
 
 #endif // BISECT_H_INCLUDED

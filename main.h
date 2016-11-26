@@ -62,11 +62,14 @@ vec3 bound_center;
 
 bool show = true;
 
+//plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
 plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 plane test_plane2(0.0, 1.0, 0.0, -0.5 , 1);
 plane test_plane3(1.0, 0.0, 0.0, 0.5, -1);
 plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);
-//plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
+
+plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
+
 vector<plane> planes;
 
 vector<edge> all_edge;
