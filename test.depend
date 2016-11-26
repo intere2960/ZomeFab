@@ -65,7 +65,7 @@
 	<GL/glut.h>
 	<vector>
 
-1480159737 source:e:\pieceofshit\main.cpp
+1480177024 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1477884417 source:e:\pieceofshit\textfile.cpp
@@ -98,7 +98,7 @@
 	<cmath>
 	<vector>
 
-1480159755 e:\pieceofshit\main.h
+1480177037 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<algorithm>
@@ -113,7 +113,7 @@
 	"shell.h"
 	"bisect.h"
 
-1480159711 source:e:\pieceofshit\bisect.cpp
+1480177008 source:e:\pieceofshit\bisect.cpp
 	<vector>
 	"glm.h"
 	"algebra3.h"
