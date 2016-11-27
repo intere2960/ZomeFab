@@ -263,6 +263,10 @@ void collect_edge()
         temp_edge_index[1] = myObj->triangles.at(i).edge_index[1];
         temp_edge_index[2] = myObj->triangles.at(i).edge_index[2];
 
+//        std::cout << myObj->triangles.at(i).edge_index[0] << " " << myObj->triangles.at(i).edge_index[1] << " " << myObj->triangles.at(i).edge_index[2] << std::endl;
+//
+//        std::cout << "index : " << i << std::endl;
+
         for(int j = 0; j < 3; j += 1){
             bool judge1,judge2;
             judge1 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);

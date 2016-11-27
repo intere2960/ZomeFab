@@ -200,7 +200,7 @@ void init()
     collect_edge();
 
     planes.push_back(test_plane1);
-    planes.push_back(test_plane2);
+//    planes.push_back(test_plane2);
 //    planes.push_back(test_plane3);
 //    planes.push_back(test_plane4);
     planes.push_back(test_plane5);
@@ -210,6 +210,7 @@ void init()
 //    for(unsigned int i = 0; i < is_face_split.size(); i += 1){
 //        cout << is_face_split.at(i) << endl;
 //    }
+//    cout << endl;
 
 //    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
 //        cout << face_split_by_plane.at(i) << " : ";
@@ -221,8 +222,27 @@ void init()
 //    }
 //    cout << endl;
 
+//    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+//        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
+//        if(i % 5 == 4)
+//             cout << endl;
+//    }
+//    cout << endl;
+//    cout << endl;
+
     split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes);
-    collect_edge();
+
+//    for(unsigned int i = 0; i < is_face_split.size(); i += 1){
+//        cout << is_face_split.at(i) << endl;
+//    }
+//    collect_edge();
+
+//    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+//        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
+//        if(i % 5 == 4)
+//             cout << endl;
+//    }
+//    cout << endl;
 
 //    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
 //        cout << face_split_by_plane.at(i) << " : ";
@@ -238,6 +258,21 @@ void init()
 //    planes2.push_back(test_plane5);
 //    test(planes2);
 //    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes2);
+//
+//    collect_edge();
+//    vector<plane> planes3;
+//    planes3.push_back(test_plane3);
+//    planes3.push_back(test_plane5);
+//    test(planes3);
+//    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes3);
+//
+//    collect_edge();
+//    vector<plane> planes4;
+//    planes4.push_back(test_plane4);
+//    planes4.push_back(test_plane5);
+//    test(planes4);
+//    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes4);
+
 
 //    split_face(myObj, all_edge, is_face_split, planes.at(0));
 //    collect_edge();
@@ -259,23 +294,23 @@ int main(int argc, char **argv)
 
     init();
 
-//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitWindowSize(1000,1000);
-//
-//    glutCreateWindow("Zometool");
-//	glutDisplayFunc(display);
-//	glutReshapeFunc(myReshape);
-//	glutMouseFunc(mouse);
-//    glutMotionFunc(mouseMotion);
-//    glutKeyboardFunc(keyboard);
-//    glutSpecialFunc(special);
-//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-//
-//	glewInit();
-//
-//	setShaders();
-//
-//	glutMainLoop();
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1000,1000);
+
+    glutCreateWindow("Zometool");
+	glutDisplayFunc(display);
+	glutReshapeFunc(myReshape);
+	glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
+	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+
+	glewInit();
+
+	setShaders();
+
+	glutMainLoop();
 
     return 0;
 }
