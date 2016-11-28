@@ -57,7 +57,8 @@ typedef struct _GLMtriangle {
   GLuint findex;                /* index of triangle facet normal */
 
   int edge_index[3];
-  std::vector<int> splite_plane_id;
+  std::vector<int> split_plane_id;
+  bool split_by_process;
 
 } GLMtriangle;
 

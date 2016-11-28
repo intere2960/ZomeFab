@@ -60,12 +60,12 @@
 	<assert.h>
 	"glm.h"
 
-1480225866 e:\pieceofshit\glm.h
+1480301435 e:\pieceofshit\glm.h
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<vector>
 
-1480230567 source:e:\pieceofshit\main.cpp
+1480323970 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1477884417 source:e:\pieceofshit\textfile.cpp
@@ -91,17 +91,16 @@
 
 1479286122 e:\pieceofshit\shell.h
 
-1479286727 source:e:\pieceofshit\shell.cpp
+1480323255 source:e:\pieceofshit\shell.cpp
 	<algorithm>
 	<vector>
 	"glm.h"
 	<cmath>
 	<vector>
 
-1480225206 e:\pieceofshit\main.h
+1480324253 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
-	<algorithm>
 	<cmath>
 	<vector>
 	<GL/glew.h>
@@ -113,18 +112,15 @@
 	"shell.h"
 	"bisect.h"
 
-1480230692 source:e:\pieceofshit\bisect.cpp
+1480323931 source:e:\pieceofshit\bisect.cpp
 	<vector>
 	"glm.h"
 	"algebra3.h"
 	"glui_internal.h"
 	"bisect.h"
 
-1480228428 e:\pieceofshit\bisect.h
-	<iostream>
+1480323858 e:\pieceofshit\bisect.h
 	<algorithm>
-	<cmath>
-	<vector>
 
 1477145074 source:c:\users\rock\desktop\test\algebra3.cpp
 	"algebra3.h"

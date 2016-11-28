@@ -78,7 +78,6 @@ void display(void)
         glPolygonMode(GL_BACK, GL_FILL);
     }
 
-
 //    drawObj(myObj_inner);
 //    glmDraw(myObj_inner, GLM_FLAT);
 //    glmDraw(myObj_inner,GLM_SMOOTH);
@@ -106,182 +105,26 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-void test(vector<plane> planes){
-
-    if(!face_split_by_plane.empty()){
-        vector<int> v;
-        face_split_by_plane.swap(v);
-    }
-
-    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
-        vec3 point_dir;
-        int dir_count[3] = {0, 0, 0};
-        for(int j = 0; j < 3; j += 1){
-            vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 2));
-            point_dir[j] = plane_dir_point(temp, planes.at(0));
-            dir_count[(int)point_dir[j] + 1] += 1;
-        }
-        if((dir_count[(planes.at(0).dir + 2) % 3] + dir_count[(planes.at(0).dir + 3) % 3]) != 3){
-            face_split_by_plane.push_back(i);
-            is_face_split.at(i) = false;
-            if(!myObj->triangles.at(i).splite_plane_id.empty()){
-                vector<int> v;
-                myObj->triangles.at(i).splite_plane_id.swap(v);
-            }
-            myObj->triangles.at(i).splite_plane_id.push_back(0);
-        }
-    }
-
-    for(unsigned int i = 1; i < planes.size(); i += 1){
-        for(unsigned int j = 0; j < face_split_by_plane.size(); j += 1){
-            vec3 point_dir;
-            int dir_count[3] = {0, 0, 0};
-            for(int k = 0; k < 3; k += 1){
-                vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 2));
-                point_dir[k] = plane_dir_point(temp, planes.at(i));
-                dir_count[(int)point_dir[k] + 1] += 1;
-            }
-
-            if(dir_count[planes.at(i).dir + 1] == 0 && dir_count[1] == 0){
-                if(!myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.empty()){
-                    vector<int> v;
-                    myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.swap(v);
-                }
-                is_face_split.at(face_split_by_plane.at(j)) = true;
-                face_split_by_plane.erase(face_split_by_plane.begin() + j);
-                j -= 1;
-            }
-            else if(planes.size() >= 2 && i == planes.size() - 1 && dir_count[planes.at(i).dir + 1] != 3){
-                if(!myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.empty()){
-                    vector<int> v;
-                    myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.swap(v);
-                }
-                is_face_split.at(face_split_by_plane.at(j)) = true;
-                face_split_by_plane.erase(face_split_by_plane.begin() + j);
-                j -= 1;
-            }
-            else{
-                if(i != planes.size() - 1)
-                    myObj->triangles.at(face_split_by_plane.at(j)).splite_plane_id.push_back(i);
-            }
-        }
-    }
-
-//    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
-//        cout << face_split_by_plane.at(i) << " : ";
-//        for(unsigned int j = 0; j < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); j += 1){
-//            cout << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(j) << " ";
-//        }
-//        cout << "size : " << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size() << endl;
-//        cout << endl;
-//    }
-//
-//    cout << endl;
-
-//    for(unsigned int i = 0; i < is_face_split.size(); i += 1){
-//        cout << i << " : " << is_face_split.at(i);
-//        cout << endl;
-//    }
-//    cout << endl;
-}
-
 void init()
 {
     bounding_box();
 
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
-//    planes.push_back(test_plane1);
     recount_normal(myObj);
-//    process_inner(myObj, myObj_inner);
-//    combine_inner_outfit(myObj, myObj_inner);
-//    combine_inner_outfit2(myObj);
+    process_inner(myObj, myObj_inner);
+    combine_inner_outfit(myObj, myObj_inner);
 
-    collect_edge();
+    collect_edge(myObj, all_edge);
 
     planes.push_back(test_plane1);
-//    planes.push_back(test_plane2);
-//    planes.push_back(test_plane3);
-//    planes.push_back(test_plane4);
-    planes.push_back(test_plane5);
+    planes.push_back(test_plane2);
+    planes.push_back(test_plane3);
+    planes.push_back(test_plane4);
+    planes.push_back(test_plane5); //dir_plane
 
-    test(planes);
-
-//    for(unsigned int i = 0; i < is_face_split.size(); i += 1){
-//        cout << is_face_split.at(i) << endl;
-//    }
-//    cout << endl;
-
-//    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
-//        cout << face_split_by_plane.at(i) << " : ";
-//        for(unsigned int j = 0; j < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); j += 1){
-//            cout << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(j) << " ";
-//        }
-////        cout << "size : " << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size() << endl;
-//        cout << endl;
-//    }
-//    cout << endl;
-
-//    for(unsigned int i = 0; i < all_edge.size(); i += 1){
-//        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
-//        if(i % 5 == 4)
-//             cout << endl;
-//    }
-//    cout << endl;
-//    cout << endl;
-
-    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes);
-
-//    for(unsigned int i = 0; i < is_face_split.size(); i += 1){
-//        cout << is_face_split.at(i) << endl;
-//    }
-//    collect_edge();
-
-//    for(unsigned int i = 0; i < all_edge.size(); i += 1){
-//        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
-//        if(i % 5 == 4)
-//             cout << endl;
-//    }
-//    cout << endl;
-
-//    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
-//        cout << face_split_by_plane.at(i) << " : ";
-//        for(unsigned int j = 0; j < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); j += 1){
-//            cout << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(j) << " ";
-//        }
-////        cout << "size : " << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size() << endl;
-//        cout << endl;
-//    }
-
-//    vector<plane> planes2;
-//    planes2.push_back(test_plane2);
-//    planes2.push_back(test_plane5);
-//    test(planes2);
-//    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes2);
-//
-//    collect_edge();
-//    vector<plane> planes3;
-//    planes3.push_back(test_plane3);
-//    planes3.push_back(test_plane5);
-//    test(planes3);
-//    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes3);
-//
-//    collect_edge();
-//    vector<plane> planes4;
-//    planes4.push_back(test_plane4);
-//    planes4.push_back(test_plane5);
-//    test(planes4);
-//    split_face_test(myObj, all_edge, is_face_split,face_split_by_plane, planes4);
-
-
-//    split_face(myObj, all_edge, is_face_split, planes.at(0));
-//    collect_edge();
-//    split_face(myObj, all_edge, is_face_split, planes.at(1));
-//    collect_edge();
-//    split_face(myObj, all_edge, is_face_split, planes.at(2));
-//    collect_edge();
-//    split_face(myObj, all_edge, is_face_split, planes.at(3));
-//    collect_edge();
+    cut_intersection(myObj,planes, face_split_by_plane, true);
+    split_face(myObj, all_edge, face_split_by_plane, planes);
 }
 
 int main(int argc, char **argv)

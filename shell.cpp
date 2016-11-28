@@ -63,13 +63,13 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
     for(unsigned int i = 1 ; i <= myObj_inner->numvertices ; i += 1)
     {
         myObj_inner->vertices.at(3 * i + 0) = myObj->vertices.at(3 * i + 0) - 0.05 * myObj->normals[3 * i + 0];
-        myObj_inner->normals[3 * i + 0] =  -1 * myObj->normals[3 * i + 0];
+        myObj_inner->normals[3 * i + 0] = myObj->normals[3 * i + 0];
 
         myObj_inner->vertices.at(3 * i + 1) = myObj->vertices.at(3 * i + 1) - 0.05 * myObj->normals[3 * i + 1];
-        myObj_inner->normals[3 * i + 1] =  -1 * myObj->normals[3 * i + 1];
+        myObj_inner->normals[3 * i + 1] = myObj->normals[3 * i + 1];
 
         myObj_inner->vertices.at(3 * i + 2) = myObj->vertices.at(3 * i + 2) - 0.05 * myObj->normals[3 * i + 2];
-        myObj_inner->normals[3 * i + 2] =  -1 * myObj->normals[3 * i + 2];
+        myObj_inner->normals[3 * i + 2] = myObj->normals[3 * i + 2];
     }
 
     myObj_inner->numfacetnorms = myObj->numfacetnorms;
@@ -78,9 +78,9 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
 
     for(unsigned int i = 1 ; i <= myObj->numfacetnorms ; i += 1)
     {
-        myObj_inner->facetnorms.at(3 * i + 0) =  -1 * myObj->facetnorms.at(3 * i + 0);
-        myObj_inner->facetnorms.at(3 * i + 1) =  -1 * myObj->facetnorms.at(3 * i + 1);
-        myObj_inner->facetnorms.at(3 * i + 2) =  -1 * myObj->facetnorms.at(3 * i + 2);
+        myObj_inner->facetnorms.at(3 * i + 0) =  myObj->facetnorms.at(3 * i + 0);
+        myObj_inner->facetnorms.at(3 * i + 1) =  myObj->facetnorms.at(3 * i + 1);
+        myObj_inner->facetnorms.at(3 * i + 2) =  myObj->facetnorms.at(3 * i + 2);
     }
 }
 

@@ -65,16 +65,16 @@ plane::plane(float a, float b, float c, float d,int e){
     dir = e;
 }
 
-float plane_dir_point(vec3 &point, plane plane)
+float plane_dir_point(vec3 &point, plane plane) //have problem
 {
     float judge = plane.plane_par[0] * point[0] + plane.plane_par[1] * point[1] + plane.plane_par[2] * point[2] - plane.plane_par[3];
 
-    if(judge > 0)
+    if(judge > 0.000001)
         judge = 1;
-    else if(judge == 0)
-        judge = 0;
-    else
+    else if(judge < -0.000001)
         judge = -1;
+    else
+        judge = 0;
 
     return judge;
 }
@@ -94,68 +94,74 @@ void plane_dist_edge(edge &temp, plane plane, float dist[2])
     dist[1] = fabs(judge2) / sqrt(pow(plane.plane_par[0],2) + pow(plane.plane_par[1],2) + pow(plane.plane_par[2],2));
 }
 
-void split_all_edge(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane)
-{
-    for(unsigned int i = 0; i < all_edge.size(); i +=1){
-        int dir[2];
-        float dist[2];
-        plane_dir_edge(all_edge.at(i), plane, dir);
-        plane_dist_edge(all_edge.at(i), plane, dist);
+void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<int> &face_split_by_plane, bool have_dir){
 
-        if(dir[0] && dir[1] && (dir[0] != dir[1])){
-            float edge_ratio = dist[0] / (dist[0] + dist[1]);
-            vec3 new_point = all_edge.at(i).point[0] + edge_ratio * (all_edge.at(i).point[1] - all_edge.at(i).point[0]);
-            all_edge.at(i).split_point = new_point;
+    if(!face_split_by_plane.empty()){
+        std::vector<int> v;
+        face_split_by_plane.swap(v);
+    }
 
-            if(is_face_split.at(all_edge.at(i).face_id[0]))
-                is_face_split.at(all_edge.at(i).face_id[0]) = false;
-            if(is_face_split.at(all_edge.at(i).face_id[1]))
-                is_face_split.at(all_edge.at(i).face_id[1]) = false;
+    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
+        vec3 point_dir;
+        int dir_count[3] = {0, 0, 0};
+        for(int j = 0; j < 3; j += 1){
+            vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 2));
+            point_dir[j] = plane_dir_point(temp, planes.at(0));
+            dir_count[(int)point_dir[j] + 1] += 1;
         }
-        else if(dir[0] == 0 || dir[1] == 0){
+        if((dir_count[(planes.at(0).dir + 2) % 3] + dir_count[(planes.at(0).dir + 3) % 3]) != 3){
+            face_split_by_plane.push_back(i);
+            myObj->triangles.at(i).split_by_process = true;
+            if(!myObj->triangles.at(i).split_plane_id.empty()){
+                std::vector<int> v;
+                myObj->triangles.at(i).split_plane_id.swap(v);
+            }
+            myObj->triangles.at(i).split_plane_id.push_back(0);
+        }
+    }
 
-            vec3 face_vertex1[3];
-            for(int j = 0; j < 3; j += 1){
-                for(int k = 0; k < 3; k += 1)
-                    face_vertex1[j][k] = myObj->vertices[3 * (myObj->triangles.at(all_edge.at(i).face_id[0]).vindices[j]) + k];
+    for(unsigned int i = 1; i < planes.size(); i += 1){
+        for(unsigned int j = 0; j < face_split_by_plane.size(); j += 1){
+            vec3 point_dir;
+            int dir_count[3] = {0, 0, 0};
+            for(int k = 0; k < 3; k += 1){
+                vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(j)).vindices[k]) + 2));
+                point_dir[k] = plane_dir_point(temp, planes.at(i));
+                dir_count[(int)point_dir[k] + 1] += 1;
             }
 
-            int dir_count1[3] = {0, 0, 0};
-            dir_count1[(int)plane_dir_point(face_vertex1[0], plane) + 1] += 1;
-            dir_count1[(int)plane_dir_point(face_vertex1[1], plane) + 1] += 1;
-            dir_count1[(int)plane_dir_point(face_vertex1[2], plane) + 1] += 1;
-
-            if(dir_count1[0] == 1 && dir_count1[1] == 1 && dir_count1[2] == 1)
-                is_face_split.at(all_edge.at(i).face_id[0]) = false;
-
-            vec3 face_vertex2[3];
-            for(int j = 0; j < 3; j += 1){
-                for(int k = 0; k < 3; k += 1)
-                    face_vertex2[j][k] = myObj->vertices[3 * (myObj->triangles.at(all_edge.at(i).face_id[1]).vindices[j]) + k];
-            }
-
-            int dir_count2[3] = {0, 0, 0};
-            dir_count2[(int)plane_dir_point(face_vertex2[0], plane) + 1] += 1;
-            dir_count2[(int)plane_dir_point(face_vertex2[1], plane) + 1] += 1;
-            dir_count2[(int)plane_dir_point(face_vertex2[2], plane) + 1] += 1;
-
-            if(dir_count2[0] == 1 && dir_count2[1] == 1 && dir_count2[2] == 1){
-                is_face_split.at(all_edge.at(i).face_id[1]) = false;
-
-                if(dir[0] == 0){
-                    all_edge.at(i).split_point = all_edge.at(i).point[0];
-                    all_edge.at(i).vertex_push_index = all_edge.at(i).index[0];
+            if(dir_count[planes.at(i).dir + 1] == 0 && dir_count[1] == 0){
+                if(!myObj->triangles.at(face_split_by_plane.at(j)).split_plane_id.empty()){
+                    std::vector<int> v;
+                    myObj->triangles.at(face_split_by_plane.at(j)).split_plane_id.swap(v);
                 }
-                else if(dir[1] == 0){
-                    all_edge.at(i).split_point = all_edge.at(i).point[1];
-                    all_edge.at(i).vertex_push_index = all_edge.at(i).index[1];
+                myObj->triangles.at(face_split_by_plane.at(j)).split_by_process = false;
+                face_split_by_plane.erase(face_split_by_plane.begin() + j);
+                j -= 1;
+            }
+            else if(have_dir && planes.size() >= 2 && i == planes.size() - 1 && dir_count[planes.at(i).dir + 1] != 3){
+                if(!myObj->triangles.at(face_split_by_plane.at(j)).split_plane_id.empty()){
+                    std::vector<int> v;
+                    myObj->triangles.at(face_split_by_plane.at(j)).split_plane_id.swap(v);
+                }
+                myObj->triangles.at(face_split_by_plane.at(j)).split_by_process = false;
+                face_split_by_plane.erase(face_split_by_plane.begin() + j);
+                j -= 1;
+            }
+            else{
+                if(i != planes.size() - 1){
+                    myObj->triangles.at(face_split_by_plane.at(j)).split_plane_id.push_back(i);
+                }
+                else{
+                    if(!have_dir)
+                        myObj->triangles.at(face_split_by_plane.at(j)).split_plane_id.push_back(i);
                 }
             }
         }
     }
 }
 
-bool split_edge_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,int split_tri_id, plane plane)
+bool split_edge(GLMmodel *myObj, std::vector<edge> &all_edge,int split_tri_id, plane plane)
 {
     bool judge = false;
     for(unsigned int i = 0; i < 3; i +=1){
@@ -165,11 +171,13 @@ bool split_edge_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
         plane_dist_edge(all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]), plane, dist);
 
         if(dir[0] && dir[1] && (dir[0] != dir[1])){
-            float edge_ratio = dist[0] / (dist[0] + dist[1]);
-            vec3 new_point = all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).point[0] + edge_ratio * (all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).point[1] - all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).point[0]);
-            all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).split_point = new_point;
+            if(all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).vertex_push_index == -1){
+                float edge_ratio = dist[0] / (dist[0] + dist[1]);
+                vec3 new_point = all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).point[0] + edge_ratio * (all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).point[1] - all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).point[0]);
+                all_edge.at(myObj->triangles.at(split_tri_id).edge_index[i]).split_point = new_point;
+            }
             if(!judge)
-                judge = true;
+                    judge = true;
         }
         else if(dir[0] == 0 || dir[1] == 0){
 
@@ -201,163 +209,27 @@ bool split_edge_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
     return judge;
 }
 
-void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, plane plane)
+void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &face_split_by_plane, std::vector<plane> &planes)
 {
-    split_all_edge(myObj, all_edge, is_face_split, plane);
+    unsigned int current = face_split_by_plane.size();
+    for(unsigned int i = 0; i < current; i += 1){
+        if(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
+            plane test_plane = planes.at(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.at(0));
+            bool test = split_edge(myObj, all_edge, face_split_by_plane.at(i), test_plane);
+            myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.erase(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.begin() + 0);
 
-    unsigned int current_numtri = myObj->numtriangles;
-    for(unsigned int i = 0; i < current_numtri; i += 1){
-        if(!is_face_split.at(i)){
-
-            vec3 point_dir;
-            int dir_count[3] = {0, 0, 0};
-            for(int j = 0; j < 3; j += 1){
-                vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(i).vindices[j]) + 2));
-                point_dir[j] = plane_dir_point(temp,plane);
-                dir_count[(int)point_dir[j] + 1] += 1;
-            }
-            int choose_dir = -1;
-            if(dir_count[0] == 1 && dir_count[1] == 1 && dir_count[2] == 1)
-                choose_dir = 0;
-            else if(dir_count[2] == 1)
-                choose_dir = 1;
-
-            int choose_index = 0;
-            for(int j = 0; j < 3; j += 1){
-                if(point_dir[j] == choose_dir)
-                    choose_index = j;
-            }
-
-            vec3 choose_edge(-1, -1, -1);
-            vec2 choose_vertex_index(-1,-1);
-            int one_split = 3;
-
-            for(int j = 0; j < 3; j += 1){
-                bool judge1,judge2;
-                judge1 = (myObj->triangles.at(i).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[(choose_index + 1) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[1]);
-                judge2 = (myObj->triangles.at(i).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[(choose_index + 1) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[0]);
-                if(judge1){
-                    choose_edge[0] = myObj->triangles.at(i).edge_index[j];
-                    one_split -= j;
-                    choose_vertex_index[0] = 1;
+            if(!test){
+                if(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
+                    face_split_by_plane.push_back(face_split_by_plane.at(i));
                 }
-                if(judge2){
-                    choose_edge[0] = myObj->triangles.at(i).edge_index[j];
-                    one_split -= j;
-                    choose_vertex_index[0] = 0;
-                }
-
-                judge1 = (myObj->triangles.at(i).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[(choose_index + 2) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[1]);
-                judge2 = (myObj->triangles.at(i).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[(choose_index + 2) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(i).edge_index[j]).index[0]);
-                if(judge1){
-                    choose_edge[1] = myObj->triangles.at(i).edge_index[j];
-                    one_split -= j;
-                    choose_vertex_index[1] = 1;
-                }
-                if(judge2){
-                    choose_edge[1] = myObj->triangles.at(i).edge_index[j];
-                    one_split -= j;
-                    choose_vertex_index[1] = 0;
-                }
-            }
-
-            choose_edge[2] = myObj->triangles.at(i).edge_index[one_split];
-
-            if(all_edge.at(choose_edge[0]).vertex_push_index == -1){
-                myObj->vertices.push_back(all_edge.at(choose_edge[0]).split_point[0]);
-                myObj->vertices.push_back(all_edge.at(choose_edge[0]).split_point[1]);
-                myObj->vertices.push_back(all_edge.at(choose_edge[0]).split_point[2]);
-                myObj->numvertices += 1;
-                all_edge.at(choose_edge[0]).vertex_push_index = myObj->numvertices;
-            }
-
-            if(all_edge.at(choose_edge[1]).vertex_push_index == -1){
-                myObj->vertices.push_back(all_edge.at(choose_edge[1]).split_point[0]);
-                myObj->vertices.push_back(all_edge.at(choose_edge[1]).split_point[1]);
-                myObj->vertices.push_back(all_edge.at(choose_edge[1]).split_point[2]);
-                myObj->numvertices += 1;
-                all_edge.at(choose_edge[1]).vertex_push_index = myObj->numvertices;
-            }
-
-            if(choose_dir != 0){
-                GLMtriangle temp1,temp2;
-
-                temp1.vindices[0] = all_edge.at(choose_edge[1]).vertex_push_index;
-                temp1.vindices[1] = all_edge.at(choose_edge[0]).vertex_push_index;
-                temp1.vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
-                myObj->triangles.push_back(temp1);
-                glmOneFacetNormals(myObj, myObj->numtriangles);
-                myObj->numtriangles += 1;
-
-                temp2.vindices[0] = all_edge.at(choose_edge[0]).vertex_push_index;
-                temp2.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
-                temp2.vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
-                myObj->triangles.push_back(temp2);
-                glmOneFacetNormals(myObj, myObj->numtriangles);
-                myObj->numtriangles += 1;
-
-                myObj->triangles.at(i).vindices[0] = myObj->triangles.at(i).vindices[choose_index];
-                myObj->triangles.at(i).vindices[1] = all_edge.at(choose_edge[0]).vertex_push_index;
-                myObj->triangles.at(i).vindices[2] = all_edge.at(choose_edge[1]).vertex_push_index;
-                glmOneFacetNormals(myObj, i);
             }
             else{
-                if(all_edge.at(choose_edge[2]).vertex_push_index == -1){
-                    myObj->vertices.push_back(all_edge.at(choose_edge[2]).split_point[0]);
-                    myObj->vertices.push_back(all_edge.at(choose_edge[2]).split_point[1]);
-                    myObj->vertices.push_back(all_edge.at(choose_edge[2]).split_point[2]);
-                    myObj->numvertices += 1;
-                    all_edge.at(choose_edge[2]).vertex_push_index = myObj->numvertices;
-                }
-
-                GLMtriangle temp;
-
-                temp.vindices[0] = myObj->triangles.at(i).vindices[choose_index];
-                temp.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
-                temp.vindices[2] = all_edge.at(choose_edge[2]).vertex_push_index;
-                myObj->triangles.push_back(temp);
-                glmOneFacetNormals(myObj, myObj->numtriangles);
-                myObj->numtriangles += 1;
-
-                myObj->triangles.at(i).vindices[0] = myObj->triangles.at(i).vindices[choose_index];
-                myObj->triangles.at(i).vindices[1] = all_edge.at(choose_edge[2]).vertex_push_index;
-                myObj->triangles.at(i).vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
-                glmOneFacetNormals(myObj, i);
-            }
-        }
-    }
-}
-
-void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split,std::vector<int> &face_split_by_plane, std::vector<plane> &planes) // split face not in range have to erace
-{
-    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
-//    unsigned int current = face_split_by_plane.size();
-//    for(unsigned int i = 0; i < current; i += 1){
-        std::cout << face_split_by_plane.at(i) << std::endl;
-        if(myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size() == 0){
-//            is_face_split.at(face_split_by_plane.at(i)) = true;
-            face_split_by_plane.erase(face_split_by_plane.begin() + i);
-            i -= 1;
-        }
-        else{
-
-//        for(unsigned int j = 0; j < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); j += 1){
-            plane test_plane = planes.at(myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(0));
-            bool test = split_edge_test(myObj, all_edge, is_face_split, face_split_by_plane.at(i), test_plane);
-//            std::cout << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(0) << std::endl;
-            myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.erase(myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.begin() + 0);
-
-//            myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(0)
-            if(test){
-//            if(myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size() > 0){
-//                myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.erase(myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.begin());
-
                 vec3 point_dir;
                 int dir_count[3] = {0, 0, 0};
-                for(int k = 0; k < 3; k += 1){
-                    vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 2));
-                    point_dir[k] = plane_dir_point(temp, test_plane);
-                    dir_count[(int)point_dir[k] + 1] += 1;
+                for(int j = 0; j < 3; j += 1){
+                    vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 2));
+                    point_dir[j] = plane_dir_point(temp, test_plane);
+                    dir_count[(int)point_dir[j] + 1] += 1;
                 }
 
                 int choose_dir = -1;
@@ -367,46 +239,45 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     choose_dir = 1;
 
                 int choose_index = 0;
-                for(int k = 0; k < 3; k += 1){
-                    if(point_dir[k] == choose_dir)
-                        choose_index = k;
+                for(int j = 0; j < 3; j += 1){
+                    if(point_dir[j] == choose_dir)
+                        choose_index = j;
                 }
 
                 vec3 choose_edge(-1, -1, -1);
                 vec2 choose_vertex_index(-1,-1);
                 int one_split = 3;
 
-                for(int k = 0; k < 3; k += 1){
+                for(int j = 0; j < 3; j += 1){
                     bool judge1,judge2;
-                    judge1 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[0]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 1) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[1]);
-                    judge2 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[1]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 1) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[0]);
+                    judge1 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[0]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 1) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[1]);
+                    judge2 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[1]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 1) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[0]);
                     if(judge1){
-                        choose_edge[0] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k];
-                        one_split -= k;
+                        choose_edge[0] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j];
+                        one_split -= j;
                         choose_vertex_index[0] = 1;
                     }
                     if(judge2){
-                        choose_edge[0] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k];
-                        one_split -= k;
+                        choose_edge[0] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j];
+                        one_split -= j;
                         choose_vertex_index[0] = 0;
                     }
 
-                    judge1 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[0]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 2) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[1]);
-                    judge2 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[1]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 2) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k]).index[0]);
+                    judge1 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[0]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 2) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[1]);
+                    judge2 = (myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[1]) && (myObj->triangles.at(face_split_by_plane.at(i)).vindices[(choose_index + 2) % 3] == (unsigned int)all_edge.at(myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j]).index[0]);
                     if(judge1){
-                        choose_edge[1] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k];
-                        one_split -= k;
+                        choose_edge[1] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j];
+                        one_split -= j;
                         choose_vertex_index[1] = 1;
                     }
                     if(judge2){
-                        choose_edge[1] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[k];
-                        one_split -= k;
+                        choose_edge[1] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[j];
+                        one_split -= j;
                         choose_vertex_index[1] = 0;
                     }
                 }
 
                 choose_edge[2] = myObj->triangles.at(face_split_by_plane.at(i)).edge_index[one_split];
-//                std::cout << choose_edge[0] << " " << choose_edge[1] << " " << choose_edge[2] << std::endl;
 
                 if(all_edge.at(choose_edge[0]).vertex_push_index == -1){
                     myObj->vertices.push_back(all_edge.at(choose_edge[0]).split_point[0]);
@@ -424,19 +295,15 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     all_edge.at(choose_edge[1]).vertex_push_index = myObj->numvertices;
                 }
 
-//                for(int k = 0; k < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); k += 1)
-//                    std::cout << "test : " << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(k) << " ";
-//                std::cout << std::endl;
-
                 if(choose_dir != 0){
-//                    std::cout << planes.at(j).dir << std::endl;
 
                     GLMtriangle temp1,temp2;
 
                     temp1.vindices[0] = all_edge.at(choose_edge[1]).vertex_push_index;
                     temp1.vindices[1] = all_edge.at(choose_edge[0]).vertex_push_index;
                     temp1.vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
-                    temp1.splite_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id;
+                    temp1.split_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id;
+                    temp1.split_by_process = true;
                     myObj->triangles.push_back(temp1);
                     glmOneFacetNormals(myObj, myObj->numtriangles);
                     myObj->numtriangles += 1;
@@ -444,32 +311,20 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     dir_count[0] = 0;
                     dir_count[1] = 0;
                     dir_count[2] = 0;
-//                    is_face_split.push_back(true);
-                    for(int k = 0; k < 3; k += 1){
-                        vec3 temp(myObj->vertices.at(3 * (temp1.vindices[k]) + 0), myObj->vertices.at(3 * (temp1.vindices[k]) + 1), myObj->vertices.at(3 * (temp1.vindices[k]) + 2));
-                        point_dir[k] = plane_dir_point(temp, test_plane);
-                        dir_count[(int)point_dir[k] + 1] += 1;
+                    for(int j = 0; j < 3; j += 1){
+                        vec3 temp(myObj->vertices.at(3 * (temp1.vindices[j]) + 0), myObj->vertices.at(3 * (temp1.vindices[j]) + 1), myObj->vertices.at(3 * (temp1.vindices[j]) + 2));
+                        point_dir[j] = plane_dir_point(temp, test_plane);
+                        dir_count[(int)point_dir[j] + 1] += 1;
                     }
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
-//                        std::cout << dir_count[0] << " " << dir_count[1] << " " << dir_count[2] << std::endl;
                         face_split_by_plane.push_back(myObj->numtriangles - 1);
-//                        is_face_split.at(is_face_split.size() - 1) = false;
                     }
-
-//                    std::cout << 1 << " : " << temp1.vindices[0] << " " << temp1.vindices[1] << " " << temp1.vindices[2] << std::endl;
-//                    std::cout << myObj->vertices[3*temp1.vindices[0]+0] << " " << myObj->vertices[3*temp1.vindices[0]+1] << " " << myObj->vertices[3*temp1.vindices[0]+2] << std::endl;
-//                    std::cout << myObj->vertices[3*temp1.vindices[1]+0] << " " << myObj->vertices[3*temp1.vindices[1]+1] << " " << myObj->vertices[3*temp1.vindices[1]+2] << std::endl;
-//                    std::cout << myObj->vertices[3*temp1.vindices[2]+0] << " " << myObj->vertices[3*temp1.vindices[2]+1] << " " << myObj->vertices[3*temp1.vindices[2]+2] << std::endl;
-//                    for(int k = 0; k < myObj->triangles.at(myObj->numtriangles-1).splite_plane_id.size(); k += 1)
-//                        std::cout << "test 1: " << myObj->triangles.at(myObj->numtriangles-1).splite_plane_id.at(k) << " ";
-//                    std::cout << std::endl;
-//                    std::cout << myObj->numtriangles << std::endl;
-//                    std::cout << std::endl;
 
                     temp2.vindices[0] = all_edge.at(choose_edge[0]).vertex_push_index;
                     temp2.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
                     temp2.vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
-                    temp2.splite_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id;
+                    temp2.split_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id;
+                    temp2.split_by_process = true;
                     myObj->triangles.push_back(temp2);
                     glmOneFacetNormals(myObj, myObj->numtriangles);
                     myObj->numtriangles += 1;
@@ -477,83 +332,47 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     dir_count[0] = 0;
                     dir_count[1] = 0;
                     dir_count[2] = 0;
-//                    is_face_split.push_back(true);
-                    for(int k = 0; k < 3; k += 1){
-                        vec3 temp(myObj->vertices.at(3 * (temp2.vindices[k]) + 0), myObj->vertices.at(3 * (temp2.vindices[k]) + 1), myObj->vertices.at(3 * (temp2.vindices[k]) + 2));
-                        point_dir[k] = plane_dir_point(temp, test_plane);
-                        dir_count[(int)point_dir[k] + 1] += 1;
+                    for(int j = 0; j < 3; j += 1){
+                        vec3 temp(myObj->vertices.at(3 * (temp2.vindices[j]) + 0), myObj->vertices.at(3 * (temp2.vindices[j]) + 1), myObj->vertices.at(3 * (temp2.vindices[j]) + 2));
+                        point_dir[j] = plane_dir_point(temp, test_plane);
+                        dir_count[(int)point_dir[j] + 1] += 1;
                     }
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
-//                        std::cout << dir_count[0] << " " << dir_count[1] << " " << dir_count[2] << std::endl;
                         face_split_by_plane.push_back(myObj->numtriangles - 1);
-//                        is_face_split.at(is_face_split.size() - 1) = false;
-                    }
-//                    std::cout << 2 << " : " << temp2.vindices[0] << " " << temp2.vindices[1] << " " << temp2.vindices[2] << std::endl;
-//                    std::cout << myObj->vertices[3*temp2.vindices[0]+0] << " " << myObj->vertices[3*temp2.vindices[0]+1] << " " << myObj->vertices[3*temp2.vindices[0]+2] << std::endl;
-//                    std::cout << myObj->vertices[3*temp2.vindices[1]+0] << " " << myObj->vertices[3*temp2.vindices[1]+1] << " " << myObj->vertices[3*temp2.vindices[1]+2] << std::endl;
-//                    std::cout << myObj->vertices[3*temp2.vindices[2]+0] << " " << myObj->vertices[3*temp2.vindices[2]+1] << " " << myObj->vertices[3*temp2.vindices[2]+2] << std::endl;
-//                    for(int k = 0; k < myObj->triangles.at(myObj->numtriangles-1).splite_plane_id.size(); k += 1)
-//                        std::cout << "test 2: " << myObj->triangles.at(myObj->numtriangles-1).splite_plane_id.at(k) << " ";
-//                    std::cout << std::endl;
-//                    std::cout << myObj->numtriangles << std::endl;
-//                    std::cout << std::endl;
-
-                    if(is_face_split[all_edge.at(choose_edge[0]).face_id[0]] || is_face_split[all_edge.at(choose_edge[0]).face_id[1]]){
-                        if(is_face_split[all_edge.at(choose_edge[0]).face_id[0]])
-                            tri_poly(myObj, all_edge, is_face_split, all_edge.at(choose_edge[0]).face_id[0], all_edge.at(choose_edge[0]));
-                        if(is_face_split[all_edge.at(choose_edge[0]).face_id[1]])
-                            tri_poly(myObj, all_edge, is_face_split, all_edge.at(choose_edge[0]).face_id[1], all_edge.at(choose_edge[0]));
-                    }
-                    if(is_face_split[all_edge.at(choose_edge[1]).face_id[0]] || is_face_split[all_edge.at(choose_edge[1]).face_id[1]]){
-                        if(is_face_split[all_edge.at(choose_edge[1]).face_id[0]])
-                            tri_poly(myObj, all_edge, is_face_split, all_edge.at(choose_edge[1]).face_id[0], all_edge.at(choose_edge[1]));
-                        if(is_face_split[all_edge.at(choose_edge[1]).face_id[1]])
-                            tri_poly(myObj, all_edge, is_face_split, all_edge.at(choose_edge[1]).face_id[1], all_edge.at(choose_edge[1]));
                     }
 
-//                    if(myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[0]).splite_plane_id.size() == 0 || myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[1]).splite_plane_id.size() == 0){
-//                        if(myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[0]).splite_plane_id.size() == 0)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[0]).face_id[0], all_edge.at(choose_edge[0]));
-//                        if(myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[1]).splite_plane_id.size() == 0)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[0]).face_id[1], all_edge.at(choose_edge[0]));
-//                    }
-//                    if(myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[0]).splite_plane_id.size() == 0 || myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[1]).splite_plane_id.size() == 0){
-//                        if(myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[0]).splite_plane_id.size() == 0)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[1]).face_id[0], all_edge.at(choose_edge[1]));
-//                        if(myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[1]).splite_plane_id.size() == 0)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[1]).face_id[1], all_edge.at(choose_edge[1]));
-//                    }
+                    if(!myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[0]).split_by_process || !myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[1]).split_by_process){
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[0]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[0]).face_id[0], all_edge.at(choose_edge[0]));
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[0]).face_id[1]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[0]).face_id[1], all_edge.at(choose_edge[0]));
+                    }
+                    if(!myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[0]).split_by_process || !myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[1]).split_by_process){
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[0]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[1]).face_id[0], all_edge.at(choose_edge[1]));
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[1]).face_id[1]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[1]).face_id[1], all_edge.at(choose_edge[1]));
+                    }
+
 
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index];
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[1] = all_edge.at(choose_edge[0]).vertex_push_index;
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[2] = all_edge.at(choose_edge[1]).vertex_push_index;
+                    myObj->triangles.at(face_split_by_plane.at(i)).split_by_process = true;
                     glmOneFacetNormals(myObj, face_split_by_plane.at(i));
 
                     dir_count[0] = 0;
                     dir_count[1] = 0;
                     dir_count[2] = 0;
-//                    is_face_split.at(face_split_by_plane.at(i)) = true;
-                    for(int k = 0; k < 3; k += 1){
-                        vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 2));
-                        point_dir[k] = plane_dir_point(temp, test_plane);
-                        dir_count[(int)point_dir[k] + 1] += 1;
+                    for(int j = 0; j < 3; j += 1){
+                        vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 2));
+                        point_dir[j] = plane_dir_point(temp, test_plane);
+                        dir_count[(int)point_dir[j] + 1] += 1;
                     }
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
-//                        std::cout << dir_count[0] << " " << dir_count[1] << " " << dir_count[2] << std::endl;
                         face_split_by_plane.push_back(face_split_by_plane.at(i));
-//                        is_face_split.at(face_split_by_plane.at(i)) = false;
                     }
-//                    std::cout << 3 << " : " << myObj->triangles.at(face_split_by_plane.at(i)).vindices[0] << " " << myObj->triangles.at(face_split_by_plane.at(i)).vindices[1] << " " << myObj->triangles.at(face_split_by_plane.at(i)).vindices[2] << std::endl;
-//                    std::cout << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[0]+0] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[0]+1] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[0]+2] << std::endl;
-//                    std::cout << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[1]+0] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[1]+1] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[1]+2] << std::endl;
-//                    std::cout << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[2]+0] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[2]+1] << " " << myObj->vertices[3*myObj->triangles.at(face_split_by_plane.at(i)).vindices[2]+2] << std::endl;
-//                    for(int k = 0; k < myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.size(); k += 1)
-//                        std::cout << "test 3: " << myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id.at(k) << " ";
-//                    std::cout << std::endl;
-//                    std::cout << face_split_by_plane.at(i) << std::endl;
-//                    std::cout << std::endl;
-//                    std::cout << std::endl;
-                                    }
+                }
                 else{
                     if(all_edge.at(choose_edge[2]).vertex_push_index == -1){
                         myObj->vertices.push_back(all_edge.at(choose_edge[2]).split_point[0]);
@@ -568,7 +387,8 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     temp.vindices[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index];
                     temp.vindices[1] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
                     temp.vindices[2] = all_edge.at(choose_edge[2]).vertex_push_index;
-                    temp.splite_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).splite_plane_id;
+                    temp.split_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id;
+                    temp.split_by_process = true;
                     myObj->triangles.push_back(temp);
                     glmOneFacetNormals(myObj, myObj->numtriangles);
                     myObj->numtriangles += 1;
@@ -576,64 +396,56 @@ void split_face_test(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bo
                     dir_count[0] = 0;
                     dir_count[1] = 0;
                     dir_count[2] = 0;
-//                    is_face_split.push_back(true);
-                    for(int k = 0; k < 3; k += 1){
-                        vec3 temp2(myObj->vertices.at(3 * (temp.vindices[k]) + 0), myObj->vertices.at(3 * (temp.vindices[k]) + 1), myObj->vertices.at(3 * (temp.vindices[k]) + 2));
-                        point_dir[k] = plane_dir_point(temp2, test_plane);
-                        dir_count[(int)point_dir[k] + 1] += 1;
+                    for(int j = 0; j < 3; j += 1){
+                        vec3 temp2(myObj->vertices.at(3 * (temp.vindices[j]) + 0), myObj->vertices.at(3 * (temp.vindices[j]) + 1), myObj->vertices.at(3 * (temp.vindices[j]) + 2));
+                        point_dir[j] = plane_dir_point(temp2, test_plane);
+                        dir_count[(int)point_dir[j] + 1] += 1;
                     }
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
-//                        std::cout << dir_count[0] << " " << dir_count[1] << " " << dir_count[2] << std::endl;
                         face_split_by_plane.push_back(myObj->numtriangles - 1);
-//                        is_face_split.at(is_face_split.size()) = false;
                     }
 
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index];
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[1] = all_edge.at(choose_edge[2]).vertex_push_index;
                     myObj->triangles.at(face_split_by_plane.at(i)).vindices[2] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
+                    myObj->triangles.at(face_split_by_plane.at(i)).split_by_process = true;
                     glmOneFacetNormals(myObj, face_split_by_plane.at(i));
 
                     dir_count[0] = 0;
                     dir_count[1] = 0;
                     dir_count[2] = 0;
-                    for(int k = 0; k < 3; k += 1){
-                        vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[k]) + 2));
-                        point_dir[k] = plane_dir_point(temp, test_plane);
-                        dir_count[(int)point_dir[k] + 1] += 1;
+                    for(int j = 0; j < 3; j += 1){
+                        vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 2));
+                        point_dir[j] = plane_dir_point(temp, test_plane);
+                        dir_count[(int)point_dir[j] + 1] += 1;
                     }
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
-//                        std::cout << dir_count[0] << " " << dir_count[1] << " " << dir_count[2] << std::endl;
                         face_split_by_plane.push_back(face_split_by_plane.at(i));
-//                        is_face_split.at(face_split_by_plane.at(i)) = false;
                     }
 
-                    if(is_face_split[all_edge.at(choose_edge[2]).face_id[0]] || is_face_split[all_edge.at(choose_edge[2]).face_id[1]]){
-                        if(is_face_split[all_edge.at(choose_edge[2]).face_id[0]])
-                            tri_poly(myObj, all_edge, is_face_split, all_edge.at(choose_edge[2]).face_id[0], all_edge.at(choose_edge[2]));
-                        if(is_face_split[all_edge.at(choose_edge[2]).face_id[1]])
-                            tri_poly(myObj, all_edge, is_face_split, all_edge.at(choose_edge[2]).face_id[1], all_edge.at(choose_edge[2]));
+                    if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).split_by_process || !myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).split_by_process){
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[0], all_edge.at(choose_edge[2]));
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[1], all_edge.at(choose_edge[2]));
                     }
-//                    if(myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).splite_plane_id.size() == 0 || myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).splite_plane_id.size() == 0){
-//                        if(myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).splite_plane_id.size() == 0)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[0], all_edge.at(choose_edge[2]));
-//                        if(myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).splite_plane_id.size() == 0)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[1], all_edge.at(choose_edge[2]));
-//                    }
                 }
-
-//                for(unsigned int k = 0; k < myObj->numtriangles; k += 1){
-//                    std::cout << myObj->triangles.at(k).vindices[0] << " " << myObj->triangles.at(k).vindices[1] << " " << myObj->triangles.at(k).vindices[2];
-//                    std::cout << std::endl;
-//                }
-//                std::cout << std::endl;
-
-//                collect_edge(myObj, all_edge, is_face_split);
             }
+        }
+        if(i == current -1){
+            collect_edge(myObj, all_edge);
+            face_split_by_plane.erase(face_split_by_plane.begin(), face_split_by_plane.begin() + current);
+
+            for(unsigned int j = 0; j < face_split_by_plane.size(); j += 1){
+                myObj->triangles.at(face_split_by_plane.at(j)).split_by_process = true;
+            }
+            i = -1;
+            current = face_split_by_plane.size();
         }
     }
 }
 
-void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is_face_split, int face_id, edge &splited_edge){
+void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge){
     int current_index;
     for(int i = 0; i < 3; i += 1){
         if(all_edge.at(myObj->triangles.at(face_id).edge_index[i]) == splited_edge){
@@ -678,184 +490,171 @@ void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<bool> &is
     temp.vindices[0] = all_edge.at(choose_index[0]).index[top_index];
     temp.vindices[1] = all_edge.at(choose_index[0]).index[choose_vertex_index[0]];
     temp.vindices[2] = splited_edge.vertex_push_index;
+    temp.split_by_process = false;
     myObj->triangles.push_back(temp);
     glmOneFacetNormals(myObj, myObj->numtriangles);
     myObj->numtriangles += 1;
-//    is_face_split.push_back(true);
 
     myObj->triangles.at(face_id).vindices[0] = all_edge.at(choose_index[0]).index[top_index];
     myObj->triangles.at(face_id).vindices[1] = splited_edge.vertex_push_index;
     myObj->triangles.at(face_id).vindices[2] = all_edge.at(choose_index[1]).index[choose_vertex_index[1]];
+    myObj->triangles.at(face_id).split_by_process = false;
     glmOneFacetNormals(myObj, face_id);
-//    is_face_split.at(face_id) = true;
 }
-//
-//void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<bool> &is_face_split)
-//{
-//    int count = 0;
-//    std::vector<vec2> *temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
-//    std::vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
-//
-//    if(!is_face_split.empty()){
-//        std::vector<bool> v;
-//        is_face_split.swap(v);
-//    }
-//
-//    for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
-//
-//        int min_index = myObj->triangles.at(i).vindices[0], temp_index = 0;
-//        is_face_split.push_back(true);
-//
-//        if((unsigned int)std::min(min_index, (int)myObj->triangles.at(i).vindices[1]) == myObj->triangles.at(i).vindices[1]){
-//            min_index = myObj->triangles.at(i).vindices[1];
-//            temp_index = 1;
-//        }
-//        if((unsigned int)std::min(min_index, (int)myObj->triangles.at(i).vindices[2]) == myObj->triangles.at(i).vindices[2]){
-//            min_index = myObj->triangles.at(i).vindices[2];
-//            temp_index = 2;
-//        }
-//
-//        unsigned int mid_index = myObj->triangles.at(i).vindices[(temp_index + 1) % 3], temp_mid_index = (temp_index + 1) % 3;
-//        if(mid_index > myObj->triangles.at(i).vindices[(temp_index + 2) % 3]){
-//            mid_index = myObj->triangles.at(i).vindices[(temp_index + 2) % 3];
-//            temp_mid_index = (temp_index + 2) % 3;
-//        }
-//
-////        std::cout << myObj->triangles.at(i).vindices[0] << " " << myObj->triangles.at(i).vindices[1] << " " << myObj->triangles.at(i).vindices[2] << std::endl;
-////        std::cout << min_index << " " << mid_index << std::endl;
-//
-//        vec2 push_index1(min_index, mid_index), push_index2(min_index, myObj->triangles.at(i).vindices[(3 - temp_index - temp_mid_index) % 3]), push_index3(mid_index, myObj->triangles.at(i).vindices[(3 - temp_index - temp_mid_index) % 3]);
-//
-//        bool add1 = true, add2 = true, add3 = true;
-//
-//        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
-//            if(push_index1[1] == temp_edge[min_index].at(j)[1]){
-//                add1 = false;
-//                break;
-//            }
-//        }
-//        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
-//            if(push_index2[1] == temp_edge[min_index].at(j)[1]){
-//                add2 = false;
-//                break;
-//            }
-//        }
-//        for(unsigned int j = 0; j < temp_edge[mid_index].size(); j += 1){
-//            if(push_index3[1] == temp_edge[mid_index].at(j)[1]){
-//                add3 = false;
-//                break;
-//            }
-//        }
-//
-//        if(add1){
-//            temp_edge[min_index].push_back(push_index1);
-//            count += 1;
-//        }
-//
-//        if(add2){
-//            temp_edge[min_index].push_back(push_index2);
-//            count += 1;
-//        }
-//
-//        if(add3){
-//            temp_edge[mid_index].push_back(push_index3);
-//            count += 1;
-//        }
-//
-//        for(int j = 0 ; j < 3 ; j += 1)
-//        {
-//            temp_point_tri[myObj->triangles.at(i).vindices[j]].push_back(i);
-//            myObj->triangles.at(i).edge_index[j] = -1;
-//        }
-//    }
-//
-//    if(!all_edge.empty()){
-//        std::vector<edge> v;
-//        all_edge.swap(v);
-//    }
-//
-//    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
-//        for(unsigned int j = 0; j < temp_edge[i].size(); j += 1){
-//            vec3 p1(myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 0), myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 1), myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 2));
-//            vec3 p2(myObj->vertices.at((int)temp_edge[i][j][1] * 3 + 0), myObj->vertices.at((int)temp_edge[i].at(j)[1] * 3 + 1), myObj->vertices.at((int)temp_edge[i].at(j)[1] * 3 + 2));
-//            edge temp((int)temp_edge[i].at(j)[0], p1, (int)temp_edge[i].at(j)[1], p2);
-//            all_edge.push_back(temp);
-//        }
-//    }
-//
-//    for(unsigned int i = 1; i <= myObj->numvertices; i += 1)
-//        sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
-//
-//    for(unsigned int i = 0; i < all_edge.size(); i += 1){
-//        std::vector<int> temp_vector(temp_point_tri[all_edge.at(i).index[0]].size() + temp_point_tri[all_edge.at(i).index[1]].size());
-//        std::vector<int>::iterator it;
-//
-//        it = set_intersection(temp_point_tri[all_edge.at(i).index[0]].begin(), temp_point_tri[all_edge.at(i).index[0]].begin() + temp_point_tri[all_edge.at(i).index[0]].size(), temp_point_tri[all_edge.at(i).index[1]].begin(), temp_point_tri[all_edge.at(i).index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
-//        temp_vector.resize(it - temp_vector.begin());
-//
-//        all_edge.at(i).face_id[0] = temp_vector[0];
-//        all_edge.at(i).face_id[1] = temp_vector[1];
-//
-//        for(int j = 0; j < 3; j += 1){
-//            if(myObj->triangles.at(temp_vector[0]).edge_index[j] == -1){
-//                myObj->triangles.at(temp_vector[0]).edge_index[j] = i;
-//                break;
-//            }
-//        }
-//
-//        for(int j = 0; j < 3; j += 1){
-//            if(myObj->triangles.at(temp_vector[1]).edge_index[j] == -1){
-//                myObj->triangles.at(temp_vector[1]).edge_index[j] = i;
-//                break;
-//            }
-//        }
-//    }
-//
-//    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
-//        float temp_edge_index[3];
-//        temp_edge_index[0] = myObj->triangles.at(i).edge_index[0];
-//        temp_edge_index[1] = myObj->triangles.at(i).edge_index[1];
-//        temp_edge_index[2] = myObj->triangles.at(i).edge_index[2];
-//
-////        std::cout << myObj->triangles.at(i).edge_index[0] << " " << myObj->triangles.at(i).edge_index[1] << " " << myObj->triangles.at(i).edge_index[2] << std::endl;
-////
-////        std::cout << "index : " << i << std::endl;
-//
-//        for(int j = 0; j < 3; j += 1){
-//            bool judge1,judge2;
-////            std::cout << all_edge.at(temp_edge_index[j]).index[0] << " ";
-//            judge1 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
-//            judge2 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
-//            if(judge1 || judge2){
-//                myObj->triangles.at(i).edge_index[0] = temp_edge_index[j];
-//            }
-//
-//            judge1 = (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
-//            judge2 = (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
-//            if(judge1 || judge2){
-//                myObj->triangles.at(i).edge_index[1] = temp_edge_index[j];
-//            }
-//
-//            judge1 = (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
-//            judge2 = (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
-//            if(judge1 || judge2){
-//                myObj->triangles.at(i).edge_index[2] = temp_edge_index[j];
-//            }
-//        }
-////        std::cout << std::endl;
-//    }
-//
-//    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
-//        if(!temp_edge[i].empty()){
-//            std::vector<vec2> v;
-//            temp_edge[i].swap(v);
-//        }
-//        if(!temp_point_tri[i].empty()){
-//            std::vector<int> v;
-//            temp_point_tri[i].swap(v);
-//        }
-//    }
-//
-//    delete temp_edge;
-//    delete temp_point_tri;
-//}
+
+void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
+{
+    int count = 0;
+    std::vector<vec2> *temp_edge = new std::vector<vec2>[myObj->numvertices + 1];
+    std::vector<int> *temp_point_tri = new std::vector<int>[myObj->numvertices + 1];
+
+
+    for(unsigned int i = 0; i < myObj->numtriangles ; i += 1){
+
+        int min_index = myObj->triangles.at(i).vindices[0], temp_index = 0;
+        myObj->triangles.at(i).split_by_process = false;
+
+        if((unsigned int)std::min(min_index, (int)myObj->triangles.at(i).vindices[1]) == myObj->triangles.at(i).vindices[1]){
+            min_index = myObj->triangles.at(i).vindices[1];
+            temp_index = 1;
+        }
+        if((unsigned int)std::min(min_index, (int)myObj->triangles.at(i).vindices[2]) == myObj->triangles.at(i).vindices[2]){
+            min_index = myObj->triangles.at(i).vindices[2];
+            temp_index = 2;
+        }
+
+        unsigned int mid_index = myObj->triangles.at(i).vindices[(temp_index + 1) % 3], temp_mid_index = (temp_index + 1) % 3;
+        if(mid_index > myObj->triangles.at(i).vindices[(temp_index + 2) % 3]){
+            mid_index = myObj->triangles.at(i).vindices[(temp_index + 2) % 3];
+            temp_mid_index = (temp_index + 2) % 3;
+        }
+
+        vec2 push_index1(min_index, mid_index), push_index2(min_index, myObj->triangles.at(i).vindices[(3 - temp_index - temp_mid_index) % 3]), push_index3(mid_index, myObj->triangles.at(i).vindices[(3 - temp_index - temp_mid_index) % 3]);
+
+        bool add1 = true, add2 = true, add3 = true;
+
+        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
+            if(push_index1[1] == temp_edge[min_index].at(j)[1]){
+                add1 = false;
+                break;
+            }
+        }
+        for(unsigned int j = 0; j < temp_edge[min_index].size(); j += 1){
+            if(push_index2[1] == temp_edge[min_index].at(j)[1]){
+                add2 = false;
+                break;
+            }
+        }
+        for(unsigned int j = 0; j < temp_edge[mid_index].size(); j += 1){
+            if(push_index3[1] == temp_edge[mid_index].at(j)[1]){
+                add3 = false;
+                break;
+            }
+        }
+
+        if(add1){
+            temp_edge[min_index].push_back(push_index1);
+            count += 1;
+        }
+
+        if(add2){
+            temp_edge[min_index].push_back(push_index2);
+            count += 1;
+        }
+
+        if(add3){
+            temp_edge[mid_index].push_back(push_index3);
+            count += 1;
+        }
+
+        for(int j = 0 ; j < 3 ; j += 1)
+        {
+            temp_point_tri[myObj->triangles.at(i).vindices[j]].push_back(i);
+            myObj->triangles.at(i).edge_index[j] = -1;
+        }
+    }
+
+    if(!all_edge.empty()){
+        std::vector<edge> v;
+        all_edge.swap(v);
+    }
+
+    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
+        for(unsigned int j = 0; j < temp_edge[i].size(); j += 1){
+            vec3 p1(myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 0), myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 1), myObj->vertices.at((int)temp_edge[i].at(j)[0] * 3 + 2));
+            vec3 p2(myObj->vertices.at((int)temp_edge[i][j][1] * 3 + 0), myObj->vertices.at((int)temp_edge[i].at(j)[1] * 3 + 1), myObj->vertices.at((int)temp_edge[i].at(j)[1] * 3 + 2));
+            edge temp((int)temp_edge[i].at(j)[0], p1, (int)temp_edge[i].at(j)[1], p2);
+            all_edge.push_back(temp);
+        }
+    }
+
+    for(unsigned int i = 1; i <= myObj->numvertices; i += 1)
+        sort(temp_point_tri[i].begin(), temp_point_tri[i].begin() + temp_point_tri[i].size());
+
+    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+        std::vector<int> temp_vector(temp_point_tri[all_edge.at(i).index[0]].size() + temp_point_tri[all_edge.at(i).index[1]].size());
+        std::vector<int>::iterator it;
+
+        it = set_intersection(temp_point_tri[all_edge.at(i).index[0]].begin(), temp_point_tri[all_edge.at(i).index[0]].begin() + temp_point_tri[all_edge.at(i).index[0]].size(), temp_point_tri[all_edge.at(i).index[1]].begin(), temp_point_tri[all_edge.at(i).index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
+        temp_vector.resize(it - temp_vector.begin());
+
+        all_edge.at(i).face_id[0] = temp_vector[0];
+        all_edge.at(i).face_id[1] = temp_vector[1];
+
+        for(int j = 0; j < 3; j += 1){
+            if(myObj->triangles.at(temp_vector[0]).edge_index[j] == -1){
+                myObj->triangles.at(temp_vector[0]).edge_index[j] = i;
+                break;
+            }
+        }
+
+        for(int j = 0; j < 3; j += 1){
+            if(myObj->triangles.at(temp_vector[1]).edge_index[j] == -1){
+                myObj->triangles.at(temp_vector[1]).edge_index[j] = i;
+                break;
+            }
+        }
+    }
+
+    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
+        float temp_edge_index[3];
+        temp_edge_index[0] = myObj->triangles.at(i).edge_index[0];
+        temp_edge_index[1] = myObj->triangles.at(i).edge_index[1];
+        temp_edge_index[2] = myObj->triangles.at(i).edge_index[2];
+
+        for(int j = 0; j < 3; j += 1){
+            bool judge1,judge2;
+            judge1 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
+            judge2 = (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
+            if(judge1 || judge2){
+                myObj->triangles.at(i).edge_index[0] = temp_edge_index[j];
+            }
+
+            judge1 = (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
+            judge2 = (myObj->triangles.at(i).vindices[1] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
+            if(judge1 || judge2){
+                myObj->triangles.at(i).edge_index[1] = temp_edge_index[j];
+            }
+
+            judge1 = (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]) && (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]);
+            judge2 = (myObj->triangles.at(i).vindices[2] == (unsigned int)all_edge.at(temp_edge_index[j]).index[1]) && (myObj->triangles.at(i).vindices[0] == (unsigned int)all_edge.at(temp_edge_index[j]).index[0]);
+            if(judge1 || judge2){
+                myObj->triangles.at(i).edge_index[2] = temp_edge_index[j];
+            }
+        }
+    }
+
+    for(unsigned int i = 0; i < myObj->numvertices + 1; i += 1){
+        if(!temp_edge[i].empty()){
+            std::vector<vec2> v;
+            temp_edge[i].swap(v);
+        }
+        if(!temp_point_tri[i].empty()){
+            std::vector<int> v;
+            temp_point_tri[i].swap(v);
+        }
+    }
+
+    delete temp_edge;
+    delete temp_point_tri;
+}

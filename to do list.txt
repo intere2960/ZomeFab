@@ -1,8 +1,9 @@
 . fix glm bug (can't read same file twice, current use copy struct(in main) temporary fix it)
-. modify to multiple plane split (how to judge face & back piece?(face judge done) each vertex judge plane,then intersection)
+. modify to multiple plane split (almost done, remain record split piece)
 . fill model method
 . free vector memory
 . viewing cut plane in other viewer (output obj file)
 . modify glmWriteOBJ (temporary fix it, but maybe use group to represent split piece in future)
 . modify glmDelete
 . modify collect_edge() (when done split, modify all_edge data)
+. plane_dir_point (in bisect) have some problem about accuracy
