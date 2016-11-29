@@ -22,7 +22,7 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
-char model_source[] = "test_model/cube.obj";
+char model_source[] = "test_model/sphere.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out.obj";
 
@@ -288,7 +288,7 @@ void keyboard(unsigned char key,int x,int y)
 
     if(key==27)
     {
-//        glmWriteOBJ(myObj, model_out, GLM_FLAT);
+        glmWriteOBJ(myObj, model_out, GLM_FLAT);
 //        glmDelete(myObj);
 //        glmDelete(myObj_inner);
         exit(0);
