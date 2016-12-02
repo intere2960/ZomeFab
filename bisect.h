@@ -3,6 +3,9 @@
 
 #include <algorithm>
 
+#include <iostream>
+using namespace std;
+
 class edge
 {
 public:
@@ -14,9 +17,10 @@ public:
     vec3 point[2];
     int index[2];
     int face_id[2];
-    float l;
+    //float l;
     vec3 split_point;
     int vertex_push_index;
+    int connect_index;
 };
 
 class plane

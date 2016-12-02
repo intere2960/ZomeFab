@@ -22,7 +22,7 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
-char model_source[] = "test_model/sphere.obj";
+char model_source[] = "test_model/cube.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out.obj";
 
@@ -62,7 +62,8 @@ vec3 bound_center;
 bool show = true;
 
 //plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
-plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
+plane test_plane1(1.0, -1.0, 0.0, 0.0, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 plane test_plane2(0.0, 1.0, 0.0, -0.5 , 1);
 plane test_plane3(1.0, 0.0, 0.0, 0.5, -1);
 plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);

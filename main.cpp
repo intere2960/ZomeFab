@@ -112,19 +112,44 @@ void init()
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
     recount_normal(myObj);
-    process_inner(myObj, myObj_inner);
-    combine_inner_outfit(myObj, myObj_inner);
+//    process_inner(myObj, myObj_inner);
+//    combine_inner_outfit(myObj, myObj_inner);
 
     collect_edge(myObj, all_edge);
 
     planes.push_back(test_plane1);
-    planes.push_back(test_plane2);
-    planes.push_back(test_plane3);
-    planes.push_back(test_plane4);
+//    planes.push_back(test_plane2);
+//    planes.push_back(test_plane3);
+//    planes.push_back(test_plane4);
     planes.push_back(test_plane5); //dir_plane
 
     cut_intersection(myObj,planes, face_split_by_plane, true);
+
+    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
+        if((i+1) % 5 == 0)
+            cout << endl;
+    }
+    cout << endl;
+//    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
+//        cout << "(" << myObj->vertices[3 * i + 0] << " , " << myObj->vertices[3 * i + 1] << " , " << myObj->vertices[3 * i + 2] << ") ";
+//        cout << endl;
+//    }
+    cout << endl << endl;
+
     split_face(myObj, all_edge, face_split_by_plane, planes);
+
+    cout << endl;
+    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
+        if((i+1) % 5 == 0)
+            cout << endl;
+    }
+    cout << endl;
+//    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
+//        cout << "(" << myObj->vertices[3 * i + 0] << " , " << myObj->vertices[3 * i + 1] << " , " << myObj->vertices[3 * i + 2] << ") ";
+//        cout << endl;
+//    }
 }
 
 int main(int argc, char **argv)
@@ -137,23 +162,23 @@ int main(int argc, char **argv)
 
     init();
 
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1000,1000);
-
-    glutCreateWindow("Zometool");
-	glutDisplayFunc(display);
-	glutReshapeFunc(myReshape);
-	glutMouseFunc(mouse);
-    glutMotionFunc(mouseMotion);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special);
-	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-
-	glewInit();
-
-	setShaders();
-
-	glutMainLoop();
+//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+//	glutInitWindowSize(1000,1000);
+//
+//    glutCreateWindow("Zometool");
+//	glutDisplayFunc(display);
+//	glutReshapeFunc(myReshape);
+//	glutMouseFunc(mouse);
+//    glutMotionFunc(mouseMotion);
+//    glutKeyboardFunc(keyboard);
+//    glutSpecialFunc(special);
+//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+//
+//	glewInit();
+//
+//	setShaders();
+//
+//	glutMainLoop();
 
     return 0;
 }
