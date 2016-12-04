@@ -61,8 +61,9 @@ vec3 bound_center;
 
 bool show = true;
 
-//plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
-plane test_plane1(1.0, -1.0, 0.0, 0.0, -1); // ax+by+cz=d  e->cut dir
+plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane1(-1.0, -2.0, 0.0, 1.0, 1); // ax+by+cz=d  e->cut dir
+//plane test_plane1(1.0, -1.0, 0.0, 0.0, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 plane test_plane2(0.0, 1.0, 0.0, -0.5 , 1);
 plane test_plane3(1.0, 0.0, 0.0, 0.5, -1);
@@ -289,7 +290,7 @@ void keyboard(unsigned char key,int x,int y)
 
     if(key==27)
     {
-        glmWriteOBJ(myObj, model_out, GLM_FLAT);
+//        glmWriteOBJ(myObj, model_out, GLM_FLAT);
 //        glmDelete(myObj);
 //        glmDelete(myObj_inner);
         exit(0);

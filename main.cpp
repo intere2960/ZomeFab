@@ -125,27 +125,54 @@ void init()
 
     cut_intersection(myObj,planes, face_split_by_plane, true);
 
-    for(unsigned int i = 0; i < all_edge.size(); i += 1){
-        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
-        if((i+1) % 5 == 0)
-            cout << endl;
-    }
-    cout << endl;
+//    for(unsigned int i = 0; i < all_edge.size(); i += 1){
+//        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
+////        cout << endl;
+////        cout << all_edge.at(i).point[0][0] << "  " << all_edge.at(i).point[0][1] << " " << all_edge.at(i).point[0][2] << endl;
+////        cout << all_edge.at(i).point[1][0] << "  " << all_edge.at(i).point[1][1] << " " << all_edge.at(i).point[1][2] << endl;
+////        cout << all_edge.at(i).vertex_push_index << endl;
+////        cout << all_edge.at(i).connect_index << endl;
+////        cout << all_edge.at(i).face_id[0] << " " << all_edge.at(i).face_id[1] << endl << endl;
+//        if((i+1) % 5 == 0)
+//            cout << endl;
+//    }
+//    cout << endl;
 //    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
 //        cout << "(" << myObj->vertices[3 * i + 0] << " , " << myObj->vertices[3 * i + 1] << " , " << myObj->vertices[3 * i + 2] << ") ";
 //        cout << endl;
 //    }
-    cout << endl << endl;
+//    cout << endl;
+//    cout << endl;
+//    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
+//        cout << myObj->triangles.at(i).vindices[0] << " " << myObj->triangles.at(i).vindices[1] << " " << myObj->triangles.at(i).vindices[2] << endl;
+//        cout << myObj->triangles.at(i).edge_index[0] << " " << myObj->triangles.at(i).edge_index[1] << " " << myObj->triangles.at(i).edge_index[2] << endl;
+//        cout << endl;
+//    }
+//    cout << endl << endl;
 
     split_face(myObj, all_edge, face_split_by_plane, planes);
 
     cout << endl;
     for(unsigned int i = 0; i < all_edge.size(); i += 1){
-        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") ";
+        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") [" << all_edge.at(i).face_id[0] << " , " << all_edge.at(i).face_id[1] << "] ";
+//        cout << endl;
+//        cout << all_edge.at(i).point[0][0] << "  " << all_edge.at(i).point[0][1] << " " << all_edge.at(i).point[0][2] << endl;
+//        cout << all_edge.at(i).point[1][0] << "  " << all_edge.at(i).point[1][1] << " " << all_edge.at(i).point[1][2] << endl;
+//        cout << all_edge.at(i).vertex_push_index << endl;
+//        cout << all_edge.at(i).connect_index << endl;
+//        cout << all_edge.at(i).face_id[0] << " " << all_edge.at(i).face_id[1] << endl << endl;
         if((i+1) % 5 == 0)
             cout << endl;
     }
     cout << endl;
+
+    cout << endl;
+    for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
+        cout << myObj->triangles.at(i).vindices[0] << " " << myObj->triangles.at(i).vindices[1] << " " << myObj->triangles.at(i).vindices[2] << endl;
+        cout << myObj->triangles.at(i).edge_index[0] << " " << myObj->triangles.at(i).edge_index[1] << " " << myObj->triangles.at(i).edge_index[2] << endl;
+        cout << endl;
+    }
+
 //    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
 //        cout << "(" << myObj->vertices[3 * i + 0] << " , " << myObj->vertices[3 * i + 1] << " , " << myObj->vertices[3 * i + 2] << ") ";
 //        cout << endl;

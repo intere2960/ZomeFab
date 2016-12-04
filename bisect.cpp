@@ -212,8 +212,8 @@ bool split_edge(GLMmodel *myObj, std::vector<edge> &all_edge,int split_tri_id, p
 void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &face_split_by_plane, std::vector<plane> &planes)
 {
     unsigned int current = face_split_by_plane.size();
-//    for(unsigned int i = 0; i < current; i += 1){
-    for(unsigned int i = 0; i < 1; i += 1){
+    for(unsigned int i = 0; i < current; i += 1){
+//    for(unsigned int i = 0; i < 1; i += 1){
         if(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
             plane test_plane = planes.at(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.at(0));
             bool test = split_edge(myObj, all_edge, face_split_by_plane.at(i), test_plane);
@@ -333,6 +333,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         inner_e1.point[0][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).vertex_push_index + 1);
                         inner_e1.point[0][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).vertex_push_index + 2);
                     }
+                    inner_e1.connect_index = -1;
                     inner_e1.face_id[0] = face_split_by_plane.at(i);
                     inner_e1.face_id[1] = myObj->numtriangles + 1;
 //                    cout << inner_e1.index[0] << " " << inner_e1.index[1] << endl;
@@ -349,6 +350,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                     inner_e2.point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).vertex_push_index + 1);
                     inner_e2.point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).vertex_push_index + 2);
 //                    cout << e2.index[0] << " " << e2.index[1] << endl;
+                    inner_e2.connect_index = -1;
                     inner_e2.face_id[0] = myObj->numtriangles + 1;
                     inner_e2.face_id[1] = myObj->numtriangles + 2;
                     all_edge.push_back(inner_e2);
@@ -492,6 +494,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                     temp.split_plane_id = myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id;
                     temp.split_by_process = true;
 //                    cout << temp.vindices[0] << " " << temp.vindices[1] << " " << temp.vindices[2] << endl;
+//                    cout << choose_edge[0] << " " << choose_edge[1] << " " << choose_edge[2] << endl;
 
                     inner_e.index[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[choose_index];
                     inner_e.index[1] = all_edge.at(choose_edge[2]).vertex_push_index;
@@ -502,24 +505,61 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                     inner_e.point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 1);
                     inner_e.point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 2);
                     inner_e.face_id[0] = face_split_by_plane.at(i);
-                    inner_e.face_id[1] = myObj->numtriangles + 1;
+                    inner_e.face_id[1] = myObj->numtriangles;
+                    inner_e.connect_index = -1;
                     all_edge.push_back(inner_e);
                     inner_edge_index = all_edge.size() - 1;
 
-                    outer_e.index[0] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
-                    outer_e.index[1] = all_edge.at(choose_edge[2]).vertex_push_index;
-                    outer_e.point[0][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]] + 0);
-                    outer_e.point[0][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]] + 1);
-                    outer_e.point[0][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]] + 2);
-                    outer_e.point[1][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 0);
-                    outer_e.point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 1);
-                    outer_e.point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 2);
-                    outer_e.connect_index = choose_edge[2];
-                    outer_e.vertex_push_index = all_edge.at(choose_edge[2]).vertex_push_index;
-//                    outer_e.face_id[0] = face_split_by_plane.at(i);
-//                    outer_e.face_id[1] = myObj->numtriangles + 1;
-                    all_edge.push_back(outer_e);
-                    outer_edge_index = all_edge.size() - 1;
+                    if(all_edge.at(choose_edge[2]).connect_index == -1){
+                        outer_e.index[0] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
+                        outer_e.index[1] = all_edge.at(choose_edge[2]).vertex_push_index;
+                        outer_e.point[0][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]] + 0);
+                        outer_e.point[0][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]] + 1);
+                        outer_e.point[0][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]] + 2);
+                        outer_e.point[1][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 0);
+                        outer_e.point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 1);
+                        outer_e.point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 2);
+                        outer_e.connect_index = choose_edge[2];
+                        outer_e.vertex_push_index = all_edge.at(choose_edge[2]).vertex_push_index;
+
+                        for(int x = 0; x < 2; x += 1){
+                            if(all_edge.at(choose_edge[2]).face_id[x] == face_split_by_plane.at(i))
+                                outer_e.face_id[x] = myObj->numtriangles;
+                            else
+                                outer_e.face_id[x] = all_edge.at(choose_edge[2]).face_id[x];
+                        }
+
+                        all_edge.push_back(outer_e);
+                        outer_edge_index = all_edge.size() - 1;
+                    }
+                    else{
+                        bool test1 = (all_edge.at(choose_edge[2]).index[0] == all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]]) && (all_edge.at(choose_edge[2]).index[1] == all_edge.at(choose_edge[2]).vertex_push_index);
+                        bool test2 = (all_edge.at(choose_edge[2]).index[1] == all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]]) && (all_edge.at(choose_edge[2]).index[0] == all_edge.at(choose_edge[2]).vertex_push_index);
+                        bool test3 = (all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[0] == all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]]) && (all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[1] == all_edge.at(choose_edge[2]).vertex_push_index);
+                        bool test4 = (all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[1] == all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]]) && (all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[0] == all_edge.at(choose_edge[2]).vertex_push_index);
+                        if(test1 || test2){
+//                            cout << "yo1" << endl;
+                            outer_edge_index = choose_edge[2];
+                            choose_edge[2] = all_edge.at(choose_edge[2]).connect_index;
+                        }
+                        if(test3 || test4){
+//                            cout << "yo2" << endl;
+                            outer_edge_index = all_edge.at(choose_edge[2]).connect_index;
+                        }
+//                        cout << "tt: " << inner_edge_index << " " << outer_edge_index << endl;
+//                        cout << "tt: " << all_edge.at(outer_edge_index).face_id[0] << " " << all_edge.at(outer_edge_index).face_id[1] << endl;
+
+                        for(int x = 0; x < 2; x += 1){
+                            if(all_edge.at(outer_edge_index).face_id[x] == face_split_by_plane.at(i)){
+                                all_edge.at(outer_edge_index).face_id[x] = myObj->numtriangles;
+                            }
+                        }
+                    }
+//                    cout << "tt: " << inner_edge_index << " " << outer_edge_index << endl;
+
+                    temp.edge_index[0] = choose_edge[0];
+                    temp.edge_index[1] = outer_edge_index;
+                    temp.edge_index[2] = inner_edge_index;
 
                     myObj->triangles.push_back(temp);
                     glmOneFacetNormals(myObj, myObj->numtriangles);
@@ -545,16 +585,21 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                     glmOneFacetNormals(myObj, face_split_by_plane.at(i));
 //                    cout << myObj->triangles.at(face_split_by_plane.at(i)).vindices[0] << " " << myObj->triangles.at(face_split_by_plane.at(i)).vindices[1] << " " << myObj->triangles.at(face_split_by_plane.at(i)).vindices[2] << endl;
 
-                    all_edge.at(choose_edge[2]).index[0] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
-                    all_edge.at(choose_edge[2]).point[1][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]] + 0);
-                    all_edge.at(choose_edge[2]).point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]] + 1);
-                    all_edge.at(choose_edge[2]).point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]] + 2);
+                    if(all_edge.at(choose_edge[2]).connect_index == -1){
+                        all_edge.at(choose_edge[2]).index[0] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
+                        all_edge.at(choose_edge[2]).point[1][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]] + 0);
+                        all_edge.at(choose_edge[2]).point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]] + 1);
+                        all_edge.at(choose_edge[2]).point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]] + 2);
 
-                    all_edge.at(choose_edge[2]).index[1] = all_edge.at(choose_edge[2]).vertex_push_index;
-                    all_edge.at(choose_edge[2]).point[1][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 0);
-                    all_edge.at(choose_edge[2]).point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 1);
-                    all_edge.at(choose_edge[2]).point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 2);
-                    all_edge.at(choose_edge[2]).connect_index = outer_edge_index;
+                        all_edge.at(choose_edge[2]).index[1] = all_edge.at(choose_edge[2]).vertex_push_index;
+                        all_edge.at(choose_edge[2]).point[1][0] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 0);
+                        all_edge.at(choose_edge[2]).point[1][1] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 1);
+                        all_edge.at(choose_edge[2]).point[1][2] = myObj->vertices.at(3 * all_edge.at(choose_edge[2]).vertex_push_index + 2);
+                        all_edge.at(choose_edge[2]).connect_index = outer_edge_index;
+                    }
+                    myObj->triangles.at(face_split_by_plane.at(i)).edge_index[0] = choose_edge[1];
+                    myObj->triangles.at(face_split_by_plane.at(i)).edge_index[1] = inner_edge_index;
+                    myObj->triangles.at(face_split_by_plane.at(i)).edge_index[2] = choose_edge[2];
 
                     dir_count[0] = 0;
                     dir_count[1] = 0;
@@ -568,12 +613,12 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         face_split_by_plane.push_back(face_split_by_plane.at(i));
                     }
 
-//                    if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).split_by_process || !myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).split_by_process){
-//                        if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).split_by_process)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[0], all_edge.at(choose_edge[2]));
-//                        if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).split_by_process)
-//                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[1], all_edge.at(choose_edge[2]));
-//                    }
+                    if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).split_by_process || !myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).split_by_process){
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[0]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[0], all_edge.at(choose_edge[2]), all_edge.at(outer_edge_index));
+                        if(!myObj->triangles.at(all_edge.at(choose_edge[2]).face_id[1]).split_by_process)
+                            tri_poly(myObj, all_edge, all_edge.at(choose_edge[2]).face_id[1], all_edge.at(choose_edge[2]), all_edge.at(outer_edge_index));
+                    }
                 }
             }
         }
@@ -590,14 +635,17 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
     }
 }
 
-void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge){
+void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge1, edge &splited_edge2){
     int current_index;
     for(int i = 0; i < 3; i += 1){
-        if(all_edge.at(myObj->triangles.at(face_id).edge_index[i]) == splited_edge){
+        if(all_edge.at(myObj->triangles.at(face_id).edge_index[i]) == splited_edge1){
             current_index = i;
             break;
         }
     }
+    cout << endl << splited_edge1.index[0] << " " << splited_edge1.index[1] << endl;
+    cout << myObj->triangles.at(face_id).vindices[0] << " " << myObj->triangles.at(face_id).vindices[1] << " " << myObj->triangles.at(face_id).vindices[2] << endl;
+    cout << current_index << endl;
 
     int choose_index[2] = {myObj->triangles.at(face_id).edge_index[(current_index + 2) % 3], myObj->triangles.at(face_id).edge_index[(current_index + 1) % 3]};
     int top_index;
@@ -634,16 +682,51 @@ void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &s
 
     temp.vindices[0] = all_edge.at(choose_index[0]).index[top_index];
     temp.vindices[1] = all_edge.at(choose_index[0]).index[choose_vertex_index[0]];
-    temp.vindices[2] = splited_edge.vertex_push_index;
+    temp.vindices[2] = splited_edge1.vertex_push_index;
     temp.split_by_process = false;
+
+    edge inner_e;
+    int inner_edge_index;
+    int outer_edge_index;
+
+    inner_e.index[0] = all_edge.at(choose_index[0]).index[top_index];
+    inner_e.index[1] = splited_edge1.vertex_push_index;
+    inner_e.point[0][0] = myObj->vertices.at(3 * all_edge.at(choose_index[0]).index[top_index] + 0);
+    inner_e.point[0][1] = myObj->vertices.at(3 * all_edge.at(choose_index[0]).index[top_index] + 1);
+    inner_e.point[0][2] = myObj->vertices.at(3 * all_edge.at(choose_index[0]).index[top_index] + 2);
+    inner_e.point[1][0] = myObj->vertices.at(3 * splited_edge1.vertex_push_index + 0);
+    inner_e.point[1][1] = myObj->vertices.at(3 * splited_edge1.vertex_push_index + 1);
+    inner_e.point[1][2] = myObj->vertices.at(3 * splited_edge1.vertex_push_index + 2);
+    inner_e.face_id[0] = face_id;
+    inner_e.face_id[1] = myObj->numtriangles;
+    inner_e.connect_index = -1;
+    all_edge.push_back(inner_e);
+    inner_edge_index = all_edge.size() - 1;
+
+    if(all_edge.at(choose_index[0]).index[1 - top_index] == splited_edge1.index[0] || all_edge.at(choose_index[0]).index[1 - top_index] == splited_edge1.index[1]){
+        outer_edge_index = splited_edge2.connect_index;
+    }
+    else{
+        outer_edge_index = splited_edge1.connect_index;
+    }
+
+    temp.edge_index[0] = inner_edge_index;
+    temp.edge_index[1] = choose_index[0];
+    temp.edge_index[2] = outer_edge_index;
+
     myObj->triangles.push_back(temp);
     glmOneFacetNormals(myObj, myObj->numtriangles);
     myObj->numtriangles += 1;
 
     myObj->triangles.at(face_id).vindices[0] = all_edge.at(choose_index[0]).index[top_index];
-    myObj->triangles.at(face_id).vindices[1] = splited_edge.vertex_push_index;
+    myObj->triangles.at(face_id).vindices[1] = splited_edge1.vertex_push_index;
     myObj->triangles.at(face_id).vindices[2] = all_edge.at(choose_index[1]).index[choose_vertex_index[1]];
     myObj->triangles.at(face_id).split_by_process = false;
+
+    myObj->triangles.at(face_id).edge_index[0] = inner_edge_index;
+    myObj->triangles.at(face_id).edge_index[1] = all_edge.at(outer_edge_index).connect_index;
+    myObj->triangles.at(face_id).edge_index[2] = choose_index[1];
+
     glmOneFacetNormals(myObj, face_id);
 }
 
