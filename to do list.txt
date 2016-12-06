@@ -5,5 +5,4 @@
 . viewing cut plane in other viewer (output obj file)
 . modify glmWriteOBJ (temporary fix it, but maybe use group to represent split piece in future)
 . modify glmDelete
-. modify collect_edge() (when done split, modify all_edge data) splited edge record next index
 . plane_dir_point (in bisect) have some problem about accuracy (try & error)

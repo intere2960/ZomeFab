@@ -155,6 +155,7 @@ void init()
     cout << endl;
     for(unsigned int i = 0; i < all_edge.size(); i += 1){
         cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") [" << all_edge.at(i).face_id[0] << " , " << all_edge.at(i).face_id[1] << "] ";
+//        cout << "(" << all_edge.at(i).index[0] << " , " << all_edge.at(i).index[1] << ") [" << all_edge.at(i).connect_index << "] ";
 //        cout << endl;
 //        cout << all_edge.at(i).point[0][0] << "  " << all_edge.at(i).point[0][1] << " " << all_edge.at(i).point[0][2] << endl;
 //        cout << all_edge.at(i).point[1][0] << "  " << all_edge.at(i).point[1][1] << " " << all_edge.at(i).point[1][2] << endl;
@@ -189,23 +190,23 @@ int main(int argc, char **argv)
 
     init();
 
-//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitWindowSize(1000,1000);
-//
-//    glutCreateWindow("Zometool");
-//	glutDisplayFunc(display);
-//	glutReshapeFunc(myReshape);
-//	glutMouseFunc(mouse);
-//    glutMotionFunc(mouseMotion);
-//    glutKeyboardFunc(keyboard);
-//    glutSpecialFunc(special);
-//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-//
-//	glewInit();
-//
-//	setShaders();
-//
-//	glutMainLoop();
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1000,1000);
+
+    glutCreateWindow("Zometool");
+	glutDisplayFunc(display);
+	glutReshapeFunc(myReshape);
+	glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
+	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+
+	glewInit();
+
+	setShaders();
+
+	glutMainLoop();
 
     return 0;
 }
