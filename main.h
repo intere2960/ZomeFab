@@ -216,13 +216,6 @@ void mouseMotion(int x, int y)
 
 void keyboard(unsigned char key,int x,int y)
 {
-    //²¾°Ê
-//    if(key == 'q' || key == 'Q') //quit
-//    {
-//        glmDelete(myObj);
-//        glmDelete(myObj_inner);
-//        exit(0);
-//    }
     if(key == 'w' || key == 'W') //move forward
     {
         eye_pos[0] += 0.1 * bound_size[0] * sin(phi) * cos(theta);

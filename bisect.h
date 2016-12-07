@@ -3,9 +3,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-using namespace std;
-
 class edge
 {
 public:
@@ -17,7 +14,6 @@ public:
     vec3 point[2];
     int index[2];
     int face_id[2];
-    //float l;
     vec3 split_point;
     int vertex_push_index;
     int connect_index;
@@ -39,7 +35,6 @@ void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<in
 bool split_edge(GLMmodel *myObj, std::vector<edge> &all_edge, int split_tri_id, plane plane);
 void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &face_split_by_plane, std::vector<plane> &planes);
 void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge1, edge &splited_edge2);
-
 void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge);
 
 #endif // BISECT_H_INCLUDED
