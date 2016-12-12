@@ -30,12 +30,14 @@ void drawObj(GLMmodel *myObj)
 		    //glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
 		    //glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
 		    //glColor3f(& myObj->vertices[ myObj->triangles[i].vindices[v]*3 ]);
-		    glNormal3fv( & myObj->facetnorms.at(3 * (i + 1)));
+//		    glNormal3fv( & myObj->facetnorms.at(3 * (i + 1)));
 		    glVertex3fv( & myObj->vertices.at( myObj->triangles.at(i).vindices[v]*3 ) );
         }
     }
     glEnd();
 }
+
+GLMmodel temp_piece;
 
 void display(void)
 {
@@ -87,6 +89,8 @@ void display(void)
 
     glPopMatrix();
 
+    drawObj(&temp_piece);
+
 //    draw_bounding_box();
 
     glutSwapBuffers();
@@ -105,6 +109,60 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
+void process_piece(){
+    vector<int> vertex_map(myObj->numvertices + 1, -1);
+    vector<int> use_vertex;
+    temp_piece.numtriangles = face_split_by_plane.size();
+    temp_piece.numvertices = 0;
+    temp_piece.position[0] = 0.0;
+    temp_piece.position[1] = 0.0;
+    temp_piece.position[2] = 0.0;
+
+    temp_piece.vertices.push_back(-100000000000000000000000000000.0);
+    temp_piece.vertices.push_back(-100000000000000000000000000000.0);
+    temp_piece.vertices.push_back(-100000000000000000000000000000.0);
+
+    int current_index = 1;
+    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
+        int temp_index[3];
+        temp_index[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[0];
+        temp_index[1] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[1];
+        temp_index[2] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[2];
+
+        if(vertex_map.at(temp_index[0]) == -1){
+            vertex_map.at(temp_index[0]) = current_index;
+            current_index += 1;
+            temp_piece.numvertices += 1;
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[0] + 0));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[0] + 1));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[0] + 2));
+        }
+        if(vertex_map.at(temp_index[1]) == -1){
+            vertex_map.at(temp_index[1]) = current_index;
+            current_index += 1;
+            temp_piece.numvertices += 1;
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[1] + 0));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[1] + 1));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[1] + 2));
+        }
+        if(vertex_map.at(temp_index[2]) == -1){
+            vertex_map.at(temp_index[2]) = current_index;
+            current_index += 1;
+            temp_piece.numvertices += 1;
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[2] + 0));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[2] + 1));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[2] + 2));
+        }
+
+        GLMtriangle temp_t;
+        temp_t.vindices[0] = vertex_map.at(temp_index[0]);
+        temp_t.vindices[1] = vertex_map.at(temp_index[1]);
+        temp_t.vindices[2] = vertex_map.at(temp_index[2]);
+
+        temp_piece.triangles.push_back(temp_t);
+    }
+}
+
 void init()
 {
     bounding_box();
@@ -121,10 +179,12 @@ void init()
     planes.push_back(test_plane2);
     planes.push_back(test_plane3);
     planes.push_back(test_plane4);
-//    planes.push_back(test_plane5); //dir_plane
+    planes.push_back(test_plane5); //dir_plane
 
-    cut_intersection(myObj,planes, face_split_by_plane, false);
+    cut_intersection(myObj,planes, face_split_by_plane, true);
     split_face(myObj, all_edge, face_split_by_plane, planes);
+
+    process_piece();
 }
 
 int main(int argc, char **argv)

@@ -209,6 +209,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
     unsigned int current = face_split_by_plane.size();
     std::vector<int> edge_split_id;
     std::vector<int> all_process_face;
+    int plane_process_time = 0;
+    int end_time = myObj->triangles.at(face_split_by_plane.at(0)).split_plane_id.size();
     for(unsigned int i = 0; i < current; i += 1){
         if(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
             plane test_plane = planes.at(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.at(0));
@@ -216,9 +218,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
             myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.erase(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.begin() + 0);
 
             if(!test){
-                if(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
-                    face_split_by_plane.push_back(face_split_by_plane.at(i));
-                }
+                face_split_by_plane.push_back(face_split_by_plane.at(i));
             }
             else{
                 vec3 point_dir;
@@ -743,6 +743,10 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
             }
 
             face_split_by_plane.erase(face_split_by_plane.begin(), face_split_by_plane.begin() + current);
+
+            plane_process_time += 1;
+            if(plane_process_time == end_time)
+                break;
 
             for(unsigned int j = 0; j < face_split_by_plane.size(); j += 1){
                 myObj->triangles.at(face_split_by_plane.at(j)).split_by_process = true;
