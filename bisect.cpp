@@ -1016,3 +1016,58 @@ void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
     delete temp_edge;
     delete temp_point_tri;
 }
+
+void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face_split_by_plane)
+{
+    std::vector<int> vertex_map(myObj->numvertices + 1, -1);
+    std::vector<int> use_vertex;
+    temp_piece.numtriangles = face_split_by_plane.size();
+    temp_piece.numvertices = 0;
+    temp_piece.position[0] = 0.0;
+    temp_piece.position[1] = 0.0;
+    temp_piece.position[2] = 0.0;
+
+    temp_piece.vertices.push_back(-100000000000000000000000000000.0);
+    temp_piece.vertices.push_back(-100000000000000000000000000000.0);
+    temp_piece.vertices.push_back(-100000000000000000000000000000.0);
+
+    int current_index = 1;
+    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
+        int temp_index[3];
+        temp_index[0] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[0];
+        temp_index[1] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[1];
+        temp_index[2] = myObj->triangles.at(face_split_by_plane.at(i)).vindices[2];
+
+        if(vertex_map.at(temp_index[0]) == -1){
+            vertex_map.at(temp_index[0]) = current_index;
+            current_index += 1;
+            temp_piece.numvertices += 1;
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[0] + 0));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[0] + 1));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[0] + 2));
+        }
+        if(vertex_map.at(temp_index[1]) == -1){
+            vertex_map.at(temp_index[1]) = current_index;
+            current_index += 1;
+            temp_piece.numvertices += 1;
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[1] + 0));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[1] + 1));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[1] + 2));
+        }
+        if(vertex_map.at(temp_index[2]) == -1){
+            vertex_map.at(temp_index[2]) = current_index;
+            current_index += 1;
+            temp_piece.numvertices += 1;
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[2] + 0));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[2] + 1));
+            temp_piece.vertices.push_back(myObj->vertices.at(3 * temp_index[2] + 2));
+        }
+
+        GLMtriangle temp_t;
+        temp_t.vindices[0] = vertex_map.at(temp_index[0]);
+        temp_t.vindices[1] = vertex_map.at(temp_index[1]);
+        temp_t.vindices[2] = vertex_map.at(temp_index[2]);
+
+        temp_piece.triangles.push_back(temp_t);
+    }
+}

@@ -22,7 +22,9 @@ using namespace std;
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
-char model_source[] = "test_model/sphere.obj";
+GLMmodel temp_piece;
+
+char model_source[] = "test_model/cube.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out.obj";
 
@@ -60,13 +62,14 @@ vec3 bound_size;
 vec3 bound_center;
 
 bool show = true;
+bool show_piece = true;
 
 //plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(-1.0, -2.0, 0.0, 1.0, 1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(1.0, -1.0, 0.0, 0.0, -1); // ax+by+cz=d  e->cut dir
 plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
-plane test_plane2(0.0, 1.0, 0.0, -0.5 , 1);
-plane test_plane3(1.0, 0.0, 0.0, 0.5, -1);
+plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
+plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
 plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);
 plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
 
@@ -269,6 +272,11 @@ void keyboard(unsigned char key,int x,int y)
     if(key == 'b' || key == 'B') // down
     {
         show = !show;
+    }
+
+    if(key == 'v' || key == 'V') // down
+    {
+        show_piece = !show_piece;
     }
 
     if(key=='+')
