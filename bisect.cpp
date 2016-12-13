@@ -210,25 +210,28 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
     std::vector<int> edge_split_id;
     std::vector<int> all_process_face;
     int plane_process_time = 0;
-    int end_time = myObj->triangles.at(face_split_by_plane.at(0)).split_plane_id.size();
+    int end_time;
+    if(face_split_by_plane.size() > 0)
+        end_time = myObj->triangles.at(face_split_by_plane.at(0)).split_plane_id.size();
     for(unsigned int i = 0; i < current; i += 1){
         if(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
             plane test_plane = planes.at(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.at(0));
             bool test = split_edge(myObj, all_edge, face_split_by_plane.at(i), test_plane);
             myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.erase(myObj->triangles.at(face_split_by_plane.at(i)).split_plane_id.begin() + 0);
 
+            vec3 point_dir;
+            int dir_count[3] = {0, 0, 0};
+            for(int j = 0; j < 3; j += 1){
+                vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 2));
+                point_dir[j] = plane_dir_point(temp, test_plane);
+                dir_count[(int)point_dir[j] + 1] += 1;
+            }
+
             if(!test){
-                face_split_by_plane.push_back(face_split_by_plane.at(i));
+                if(dir_count[1] + dir_count[test_plane.dir * (-1) + 1] != 3)
+                    face_split_by_plane.push_back(face_split_by_plane.at(i));
             }
             else{
-                vec3 point_dir;
-                int dir_count[3] = {0, 0, 0};
-                for(int j = 0; j < 3; j += 1){
-                    vec3 temp(myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 0), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 1), myObj->vertices.at(3 * (myObj->triangles.at(face_split_by_plane.at(i)).vindices[j]) + 2));
-                    point_dir[j] = plane_dir_point(temp, test_plane);
-                    dir_count[(int)point_dir[j] + 1] += 1;
-                }
-
                 int choose_dir = -1;
                 if(dir_count[0] == 1 && dir_count[1] == 1 && dir_count[2] == 1)
                     choose_dir = 0;
