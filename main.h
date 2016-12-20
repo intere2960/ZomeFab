@@ -72,6 +72,12 @@ plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
 plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
 plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);
 plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
+//plane test_plane1(1.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(1.0, -0.5, 0.0, 0.5, -1);
+//plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
+//plane test_plane4(1.0, 0.5, 0.0, -0.5, 1);
+//plane test_plane5(1.0, -1.0, 0.0, -0.5, 1);
+//plane test_plane6(0.0, 0.0, 1.0, 0.0, 1);
 
 vector<plane> planes;
 
