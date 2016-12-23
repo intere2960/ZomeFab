@@ -202,13 +202,18 @@ void init()
 
     planes.push_back(test_plane1);
     planes.push_back(test_plane2);
-//    planes.push_back(test_plane3);
+    planes.push_back(test_plane3);
 //    planes.push_back(test_plane4);
-    planes.push_back(test_plane5); //dir_plane
-//    planes.push_back(test_plane6); //dir_plane
+//    planes.push_back(test_plane5); //dir_plane
+    planes.push_back(test_plane6); //dir_plane
 
     cut_intersection(myObj,planes, face_split_by_plane, true);
     split_face(myObj, all_edge, face_split_by_plane, planes);
+
+    cout << endl;
+    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
+        cout << i << " : " << myObj->vertices.at(3 * i + 0) << " " << myObj->vertices.at(3 * i + 1) << " " << myObj->vertices.at(3 * i + 2) << endl;
+    }
 
     process_piece(temp_piece, myObj, face_split_by_plane);
 //    fill_test();

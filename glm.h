@@ -72,6 +72,11 @@ typedef struct _GLMgroup {
   struct _GLMgroup* next;           /* pointer to next group in model */
 } GLMgroup;
 
+typedef struct _vertex {
+    std::vector<int> connect_edge;
+    std::vector<int> align_plane;
+} vertex;
+
 /* GLMmodel: Structure that defines a model.
  */
 typedef struct _GLMmodel {
@@ -81,6 +86,7 @@ typedef struct _GLMmodel {
   GLuint   numvertices;         /* number of vertices in model */
 //  GLfloat* vertices;            /* array of vertices  */
   std::vector<GLfloat> vertices;            /* array of vertices  */
+  std::vector<vertex> cut_loop;
 
   GLuint   numnormals;          /* number of normals in model */
   GLfloat* normals;             /* array of normals */

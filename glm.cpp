@@ -1450,6 +1450,7 @@ glmReadOBJ(char* filename)
 //    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
 //        3 * (model->numvertices + 1));
     model->vertices.resize(3 * (model->numvertices + 1));
+    model->cut_loop.resize(model->numvertices + 1);
 //    model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
 //        model->numtriangles);
     model->triangles.resize(model->numtriangles);
