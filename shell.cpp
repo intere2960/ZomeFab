@@ -70,6 +70,9 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
 
         myObj_inner->vertices.at(3 * i + 2) = myObj->vertices.at(3 * i + 2) - 0.05 * myObj->normals[3 * i + 2];
         myObj_inner->normals[3 * i + 2] = myObj->normals[3 * i + 2];
+
+        vertex new_vertex;
+        myObj->cut_loop.push_back(new_vertex);
     }
 
     myObj_inner->numfacetnorms = myObj->numfacetnorms;

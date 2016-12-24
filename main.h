@@ -24,7 +24,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/cube.obj";
+char model_source[] = "test_model/Column4.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out.obj";
 
@@ -67,18 +67,18 @@ bool show_piece = true;
 //plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(-1.0, -2.0, 0.0, 1.0, 1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(1.0, -1.0, 0.0, 0.0, 1); // ax+by+cz=d  e->cut dir
-//plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
-//plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
-////plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
-//plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
-//plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);
-//plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
-plane test_plane1(1.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
-plane test_plane2(1.0, -0.5, 0.0, 0.5, -1);
+plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
+plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
+//plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
 plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
-plane test_plane4(1.0, 0.5, 0.0, -0.5, 1);
-plane test_plane5(1.0, -1.0, 0.0, -0.5, 1);
-plane test_plane6(0.0, 0.0, 1.0, 0.0, 1);
+plane test_plane4(1.0, 0.0, 0.0, -0.5, 1);
+plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
+//plane test_plane1(1.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(1.0, -0.5, 0.0, 0.5, -1);
+//plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
+//plane test_plane4(1.0, 0.5, 0.0, -0.5, 1);
+//plane test_plane5(1.0, -1.0, 0.0, -0.5, 1);
+//plane test_plane6(0.0, 0.0, 1.0, 0.0, 1);
 
 vector<plane> planes;
 

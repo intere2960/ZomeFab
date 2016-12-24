@@ -200,20 +200,31 @@ void init()
 
     collect_edge(myObj, all_edge);
 
-    planes.push_back(test_plane1);
+//    planes.push_back(test_plane1);
     planes.push_back(test_plane2);
-    planes.push_back(test_plane3);
+//    planes.push_back(test_plane3);
 //    planes.push_back(test_plane4);
-//    planes.push_back(test_plane5); //dir_plane
-    planes.push_back(test_plane6); //dir_plane
+    planes.push_back(test_plane5); //dir_plane
+//    planes.push_back(test_plane6); //dir_plane
 
     cut_intersection(myObj,planes, face_split_by_plane, true);
     split_face(myObj, all_edge, face_split_by_plane, planes);
 
-    cout << endl;
-    for(unsigned int i = 1; i <= myObj->numvertices; i += 1){
-        cout << i << " : " << myObj->vertices.at(3 * i + 0) << " " << myObj->vertices.at(3 * i + 1) << " " << myObj->vertices.at(3 * i + 2) << endl;
-    }
+    for(unsigned int i = 1; i < myObj->cut_loop.size(); i += 1){
+ //        cout << myObj->cut_loop.at(i).size() << endl;
+         if(myObj->cut_loop.at(i).align_plane.size() > 1){
+             cout << i << " : ";
+             for(unsigned int j = 0; j < myObj->cut_loop.at(i).connect_edge.size(); j += 1){
+                 cout << myObj->cut_loop.at(i).connect_edge.at(j) << " ";
+             }
+             cout << endl;
+             cout << "\tcut plane : ";
+             for(unsigned int j = 0; j < myObj->cut_loop.at(i).align_plane.size(); j += 1){
+                 cout << myObj->cut_loop.at(i).align_plane.at(j) << " ";
+             }
+             cout << endl;
+         }
+     }
 
     process_piece(temp_piece, myObj, face_split_by_plane);
 //    fill_test();

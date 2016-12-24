@@ -6,4 +6,4 @@
 . modify glmWriteOBJ (temporary fix it, but maybe use group to represent split piece in future)
 . modify glmDelete
 . plane_dir_point (in bisect) have some problem about accuracy (try & error)
-. 紀錄每個點的cut plane
+. split_face have some problem (lack some push face)
