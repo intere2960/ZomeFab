@@ -59,9 +59,9 @@ int plane_dir_point(vec3 &point, plane plane) //have problem
 {
     float judge = plane.plane_par[0] * point[0] + plane.plane_par[1] * point[1] + plane.plane_par[2] * point[2] - plane.plane_par[3];
 
-    if(judge > 0.000001)
+    if(judge > 0.0001)
         judge = 1;
-    else if(judge < -0.000001)
+    else if(judge < -0.0001)
         judge = -1;
     else
         judge = 0;

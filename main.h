@@ -24,7 +24,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/Column4.obj";
+char model_source[] = "test_model/cube.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out.obj";
 

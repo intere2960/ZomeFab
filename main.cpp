@@ -200,10 +200,10 @@ void init()
 
     collect_edge(myObj, all_edge);
 
-//    planes.push_back(test_plane1);
+    planes.push_back(test_plane1);
     planes.push_back(test_plane2);
-//    planes.push_back(test_plane3);
-//    planes.push_back(test_plane4);
+    planes.push_back(test_plane3);
+    planes.push_back(test_plane4);
     planes.push_back(test_plane5); //dir_plane
 //    planes.push_back(test_plane6); //dir_plane
 
