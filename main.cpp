@@ -31,7 +31,7 @@ void drawObj(GLMmodel *myObj)
 		    //glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
 		    //glColor3f(& myObj->vertices[ myObj->triangles[i].vindices[v]*3 ]);
 //		    glNormal3fv( & myObj->facetnorms.at(3 * (i + 1)));
-		    glVertex3fv( & myObj->vertices.at( myObj->triangles.at(i).vindices[v]*3 ) );
+		    glVertex3fv( & myObj->vertices->at( myObj->triangles->at(i).vindices[v]*3 ) );
         }
     }
     glEnd();
@@ -108,7 +108,7 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-vector<edge> all_piece_edge;
+//vector<edge> all_piece_edge;
 void fill_test()
 {
 //    for(unsigned int i = 0; i < planes.size(); i += 1){
@@ -198,6 +198,10 @@ void init()
 //    process_inner(myObj, myObj_inner);
 //    combine_inner_outfit(myObj, myObj_inner);
 
+//    for(unsigned int i = 1; i <= myObj_inner->numvertices; i += 1){
+//        cout << myObj_inner->vertices->at(3 * i + 0) << " " << myObj_inner->vertices->at(3 * i + 1) << " " << myObj_inner->vertices->at(3 * i + 2) << endl;
+//    }
+
     collect_edge(myObj, all_edge);
 
     planes.push_back(test_plane1);
@@ -210,21 +214,28 @@ void init()
     cut_intersection(myObj,planes, face_split_by_plane, true);
     split_face(myObj, all_edge, face_split_by_plane, planes);
 
-    for(unsigned int i = 1; i < myObj->cut_loop.size(); i += 1){
- //        cout << myObj->cut_loop.at(i).size() << endl;
-         if(myObj->cut_loop.at(i).align_plane.size() > 1){
-             cout << i << " : ";
-             for(unsigned int j = 0; j < myObj->cut_loop.at(i).connect_edge.size(); j += 1){
-                 cout << myObj->cut_loop.at(i).connect_edge.at(j) << " ";
-             }
-             cout << endl;
-             cout << "\tcut plane : ";
-             for(unsigned int j = 0; j < myObj->cut_loop.at(i).align_plane.size(); j += 1){
-                 cout << myObj->cut_loop.at(i).align_plane.at(j) << " ";
-             }
-             cout << endl;
-         }
-     }
+    for(unsigned int i = 1; i < myObj->cut_loop->size(); i += 1){
+ //        cout << myObj->cut_loop->at(i).size() << endl;
+        if(myObj->cut_loop->at(i).align_plane.size() > 1){
+            cout << i << " : ";
+            for(unsigned int j = 0; j < myObj->cut_loop->at(i).connect_edge.size(); j += 1){
+                cout << myObj->cut_loop->at(i).connect_edge.at(j) << " ";
+            }
+            cout << endl;
+            cout << "\tcut plane : ";
+            for(unsigned int j = 0; j < myObj->cut_loop->at(i).align_plane.size(); j += 1){
+                cout << myObj->cut_loop->at(i).align_plane.at(j) << " ";
+            }
+            cout << endl;
+            myObj->multi_vertex->push_back(i);
+        }
+    }
+    cout << endl;
+
+    for(unsigned int i = 0; i < myObj->multi_vertex->size(); i += 1){
+        cout << myObj->multi_vertex->at(i) << " ";
+    }
+    cout << endl;
 
     process_piece(temp_piece, myObj, face_split_by_plane);
 //    fill_test();
@@ -233,10 +244,12 @@ void init()
 int main(int argc, char **argv)
 {
     myObj = glmReadOBJ(model_source);
-    GLMmodel temp = *myObj;
-    myObj_inner = &temp;
+//    GLMmodel temp = *myObj;
+//    myObj_inner = &temp;
+//    glmCopy(myObj, myObj_inner);
+//    cout << myObj_inner->numvertices << endl;
 
-//    myObj_inner = glmReadOBJ(model_source);
+    myObj_inner = glmReadOBJ(model_source) ;
 
     init();
 

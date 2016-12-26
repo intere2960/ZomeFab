@@ -21,7 +21,7 @@
 
 
 //#define T(x) (model->triangles[(x)])
-#define T(x) (model->triangles.at(x))
+#define T(x) (model->triangles->at(x))
 
 
 /* _GLMnode: general purpose node */
@@ -616,9 +616,9 @@ glmSecondPass(GLMmodel* model, FILE* file)
 //                    &vertices[3 * numvertices + 1],
 //                    &vertices[3 * numvertices + 2]);
                 fscanf(file, "%f %f %f",
-                    &model->vertices.at(3 * numvertices + 0),
-                    &model->vertices.at(3 * numvertices + 1),
-                    &model->vertices.at(3 * numvertices + 2));
+                    &model->vertices->at(3 * numvertices + 0),
+                    &model->vertices->at(3 * numvertices + 1),
+                    &model->vertices->at(3 * numvertices + 2));
                 numvertices++;
                 break;
             case 'n':           /* normal */
@@ -829,24 +829,24 @@ glmUnitize(GLMmodel* model)
 //    assert(model->vertices);
 
     /* get the max/mins */
-    maxx = minx = model->vertices[3 + 0];
-    maxy = miny = model->vertices[3 + 1];
-    maxz = minz = model->vertices[3 + 2];
+    maxx = minx = model->vertices->at(3 + 0);
+    maxy = miny = model->vertices->at(3 + 1);
+    maxz = minz = model->vertices->at(3 + 2);
     for (i = 1; i <= model->numvertices; i++) {
-        if (maxx < model->vertices[3 * i + 0])
-            maxx = model->vertices[3 * i + 0];
-        if (minx > model->vertices[3 * i + 0])
-            minx = model->vertices[3 * i + 0];
+        if (maxx < model->vertices->at(3 * i + 0))
+            maxx = model->vertices->at(3 * i + 0);
+        if (minx > model->vertices->at(3 * i + 0))
+            minx = model->vertices->at(3 * i + 0);
 
-        if (maxy < model->vertices[3 * i + 1])
-            maxy = model->vertices[3 * i + 1];
-        if (miny > model->vertices[3 * i + 1])
-            miny = model->vertices[3 * i + 1];
+        if (maxy < model->vertices->at(3 * i + 1))
+            maxy = model->vertices->at(3 * i + 1);
+        if (miny > model->vertices->at(3 * i + 1))
+            miny = model->vertices->at(3 * i + 1);
 
-        if (maxz < model->vertices[3 * i + 2])
-            maxz = model->vertices[3 * i + 2];
-        if (minz > model->vertices[3 * i + 2])
-            minz = model->vertices[3 * i + 2];
+        if (maxz < model->vertices->at(3 * i + 2))
+            maxz = model->vertices->at(3 * i + 2);
+        if (minz > model->vertices->at(3 * i + 2))
+            minz = model->vertices->at(3 * i + 2);
     }
 
     /* calculate model width, height, and depth */
@@ -864,12 +864,12 @@ glmUnitize(GLMmodel* model)
 
     /* translate around center then scale */
     for (i = 1; i <= model->numvertices; i++) {
-        model->vertices[3 * i + 0] -= cx;
-        model->vertices[3 * i + 1] -= cy;
-        model->vertices[3 * i + 2] -= cz;
-        model->vertices[3 * i + 0] *= scale;
-        model->vertices[3 * i + 1] *= scale;
-        model->vertices[3 * i + 2] *= scale;
+        model->vertices->at(3 * i + 0) -= cx;
+        model->vertices->at(3 * i + 1) -= cy;
+        model->vertices->at(3 * i + 2) -= cz;
+        model->vertices->at(3 * i + 0) *= scale;
+        model->vertices->at(3 * i + 1) *= scale;
+        model->vertices->at(3 * i + 2) *= scale;
     }
 
     return scale;
@@ -892,24 +892,24 @@ glmDimensions(GLMmodel* model, GLfloat* dimensions)
     assert(dimensions);
 
     /* get the max/mins */
-    maxx = minx = model->vertices[3 + 0];
-    maxy = miny = model->vertices[3 + 1];
-    maxz = minz = model->vertices[3 + 2];
+    maxx = minx = model->vertices->at(3 + 0);
+    maxy = miny = model->vertices->at(3 + 1);
+    maxz = minz = model->vertices->at(3 + 2);
     for (i = 1; i <= model->numvertices; i++) {
-        if (maxx < model->vertices[3 * i + 0])
-            maxx = model->vertices[3 * i + 0];
-        if (minx > model->vertices[3 * i + 0])
-            minx = model->vertices[3 * i + 0];
+        if (maxx < model->vertices->at(3 * i + 0))
+            maxx = model->vertices->at(3 * i + 0);
+        if (minx > model->vertices->at(3 * i + 0))
+            minx = model->vertices->at(3 * i + 0);
 
-        if (maxy < model->vertices[3 * i + 1])
-            maxy = model->vertices[3 * i + 1];
-        if (miny > model->vertices[3 * i + 1])
-            miny = model->vertices[3 * i + 1];
+        if (maxy < model->vertices->at(3 * i + 1))
+            maxy = model->vertices->at(3 * i + 1);
+        if (miny > model->vertices->at(3 * i + 1))
+            miny = model->vertices->at(3 * i + 1);
 
-        if (maxz < model->vertices[3 * i + 2])
-            maxz = model->vertices[3 * i + 2];
-        if (minz > model->vertices[3 * i + 2])
-            minz = model->vertices[3 * i + 2];
+        if (maxz < model->vertices->at(3 * i + 2))
+            maxz = model->vertices->at(3 * i + 2);
+        if (minz > model->vertices->at(3 * i + 2))
+            minz = model->vertices->at(3 * i + 2);
     }
 
     /* calculate model width, height, and depth */
@@ -929,9 +929,9 @@ glmScale(GLMmodel* model, GLfloat scale)
     GLuint i;
 
     for (i = 1; i <= model->numvertices; i++) {
-        model->vertices[3 * i + 0] *= scale;
-        model->vertices[3 * i + 1] *= scale;
-        model->vertices[3 * i + 2] *= scale;
+        model->vertices->at(3 * i + 0) *= scale;
+        model->vertices->at(3 * i + 1) *= scale;
+        model->vertices->at(3 * i + 2) *= scale;
     }
 }
 
@@ -968,9 +968,9 @@ glmReverseWinding(GLMmodel* model)
 
     /* reverse facet normals */
     for (i = 1; i <= model->numfacetnorms; i++) {
-        model->facetnorms[3 * i + 0] = -model->facetnorms[3 * i + 0];
-        model->facetnorms[3 * i + 1] = -model->facetnorms[3 * i + 1];
-        model->facetnorms[3 * i + 2] = -model->facetnorms[3 * i + 2];
+        model->facetnorms->at(3 * i + 0) = -model->facetnorms->at(3 * i + 0);
+        model->facetnorms->at(3 * i + 1) = -model->facetnorms->at(3 * i + 1);
+        model->facetnorms->at(3 * i + 2) = -model->facetnorms->at(3 * i + 2);
     }
 
     /* reverse vertex normals */
@@ -998,36 +998,36 @@ glmFacetNormals(GLMmodel* model)
 //    assert(model->vertices);
 
     /* clobber any old facetnormals */
-    if (!model->facetnorms.empty()){
+    if (!model->facetnorms->empty()){
         std::vector<GLfloat> v;
-        model->facetnorms.swap(v);
+        model->facetnorms->swap(v);
     }
 
     /* allocate memory for the new facet normals */
     model->numfacetnorms = model->numtriangles;
 //    model->facetnorms = (GLfloat*)malloc(sizeof(GLfloat) *
 //                       3 * (model->numfacetnorms + 1));
-    model->facetnorms.resize(3 * (model->numfacetnorms + 1));
+    model->facetnorms->resize(3 * (model->numfacetnorms + 1));
 
     for (i = 0; i < model->numtriangles; i++) {
-        model->triangles[i].findex = i+1;
+        model->triangles->at(i).findex = i+1;
 
-        u[0] = model->vertices.at(3 * T(i).vindices[1] + 0) -
-            model->vertices.at(3 * T(i).vindices[0] + 0);
-        u[1] = model->vertices.at(3 * T(i).vindices[1] + 1) -
-            model->vertices.at(3 * T(i).vindices[0] + 1);
-        u[2] = model->vertices.at(3 * T(i).vindices[1] + 2) -
-            model->vertices.at(3 * T(i).vindices[0] + 2);
+        u[0] = model->vertices->at(3 * T(i).vindices[1] + 0) -
+            model->vertices->at(3 * T(i).vindices[0] + 0);
+        u[1] = model->vertices->at(3 * T(i).vindices[1] + 1) -
+            model->vertices->at(3 * T(i).vindices[0] + 1);
+        u[2] = model->vertices->at(3 * T(i).vindices[1] + 2) -
+            model->vertices->at(3 * T(i).vindices[0] + 2);
 
-        v[0] = model->vertices.at(3 * T(i).vindices[2] + 0) -
-            model->vertices.at(3 * T(i).vindices[0] + 0);
-        v[1] = model->vertices.at(3 * T(i).vindices[2] + 1) -
-            model->vertices.at(3 * T(i).vindices[0] + 1);
-        v[2] = model->vertices.at(3 * T(i).vindices[2] + 2) -
-            model->vertices.at(3 * T(i).vindices[0] + 2);
+        v[0] = model->vertices->at(3 * T(i).vindices[2] + 0) -
+            model->vertices->at(3 * T(i).vindices[0] + 0);
+        v[1] = model->vertices->at(3 * T(i).vindices[2] + 1) -
+            model->vertices->at(3 * T(i).vindices[0] + 1);
+        v[2] = model->vertices->at(3 * T(i).vindices[2] + 2) -
+            model->vertices->at(3 * T(i).vindices[0] + 2);
 
-        glmCross(u, v, &model->facetnorms.at(3 * (i+1)));
-        glmNormalize(&model->facetnorms.at(3 * (i+1)));
+        glmCross(u, v, &model->facetnorms->at(3 * (i+1)));
+        glmNormalize(&model->facetnorms->at(3 * (i+1)));
 
     }
 }
@@ -1041,34 +1041,34 @@ glmOneFacetNormals(GLMmodel* model, int tri_index)
     GLfloat v[3];
     GLfloat temp[3];
 
-    u[0] = model->vertices.at(3 * T(tri_index).vindices[1] + 0) -
-        model->vertices.at(3 * T(tri_index).vindices[0] + 0);
-    u[1] = model->vertices.at(3 * T(tri_index).vindices[1] + 1) -
-        model->vertices.at(3 * T(tri_index).vindices[0] + 1);
-    u[2] = model->vertices.at(3 * T(tri_index).vindices[1] + 2) -
-        model->vertices.at(3 * T(tri_index).vindices[0] + 2);
+    u[0] = model->vertices->at(3 * T(tri_index).vindices[1] + 0) -
+        model->vertices->at(3 * T(tri_index).vindices[0] + 0);
+    u[1] = model->vertices->at(3 * T(tri_index).vindices[1] + 1) -
+        model->vertices->at(3 * T(tri_index).vindices[0] + 1);
+    u[2] = model->vertices->at(3 * T(tri_index).vindices[1] + 2) -
+        model->vertices->at(3 * T(tri_index).vindices[0] + 2);
 
-    v[0] = model->vertices.at(3 * T(tri_index).vindices[2] + 0) -
-        model->vertices.at(3 * T(tri_index).vindices[0] + 0);
-    v[1] = model->vertices.at(3 * T(tri_index).vindices[2] + 1) -
-        model->vertices.at(3 * T(tri_index).vindices[0] + 1);
-    v[2] = model->vertices.at(3 * T(tri_index).vindices[2] + 2) -
-        model->vertices.at(3 * T(tri_index).vindices[0] + 2);
+    v[0] = model->vertices->at(3 * T(tri_index).vindices[2] + 0) -
+        model->vertices->at(3 * T(tri_index).vindices[0] + 0);
+    v[1] = model->vertices->at(3 * T(tri_index).vindices[2] + 1) -
+        model->vertices->at(3 * T(tri_index).vindices[0] + 1);
+    v[2] = model->vertices->at(3 * T(tri_index).vindices[2] + 2) -
+        model->vertices->at(3 * T(tri_index).vindices[0] + 2);
 
     glmCross(u, v, temp);
     glmNormalize(temp);
 
     if((unsigned int)(tri_index + 1) > model->numfacetnorms){
-        model->triangles[tri_index].findex = model->numfacetnorms + 1;
+        model->triangles->at(tri_index).findex = model->numfacetnorms + 1;
         model->numfacetnorms += 1;
-        model->facetnorms.push_back(temp[0]);
-        model->facetnorms.push_back(temp[1]);
-        model->facetnorms.push_back(temp[2]);
+        model->facetnorms->push_back(temp[0]);
+        model->facetnorms->push_back(temp[1]);
+        model->facetnorms->push_back(temp[2]);
     }
     else{
-        model->facetnorms.at(model->triangles[tri_index].findex * 3 + 0) = temp[0];
-        model->facetnorms.at(model->triangles[tri_index].findex * 3 + 1) = temp[1];
-        model->facetnorms.at(model->triangles[tri_index].findex * 3 + 2) = temp[2];
+        model->facetnorms->at(model->triangles->at(tri_index).findex * 3 + 0) = temp[0];
+        model->facetnorms->at(model->triangles->at(tri_index).findex * 3 + 1) = temp[1];
+        model->facetnorms->at(model->triangles->at(tri_index).findex * 3 + 2) = temp[2];
     }
 }
 
@@ -1153,13 +1153,13 @@ glmVertexNormals(GLMmodel* model, GLfloat angle)
         facet normals is greater than the cosine of the threshold
         angle -- or, said another way, the angle between the two
             facet normals is less than (or equal to) the threshold angle */
-            dot = glmDot(&model->facetnorms[3 * T(node->index).findex],
-                &model->facetnorms[3 * T(members[i]->index).findex]);
+            dot = glmDot(&model->facetnorms->at(3 * T(node->index).findex),
+                &model->facetnorms->at(3 * T(members[i]->index).findex));
             if (dot > cos_angle) {
                 node->averaged = GL_TRUE;
-                average[0] += model->facetnorms[3 * T(node->index).findex + 0];
-                average[1] += model->facetnorms[3 * T(node->index).findex + 1];
-                average[2] += model->facetnorms[3 * T(node->index).findex + 2];
+                average[0] += model->facetnorms->at(3 * T(node->index).findex + 0);
+                average[1] += model->facetnorms->at(3 * T(node->index).findex + 1);
+                average[2] += model->facetnorms->at(3 * T(node->index).findex + 2);
                 avg = 1;            /* we averaged at least one normal! */
             } else {
                 node->averaged = GL_FALSE;
@@ -1193,11 +1193,11 @@ glmVertexNormals(GLMmodel* model, GLfloat angle)
             } else {
                 /* if this node wasn't averaged, use the facet normal */
                 model->normals[3 * numnormals + 0] =
-                    model->facetnorms[3 * T(node->index).findex + 0];
+                    model->facetnorms->at(3 * T(node->index).findex + 0);
                 model->normals[3 * numnormals + 1] =
-                    model->facetnorms[3 * T(node->index).findex + 1];
+                    model->facetnorms->at(3 * T(node->index).findex + 1);
                 model->normals[3 * numnormals + 2] =
-                    model->facetnorms[3 * T(node->index).findex + 2];
+                    model->facetnorms->at(3 * T(node->index).findex + 2);
                 if (T(node->index).vindices[0] == i)
                     T(node->index).nindices[0] = numnormals;
                 else if (T(node->index).vindices[1] == i)
@@ -1265,8 +1265,8 @@ glmLinearTexture(GLMmodel* model)
 
     /* do the calculations */
     for(i = 1; i <= model->numvertices; i++) {
-        x = model->vertices[3 * i + 0] * scalefactor;
-        y = model->vertices[3 * i + 2] * scalefactor;
+        x = model->vertices->at(3 * i + 0) * scalefactor;
+        y = model->vertices->at(3 * i + 2) * scalefactor;
         model->texcoords[2 * i + 0] = (x + 1.0) / 2.0;
         model->texcoords[2 * i + 1] = (y + 1.0) / 2.0;
     }
@@ -1367,21 +1367,21 @@ glmDelete(GLMmodel* model)
     if (model->pathname)     free(model->pathname);
     if (model->mtllibname) free(model->mtllibname);
 //    if (model->vertices)     free(model->vertices);
-    if (!model->vertices.empty()){
+    if (!model->vertices->empty()){
         std::vector<GLfloat> v;
-        model->vertices.swap(v);
+        model->vertices->swap(v);
     }
     if (model->normals)  free(model->normals);
     if (model->texcoords)  free(model->texcoords);
 //    if (model->facetnorms) free(model->facetnorms);
-    if (!model->facetnorms.empty()){
+    if (!model->facetnorms->empty()){
         std::vector<GLfloat> v;
-        model->facetnorms.swap(v);
+        model->facetnorms->swap(v);
     }
     //if (model->triangles)  free(model->triangles);
-    if (!model->triangles.empty()){
+    if (!model->triangles->empty()){
         std::vector<GLMtriangle> v;
-        model->triangles.swap(v);
+        model->triangles->swap(v);
     }
     if (model->materials) {
         for (i = 0; i < model->nummaterials; i++)
@@ -1449,11 +1449,17 @@ glmReadOBJ(char* filename)
     /* allocate memory */
 //    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
 //        3 * (model->numvertices + 1));
-    model->vertices.resize(3 * (model->numvertices + 1));
-    model->cut_loop.resize(model->numvertices + 1);
+//    model->vertices->resize(3 * (model->numvertices + 1));
+    model->vertices = new std::vector<GLfloat>(3 * (model->numvertices + 1));
+//    model->cut_loop.resize(model->numvertices + 1);
+    model->cut_loop = new std::vector<vertex>(model->numvertices + 1);
 //    model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
 //        model->numtriangles);
-    model->triangles.resize(model->numtriangles);
+//    model->triangles->resize(model->numtriangles);
+    model->triangles = new std::vector<GLMtriangle>(model->numtriangles);
+    model->facetnorms = new std::vector<GLfloat>(3 * (model->numfacetnorms + 1));
+
+    model->multi_vertex = new std::vector<int>();
 
     if (model->numnormals) {
         model->normals = (GLfloat*)malloc(sizeof(GLfloat) *
@@ -1501,7 +1507,7 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
 
     /* do a bit of warning */
 //    if (mode & GLM_FLAT && !model->facetnorms) {
-    if (mode & GLM_FLAT && model->facetnorms.empty()) {
+    if (mode & GLM_FLAT && model->facetnorms->empty()) {
         printf("glmWriteOBJ() warning: flat normal output requested "
             "with no facet normals defined.\n");
         mode &= ~GLM_FLAT;
@@ -1566,9 +1572,9 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
     fprintf(file, "# %d vertices\n", model->numvertices);
     for (i = 1; i <= model->numvertices; i++) {
         fprintf(file, "v %f %f %f\n",
-            model->vertices[3 * i + 0],
-            model->vertices[3 * i + 1],
-            model->vertices[3 * i + 2]);
+            model->vertices->at(3 * i + 0),
+            model->vertices->at(3 * i + 1),
+            model->vertices->at(3 * i + 2));
     }
 
     /* spit out the smooth/flat normals */
@@ -1586,9 +1592,9 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
         fprintf(file, "# %d normals\n", model->numfacetnorms);
         for (i = 1; i <= model->numnormals; i++) {
             fprintf(file, "vn %f %f %f\n",
-                model->facetnorms[3 * i + 0],
-                model->facetnorms[3 * i + 1],
-                model->facetnorms[3 * i + 2]);
+                model->facetnorms->at(3 * i + 0),
+                model->facetnorms->at(3 * i + 1),
+                model->facetnorms->at(3 * i + 2));
         }
     }
 
@@ -1752,7 +1758,7 @@ glmDraw(GLMmodel* model, GLuint mode)
 
     /* do a bit of warning */
 //    if (mode & GLM_FLAT && !model->facetnorms) {
-    if (mode & GLM_FLAT && model->facetnorms.empty()) {
+    if (mode & GLM_FLAT && model->facetnorms->empty()) {
         printf("glmDraw() warning: flat render mode requested "
             "with no facet normals defined.\n");
         mode &= ~GLM_FLAT;
@@ -1816,25 +1822,25 @@ glmDraw(GLMmodel* model, GLuint mode)
             triangle = &T(group->triangles[i]);
 
             if (mode & GLM_FLAT)
-                glNormal3fv(&model->facetnorms[3 * triangle->findex]);
+                glNormal3fv(&model->facetnorms->at(3 * triangle->findex));
 
             if (mode & GLM_SMOOTH)
                 glNormal3fv(&model->normals[3 * triangle->nindices[0]]);
             if (mode & GLM_TEXTURE)
                 glTexCoord2fv(&model->texcoords[2 * triangle->tindices[0]]);
-            glVertex3fv(&model->vertices[3 * triangle->vindices[0]]);
+            glVertex3fv(&model->vertices->at(3 * triangle->vindices[0]));
 
             if (mode & GLM_SMOOTH)
                 glNormal3fv(&model->normals[3 * triangle->nindices[1]]);
             if (mode & GLM_TEXTURE)
                 glTexCoord2fv(&model->texcoords[2 * triangle->tindices[1]]);
-            glVertex3fv(&model->vertices[3 * triangle->vindices[1]]);
+            glVertex3fv(&model->vertices->at(3 * triangle->vindices[1]));
 
             if (mode & GLM_SMOOTH)
                 glNormal3fv(&model->normals[3 * triangle->nindices[2]]);
             if (mode & GLM_TEXTURE)
                 glTexCoord2fv(&model->texcoords[2 * triangle->tindices[2]]);
-            glVertex3fv(&model->vertices[3 * triangle->vindices[2]]);
+            glVertex3fv(&model->vertices->at(3 * triangle->vindices[2]));
 
         }
         glEnd();
@@ -1882,7 +1888,7 @@ GLvoid
 glmWeld(GLMmodel* model, GLfloat epsilon)
 {
 //    GLfloat* vectors;
-    std::vector<GLfloat> vectors;
+    std::vector<GLfloat> *vectors;
 //    GLfloat* copies;
     std::vector<GLfloat> copies;
     GLuint numvectors;
@@ -1891,17 +1897,17 @@ glmWeld(GLMmodel* model, GLfloat epsilon)
     /* vertices */
     numvectors = model->numvertices;
     vectors  = model->vertices;
-    copies = glmWeldVectors(vectors, &numvectors, epsilon);
+    copies = glmWeldVectors(*vectors, &numvectors, epsilon);
 
 #if 0
-    printf("glmWeld(): %d redundant vertices.\n",
+    printf("glmWeld(): %d redundant vertices->\n",
         model->numvertices - numvectors - 1);
 #endif
 
     for (i = 0; i < model->numtriangles; i++) {
-        T(i).vindices[0] = (GLuint)vectors[3 * T(i).vindices[0] + 0];
-        T(i).vindices[1] = (GLuint)vectors[3 * T(i).vindices[1] + 0];
-        T(i).vindices[2] = (GLuint)vectors[3 * T(i).vindices[2] + 0];
+        T(i).vindices[0] = (GLuint)vectors->at(3 * T(i).vindices[0] + 0);
+        T(i).vindices[1] = (GLuint)vectors->at(3 * T(i).vindices[1] + 0);
+        T(i).vindices[2] = (GLuint)vectors->at(3 * T(i).vindices[2] + 0);
     }
 
     /* free space for old vertices */
@@ -1911,13 +1917,13 @@ glmWeld(GLMmodel* model, GLfloat epsilon)
     model->numvertices = numvectors;
 //    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
 //        3 * (model->numvertices + 1));
-    model->vertices.resize(3 * (model->numvertices + 1));
+    model->vertices->resize(3 * (model->numvertices + 1));
 
     /* copy the optimized vertices into the actual vertex list */
     for (i = 1; i <= model->numvertices; i++) {
-        model->vertices[3 * i + 0] = copies[3 * i + 0];
-        model->vertices[3 * i + 1] = copies[3 * i + 1];
-        model->vertices[3 * i + 2] = copies[3 * i + 2];
+        model->vertices->at(3 * i + 0) = copies[3 * i + 0];
+        model->vertices->at(3 * i + 1) = copies[3 * i + 1];
+        model->vertices->at(3 * i + 2) = copies[3 * i + 2];
     }
 
 //    free(copies);
@@ -2077,3 +2083,46 @@ for (i = 1; i <= model->numvertices; i++) {
     }
 }
 #endif
+
+//#include <iostream>
+//
+//void glmCopy(GLMmodel* m1, GLMmodel* m2){
+////  char*    pathname;            /* path to this model */
+////  char*    mtllibname;          /* name of the material library */
+////
+////  GLuint   numvertices;         /* number of vertices in model */
+//    std::cout << m1->numvertices << std::endl;
+//    m2 = new GLMmodel();
+//    m2->numvertices = m1->numvertices;
+//    std::cout << m2->numvertices << std::endl;
+//////  GLfloat* vertices;            /* array of vertices  */
+////  std::vector<GLfloat> *vertices;            /* array of vertices  */
+//    m2->vertices = new std::vector<GLfloat>(1);
+//    for(unsigned int i = 1; i <= m1->numvertices; i += 1){
+//        m2->vertices->push_back(m1->vertices->at(i));
+//    }
+////  std::vector<vertex> *cut_loop;
+////  std::vector<int> *multi_vertex;
+////
+////  GLuint   numnormals;          /* number of normals in model */
+////  GLfloat* normals;             /* array of normals */
+////
+////  GLuint   numtexcoords;        /* number of texcoords in model */
+////  GLfloat* texcoords;           /* array of texture coordinates */
+////
+////  GLuint   numfacetnorms;       /* number of facetnorms in model */
+//////  GLfloat* facetnorms;          /* array of facetnorms */
+////  std::vector<GLfloat> *facetnorms;          /* array of facetnorms */
+////
+////  GLuint       numtriangles;    /* number of triangles in model */
+//////  GLMtriangle* triangles;       /* vector of triangles */
+////  std::vector<GLMtriangle> *triangles;       /* vector of triangles */
+////
+////  GLuint       nummaterials;    /* number of materials in model */
+////  GLMmaterial* materials;       /* array of materials */
+////
+////  GLuint       numgroups;       /* number of groups in model */
+////  GLMgroup*    groups;          /* linked list of groups */
+////
+////  GLfloat position[3];
+//}

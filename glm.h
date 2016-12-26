@@ -50,7 +50,9 @@ typedef struct _GLMmaterial
 
 /* GLMtriangle: Structure that defines a triangle in a model.
  */
-typedef struct _GLMtriangle {
+//typedef struct _GLMtriangle {
+class GLMtriangle {
+public:
   GLuint vindices[3];           /* array of triangle vertex indices */
   GLuint nindices[3];           /* array of triangle normal indices */
   GLuint tindices[3];           /* array of triangle texcoord indices*/
@@ -60,7 +62,8 @@ typedef struct _GLMtriangle {
   std::vector<int> split_plane_id;
   bool split_by_process;
 
-} GLMtriangle;
+//} GLMtriangle;
+};
 
 /* GLMgroup: Structure that defines a group in a model.
  */
@@ -72,21 +75,27 @@ typedef struct _GLMgroup {
   struct _GLMgroup* next;           /* pointer to next group in model */
 } GLMgroup;
 
-typedef struct _vertex {
+//typedef struct _vertex {
+class vertex {
+public:
     std::vector<int> connect_edge;
     std::vector<int> align_plane;
-} vertex;
+//} vertex;
+};
 
 /* GLMmodel: Structure that defines a model.
  */
-typedef struct _GLMmodel {
+//typedef struct _GLMmodel {
+class GLMmodel {
+public:
   char*    pathname;            /* path to this model */
   char*    mtllibname;          /* name of the material library */
 
   GLuint   numvertices;         /* number of vertices in model */
 //  GLfloat* vertices;            /* array of vertices  */
-  std::vector<GLfloat> vertices;            /* array of vertices  */
-  std::vector<vertex> cut_loop;
+  std::vector<GLfloat> *vertices;            /* array of vertices  */
+  std::vector<vertex> *cut_loop;
+  std::vector<int> *multi_vertex;
 
   GLuint   numnormals;          /* number of normals in model */
   GLfloat* normals;             /* array of normals */
@@ -96,11 +105,11 @@ typedef struct _GLMmodel {
 
   GLuint   numfacetnorms;       /* number of facetnorms in model */
 //  GLfloat* facetnorms;          /* array of facetnorms */
-  std::vector<GLfloat> facetnorms;          /* array of facetnorms */
+  std::vector<GLfloat> *facetnorms;          /* array of facetnorms */
 
   GLuint       numtriangles;    /* number of triangles in model */
 //  GLMtriangle* triangles;       /* vector of triangles */
-  std::vector<GLMtriangle> triangles;       /* vector of triangles */
+  std::vector<GLMtriangle> *triangles;       /* vector of triangles */
 
   GLuint       nummaterials;    /* number of materials in model */
   GLMmaterial* materials;       /* array of materials */
@@ -110,8 +119,10 @@ typedef struct _GLMmodel {
 
   GLfloat position[3];          /* position of the model */
 
-} GLMmodel;
+//} GLMmodel;
+};
 
+void glmCopy(GLMmodel* m1, GLMmodel* m2);
 
 /* glmUnitize: "unitize" a model by translating it to the origin and
  * scaling it to fit in a unit cube around the origin.  Returns the
