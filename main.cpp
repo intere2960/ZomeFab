@@ -198,10 +198,6 @@ void init()
 //    process_inner(myObj, myObj_inner);
 //    combine_inner_outfit(myObj, myObj_inner);
 
-//    for(unsigned int i = 1; i <= myObj_inner->numvertices; i += 1){
-//        cout << myObj_inner->vertices->at(3 * i + 0) << " " << myObj_inner->vertices->at(3 * i + 1) << " " << myObj_inner->vertices->at(3 * i + 2) << endl;
-//    }
-
     collect_edge(myObj, all_edge);
 
     planes.push_back(test_plane1);
@@ -244,12 +240,9 @@ void init()
 int main(int argc, char **argv)
 {
     myObj = glmReadOBJ(model_source);
-//    GLMmodel temp = *myObj;
-//    myObj_inner = &temp;
-//    glmCopy(myObj, myObj_inner);
-//    cout << myObj_inner->numvertices << endl;
+    myObj_inner = glmCopy(myObj);
 
-    myObj_inner = glmReadOBJ(model_source) ;
+//    myObj_inner = glmReadOBJ(model_source) ;
 
     init();
 

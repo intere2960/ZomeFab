@@ -1,9 +1,7 @@
-. fix glm bug (can't read same file twice, current use copy struct(in main) temporary fix it)
 . modify to multiple plane split (almost done)
-. fill model method
+. fill model method (1. find cut loop 2. blender fill)
 . free vector memory
 . viewing cut plane in other viewer (output obj file)
 . modify glmWriteOBJ (temporary fix it, but maybe use group to represent split piece in future)
 . modify glmDelete
 . plane_dir_point (in bisect) have some problem about accuracy (try & error)
-. split_face have some problem (lack some push face)

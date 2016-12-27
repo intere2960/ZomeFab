@@ -2084,45 +2084,53 @@ for (i = 1; i <= model->numvertices; i++) {
 }
 #endif
 
-//#include <iostream>
-//
-//void glmCopy(GLMmodel* m1, GLMmodel* m2){
-////  char*    pathname;            /* path to this model */
-////  char*    mtllibname;          /* name of the material library */
-////
-////  GLuint   numvertices;         /* number of vertices in model */
-//    std::cout << m1->numvertices << std::endl;
-//    m2 = new GLMmodel();
-//    m2->numvertices = m1->numvertices;
-//    std::cout << m2->numvertices << std::endl;
-//////  GLfloat* vertices;            /* array of vertices  */
-////  std::vector<GLfloat> *vertices;            /* array of vertices  */
-//    m2->vertices = new std::vector<GLfloat>(1);
-//    for(unsigned int i = 1; i <= m1->numvertices; i += 1){
-//        m2->vertices->push_back(m1->vertices->at(i));
-//    }
-////  std::vector<vertex> *cut_loop;
-////  std::vector<int> *multi_vertex;
-////
-////  GLuint   numnormals;          /* number of normals in model */
-////  GLfloat* normals;             /* array of normals */
-////
-////  GLuint   numtexcoords;        /* number of texcoords in model */
-////  GLfloat* texcoords;           /* array of texture coordinates */
-////
-////  GLuint   numfacetnorms;       /* number of facetnorms in model */
-//////  GLfloat* facetnorms;          /* array of facetnorms */
-////  std::vector<GLfloat> *facetnorms;          /* array of facetnorms */
-////
-////  GLuint       numtriangles;    /* number of triangles in model */
-//////  GLMtriangle* triangles;       /* vector of triangles */
-////  std::vector<GLMtriangle> *triangles;       /* vector of triangles */
-////
-////  GLuint       nummaterials;    /* number of materials in model */
-////  GLMmaterial* materials;       /* array of materials */
-////
-////  GLuint       numgroups;       /* number of groups in model */
-////  GLMgroup*    groups;          /* linked list of groups */
-////
-////  GLfloat position[3];
-//}
+GLMmodel* glmCopy(GLMmodel* m1){
+    GLMmodel *m2;
+    m2 = new GLMmodel();
+
+    m2->numvertices = m1->numvertices;
+    m2->vertices = new std::vector<GLfloat>(3);
+    for(unsigned int i = 1; i <= m1->numvertices; i += 1){
+        m2->vertices->push_back(m1->vertices->at(3 * i + 0));
+        m2->vertices->push_back(m1->vertices->at(3 * i + 1));
+        m2->vertices->push_back(m1->vertices->at(3 * i + 2));
+    }
+
+    m2->cut_loop = new std::vector<vertex>(1);
+    for(unsigned int i = 1; i <= m1->cut_loop->size() - 1; i += 1){
+        m2->cut_loop->push_back(m1->cut_loop->at(i));
+    }
+
+    m2->multi_vertex = new std::vector<int>();
+    for(unsigned int i = 0; i < m1->multi_vertex->size(); i += 1){
+        m2->multi_vertex->push_back(m1->multi_vertex->at(i));
+    }
+
+    m2->numnormals = m1->numnormals;
+    m2->normals = new GLfloat((m2->numnormals + 1) * 3);
+    for(unsigned int i = 1; i <= m2->numnormals; i += 1){
+        m2->normals[3 * i + 0] = m1->normals[3 * i + 0];
+        m2->normals[3 * i + 1] = m1->normals[3 * i + 1];
+        m2->normals[3 * i + 2] = m1->normals[3 * i + 2];
+    }
+
+    m2->numfacetnorms = m1->numfacetnorms;
+    m2->facetnorms = new std::vector<GLfloat>();
+    for(unsigned int i = 0; i < m1->numfacetnorms; i += 1){
+        m2->facetnorms->push_back(m1->facetnorms->at(3 * i + 0));
+        m2->facetnorms->push_back(m1->facetnorms->at(3 * i + 1));
+        m2->facetnorms->push_back(m1->facetnorms->at(3 * i + 2));
+    }
+
+    m2->numtriangles = m1->numtriangles;
+    m2->triangles = new std::vector<GLMtriangle>();
+    for(unsigned int i = 0; i < m1->numtriangles; i += 1){
+        m2->triangles->push_back(m1->triangles->at(i));
+    }
+
+    m2->position[0] = m1->position[0];
+    m2->position[1] = m1->position[1];
+    m2->position[2] = m1->position[2];
+
+    return m2;
+}

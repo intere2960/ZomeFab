@@ -122,7 +122,7 @@ public:
 //} GLMmodel;
 };
 
-void glmCopy(GLMmodel* m1, GLMmodel* m2);
+GLMmodel* glmCopy(GLMmodel* m1);
 
 /* glmUnitize: "unitize" a model by translating it to the origin and
  * scaling it to fit in a unit cube around the origin.  Returns the
