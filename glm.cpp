@@ -1459,7 +1459,7 @@ glmReadOBJ(char* filename)
     model->triangles = new std::vector<GLMtriangle>(model->numtriangles);
     model->facetnorms = new std::vector<GLfloat>(3 * (model->numfacetnorms + 1));
 
-    model->multi_vertex = new std::vector<int>();
+    model->multi_vertex = new std::vector<unsigned int>();
 
     if (model->numnormals) {
         model->normals = (GLfloat*)malloc(sizeof(GLfloat) *
@@ -2101,17 +2101,9 @@ GLMmodel* glmCopy(GLMmodel* m1){
         m2->cut_loop->push_back(m1->cut_loop->at(i));
     }
 
-    m2->multi_vertex = new std::vector<int>();
+    m2->multi_vertex = new std::vector<unsigned int>();
     for(unsigned int i = 0; i < m1->multi_vertex->size(); i += 1){
         m2->multi_vertex->push_back(m1->multi_vertex->at(i));
-    }
-
-    m2->numnormals = m1->numnormals;
-    m2->normals = new GLfloat((m2->numnormals + 1) * 3);
-    for(unsigned int i = 1; i <= m2->numnormals; i += 1){
-        m2->normals[3 * i + 0] = m1->normals[3 * i + 0];
-        m2->normals[3 * i + 1] = m1->normals[3 * i + 1];
-        m2->normals[3 * i + 2] = m1->normals[3 * i + 2];
     }
 
     m2->numfacetnorms = m1->numfacetnorms;

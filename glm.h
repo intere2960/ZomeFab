@@ -59,7 +59,7 @@ public:
   GLuint findex;                /* index of triangle facet normal */
 
   int edge_index[3];
-  std::vector<int> split_plane_id;
+  std::vector<unsigned int> split_plane_id;
   bool split_by_process;
 
 //} GLMtriangle;
@@ -78,9 +78,16 @@ typedef struct _GLMgroup {
 //typedef struct _vertex {
 class vertex {
 public:
-    std::vector<int> connect_edge;
-    std::vector<int> align_plane;
+    std::vector<unsigned int> connect_edge;
+    std::vector<unsigned int> align_plane;
 //} vertex;
+};
+
+class Loop{
+public:
+    std::vector<int> loop_line;
+    unsigned int start_index;
+    unsigned int end_index;
 };
 
 /* GLMmodel: Structure that defines a model.
@@ -95,7 +102,7 @@ public:
 //  GLfloat* vertices;            /* array of vertices  */
   std::vector<GLfloat> *vertices;            /* array of vertices  */
   std::vector<vertex> *cut_loop;
-  std::vector<int> *multi_vertex;
+  std::vector<unsigned int> *multi_vertex;
 
   GLuint   numnormals;          /* number of normals in model */
   GLfloat* normals;             /* array of normals */
@@ -118,6 +125,8 @@ public:
   GLMgroup*    groups;          /* linked list of groups */
 
   GLfloat position[3];          /* position of the model */
+
+  std::vector<Loop> *loop;
 
 //} GLMmodel;
 };

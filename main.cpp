@@ -207,11 +207,17 @@ void init()
     planes.push_back(test_plane5); //dir_plane
 //    planes.push_back(test_plane6); //dir_plane
 
-    cut_intersection(myObj,planes, face_split_by_plane, true);
+    cut_intersection(myObj,planes, face_split_by_plane, false);
+//    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
+//        cout << face_split_by_plane.at(i) << " : ";
+//        for(unsigned int j = 0; j < myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.size(); j += 1){
+//            cout << myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.at(j) << " ";
+//        }
+//        cout << endl;
+//    }
     split_face(myObj, all_edge, face_split_by_plane, planes);
 
     for(unsigned int i = 1; i < myObj->cut_loop->size(); i += 1){
- //        cout << myObj->cut_loop->at(i).size() << endl;
         if(myObj->cut_loop->at(i).align_plane.size() > 1){
             cout << i << " : ";
             for(unsigned int j = 0; j < myObj->cut_loop->at(i).connect_edge.size(); j += 1){
@@ -232,6 +238,8 @@ void init()
         cout << myObj->multi_vertex->at(i) << " ";
     }
     cout << endl;
+
+    find_loop(myObj, all_edge, planes);
 
     process_piece(temp_piece, myObj, face_split_by_plane);
 //    fill_test();

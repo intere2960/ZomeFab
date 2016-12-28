@@ -103,7 +103,7 @@ void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<in
             face_split_by_plane.push_back(i);
             myObj->triangles->at(i).split_by_process = true;
             if(!myObj->triangles->at(i).split_plane_id.empty()){
-                std::vector<int> v;
+                std::vector<unsigned int> v;
                 myObj->triangles->at(i).split_plane_id.swap(v);
             }
             myObj->triangles->at(i).split_plane_id.push_back(0);
@@ -122,7 +122,7 @@ void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<in
 
             if(dir_count[planes.at(i).dir + 1] == 0 && dir_count[1] == 0){
                 if(!myObj->triangles->at(face_split_by_plane.at(j)).split_plane_id.empty()){
-                    std::vector<int> v;
+                    std::vector<unsigned int> v;
                     myObj->triangles->at(face_split_by_plane.at(j)).split_plane_id.swap(v);
                 }
                 myObj->triangles->at(face_split_by_plane.at(j)).split_by_process = false;
@@ -131,7 +131,7 @@ void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<in
             }
             else if(have_dir && planes.size() >= 2 && i == planes.size() - 1 && dir_count[planes.at(i).dir + 1] != 3){
                 if(!myObj->triangles->at(face_split_by_plane.at(j)).split_plane_id.empty()){
-                    std::vector<int> v;
+                    std::vector<unsigned int> v;
                     myObj->triangles->at(face_split_by_plane.at(j)).split_plane_id.swap(v);
                 }
                 myObj->triangles->at(face_split_by_plane.at(j)).split_by_process = false;
@@ -151,19 +151,18 @@ void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<in
     }
 }
 
-int split_edge(GLMmodel *myObj, std::vector<edge> &all_edge,int split_tri_id, plane plane)
+bool split_edge(GLMmodel *myObj, std::vector<edge> &all_edge,int split_tri_id, plane plane)
 {
-    int judge = _none;
-    int count_connect_index = 0;
+    bool judge = false;
     for(unsigned int i = 0; i < 3; i +=1){
+
         int dir[2];
         float dist[2];
         plane_dir_edge(all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]), plane, dir);
         plane_dist_edge(all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]), plane, dist);
 
         if(all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).connect_index != -1){
-            count_connect_index += 1;
-            judge = _split;
+            judge = true;
         }
         else{
             if(dir[0] && dir[1] && (dir[0] != dir[1])){
@@ -172,7 +171,7 @@ int split_edge(GLMmodel *myObj, std::vector<edge> &all_edge,int split_tri_id, pl
                     vec3 new_point = all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).point[0] + edge_ratio * (all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).point[1] - all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).point[0]);
                     all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).split_point = new_point;
                 }
-                judge = _split;
+                judge = true;
             }
             else if(dir[0] == 0 || dir[1] == 0){
 
@@ -189,17 +188,15 @@ int split_edge(GLMmodel *myObj, std::vector<edge> &all_edge,int split_tri_id, pl
 
                 if(dir_count1[0] == 1 && dir_count1[1] == 1 && dir_count1[2] == 1){
                     if(dir[0] == 0){
-                        all_edge.at(i).split_point = all_edge.at(i).point[0];
-                        all_edge.at(i).vertex_push_index = all_edge.at(i).index[0];
+                        all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).split_point = all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).point[0];
+                        all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).vertex_push_index = all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).index[0];
                     }
                     else if(dir[1] == 0){
-                        all_edge.at(i).split_point = all_edge.at(i).point[1];
-                        all_edge.at(i).vertex_push_index = all_edge.at(i).index[1];
+                        all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).split_point = all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).point[1];
+                        all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).vertex_push_index = all_edge.at(myObj->triangles->at(split_tri_id).edge_index[i]).index[1];
                     }
-                    judge = _split;
+                    judge = true;
                 }
-                else
-                    judge = _align;
             }
         }
     }
@@ -219,9 +216,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
     for(unsigned int i = 0; i < current; i += 1){
         if(myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.size() != 0){
             int cut_plane = myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.at(0);
-
             plane test_plane = planes.at(myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.at(0));
-            int test = split_edge(myObj, all_edge, face_split_by_plane.at(i), test_plane);
+            bool test = split_edge(myObj, all_edge, face_split_by_plane.at(i), test_plane);
             myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.erase(myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.begin() + 0);
 
             vec3 point_dir;
@@ -232,7 +228,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                 dir_count[(int)point_dir[j] + 1] += 1;
             }
 
-            if(test != _split){
+            if(!test){
                 if(dir_count[1] + dir_count[test_plane.dir * (-1) + 1] != 3)
                     face_split_by_plane.push_back(face_split_by_plane.at(i));
             }
@@ -462,6 +458,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         point_dir[j] = plane_dir_point(temp, test_plane);
                         dir_count[(int)point_dir[j] + 1] += 1;
                     }
+
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
                         face_split_by_plane.push_back(myObj->numtriangles - 1);
                     }
@@ -534,6 +531,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         point_dir[j] = plane_dir_point(temp, test_plane);
                         dir_count[(int)point_dir[j] + 1] += 1;
                     }
+
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
                         face_split_by_plane.push_back(myObj->numtriangles - 1);
                     }
@@ -603,13 +601,13 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
 
                         if(plane_dir_point(old_vertex[0], test_plane) != test_plane.dir && plane_dir_point(old_vertex[0], test_plane) != 0){
                             if(!myObj->cut_loop->at(old_index[0]).connect_edge.empty()){
-                                std::vector<int> v;
+                                std::vector<unsigned int> v;
                                 myObj->cut_loop->at(old_index[0]).connect_edge.swap(v);
                             }
                         }
                         if(plane_dir_point(old_vertex[1], test_plane) != test_plane.dir && plane_dir_point(old_vertex[1], test_plane) != 0){
                             if(!myObj->cut_loop->at(old_index[1]).connect_edge.empty()){
-                                std::vector<int> v;
+                                std::vector<unsigned int> v;
                                 myObj->cut_loop->at(old_index[1]).connect_edge.swap(v);
                             }
                         }
@@ -689,13 +687,13 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
 
                         if(plane_dir_point(old_vertex[0], test_plane) != test_plane.dir && plane_dir_point(old_vertex[0], test_plane) != 0){
                             if(!myObj->cut_loop->at(old_index[0]).connect_edge.empty()){
-                                std::vector<int> v;
+                                std::vector<unsigned int> v;
                                 myObj->cut_loop->at(old_index[0]).connect_edge.swap(v);
                             }
                         }
                         if(plane_dir_point(old_vertex[1], test_plane) != test_plane.dir && plane_dir_point(old_vertex[1], test_plane) != 0){
                             if(!myObj->cut_loop->at(old_index[1]).connect_edge.empty()){
-                                std::vector<int> v;
+                                std::vector<unsigned int> v;
                                 myObj->cut_loop->at(old_index[1]).connect_edge.swap(v);
                             }
                         }
@@ -742,6 +740,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         point_dir[j] = plane_dir_point(temp, test_plane);
                         dir_count[(int)point_dir[j] + 1] += 1;
                     }
+
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
                         face_split_by_plane.push_back(face_split_by_plane.at(i));
                     }
@@ -813,6 +812,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
 
                         all_edge.push_back(outer_e);
                         outer_edge_index = all_edge.size() - 1;
+                        edge_split_id.push_back(choose_edge[0]);
+                        edge_split_id.push_back(choose_edge[1]);
                         edge_split_id.push_back(outer_edge_index);
                         edge_split_id.push_back(choose_edge[2]);
                     }
@@ -858,6 +859,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         point_dir[j] = plane_dir_point(temp2, test_plane);
                         dir_count[(int)point_dir[j] + 1] += 1;
                     }
+
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
                         face_split_by_plane.push_back(myObj->numtriangles - 1);
                     }
@@ -963,6 +965,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                         point_dir[j] = plane_dir_point(temp, test_plane);
                         dir_count[(int)point_dir[j] + 1] += 1;
                     }
+
                     if(dir_count[test_plane.dir * -1 + 1] == 0){
                         face_split_by_plane.push_back(face_split_by_plane.at(i));
                     }
@@ -977,10 +980,12 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
             }
         }
         if(i == current -1){
+
             for(unsigned int j = 0; j < edge_split_id.size(); j += 1){
                 all_edge.at(edge_split_id.at(j)).connect_index = -1;
                 all_edge.at(edge_split_id.at(j)).vertex_push_index = -1;
             }
+
             if(!edge_split_id.empty()){
                 std::vector<int> v;
                 edge_split_id.swap(v);
@@ -1261,6 +1266,79 @@ void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
 
     delete temp_edge;
     delete temp_point_tri;
+}
+
+void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> &planes)
+{
+    bool use_plane[planes.size()] = { false };
+    myObj->loop = new std::vector<Loop>(planes.size());
+    for(unsigned int i = 0; i < planes.size(); i += 1){
+        bool use_vertex[myObj->numvertices + 1] = { false };
+        bool find_plane = false;
+        for(unsigned int j = 0; j < myObj->multi_vertex->size(); j += 1){
+            if(myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.at(0) == i || myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.at(1) == i){
+                use_plane[i] = true;
+                myObj->loop->at(i).loop_line.push_back(myObj->multi_vertex->at(j));
+                myObj->loop->at(i).start_index = myObj->multi_vertex->at(j);
+                use_vertex[myObj->multi_vertex->at(j)] = true;
+                find_plane = true;
+                break;
+            }
+        }
+
+        if(!find_plane)
+            continue;
+
+        int next_index = 0;
+        int dir[2];
+        plane_dir_edge(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)), planes.at(i), dir);
+        if(dir[0] == 0 && dir[1] == 0){
+            if(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)).index[0] == myObj->loop->at(i).start_index){
+                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)).index[1];
+            }
+            else{
+                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)).index[0];
+            }
+        }
+
+        plane_dir_edge(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)), planes.at(i), dir);
+        if(dir[0] == 0 && dir[1] == 0){
+            if(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)).index[0] == myObj->loop->at(i).start_index){
+                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)).index[1];
+            }
+            else{
+                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)).index[0];
+            }
+        }
+
+        myObj->loop->at(i).loop_line.push_back(next_index);
+        use_vertex[next_index] = true;
+
+        while(myObj->cut_loop->at(next_index).align_plane.size() == 1){
+            for(unsigned j = 0; j < myObj->cut_loop->at(next_index).connect_edge.size(); j += 1){
+                if(all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[0] == next_index){
+                    if(!use_vertex[all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[1]]){
+                        next_index = all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[1];
+                        break;
+                    }
+                }
+                else{
+                    if(!use_vertex[all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[0]]){
+                        next_index = all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[0];
+                        break;
+                    }
+                }
+            }
+            use_vertex[next_index] = true;
+            myObj->loop->at(i).loop_line.push_back(next_index);
+        }
+
+//        cout << i << " : ";
+//        for(unsigned int j = 0; j < myObj->loop->at(i).loop_line.size(); j += 1){
+//            cout << myObj->loop->at(i).loop_line.at(j) << " ";
+//        }
+//        cout << endl;
+    }
 }
 
 void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face_split_by_plane)
