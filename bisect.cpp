@@ -1289,7 +1289,7 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
         if(!find_plane)
             continue;
 
-        int next_index = 0;
+        int next_index;
         int dir[2];
         plane_dir_edge(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)), planes.at(i), dir);
         if(dir[0] == 0 && dir[1] == 0){
@@ -1332,12 +1332,72 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
             use_vertex[next_index] = true;
             myObj->loop->at(i).loop_line.push_back(next_index);
         }
+    }
 
-//        cout << i << " : ";
-//        for(unsigned int j = 0; j < myObj->loop->at(i).loop_line.size(); j += 1){
-//            cout << myObj->loop->at(i).loop_line.at(j) << " ";
-//        }
-//        cout << endl;
+    for(unsigned int i = 0; i < myObj->loop->size(); i += 1){
+        if(myObj->loop->at(i).loop_line.size() == 0){
+            continue;
+        }
+        else{
+            int end_index = myObj->loop->at(i).loop_line.at(myObj->loop->at(i).loop_line.size() - 1);
+            bool use_vertex[myObj->numvertices + 1] = { false };
+            int start_index;
+            int next_index;
+            bool find_vertex = false;
+            for(unsigned int j = 0; j < myObj->multi_vertex->size(); j += 1){
+                if(myObj->multi_vertex->at(j) != end_index && std::equal(myObj->cut_loop->at(end_index).align_plane.begin(), myObj->cut_loop->at(end_index).align_plane.end(), myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.begin())){
+                     start_index = myObj->multi_vertex->at(j);
+                     myObj->loop->at(i).loop_line.push_back(start_index);
+                     use_vertex[start_index] = true;
+                     find_vertex = true;
+                     break;
+                }
+            }
+
+            if(!find_vertex)
+                continue;
+
+            int dir[2];
+            plane_dir_edge(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)), planes.at(i), dir);
+            if(dir[0] == 0 && dir[1] == 0){
+                if(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)).index[0] == start_index){
+                    next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)).index[1];
+                }
+                else{
+                    next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)).index[0];
+                }
+            }
+
+            plane_dir_edge(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)), planes.at(i), dir);
+            if(dir[0] == 0 && dir[1] == 0){
+                if(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)).index[0] == start_index){
+                    next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)).index[1];
+                }
+                else{
+                    next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)).index[0];
+                }
+            }
+            myObj->loop->at(i).loop_line.push_back(next_index);
+            use_vertex[next_index] = true;
+            while(myObj->cut_loop->at(next_index).align_plane.size() == 1){
+                for(unsigned j = 0; j < myObj->cut_loop->at(next_index).connect_edge.size(); j += 1){
+                    if(all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[0] == next_index){
+                        if(!use_vertex[all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[1]]){
+                            next_index = all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[1];
+                            break;
+                        }
+                    }
+                    else{
+                        if(!use_vertex[all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[0]]){
+                            next_index = all_edge.at(myObj->cut_loop->at(next_index).connect_edge.at(j)).index[0];
+                            break;
+                        }
+                    }
+                }
+                use_vertex[next_index] = true;
+                myObj->loop->at(i).loop_line.push_back(next_index);
+            }
+        }
     }
 }
 
@@ -1357,6 +1417,8 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
     temp_piece.vertices->push_back(-100000000000000000000000000000.0);
 
     temp_piece.triangles = new std::vector<GLMtriangle>();
+
+    temp_piece.loop = new std::vector<Loop>(myObj->loop->size());
 
     int current_index = 1;
     for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
@@ -1396,5 +1458,11 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
         temp_t.vindices[2] = vertex_map.at(temp_index[2]);
 
         temp_piece.triangles->push_back(temp_t);
+    }
+
+    for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
+        for(unsigned int j = 0; j < myObj->loop->at(i).loop_line.size(); j += 1){
+            temp_piece.loop->at(i).loop_line.push_back(vertex_map.at(myObj->loop->at(i).loop_line.at(j)));
+        }
     }
 }

@@ -83,7 +83,9 @@ plane test_plane5(0.0, 0.0, 1.0, 0.0, 1);
 vector<plane> planes;
 
 vector<edge> all_edge;
+vector<edge> all_inner_edge;
 vector<int> face_split_by_plane;
+vector<int> face_inner_split_by_plane;
 
 //bounding box
 
@@ -298,7 +300,7 @@ void keyboard(unsigned char key,int x,int y)
 
     if(key==27)
     {
-//        glmWriteOBJ(myObj, model_out, GLM_FLAT);
+//        glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
 //        glmDelete(myObj);
 //        glmDelete(myObj_inner);
         exit(0);

@@ -87,7 +87,7 @@ class Loop{
 public:
     std::vector<int> loop_line;
     unsigned int start_index;
-    unsigned int end_index;
+//    unsigned int end_index;
 };
 
 /* GLMmodel: Structure that defines a model.

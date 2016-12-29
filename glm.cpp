@@ -1673,10 +1673,10 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
 //        fprintf(file, "\n");
 //        group = group->next;
 //    }
-    group = model->groups;
+//    group = model->groups;
     for(unsigned int i = 0; i < model->numtriangles; i += 1) {
-        if (mode & GLM_MATERIAL)
-            fprintf(file, "usemtl %s\n", model->materials[group->material].name);
+//        if (mode & GLM_MATERIAL)
+//            fprintf(file, "usemtl %s\n", model->materials[group->material].name);
         if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
             fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                 T(i).vindices[0],
@@ -1727,6 +1727,16 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
                 T(i).vindices[2]);
         }
     }
+
+//    for(unsigned int i = 0; i < model->loop->size(); i += 1){
+//        if(model->loop->at(i).loop_line.size() > 0){
+//            fprintf(file,"f ");
+//            for(unsigned int j = 0; j < model->loop->at(i).loop_line.size(); j += 1){
+//                fprintf(file, "%d ", model->loop->at(i).loop_line.at(j));
+//            }
+//            fprintf(file,"\n");
+//        }
+//    }
 
     fclose(file);
 }

@@ -70,6 +70,7 @@ void display(void)
         glPolygonMode(GL_FRONT, GL_LINE);
         glPolygonMode(GL_BACK, GL_LINE);
         drawObj(myObj);
+        drawObj(myObj_inner);
 //        glmDraw(myObj, GLM_FLAT);
 //        glmDraw(myObj,GLM_SMOOTH);
         //angle += 1.0;
@@ -108,84 +109,8 @@ void myReshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-//vector<edge> all_piece_edge;
 void fill_test()
 {
-//    for(unsigned int i = 0; i < planes.size(); i += 1){
-//        for(unsigned int j = 0; j < temp_piece.numvertices; j += 1){
-//            vec3 temp(temp_piece.vertices.at(3 * (j + 1) + 0), temp_piece.vertices.at(3 * (j + 1) + 1), temp_piece.vertices.at(3 * (j + 1) + 2));
-//    //        cout << plane_dir_point(temp, planes.at(i)) << endl;
-//            if(plane_dir_point(temp, planes.at(i)) == 0){
-//                cout << j << " : " << temp[0] << " " << temp[1] << " " << temp[2] << endl;
-//            }
-//        }
-//        cout << endl;
-//    }
-
-//    collect_edge(&temp_piece, all_piece_edge);
-//
-//    bool use_vertice[temp_piece.numvertices], use_face[temp_piece.numtriangles];
-//
-//    for(unsigned int i = 1; i <= temp_piece.numvertices; i += 1){
-//        vec3 temp(temp_piece.vertices.at(3 * i + 0), temp_piece.vertices.at(3 * i + 1), temp_piece.vertices.at(3 * i + 2));
-//        cout << i << " : " << temp[0] << " " << temp[1] << " " << temp[2] << endl;
-//        use_vertice[i] = false;
-//    }
-//    cout << endl;
-//
-//    for(unsigned int i = 0; i < temp_piece.numtriangles; i += 1){
-//        if(split_edge(&temp_piece, all_piece_edge, i, planes.at(0)) == _align)
-//            cout << "tri " << i << " : " << temp_piece.triangles.at(i).vindices[0] << " " << temp_piece.triangles.at(i).vindices[1] << " " << temp_piece.triangles.at(i).vindices[2] << endl;
-//        use_face[i] = false;
-//    }
-//    cout << endl;
-//
-//    for(unsigned int i = 0; i < all_piece_edge.size(); i += 1){
-//        cout << all_piece_edge.at(i).index[0] << " " << all_piece_edge.at(i).index[1] << " face : " << all_piece_edge.at(i).face_id[0] << " " << all_piece_edge.at(i).face_id[1] << endl;
-//    }
-//    cout << endl;
-//    int start_index, start_edge;
-//    for(unsigned int i = 0; i < all_piece_edge.size(); i += 1){
-//        if(all_piece_edge.at(i).face_id[1] == -1){
-////            cout << "test : " << all_piece_edge.at(i).index[0] << " " << all_piece_edge.at(i).index[1] << endl;
-//            vec3 temp1(temp_piece.vertices.at(3 * all_piece_edge.at(i).index[0] + 0), temp_piece.vertices.at(3 * all_piece_edge.at(i).index[0] + 1), temp_piece.vertices.at(3 * all_piece_edge.at(i).index[0] + 2));
-//            vec3 temp2(temp_piece.vertices.at(3 * all_piece_edge.at(i).index[1] + 0), temp_piece.vertices.at(3 * all_piece_edge.at(i).index[1] + 1), temp_piece.vertices.at(3 * all_piece_edge.at(i).index[1] + 2));
-//            int judge1 = plane_dir_point(temp1, planes.at(0));
-//            int judge2 = plane_dir_point(temp2, planes.at(0));
-//            if(judge1 ^ judge2){
-////                cout << all_piece_edge.at(i).index[0] << " " << all_piece_edge.at(i).index[1] << " face : " << all_piece_edge.at(i).face_id[0] << " " << all_piece_edge.at(i).face_id[1] << endl;
-//
-//                int plane_id = 0 - 1;
-//                if(plane_id < 0)
-//                    plane_id = plane_id + planes.size() - 1;
-//
-//                if(judge1 == 0){
-//                    if(plane_dir_point(temp1, planes.at(plane_id)) == 0){
-////                        cout << all_piece_edge.at(i).index[0] << endl;
-//                        start_index = all_piece_edge.at(i).index[0];
-//                        start_edge = i;
-//                        break;
-//                    }
-//                }
-//                if(judge2 == 0){
-//                    if(plane_dir_point(temp2, planes.at(plane_id)) == 0){
-////                        cout << all_piece_edge.at(i).index[1] << endl;
-//                        start_index = all_piece_edge.at(i).index[1];
-//                        start_edge = i;
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    cout << endl;
-//    cout << start_index << " , edge: " << start_edge << endl;
-//
-//    int current_face = all_piece_edge.at(start_edge).face_id[0];
-//    use_face[current_face] = true;
-////    cout << current_face;
-//    vector<int> face_loop;
-//    face_loop.push_back(start_index);
 }
 
 void init()
@@ -195,8 +120,8 @@ void init()
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
     recount_normal(myObj);
-//    process_inner(myObj, myObj_inner);
-//    combine_inner_outfit(myObj, myObj_inner);
+    process_inner(myObj, myObj_inner);
+    combine_inner_outfit(myObj, myObj_inner);
 
     collect_edge(myObj, all_edge);
 
@@ -207,41 +132,28 @@ void init()
     planes.push_back(test_plane5); //dir_plane
 //    planes.push_back(test_plane6); //dir_plane
 
-    cut_intersection(myObj,planes, face_split_by_plane, false);
-//    for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
-//        cout << face_split_by_plane.at(i) << " : ";
-//        for(unsigned int j = 0; j < myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.size(); j += 1){
-//            cout << myObj->triangles->at(face_split_by_plane.at(i)).split_plane_id.at(j) << " ";
-//        }
-//        cout << endl;
-//    }
+    cut_intersection(myObj, planes, face_split_by_plane, false);
     split_face(myObj, all_edge, face_split_by_plane, planes);
 
     for(unsigned int i = 1; i < myObj->cut_loop->size(); i += 1){
         if(myObj->cut_loop->at(i).align_plane.size() > 1){
-            cout << i << " : ";
-            for(unsigned int j = 0; j < myObj->cut_loop->at(i).connect_edge.size(); j += 1){
-                cout << myObj->cut_loop->at(i).connect_edge.at(j) << " ";
-            }
-            cout << endl;
-            cout << "\tcut plane : ";
-            for(unsigned int j = 0; j < myObj->cut_loop->at(i).align_plane.size(); j += 1){
-                cout << myObj->cut_loop->at(i).align_plane.at(j) << " ";
-            }
-            cout << endl;
+            sort(myObj->cut_loop->at(i).align_plane.begin(), myObj->cut_loop->at(i).align_plane.begin() + myObj->cut_loop->at(i).align_plane.size());
             myObj->multi_vertex->push_back(i);
         }
     }
-    cout << endl;
-
-    for(unsigned int i = 0; i < myObj->multi_vertex->size(); i += 1){
-        cout << myObj->multi_vertex->at(i) << " ";
-    }
-    cout << endl;
 
     find_loop(myObj, all_edge, planes);
 
     process_piece(temp_piece, myObj, face_split_by_plane);
+
+    for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
+        cout << i << " : ";
+        for(unsigned int j = 0; j < temp_piece.loop->at(i).loop_line.size(); j += 1){
+            cout << temp_piece.loop->at(i).loop_line.at(j) << " ";
+        }
+        cout << endl;
+    }
+
 //    fill_test();
 }
 
