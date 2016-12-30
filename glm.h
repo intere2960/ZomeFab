@@ -22,6 +22,7 @@
 #endif
 
 #include <vector>
+#include "algebra3.h"
 
 
 #ifndef M_PI
@@ -85,8 +86,12 @@ public:
 
 class Loop{
 public:
+    vec3 plane_normal;
     std::vector<int> loop_line;
-    unsigned int start_index;
+//    unsigned int start_index;
+//    std::vector<vec2> two_d_point;
+    std::vector<int> sign;
+    int sign_flip;
 //    unsigned int end_index;
 };
 

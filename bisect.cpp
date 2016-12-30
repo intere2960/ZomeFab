@@ -1275,11 +1275,15 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
     for(unsigned int i = 0; i < planes.size(); i += 1){
         bool use_vertex[myObj->numvertices + 1] = { false };
         bool find_plane = false;
+        int start_index;
+        myObj->loop->at(i).plane_normal[0] = planes.at(i).plane_par[0];
+        myObj->loop->at(i).plane_normal[1] = planes.at(i).plane_par[1];
+        myObj->loop->at(i).plane_normal[2] = planes.at(i).plane_par[2];
         for(unsigned int j = 0; j < myObj->multi_vertex->size(); j += 1){
             if(myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.at(0) == i || myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.at(1) == i){
                 use_plane[i] = true;
                 myObj->loop->at(i).loop_line.push_back(myObj->multi_vertex->at(j));
-                myObj->loop->at(i).start_index = myObj->multi_vertex->at(j);
+                start_index = myObj->multi_vertex->at(j);
                 use_vertex[myObj->multi_vertex->at(j)] = true;
                 find_plane = true;
                 break;
@@ -1291,23 +1295,23 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
 
         int next_index;
         int dir[2];
-        plane_dir_edge(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)), planes.at(i), dir);
+        plane_dir_edge(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)), planes.at(i), dir);
         if(dir[0] == 0 && dir[1] == 0){
-            if(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)).index[0] == myObj->loop->at(i).start_index){
-                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)).index[1];
+            if(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)).index[0] == start_index){
+                next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)).index[1];
             }
             else{
-                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(0)).index[0];
+                next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(0)).index[0];
             }
         }
 
-        plane_dir_edge(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)), planes.at(i), dir);
+        plane_dir_edge(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)), planes.at(i), dir);
         if(dir[0] == 0 && dir[1] == 0){
-            if(all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)).index[0] == myObj->loop->at(i).start_index){
-                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)).index[1];
+            if(all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)).index[0] == start_index){
+                next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)).index[1];
             }
             else{
-                next_index = all_edge.at(myObj->cut_loop->at(myObj->loop->at(i).start_index).connect_edge.at(1)).index[0];
+                next_index = all_edge.at(myObj->cut_loop->at(start_index).connect_edge.at(1)).index[0];
             }
         }
 
@@ -1461,6 +1465,9 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
     }
 
     for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
+        temp_piece.loop->at(i).plane_normal[0] = myObj->loop->at(i).plane_normal[0];
+        temp_piece.loop->at(i).plane_normal[1] = myObj->loop->at(i).plane_normal[1];
+        temp_piece.loop->at(i).plane_normal[2] = myObj->loop->at(i).plane_normal[2];
         for(unsigned int j = 0; j < myObj->loop->at(i).loop_line.size(); j += 1){
             temp_piece.loop->at(i).loop_line.push_back(vertex_map.at(myObj->loop->at(i).loop_line.at(j)));
         }
