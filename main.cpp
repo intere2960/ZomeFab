@@ -170,7 +170,7 @@ void judge_inverse(Loop &loop){
     }
 }
 
-void sign_calc()
+void sign_calc(GLMmodel &temp_piece)
 {
     for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
 //    for(unsigned int i = 1; i < 2; i += 1){
@@ -187,9 +187,60 @@ void sign_calc()
     }
 }
 
+int find_ear_index(Loop &loop)
+{
+    for(unsigned int i = 0; i < loop.loop_line.size(); i += 1){
+        if(loop.loop_line.at(i) == 0)
+            return i;
+    }
+    return loop.loop_line.size() - 1;
+}
+
+void triangulate(Loop &loop)
+{
+//    cout << "size : " << loop.loop_line.size() << endl;
+    while(loop.loop_line.size() > 3){
+        int ear_index = find_ear_index(loop);
+        int prev_index = (ear_index - 1 + loop.loop_line.size()) % loop.loop_line.size();
+        int next_index = (ear_index + 1) % loop.loop_line.size();
+
+        vec3 tri_vindex;
+        tri_vindex[0] = loop.loop_line.at(prev_index);
+        tri_vindex[1] = loop.loop_line.at(ear_index);
+        tri_vindex[2] = loop.loop_line.at(next_index);
+        loop.tri.push_back(tri_vindex);
+
+        loop.loop_line.erase(loop.loop_line.begin() + ear_index);
+        loop.sign.erase(loop.sign.begin() + ear_index);
+    }
+//    cout << "size : " << loop.loop_line.size() << endl;
+
+    if(loop.loop_line.size() == 3) {
+        vec3 tri_vindex;
+        tri_vindex[0] = loop.loop_line.at(0);
+        tri_vindex[1] = loop.loop_line.at(1);
+        tri_vindex[2] = loop.loop_line.at(2);
+        loop.tri.push_back(tri_vindex);
+	}
+}
+
 void fill_test()
 {
-    sign_calc();
+    sign_calc(temp_piece);
+//    cout << "ear : " << find_ear_index(temp_piece.loop->at(0)) << endl;
+    for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
+//    for(unsigned int i = 0; i < 1; i += 1){
+        triangulate(temp_piece.loop->at(i));
+        for(unsigned int j = 0; j < temp_piece.loop->at(i).tri.size(); j += 1){
+            vec3 tri_vindex = temp_piece.loop->at(i).tri.at(j);
+            GLMtriangle temp;
+            temp.vindices[0] = tri_vindex[0];
+            temp.vindices[1] = tri_vindex[1];
+            temp.vindices[2] = tri_vindex[2];
+            temp_piece.triangles->push_back(temp);
+            temp_piece.numtriangles += 1;
+        }
+    }
 }
 
 void init()

@@ -91,6 +91,7 @@ public:
 //    unsigned int start_index;
 //    std::vector<vec2> two_d_point;
     std::vector<int> sign;
+    std::vector<vec3> tri;
     int sign_flip;
 //    unsigned int end_index;
 };
