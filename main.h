@@ -24,7 +24,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/bunny.obj";
+char model_source[] = "test_model/sphere.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -300,7 +300,7 @@ void keyboard(unsigned char key,int x,int y)
 
     if(key==27)
     {
-        glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
+//        glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
 //        glmDelete(myObj);
 //        glmDelete(myObj_inner);
         exit(0);
