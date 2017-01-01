@@ -4,7 +4,7 @@
 [Tt]emp
 bin
 obj
-test/out
+test_model/out
 *.user
 *.suo
 *.[Cc]ache
