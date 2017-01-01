@@ -4,6 +4,7 @@
 [Tt]emp
 bin
 obj
+test/out
 *.user
 *.suo
 *.[Cc]ache
