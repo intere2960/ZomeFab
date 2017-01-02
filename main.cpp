@@ -69,8 +69,9 @@ void display(void)
     if(show){
         glPolygonMode(GL_FRONT, GL_LINE);
         glPolygonMode(GL_BACK, GL_LINE);
-        drawObj(myObj);
-        drawObj(myObj_inner);
+        drawObj(&temp_piece);
+//        drawObj(myObj);
+//        drawObj(myObj_inner);
 //        glmDraw(myObj, GLM_FLAT);
 //        glmDraw(myObj,GLM_SMOOTH);
         //angle += 1.0;
@@ -134,6 +135,7 @@ void myReshape(int w, int h)
 //        loop.two_d_point.push_back(new_point);
 //    }
 //}
+ enum point_type { _concave = -1, _tangential = 0, _convex = 1 };
 
 int span_tri(Loop &loop, int index1, int index2, int index3, int sign_flip)
 {
@@ -146,14 +148,17 @@ int span_tri(Loop &loop, int index1, int index2, int index3, int sign_flip)
 
     vec3 cross = vector1 ^ vector2;
 
-    float judge = cross[0] + cross[1] + cross[2];
+    float judge = (cross[0] + cross[1] + cross[2]) * sign_flip;
 //    cout << "judge : " << judge << endl;
+    loop.num_concave += 1;
 
     if(judge < -0.0001)
-        return -1 * sign_flip;
-    if(judge > 0.0001)
-        return 1 * sign_flip;
-    return 0;
+        return _concave;
+    if(judge > 0.0001){
+        loop.num_concave -= 1;
+        return _convex;
+    }
+    return _tangential;
 }
 
 void judge_inverse(Loop &loop){
@@ -164,8 +169,12 @@ void judge_inverse(Loop &loop){
     bool judge2 = end_s < 0;
     if(judge1 && judge2){
         loop.sign_flip = -1;
+        loop.num_concave = 0;
         for(unsigned i = 0; i < loop.sign.size(); i += 1){
-            loop.sign.at(i)= loop.sign_flip * loop.sign.at(i);
+            loop.sign.at(i) = loop.sign_flip * loop.sign.at(i);
+            if(loop.sign.at(i) != _convex){
+                loop.num_concave += 1;
+            }
         }
     }
 }
@@ -181,6 +190,7 @@ void fill_prepare(GLMmodel &temp_piece)
         }
 
         temp_piece.loop->at(i).sign_flip = 1;
+        temp_piece.loop->at(i).num_concave = 0;
         unsigned int line_size = temp_piece.loop->at(i).loop_line.size();
         for(unsigned int j = 0; j < temp_piece.loop->at(i).loop_line.size(); j += 1){
             int prev = (j - 1 + line_size) % line_size;
@@ -193,14 +203,52 @@ void fill_prepare(GLMmodel &temp_piece)
     }
 }
 
+bool check_ear_index(Loop &loop, int current)
+{
+    if(loop.sign.at(current) == _convex)
+        return false;
+
+    int concave_check = loop.num_concave;
+    int prev_index = (current - 1 + loop.loop_line.size()) % loop.loop_line.size();
+    int next_index = (current + 1) % loop.loop_line.size();
+
+    for(unsigned int i = 0; i < loop.sign.size(); i += 1){
+        int index = (current + i + 2) % loop.loop_line.size();
+        if(index == prev_index)
+            break;
+
+        if(loop.sign.at(index) != _convex){
+            if(span_tri(loop, next_index, prev_index, index, loop.sign_flip) != _concave &&
+               span_tri(loop, prev_index, current, index, loop.sign_flip) != _concave &&
+               span_tri(loop, current, next_index, index, loop.sign_flip) != _concave ){
+                return false;
+            }
+
+            concave_check += 1;
+            if (concave_check == loop.num_concave) {
+                break;
+            }
+        }
+    }
+    return true;
+}
+
 int find_ear_index(Loop &loop, int current)
 {
     int index = current;
     int total_size = loop.sign.size();
     for(unsigned int i = 0; i < loop.sign.size(); i += 1){
-        index = (index + i) % total_size;
+        index = (index + 1) % total_size;
 //        cout << "test : " << loop.sign.at(i) << endl;
-        if(loop.sign.at(current + i) == 1)
+        if(check_ear_index(loop, index))
+            return index;
+    }
+
+    index = current;
+    for(unsigned int i = 0; i < loop.sign.size(); i += 1){
+        index = (index + 1) % total_size;
+//        cout << "test : " << loop.sign.at(i) << endl;
+        if(loop.sign.at(index) != _concave)
             return index;
     }
     return index;
@@ -216,21 +264,31 @@ void triangulate(Loop &loop)
         int prev_index = (ear_index - 1 + loop.loop_line.size()) % loop.loop_line.size();
         int next_index = (ear_index + 1) % loop.loop_line.size();
 
+        if(loop.sign.at(ear_index) != _convex){
+            loop.num_concave -= 1;
+        }
+
         vec3 tri_vindex;
         tri_vindex[0] = loop.loop_line.at(prev_index);
         tri_vindex[1] = loop.loop_line.at(ear_index);
         tri_vindex[2] = loop.loop_line.at(next_index);
-//        cout << tri_vindex[0] << " " << tri_vindex[1] << " " << tri_vindex[2] << endl;
+        cout << tri_vindex[0] << " " << tri_vindex[1] << " " << tri_vindex[2] << endl;
         loop.tri.push_back(tri_vindex);
 
-        if(loop.sign.at(prev_index) != 1){
+        if(loop.sign.at(prev_index) != _convex){
             int prev_prev_index = (ear_index - 2 + loop.loop_line.size()) % loop.loop_line.size();
             loop.sign.at(prev_index) = span_tri(loop, prev_prev_index, prev_index, next_index, loop.sign_flip);
+            if(loop.sign.at(prev_index) == _convex){
+                loop.num_concave -= 1;
+            }
         }
 
-        if(loop.sign.at(next_index) != 1){
+        if(loop.sign.at(next_index) != _convex){
             int next_next_index = (ear_index + 2) % loop.loop_line.size();
             loop.sign.at(next_index) = span_tri(loop, prev_index, next_index, next_next_index, loop.sign_flip);
+            if(loop.sign.at(next_index) == _convex){
+                loop.num_concave -= 1;
+            }
         }
 //        cout << "next : " << loop.sign.at(next_index) << endl;
 
@@ -238,16 +296,16 @@ void triangulate(Loop &loop)
         loop.sign.erase(loop.sign.begin() + ear_index);
         loop.three_d_point.erase(loop.three_d_point.begin() + ear_index);
 
-//        travel_index = ear_index % loop.loop_line.size();
+        travel_index = (next_index + 1) % loop.loop_line.size();
 //        cout << travel_index << endl;
     }
 //    cout << "size : " << loop.loop_line.size() << endl;
 
     if(loop.loop_line.size() == 3) {
         vec3 tri_vindex;
-        tri_vindex[0] = loop.loop_line.at(0);
-        tri_vindex[1] = loop.loop_line.at(1);
-        tri_vindex[2] = loop.loop_line.at(2);
+        tri_vindex[0] = loop.loop_line.at(travel_index);
+        tri_vindex[1] = loop.loop_line.at((travel_index + 1) % 3);
+        tri_vindex[2] = loop.loop_line.at((travel_index + 2) % 3);
         loop.tri.push_back(tri_vindex);
 	}
 }
@@ -307,7 +365,8 @@ void init()
 
     fill_prepare(temp_piece);
     for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
-        cout << i << " : " << endl;
+//        cout << i << " : " << endl;
+        cout << i << " : " << temp_piece.loop->at(i).num_concave << endl;
 //        cout << "normal " << temp_piece.loop->at(i).plane_normal[0] << " " << temp_piece.loop->at(i).plane_normal[1] << " " << temp_piece.loop->at(i).plane_normal[2] << endl;
         for(unsigned int j = 0; j < temp_piece.loop->at(i).loop_line.size(); j += 1){
             cout << temp_piece.loop->at(i).loop_line.at(j) << "(" << temp_piece.loop->at(i).sign.at(j) << ") ";

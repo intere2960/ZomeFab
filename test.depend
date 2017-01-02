@@ -60,13 +60,13 @@
 	<assert.h>
 	"glm.h"
 
-1483257089 e:\pieceofshit\glm.h
+1483334270 e:\pieceofshit\glm.h
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<vector>
 	"algebra3.h"
 
-1483274155 source:e:\pieceofshit\main.cpp
+1483365892 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1480701659 source:e:\pieceofshit\textfile.cpp
@@ -99,7 +99,7 @@
 	<cmath>
 	<vector>
 
-1483274192 e:\pieceofshit\main.h
+1483365905 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>

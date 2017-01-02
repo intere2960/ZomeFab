@@ -94,6 +94,7 @@ public:
     std::vector<int> sign;
     std::vector<vec3> tri;
     int sign_flip;
+    int num_concave;
 //    unsigned int end_index;
 };
 
