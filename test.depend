@@ -52,7 +52,7 @@
 1478970094 source:c:\users\rock\desktop\test\main.cpp
 	"main.h"
 
-1483255588 source:e:\pieceofshit\glm.cpp
+1483447845 source:e:\pieceofshit\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -66,7 +66,7 @@
 	<vector>
 	"algebra3.h"
 
-1483365892 source:e:\pieceofshit\main.cpp
+1483450864 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1480701659 source:e:\pieceofshit\textfile.cpp
@@ -99,7 +99,7 @@
 	<cmath>
 	<vector>
 
-1483365905 e:\pieceofshit\main.h
+1483450912 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>
