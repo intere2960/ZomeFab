@@ -89,7 +89,7 @@ public:
     vec3 plane_normal;
     std::vector<int> loop_line;
 //    unsigned int start_index;
-//    std::vector<vec2> two_d_point;
+    std::vector<vec2> two_d_point;
     std::vector<vec3> three_d_point;
     std::vector<int> sign;
     std::vector<vec3> tri;

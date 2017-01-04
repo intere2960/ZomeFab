@@ -52,7 +52,7 @@
 1478970094 source:c:\users\rock\desktop\test\main.cpp
 	"main.h"
 
-1483447845 source:e:\pieceofshit\glm.cpp
+1483508571 source:e:\pieceofshit\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -60,13 +60,13 @@
 	<assert.h>
 	"glm.h"
 
-1483334270 e:\pieceofshit\glm.h
+1483507058 e:\pieceofshit\glm.h
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<vector>
 	"algebra3.h"
 
-1483450864 source:e:\pieceofshit\main.cpp
+1483538382 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1480701659 source:e:\pieceofshit\textfile.cpp
@@ -92,14 +92,14 @@
 
 1480701659 e:\pieceofshit\shell.h
 
-1482744371 source:e:\pieceofshit\shell.cpp
+1483536468 source:e:\pieceofshit\shell.cpp
 	<algorithm>
 	<vector>
 	"glm.h"
 	<cmath>
 	<vector>
 
-1483450912 e:\pieceofshit\main.h
+1483538413 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>
@@ -113,7 +113,7 @@
 	"shell.h"
 	"bisect.h"
 
-1483097146 source:e:\pieceofshit\bisect.cpp
+1483538355 source:e:\pieceofshit\bisect.cpp
 	<vector>
 	"glm.h"
 	"algebra3.h"

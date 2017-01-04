@@ -148,13 +148,22 @@ int span_tri(Loop &loop, int index1, int index2, int index3)
 
     vec3 cross = vector1 ^ vector2;
 
+//    vec2 p1 = loop.two_d_point.at(index1);
+//    vec2 p2 = loop.two_d_point.at(index2);
+//    vec2 p3 = loop.two_d_point.at(index3);
+//
+//    vec2 vector1 = p3 - p2;
+//    vec2 vector2 = p1 - p2;
+//
+//    vec3 cross = vector1 ^ vector2;
+
     float judge = (cross[0] + cross[1] + cross[2]) * loop.sign_flip;
 //    cout << "judge : " << judge << endl;
     loop.num_concave += 1;
 
-    if(judge < -0.0001)
+    if(judge < -0.000001)
         return _concave;
-    if(judge > 0.0001){
+    if(judge > 0.000001){
         loop.num_concave -= 1;
         return _convex;
     }
@@ -326,6 +335,7 @@ void triangulate(Loop &loop)
         loop.loop_line.erase(loop.loop_line.begin() + ear_index);
         loop.sign.erase(loop.sign.begin() + ear_index);
         loop.three_d_point.erase(loop.three_d_point.begin() + ear_index);
+//        loop.two_d_point.erase(loop.two_d_point.begin() + ear_index);
 
         travel_index = next_index % loop.loop_line.size();
 //        cout << "travel_index : " << loop.loop_line.at(travel_index) << endl;
@@ -386,10 +396,13 @@ void init()
     planes.push_back(test_plane3);
     planes.push_back(test_plane4);
     planes.push_back(test_plane5); //dir_plane
-//    planes.push_back(test_plane6); //dir_plane
+    planes.push_back(test_plane6); //dir_plane
 
     cut_intersection(myObj, planes, face_split_by_plane, false);
+
+//    cout << face_split_by_plane.size() << endl;
     split_face(myObj, all_edge, face_split_by_plane, planes);
+//    cout << face_split_by_plane.size() << endl;
 
     for(unsigned int i = 1; i < myObj->cut_loop->size(); i += 1){
         if(myObj->cut_loop->at(i).align_plane.size() > 1){
@@ -401,6 +414,10 @@ void init()
     find_loop(myObj, all_edge, planes);
 
     process_piece(temp_piece, myObj, face_split_by_plane);
+
+//    for(unsigned int i = 0; i < temp_piece.numtriangles; i += 1){
+//        cout << i << " : " << temp_piece.triangles->at(i).vindices[0] << " " << temp_piece.triangles->at(i).vindices[1] << " " << temp_piece.triangles->at(i).vindices[2] << endl;
+//    }
 
     fill_prepare(temp_piece);
 
