@@ -1284,6 +1284,13 @@ void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
 
 void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> &planes)
 {
+    for(unsigned int i = 1; i < myObj->cut_loop->size(); i += 1){
+        if(myObj->cut_loop->at(i).align_plane.size() > 1){
+            sort(myObj->cut_loop->at(i).align_plane.begin(), myObj->cut_loop->at(i).align_plane.begin() + myObj->cut_loop->at(i).align_plane.size());
+            myObj->multi_vertex->push_back(i);
+        }
+    }
+
     bool use_plane[planes.size()] = { false };
     myObj->loop = new std::vector<Loop>(planes.size());
     for(unsigned int i = 0; i < planes.size(); i += 1){

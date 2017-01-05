@@ -1,7 +1,2 @@
-. modify to multiple plane split (almost done)
-. fill model method (blender fill)
 . free vector memory
 . viewing cut plane in other viewer (output obj file)
-. modify glmWriteOBJ (temporary fix it)
-. modify glmDelete
-. plane_dir_point (in bisect) have some problem about accuracy (try & error)

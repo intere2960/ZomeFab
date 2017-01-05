@@ -1371,6 +1371,7 @@ glmDelete(GLMmodel* model)
         std::vector<GLfloat> v;
         model->vertices->swap(v);
     }
+    free(model->vertices);
     if (model->normals)  free(model->normals);
     if (model->texcoords)  free(model->texcoords);
 //    if (model->facetnorms) free(model->facetnorms);
@@ -1378,11 +1379,13 @@ glmDelete(GLMmodel* model)
         std::vector<GLfloat> v;
         model->facetnorms->swap(v);
     }
+    free(model->facetnorms);
     //if (model->triangles)  free(model->triangles);
     if (!model->triangles->empty()){
         std::vector<GLMtriangle> v;
         model->triangles->swap(v);
     }
+    free(model->triangles);
     if (model->materials) {
         for (i = 0; i < model->nummaterials; i++)
             free(model->materials[i].name);
@@ -1395,7 +1398,7 @@ glmDelete(GLMmodel* model)
         free(group->triangles);
         free(group);
     }
-
+    free(model->loop);
     free(model);
 }
 

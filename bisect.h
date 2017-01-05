@@ -6,8 +6,6 @@
 #include <iostream>
 using namespace std;
 
-enum split_state { _none = -1, _align = 0, _split = 1 };
-
 class edge
 {
 public:

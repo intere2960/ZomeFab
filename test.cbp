@@ -36,6 +36,8 @@
 		<Unit filename="algebra3.h" />
 		<Unit filename="bisect.cpp" />
 		<Unit filename="bisect.h" />
+		<Unit filename="fill.cpp" />
+		<Unit filename="fill.h" />
 		<Unit filename="glm.cpp" />
 		<Unit filename="glm.h" />
 		<Unit filename="glui_internal.h" />
