@@ -87,11 +87,11 @@ public:
 class Loop{
 public:
     vec3 plane_normal;
-    std::vector<int> loop_line;
-    std::vector<vec2> two_d_point;
+    std::vector<int> *loop_line;
+    std::vector<vec2> *two_d_point;
     bool travel_reverse;
-    std::vector<int> sign;
-    std::vector<vec3> tri;
+    std::vector<int> *sign;
+    std::vector<vec3> *tri;
     float sign_flip;
     int num_concave;
 };

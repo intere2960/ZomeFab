@@ -47,8 +47,8 @@ void display(void)
     if(show){
         glPolygonMode(GL_FRONT, GL_LINE);
         glPolygonMode(GL_BACK, GL_LINE);
-        drawObj(&temp_piece);
-//        drawObj(myObj);
+//        drawObj(&temp_piece);
+        drawObj(myObj);
 //        drawObj(myObj_inner);
         glPolygonMode(GL_FRONT, GL_FILL);
         glPolygonMode(GL_BACK, GL_FILL);

@@ -24,7 +24,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/sphere.obj";
+char model_source[] = "test_model/Column4.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -67,18 +67,30 @@ bool show_piece = true;
 //plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(-1.0, -2.0, 0.0, 1.0, 1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(1.0, -1.0, 0.0, 0.0, 1); // ax+by+cz=d  e->cut dir
-plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
-plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
-//plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
-plane test_plane3(0.0, -1.0, 0.0, 0.5 , -1);
-plane test_plane4(-1.0, 0.0, 0.0, 0.5, -1);
-plane test_plane5(0.0, 0.0, -1.0, 0.0, -1);
+//plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
+////plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
+//plane test_plane3(0.0, -1.0, 0.0, 0.5 , -1);
+//plane test_plane4(-1.0, 0.0, 0.0, 0.5, -1);
+//plane test_plane5(0.0, 0.0, -1.0, 0.0, -1);
 //plane test_plane1(1.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane2(1.0, -0.5, 0.0, 0.5, -1);
 //plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
 //plane test_plane4(1.0, 0.5, 0.0, -0.5, 1);
 //plane test_plane5(1.0, -1.0, 0.0, -0.5, 1);
 //plane test_plane6(0.0, 0.0, -1.0, 0.0, -1);
+//plane test_plane1(-0.0122959, 1090.43, -3433.2, -109059, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(3420.57, -960.09, -2157.39, 44738.4, -1);
+////plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
+//plane test_plane3(1746.66, -3503.89, 114.799, -232356, -1);
+//plane test_plane4(-333.867, -2194.18, 397.347, -103187, -1);
+//plane test_plane5(-5712.81, -1917.88, -2282.41, -117733, -1);
+plane test_plane1(0.657198, 0.388591, -0.645823, 24.6419, -1); // ax+by+cz=d  e->cut dir
+plane test_plane2(0.797712, -0.528882, -0.289723, 19.3016, -1);
+//plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
+plane test_plane3(-0.190125, -0.869877, 0.455156, -1.83655, -1);
+plane test_plane4(-0.815291, -0.516631, 0.26152, -0.0463305, -1);
+plane test_plane5(-0.445947, 0.89458, -0.0293085, 62.496, -1);
 
 vector<plane> planes;
 
@@ -296,7 +308,6 @@ void keyboard(unsigned char key,int x,int y)
     {
         lightTheta -= 10.0;
     }
-
 
     if(key==27)
     {
