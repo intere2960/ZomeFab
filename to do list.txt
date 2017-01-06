@@ -1,2 +1,1 @@
 . free vector memory
-. viewing cut plane in other viewer (output obj file)

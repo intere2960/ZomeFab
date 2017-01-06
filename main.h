@@ -64,33 +64,42 @@ vec3 bound_center;
 bool show = true;
 bool show_piece = true;
 
-//plane test_plane1(1.0, 2.0, 0.0, 1.0, -1); // ax+by+cz=d  e->cut dir
-//plane test_plane1(-1.0, -2.0, 0.0, 1.0, 1); // ax+by+cz=d  e->cut dir
-//plane test_plane1(1.0, -1.0, 0.0, 0.0, 1); // ax+by+cz=d  e->cut dir
 //plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
-////plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
 //plane test_plane3(0.0, -1.0, 0.0, 0.5 , -1);
 //plane test_plane4(-1.0, 0.0, 0.0, 0.5, -1);
 //plane test_plane5(0.0, 0.0, -1.0, 0.0, -1);
+
 //plane test_plane1(1.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane2(1.0, -0.5, 0.0, 0.5, -1);
 //plane test_plane3(0.0, 1.0, 0.0, -0.5 , 1);
 //plane test_plane4(1.0, 0.5, 0.0, -0.5, 1);
 //plane test_plane5(1.0, -1.0, 0.0, -0.5, 1);
 //plane test_plane6(0.0, 0.0, -1.0, 0.0, -1);
-//plane test_plane1(-0.0122959, 1090.43, -3433.2, -109059, -1); // ax+by+cz=d  e->cut dir
-//plane test_plane2(3420.57, -960.09, -2157.39, 44738.4, -1);
+
+//plane test_plane1(-3.41344e-006, 0.302711, -0.953082, -21.0594, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(0.822947, -0.230986, -0.519041, -18.4975, -1);
 ////plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
-//plane test_plane3(1746.66, -3503.89, 114.799, -232356, -1);
-//plane test_plane4(-333.867, -2194.18, 397.347, -103187, -1);
-//plane test_plane5(-5712.81, -1917.88, -2282.41, -117733, -1);
-plane test_plane1(0.657198, 0.388591, -0.645823, 24.6419, -1); // ax+by+cz=d  e->cut dir
-plane test_plane2(0.797712, -0.528882, -0.289723, 19.3016, -1);
-//plane test_plane2(2.0, 1.0, 0.0, 1.0, 1);
-plane test_plane3(-0.190125, -0.869877, 0.455156, -1.83655, -1);
-plane test_plane4(-0.815291, -0.516631, 0.26152, -0.0463305, -1);
-plane test_plane5(-0.445947, 0.89458, -0.0293085, 62.496, -1);
+//plane test_plane3(0.445941, -0.894582, 0.0293094, -61.5363, -1);
+//plane test_plane4(-0.148074, -0.973148, 0.176228, -47.3311, -1);
+//plane test_plane5(-0.886545, -0.297628, -0.354197, -22.8361, -1);
+//plane test_plane6(0.0, 0.0, -1.0, 0.0, -1);
+
+//plane test_plane1(0.657198, 0.388593, -0.645822, 24.1358, -1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(0.797712, -0.528882, -0.289723, 11.3956, -1);
+//plane test_plane3(-0.190125, -0.869877, 0.455156, 2.80831, -1);
+//plane test_plane4(-0.815291, -0.516631, 0.26152, -1.73863, -1);
+//plane test_plane5(-0.445947, 0.89458, -0.0293085, 63.5362, -1);
+//plane test_plane6(0.0, 0.0, -1.0, 0.0, -1);
+
+plane test_plane1(-0.148074, -0.973148, 0.176228, -47.3311, 1); // ax+by+cz=d  e->cut dir
+plane test_plane2(-0.815291, -0.516631, 0.26152, -1.73863, 1);
+plane test_plane3(-0.999344, -0.0356894, 0.00622273, -4.31148, 1);
+plane test_plane4(-0.209343, 0.925338, -0.31611, -30.4608, 1);
+plane test_plane5(0.688078, 0.661504, -0.298263, -37.4853, 1);
+plane test_plane6(0.79353, -0.279945, 0.540315, -5.83478, 1);
+plane test_plane7(0.618385, -0.635714, 0.462025, -22.8756, 1);
+plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
 vector<plane> planes;
 

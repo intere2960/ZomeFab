@@ -59,9 +59,9 @@ int plane_dir_point(vec3 &point, plane plane) //have problem
 {
     float judge = plane.plane_par[0] * point[0] + plane.plane_par[1] * point[1] + plane.plane_par[2] * point[2] - plane.plane_par[3];
 
-    if(judge > 0.1)
+    if(judge > 0.0001)
         judge = 1;
-    else if(judge < -0.1)
+    else if(judge < -0.0001)
         judge = -1;
     else
         judge = 0;
@@ -1022,6 +1022,7 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
             current = face_split_by_plane.size();
         }
     }
+    find_loop(myObj, all_edge, planes);
 }
 
 void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge1, edge &splited_edge2){
@@ -1356,7 +1357,6 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
                 }
             }
             use_vertex[next_index] = true;
-            cout << next_index << endl;
             myObj->loop->at(i).loop_line->push_back(next_index);
         }
     }
@@ -1372,7 +1372,7 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
             int next_index;
             bool find_vertex = false;
             for(unsigned int j = 0; j < myObj->multi_vertex->size(); j += 1){
-                if(myObj->multi_vertex->at(j) != end_index && std::equal(myObj->cut_loop->at(end_index).align_plane.begin(), myObj->cut_loop->at(end_index).align_plane.end(), myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.begin())){
+                if(myObj->multi_vertex->at(j) != (unsigned int)end_index && std::equal(myObj->cut_loop->at(end_index).align_plane.begin(), myObj->cut_loop->at(end_index).align_plane.end(), myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.begin())){
                      start_index = myObj->multi_vertex->at(j);
                      myObj->loop->at(i).loop_line->push_back(start_index);
                      use_vertex[start_index] = true;

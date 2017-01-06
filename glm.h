@@ -51,7 +51,6 @@ typedef struct _GLMmaterial
 
 /* GLMtriangle: Structure that defines a triangle in a model.
  */
-//typedef struct _GLMtriangle {
 class GLMtriangle {
 public:
   GLuint vindices[3];           /* array of triangle vertex indices */
@@ -62,8 +61,6 @@ public:
   int edge_index[3];
   std::vector<unsigned int> split_plane_id;
   bool split_by_process;
-
-//} GLMtriangle;
 };
 
 /* GLMgroup: Structure that defines a group in a model.
@@ -76,12 +73,10 @@ typedef struct _GLMgroup {
   struct _GLMgroup* next;           /* pointer to next group in model */
 } GLMgroup;
 
-//typedef struct _vertex {
 class vertex {
 public:
     std::vector<unsigned int> connect_edge;
     std::vector<unsigned int> align_plane;
-//} vertex;
 };
 
 class Loop{
@@ -98,14 +93,12 @@ public:
 
 /* GLMmodel: Structure that defines a model.
  */
-//typedef struct _GLMmodel {
 class GLMmodel {
 public:
   char*    pathname;            /* path to this model */
   char*    mtllibname;          /* name of the material library */
 
   GLuint   numvertices;         /* number of vertices in model */
-//  GLfloat* vertices;            /* array of vertices  */
   std::vector<GLfloat> *vertices;            /* array of vertices  */
   std::vector<vertex> *cut_loop;
   std::vector<unsigned int> *multi_vertex;
@@ -117,11 +110,9 @@ public:
   GLfloat* texcoords;           /* array of texture coordinates */
 
   GLuint   numfacetnorms;       /* number of facetnorms in model */
-//  GLfloat* facetnorms;          /* array of facetnorms */
   std::vector<GLfloat> *facetnorms;          /* array of facetnorms */
 
   GLuint       numtriangles;    /* number of triangles in model */
-//  GLMtriangle* triangles;       /* vector of triangles */
   std::vector<GLMtriangle> *triangles;       /* vector of triangles */
 
   GLuint       nummaterials;    /* number of materials in model */
@@ -133,8 +124,6 @@ public:
   GLfloat position[3];          /* position of the model */
 
   std::vector<Loop> *loop;
-
-//} GLMmodel;
 };
 
 GLMmodel* glmCopy(GLMmodel* m1);

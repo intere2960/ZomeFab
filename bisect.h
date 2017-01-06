@@ -3,9 +3,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-using namespace std;
-
 class edge
 {
 public:

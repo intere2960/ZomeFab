@@ -95,13 +95,13 @@ void init()
     planes.push_back(test_plane3);
     planes.push_back(test_plane4);
     planes.push_back(test_plane5); //dir_plane
-//    planes.push_back(test_plane6); //dir_plane
+    planes.push_back(test_plane6); //dir_plane
+    planes.push_back(test_plane7); //dir_plane
+    planes.push_back(test_plane8); //dir_plane
 
     cut_intersection(myObj, planes, face_split_by_plane, false);
 
     split_face(myObj, all_edge, face_split_by_plane, planes);
-
-    find_loop(myObj, all_edge, planes);
 
     process_piece(temp_piece, myObj, face_split_by_plane);
 
