@@ -24,7 +24,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/Column4.obj";
+char model_source[] = "test_model/ateneav0525.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -92,19 +92,34 @@ bool show_piece = true;
 //plane test_plane5(-0.445947, 0.89458, -0.0293085, 63.5362, -1);
 //plane test_plane6(0.0, 0.0, -1.0, 0.0, -1);
 
-plane test_plane1(-0.148074, -0.973148, 0.176228, -47.3311, 1); // ax+by+cz=d  e->cut dir
-plane test_plane2(-0.815291, -0.516631, 0.26152, -1.73863, 1);
-plane test_plane3(-0.999344, -0.0356894, 0.00622273, -4.31148, 1);
-plane test_plane4(-0.209343, 0.925338, -0.31611, -30.4608, 1);
-plane test_plane5(0.688078, 0.661504, -0.298263, -37.4853, 1);
-plane test_plane6(0.79353, -0.279945, 0.540315, -5.83478, 1);
-plane test_plane7(0.618385, -0.635714, 0.462025, -22.8756, 1);
-plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
+//plane test_plane1(-0.148074, -0.973148, 0.176228, -47.3311, 1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(-0.815291, -0.516631, 0.26152, -1.73863, 1);
+//plane test_plane3(-0.999344, -0.0356894, 0.00622273, -4.31148, 1);
+//plane test_plane4(-0.209343, 0.925338, -0.31611, -30.4608, 1);
+//plane test_plane5(0.688078, 0.661504, -0.298263, -37.4853, 1);
+//plane test_plane6(0.79353, -0.279945, 0.540315, -5.83478, 1);
+//plane test_plane7(0.618385, -0.635714, 0.462025, -22.8756, 1);
+//plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
+
+plane test_plane1(-0.526496, 0.634479, 0.565896, 122.793, 1); // ax+by+cz=d  e->cut dir
+plane test_plane2(0.0971029, 0.848491, 0.520225, 95.435, 1);
+plane test_plane3(-0.759769, -0.35547, -0.544419, 14.6121, -1);
+plane test_plane4(-0.78622, 0.556466, -0.268705, 123.328, -1);
+plane test_plane5(0.268936, 0.931406, -0.245269, 90.5815, -1);
+plane test_plane6(0.690705, 0.662271, -0.290386, 32.8401, -1);
+
+//plane test_plane1(-0.78622, 0.556466, -0.268705, 123.328, 1); // ax+by+cz=d  e->cut dir
+//plane test_plane2(0.950511, 0.309272, 0.0296519, -31.838, -1);
+//plane test_plane3(0.806044, 0.591815, 0.00695651, 23.0949, -1);
+//plane test_plane4(0.115514, 0.992865, 0.0295873, 170.48, -1);
+//plane test_plane5(-0.708767, 0.705386, 0.00896756, 226.001, -1);
+//plane test_plane6(-0.833321, -0.250393, -0.492828, 68.7811, -1);
+//plane test_plane7(-0.00659407, -0.951645, -0.307131, -109.964, -1);
+//plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
 vector<plane> planes;
 
 vector<edge> all_edge;
-vector<edge> all_inner_edge;
 vector<int> face_split_by_plane;
 vector<int> face_inner_split_by_plane;
 

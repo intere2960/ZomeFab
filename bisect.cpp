@@ -389,10 +389,15 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                     if((unsigned int)(find(myObj->cut_loop->at(inner_e1.index[0]).align_plane.begin(), myObj->cut_loop->at(inner_e1.index[0]).align_plane.end(), cut_plane) - myObj->cut_loop->at(inner_e1.index[0]).align_plane.begin()) >= myObj->cut_loop->at(inner_e1.index[0]).align_plane.size()){
                         myObj->cut_loop->at(inner_e1.index[0]).align_plane.push_back(cut_plane);
                     }
+                    if(myObj->cut_loop->at(inner_e1.index[0]).align_plane.size() >= 2)
+                        myObj->multi_vertex->push_back(inner_e1.index[0]);
+
                     myObj->cut_loop->at(inner_e1.index[1]).connect_edge.push_back(inner_edge_index[0]);
                     if((unsigned int)(find(myObj->cut_loop->at(inner_e1.index[1]).align_plane.begin(), myObj->cut_loop->at(inner_e1.index[1]).align_plane.end(), cut_plane) - myObj->cut_loop->at(inner_e1.index[1]).align_plane.begin()) >= myObj->cut_loop->at(inner_e1.index[1]).align_plane.size()){
                         myObj->cut_loop->at(inner_e1.index[1]).align_plane.push_back(cut_plane);
                     }
+                    if(myObj->cut_loop->at(inner_e1.index[1]).align_plane.size() >= 2)
+                        myObj->multi_vertex->push_back(inner_e1.index[1]);
 
                     if(all_edge.at(choose_edge[1]).connect_index == -1){
                         inner_e2.index[0] = all_edge.at(choose_edge[1]).index[(int)choose_vertex_index[1]];
@@ -589,6 +594,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                                     if(judge_dir[0] == 0 && judge_dir[1] == 0 && all_edge.at(myObj->cut_loop->at(all_edge.at(choose_edge[0]).index[0]).connect_edge.at(k)).index[1] == all_edge.at(choose_edge[0]).vertex_push_index){
                                         myObj->cut_loop->at(all_edge.at(choose_edge[0]).vertex_push_index).connect_edge.push_back(myObj->cut_loop->at(all_edge.at(choose_edge[0]).index[0]).connect_edge.at(k));
                                         myObj->cut_loop->at(all_edge.at(choose_edge[0]).vertex_push_index).align_plane.push_back(myObj->cut_loop->at(all_edge.at(choose_edge[0]).index[0]).align_plane.at(j));
+                                        if(myObj->cut_loop->at(all_edge.at(choose_edge[0]).vertex_push_index).align_plane.size() >= 2)
+                                            myObj->multi_vertex->push_back(all_edge.at(choose_edge[0]).vertex_push_index);
                                         break;
                                     }
                                 }
@@ -603,6 +610,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                                     if(judge_dir[0] == 0 && judge_dir[1] == 0 && all_edge.at(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[0]).connect_index).index[0]).connect_edge.at(k)).index[1] == all_edge.at(all_edge.at(choose_edge[0]).connect_index).vertex_push_index){
                                         myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[0]).connect_index).vertex_push_index).connect_edge.push_back(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[0]).connect_index).index[0]).connect_edge.at(k));
                                         myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[0]).connect_index).vertex_push_index).align_plane.push_back(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[0]).connect_index).index[0]).align_plane.at(j));
+                                        if(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[0]).connect_index).vertex_push_index).align_plane.size() >= 2)
+                                            myObj->multi_vertex->push_back(all_edge.at(all_edge.at(choose_edge[0]).connect_index).vertex_push_index);
                                         break;
                                     }
                                 }
@@ -675,6 +684,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                                     if(judge_dir[0] == 0 && judge_dir[1] == 0 && all_edge.at(myObj->cut_loop->at(all_edge.at(choose_edge[1]).index[0]).connect_edge.at(k)).index[1] == all_edge.at(choose_edge[1]).vertex_push_index){
                                         myObj->cut_loop->at(all_edge.at(choose_edge[1]).vertex_push_index).connect_edge.push_back(myObj->cut_loop->at(all_edge.at(choose_edge[1]).index[0]).connect_edge.at(k));
                                         myObj->cut_loop->at(all_edge.at(choose_edge[1]).vertex_push_index).align_plane.push_back(myObj->cut_loop->at(all_edge.at(choose_edge[1]).index[0]).align_plane.at(j));
+                                        if(myObj->cut_loop->at(all_edge.at(choose_edge[1]).vertex_push_index).align_plane.size() >= 2)
+                                            myObj->multi_vertex->push_back(all_edge.at(choose_edge[1]).vertex_push_index);
                                         break;
                                     }
                                 }
@@ -689,6 +700,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                                     if(judge_dir[0] == 0 && judge_dir[1] == 0 && all_edge.at(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[1]).connect_index).index[0]).connect_edge.at(k)).index[1] == all_edge.at(all_edge.at(choose_edge[1]).connect_index).vertex_push_index){
                                         myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[1]).connect_index).vertex_push_index).connect_edge.push_back(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[1]).connect_index).index[0]).connect_edge.at(k));
                                         myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[1]).connect_index).vertex_push_index).align_plane.push_back(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[1]).connect_index).index[0]).align_plane.at(j));
+                                        if(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[1]).connect_index).vertex_push_index).align_plane.size() >= 2)
+                                            myObj->multi_vertex->push_back(all_edge.at(all_edge.at(choose_edge[1]).connect_index).vertex_push_index);
                                         break;
                                     }
                                 }
@@ -797,10 +810,15 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                     if((unsigned int)(find(myObj->cut_loop->at(inner_e.index[0]).align_plane.begin(), myObj->cut_loop->at(inner_e.index[0]).align_plane.end(), cut_plane) - myObj->cut_loop->at(inner_e.index[0]).align_plane.begin()) >= myObj->cut_loop->at(inner_e.index[0]).align_plane.size()){
                         myObj->cut_loop->at(inner_e.index[0]).align_plane.push_back(cut_plane);
                     }
+                    if(myObj->cut_loop->at(inner_e.index[0]).align_plane.size() >= 2)
+                        myObj->multi_vertex->push_back(inner_e.index[0]);
+
                     myObj->cut_loop->at(inner_e.index[1]).connect_edge.push_back(inner_edge_index);
                     if((unsigned int)(find(myObj->cut_loop->at(inner_e.index[1]).align_plane.begin(), myObj->cut_loop->at(inner_e.index[1]).align_plane.end(), cut_plane) - myObj->cut_loop->at(inner_e.index[1]).align_plane.begin()) >= myObj->cut_loop->at(inner_e.index[1]).align_plane.size()){
                         myObj->cut_loop->at(inner_e.index[1]).align_plane.push_back(cut_plane);
                     }
+                    if(myObj->cut_loop->at(inner_e.index[1]).align_plane.size() >= 2)
+                        myObj->multi_vertex->push_back(inner_e.index[1]);
 
                     if(all_edge.at(choose_edge[2]).connect_index == -1){
                         outer_e.index[0] = all_edge.at(choose_edge[0]).index[(int)choose_vertex_index[0]];
@@ -914,6 +932,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                                     if(judge_dir[0] == 0 && judge_dir[1] == 0 && all_edge.at(myObj->cut_loop->at(all_edge.at(choose_edge[2]).index[0]).connect_edge.at(k)).index[1] == all_edge.at(choose_edge[2]).vertex_push_index){
                                         myObj->cut_loop->at(all_edge.at(choose_edge[2]).vertex_push_index).connect_edge.push_back(myObj->cut_loop->at(all_edge.at(choose_edge[2]).index[0]).connect_edge.at(k));
                                         myObj->cut_loop->at(all_edge.at(choose_edge[2]).vertex_push_index).align_plane.push_back(myObj->cut_loop->at(all_edge.at(choose_edge[2]).index[0]).align_plane.at(j));
+                                        if(myObj->cut_loop->at(all_edge.at(choose_edge[2]).vertex_push_index).align_plane.size() >= 2)
+                                            myObj->multi_vertex->push_back(all_edge.at(choose_edge[2]).vertex_push_index);
                                         break;
                                     }
                                 }
@@ -928,6 +948,8 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                                     if(judge_dir[0] == 0 && judge_dir[1] == 0 && all_edge.at(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[0]).connect_edge.at(k)).index[1] == all_edge.at(all_edge.at(choose_edge[2]).connect_index).vertex_push_index){
                                         myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[2]).connect_index).vertex_push_index).connect_edge.push_back(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[0]).connect_edge.at(k));
                                         myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[2]).connect_index).vertex_push_index).align_plane.push_back(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[2]).connect_index).index[0]).align_plane.at(j));
+                                        if(myObj->cut_loop->at(all_edge.at(all_edge.at(choose_edge[2]).connect_index).vertex_push_index).align_plane.size() >= 2)
+                                            myObj->multi_vertex->push_back(all_edge.at(all_edge.at(choose_edge[2]).connect_index).vertex_push_index);
                                         break;
                                     }
                                 }
@@ -1022,7 +1044,25 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
             current = face_split_by_plane.size();
         }
     }
-    find_loop(myObj, all_edge, planes);
+
+    for(unsigned int i = 0; i < planes.size(); i += 1){
+        for(unsigned int j = 0; j < myObj->multi_vertex->size(); j += 1){
+            vec3 point(myObj->vertices->at(3 * myObj->multi_vertex->at(j) + 0), myObj->vertices->at(3 * myObj->multi_vertex->at(j) + 1), myObj->vertices->at(3 * myObj->multi_vertex->at(j) + 2));
+            int judge = plane_dir_point(point, planes.at(i));
+            if(judge == planes.at(i).dir * -1){
+                if(!myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.empty()){
+                    std::vector<unsigned int> v;
+                    myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.swap(v);
+                }
+                myObj->multi_vertex->erase(myObj->multi_vertex->begin() + j);
+                j -= 1;
+            }
+        }
+    }
+
+    for(unsigned int i = 0; i < myObj->multi_vertex->size(); i += 1){
+        sort(myObj->cut_loop->at(myObj->multi_vertex->at(i)).align_plane.begin(), myObj->cut_loop->at(myObj->multi_vertex->at(i)).align_plane.begin() + myObj->cut_loop->at(myObj->multi_vertex->at(i)).align_plane.size());
+    }
 }
 
 void tri_poly(GLMmodel *myObj, std::vector<edge> &all_edge, int face_id, edge &splited_edge1, edge &splited_edge2){
@@ -1285,13 +1325,6 @@ void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
 
 void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> &planes)
 {
-    for(unsigned int i = 1; i < myObj->cut_loop->size(); i += 1){
-        if(myObj->cut_loop->at(i).align_plane.size() > 1){
-            sort(myObj->cut_loop->at(i).align_plane.begin(), myObj->cut_loop->at(i).align_plane.begin() + myObj->cut_loop->at(i).align_plane.size());
-            myObj->multi_vertex->push_back(i);
-        }
-    }
-
     bool use_plane[planes.size()] = { false };
     myObj->loop = new std::vector<Loop>(planes.size());
     for(unsigned int i = 0; i < planes.size(); i += 1){
