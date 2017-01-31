@@ -227,7 +227,6 @@ void triangulate(Loop &loop)
         tri_vindex[1] = loop.loop_line->at(1);
         tri_vindex[2] = loop.loop_line->at(2);
         loop.tri->push_back(tri_vindex);
-
 	}
 }
 

@@ -80,6 +80,8 @@ void myReshape(int w, int h)
 
 void init()
 {
+//    glmRT(myObj, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 0.0));
+
     bounding_box();
 
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
@@ -95,7 +97,7 @@ void init()
     planes.push_back(test_plane3);
     planes.push_back(test_plane4);
     planes.push_back(test_plane5); //dir_plane
-    planes.push_back(test_plane6); //dir_plane
+//    planes.push_back(test_plane6); //dir_plane
 //    planes.push_back(test_plane7); //dir_plane
 //    planes.push_back(test_plane8); //dir_plane
 
@@ -112,36 +114,36 @@ void init()
 
 int main(int argc, char **argv)
 {
-//    myObj = glmReadOBJ(model_source);
-//    myObj_inner = glmCopy(myObj);
+    myObj = glmReadOBJ(model_source);
+    myObj_inner = glmCopy(myObj);
 
 //    myObj_inner = glmReadOBJ(model_source) ;
 
-//    init();
-//
-//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitWindowSize(1000,1000);
-//
-//    glutCreateWindow("Zometool");
-//	glutDisplayFunc(display);
-//	glutReshapeFunc(myReshape);
-//	glutMouseFunc(mouse);
-//    glutMotionFunc(mouseMotion);
-//    glutKeyboardFunc(keyboard);
-//    glutSpecialFunc(special);
-//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-//
-//	glewInit();
-//
-//	setShaders();
-//
-//	glutMainLoop();
-    zomedir t;
-    for(unsigned int i = 0; i < t.dir->size(); i += 1){
-        cout << i << " : " << t.dir->at(i)[0] << " " << t.dir->at(i)[1] << " " << t.dir->at(i)[2] << endl;
-    }
-    vec3 x(0.0, 0.0, 1.0);
-    cout << t.dir_face(x);
+    init();
+
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1000,1000);
+
+    glutCreateWindow("Zometool");
+	glutDisplayFunc(display);
+	glutReshapeFunc(myReshape);
+	glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
+    glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
+	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+
+	glewInit();
+
+	setShaders();
+
+	glutMainLoop();
+//    zomedir t;
+//    for(unsigned int i = 0; i < t.dir->size(); i += 1){
+//        cout << i << " : " << t.dir->at(i)[0] << " " << t.dir->at(i)[1] << " " << t.dir->at(i)[2] << endl;
+//    }
+//    vec3 x(0.0, 0.0, 1.0);
+//    cout << t.dir_face(x);
 
     return 0;
 }

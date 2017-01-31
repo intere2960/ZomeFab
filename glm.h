@@ -154,6 +154,9 @@ glmDimensions(GLMmodel* model, GLfloat* dimensions);
 GLvoid
 glmScale(GLMmodel* model, GLfloat scale);
 
+GLvoid
+glmRT(GLMmodel* model, vec3 rotate, vec3 translate);
+
 /* glmReverseWinding: Reverse the polygon winding for all polygons in
  * this model.  Default winding is counter-clockwise.  Also changes
  * the direction of the normals.

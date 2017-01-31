@@ -59,9 +59,9 @@ int plane_dir_point(vec3 &point, plane plane) //have problem
 {
     float judge = plane.plane_par[0] * point[0] + plane.plane_par[1] * point[1] + plane.plane_par[2] * point[2] - plane.plane_par[3];
 
-    if(judge > SMALL_VALUE)
+    if(judge > 0.0001)
         judge = 1;
-    else if(judge < -SMALL_VALUE)
+    else if(judge < -0.0001)
         judge = -1;
     else
         judge = 0;
@@ -1056,6 +1056,11 @@ void split_face(GLMmodel *myObj, std::vector<edge> &all_edge,std::vector<int> &f
                 }
                 myObj->multi_vertex->erase(myObj->multi_vertex->begin() + j);
                 j -= 1;
+            }
+            if(judge == 0){
+                if((unsigned int)(find(myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.begin(), myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.end(), i) - myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.begin()) >= myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.size()){
+                    myObj->cut_loop->at(myObj->multi_vertex->at(j)).align_plane.push_back(i);
+                }
             }
         }
     }
