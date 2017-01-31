@@ -13,7 +13,7 @@
 #define NODE_DIAMETER 17.7
 #define LATCH 4.0
 #define SCALE 47.3 //46.3 => 47.3
-#define GOLDEN (1.0 +sqrt(5.0)) / 2
+#define GOLDEN (1.0 + sqrt(5.0)) / 2
 
 #define WEIGHT_BLUE_S 1.7
 #define WEIGHT_BLUE_M 3.0

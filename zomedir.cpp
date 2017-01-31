@@ -1,4 +1,5 @@
 #include "zomedir.h"
+#include "glui_internal.h"
 
 zomedir::zomedir()
 {
@@ -59,17 +60,17 @@ zomedir::zomedir()
 	dir->push_back(vec3(0.0, -golden * sqrt((5 - sqrt(5)) / 10), sqrt((5 - sqrt(5)) / 10)));
 
     // around z axis (38-41)
-    dir->push_back(vec3(sqrt((5 - sqrt(5)) / 10), 0., golden * sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(-sqrt((5 - sqrt(5)) / 10), 0., golden * sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(-sqrt((5 - sqrt(5)) / 10), 0., -golden * sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(sqrt((5 - sqrt(5)) / 10), 0., -golden * sqrt((5 - sqrt(5)) / 10)));
+    dir->push_back(vec3(sqrt((5 - sqrt(5)) / 10), 0.0, golden * sqrt((5 - sqrt(5)) / 10)));
+	dir->push_back(vec3(-sqrt((5 - sqrt(5)) / 10), 0.0, golden * sqrt((5 - sqrt(5)) / 10)));
+	dir->push_back(vec3(-sqrt((5 - sqrt(5)) / 10), 0.0, -golden * sqrt((5 - sqrt(5)) / 10)));
+	dir->push_back(vec3(sqrt((5 - sqrt(5)) / 10), 0.0, -golden * sqrt((5 - sqrt(5)) / 10)));
 
     // yellows (diagonals in planes)
     // around x axis (42-35)
-    dir->push_back(vec3(golden / sqrt(3), 0.,  1.0 / golden / sqrt(3)));
-	dir->push_back(vec3(golden / sqrt(3), 0., -1.0 / golden / sqrt(3)));
-	dir->push_back(vec3(-golden / sqrt(3), 0., -1.0 / golden / sqrt(3)));
-	dir->push_back(vec3(-golden / sqrt(3), 0., 1.0 / golden / sqrt(3)));
+    dir->push_back(vec3(golden / sqrt(3), 0.0,  1.0 / golden / sqrt(3)));
+	dir->push_back(vec3(golden / sqrt(3), 0.0, -1.0 / golden / sqrt(3)));
+	dir->push_back(vec3(-golden / sqrt(3), 0.0, -1.0 / golden / sqrt(3)));
+	dir->push_back(vec3(-golden / sqrt(3), 0.0, 1.0 / golden / sqrt(3)));
 
     // around y axis (46-49)
     dir->push_back(vec3(1.0 / golden / sqrt(3), golden / sqrt(3), 0.0));
@@ -88,7 +89,7 @@ zomedir::zomedir()
 	dir->push_back(vec3(-sqrt(3) / 3 , sqrt(3) / 3 , sqrt(3) / 3));
 	dir->push_back(vec3(sqrt(3) / 3 , -sqrt(3) / 3 , sqrt(3) / 3));
 	dir->push_back(vec3(sqrt(3) / 3 , sqrt(3) / 3 , -sqrt(3) / 3));
-	dir->push_back(vec3(sqrt(3) / 3 , -sqrt(3) / 3 , sqrt(3) / 3));
+	dir->push_back(vec3(sqrt(3) / 3 , -sqrt(3) / 3 , -sqrt(3) / 3));
 	dir->push_back(vec3(-sqrt(3) / 3 , sqrt(3) / 3 , -sqrt(3) / 3));
 	dir->push_back(vec3(-sqrt(3) / 3 , -sqrt(3) / 3 , sqrt(3) / 3));
 	dir->push_back(vec3(-sqrt(3) / 3 , -sqrt(3) / 3 , -sqrt(3) / 3));
@@ -114,7 +115,7 @@ GLfloat zomedir::theta(int index)
 	{
 		theta = M_PI - theta;
 	}
-	if(sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < 0.0001)
+	if(sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < SMALL_VALUE)
 	{
 		theta = 0;
 	}
@@ -164,7 +165,7 @@ GLfloat zomedir::yaw(int index)
 		if(index == 27) yaw = M_PI - yaw;
 		if(index == 28) yaw = M_PI - yaw;
 
-		if ( 0 && sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < 0.0001)
+		if ( 0 && sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < SMALL_VALUE)
 		{
 			yaw = 0;
 		}
@@ -306,7 +307,7 @@ int zomedir::dir_face(vec3 &fdir)
 			return i;
 		}
 
-		if((fdir - dir->at(i)).length() < 0.0001 )
+		if((fdir - dir->at(i)).length() < SMALL_VALUE )
 		{
 
 			return i;
@@ -329,9 +330,9 @@ int zomedir::dir_face(vec3 &vecInitial, vec3 &vecEnd, int size)
 			return i;
 		}
 
-		if((tempdir - dir->at(i)).length() < 0.0001)
+		if((tempdir - dir->at(i)).length() < SMALL_VALUE)
 		{
-			if(abs(d - face_length(i, size)) < 0.0001)
+			if(abs(d - face_length(i, size)) < SMALL_VALUE)
 			{
 				return i;
 			}

@@ -86,8 +86,8 @@
 
 
 /***** Small value when we want to do a comparison to 'close to zero' *****/
-#ifndef FUDGE
-#define FUDGE .00001
+#ifndef SMALL_VALUE
+#define SMALL_VALUE .00001
 #endif
 
 

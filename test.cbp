@@ -52,6 +52,8 @@
 		<Unit filename="to do list.txt" />
 		<Unit filename="zomedir.cpp" />
 		<Unit filename="zomedir.h" />
+		<Unit filename="zomestruc.cpp" />
+		<Unit filename="zomestruc.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
