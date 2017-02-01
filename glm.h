@@ -323,4 +323,7 @@ glmWeld(GLMmodel* model, GLfloat epsilon);
 GLubyte*
 glmReadPPM(char* filename, int* width, int* height);
 
+GLvoid
+glmCombine(GLMmodel *model, GLMmodel *source);
+
 #endif

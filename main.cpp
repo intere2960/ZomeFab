@@ -88,6 +88,9 @@ void init()
 
     recount_normal(myObj);
     process_inner(myObj, myObj_inner);
+
+//    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
+
     combine_inner_outfit(myObj, myObj_inner);
 
     collect_edge(myObj, all_edge);
