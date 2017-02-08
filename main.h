@@ -337,9 +337,10 @@ void keyboard(unsigned char key,int x,int y)
     if(key==27)
     {
 //        glmWriteOBJ(myObj, model_out, GLM_NONE);
+//        glmWriteOBJ(myObj, "test_model/zometool/view.obj", GLM_NONE);
 //        glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
-        glmDelete(myObj);
-        glmDelete(myObj_inner);
+//        glmDelete(myObj);
+//        glmDelete(myObj_inner);
         exit(0);
     }
 }
@@ -365,3 +366,22 @@ void special(int key, int x, int y)
     center[2] = eye_pos[2] + bound_size[2] * sin(phi) * sin(theta);
 }
 
+//zome OBJ
+//
+//    GLMmodel *ball1 = NULL;
+//    GLMmodel *ball2 = NULL;
+//    GLMmodel *stick = NULL;
+//    ball1 = glmReadOBJ("test_model/zometool/zomeball.obj");
+//    ball2 = glmReadOBJ("test_model/zometool/zomeball.obj");
+//    stick = glmReadOBJ("test_model/zometool/YellowS.obj");
+//
+//    zomedir t;
+//    for(unsigned int i = 0; i < t.dir->size(); i += 1){
+//        cout << i << " : " << t.dir->at(i)[0] << " " << t.dir->at(i)[1] << " " << t.dir->at(i)[2] << " => " << t.theta(i) << " " << t.phi(i) << " " << t.roll(i) << endl;
+//    }
+//
+//    glmR(stick, vec3(0.0, 1.0, 0.0), t.roll(51));
+//    glmRT(stick, vec3(0.0, t.phi(51), t.theta(51)), vec3(0.0, t.color_length(COLOR_YELLOW, SIZE_S) / 2, 0.0));
+//    glmRT(ball2, vec3(0.0, 0.0, 0.0), vec3(SCALE, 0.0, 0.0));
+//
+//    glmCombine(ball1, stick);

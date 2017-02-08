@@ -46,7 +46,7 @@ public:
 	void face_dir(GLfloat x, GLfloat y, GLfloat z);
 	GLfloat theta(int index);
 	GLfloat phi(int index);
-	GLfloat yaw(int index);
+	GLfloat roll(int index);
 
 	std::vector<vec3> *dir;
 

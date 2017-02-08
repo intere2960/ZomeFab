@@ -52,7 +52,7 @@
 1478970094 source:c:\users\rock\desktop\test\main.cpp
 	"main.h"
 
-1483709077 source:e:\pieceofshit\glm.cpp
+1486542156 source:e:\pieceofshit\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -60,45 +60,45 @@
 	<assert.h>
 	"glm.h"
 
-1483710146 e:\pieceofshit\glm.h
+1486542225 e:\pieceofshit\glm.h
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<vector>
 	"algebra3.h"
 
-1484385098 source:e:\pieceofshit\main.cpp
+1486543931 source:e:\pieceofshit\main.cpp
 	"main.h"
 
-1480701659 source:e:\pieceofshit\textfile.cpp
+1486385372 source:e:\pieceofshit\textfile.cpp
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 
-1480701659 e:\pieceofshit\textfile.h
+1486385372 e:\pieceofshit\textfile.h
 
-1480701659 source:e:\pieceofshit\algebra3.cpp
+1486385372 source:e:\pieceofshit\algebra3.cpp
 	"algebra3.h"
 	"glui_internal.h"
 	<cmath>
 
-1480701659 e:\pieceofshit\algebra3.h
+1486385372 e:\pieceofshit\algebra3.h
 	<cmath>
 	<cstdio>
 	<cstdlib>
 
-1480701659 e:\pieceofshit\glui_internal.h
+1486385372 e:\pieceofshit\glui_internal.h
 	<cstdio>
 	<cmath>
 
-1480701659 e:\pieceofshit\shell.h
+1486385372 e:\pieceofshit\shell.h
 
-1484383938 source:e:\pieceofshit\shell.cpp
+1486385372 source:e:\pieceofshit\shell.cpp
 	<algorithm>
 	<vector>
 	<cmath>
 	"glm.h"
 
-1484385132 e:\pieceofshit\main.h
+1486543991 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>
@@ -112,17 +112,17 @@
 	"shell.h"
 	"bisect.h"
 	"fill.h"
+	"zomedir.h"
 
-1484384870 source:e:\pieceofshit\bisect.cpp
+1486385453 source:e:\pieceofshit\bisect.cpp
 	<vector>
 	"glm.h"
 	"algebra3.h"
 	"glui_internal.h"
 	"bisect.h"
 
-1484381341 e:\pieceofshit\bisect.h
+1486385372 e:\pieceofshit\bisect.h
 	<algorithm>
-	<iostream>
 
 1477145074 source:c:\users\rock\desktop\test\algebra3.cpp
 	"algebra3.h"
@@ -250,14 +250,14 @@
 	<assert.h>
 	"glm.h"
 
-1483624609 source:e:\pieceofshit\fill.cpp
+1486385372 source:e:\pieceofshit\fill.cpp
 	<vector>
 	"glm.h"
 	"algebra3.h"
 	"glui_internal.h"
 	"fill.h"
 
-1483602318 e:\pieceofshit\fill.h
+1486385372 e:\pieceofshit\fill.h
 
 1485886431 source:c:\users\rock\desktop\pieceofshit\fill.cpp
 	<vector>
@@ -282,6 +282,24 @@
 	"zomestruc.h"
 
 1485857104 c:\users\rock\desktop\pieceofshit\zomestruc.h
+	<GL/glut.h>
+	"algebra3.h"
+	"zomedir.h"
+
+1486541804 e:\pieceofshit\zomedir.h
+	<vector>
+	<cmath>
+	<GL/glut.h>
+	"algebra3.h"
+
+1486543563 source:e:\pieceofshit\zomedir.cpp
+	"zomedir.h"
+	"glui_internal.h"
+
+1486385372 source:e:\pieceofshit\zomestruc.cpp
+	"zomestruc.h"
+
+1486385372 e:\pieceofshit\zomestruc.h
 	<GL/glut.h>
 	"algebra3.h"
 	"zomedir.h"

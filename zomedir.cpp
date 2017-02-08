@@ -107,109 +107,109 @@ zomedir::~zomedir()
     delete dir;
 }
 
-GLfloat zomedir::theta(int index)
+GLfloat zomedir::phi(int index)
 {
-	GLfloat sinTheta = dir->at(index)[2] / sqrt(pow(dir->at(index)[2], 2) + pow(dir->at(index)[2], 2) );
-	GLfloat theta = asin( sinTheta );
+	GLfloat sinPhi = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2) );
+	GLfloat phi = asin(sinPhi);
 	if(dir->at(index)[0] < 0)
 	{
-		theta = M_PI - theta;
+		phi = M_PI - phi;
 	}
 	if(sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < SMALL_VALUE)
 	{
-		theta = 0;
+		phi = 0;
 	}
-	return theta;
+	return -phi;
 }
 
-GLfloat zomedir::phi(int index)
+GLfloat zomedir::theta(int index)
 {
-	GLfloat sinPhi = dir->at(index)[1] / sqrt(pow(dir->at(index)[0] , 2) + pow(dir->at(index)[1] , 2) + pow(dir->at(index)[2] , 2));
-	GLfloat phi = acos(sinPhi);
-	return phi;
+	GLfloat sinTheta = dir->at(index)[1] / sqrt(pow(dir->at(index)[0] , 2) + pow(dir->at(index)[1] , 2) + pow(dir->at(index)[2] , 2));
+	GLfloat theta = acos(sinTheta);
+	return -theta;
 }
 
-GLfloat zomedir::yaw(int index)
+GLfloat zomedir::roll(int index)
 {
-	GLfloat yaw;
+	GLfloat roll;
 	if(index < 30)
 	{
-		GLfloat sinYaw = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2));
-		yaw = asin(sinYaw);
-		if(index == 0) yaw = M_PI * 0.5;
-		if(index == 1) yaw = M_PI * 0.5;
-		if(index == 2) yaw = 0.0;
-		if(index == 3) yaw = 0.0;
-		if(index == 4) yaw = 0.0;
-		if(index == 5) yaw = 0.0;
+		GLfloat sinroll = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2));
+		roll = asin(sinroll);
+		if(index == 0) roll = M_PI * 0.5;
+		if(index == 1) roll = M_PI * 0.5;
+		if(index == 2) roll = 0.0;
+		if(index == 3) roll = 0.0;
+		if(index == 4) roll = 0.0;
+		if(index == 5) roll = 0.0;
 
-		if(index == 6) yaw = M_PI - yaw;
+		if(index == 6) roll = M_PI - roll;
 
-		if(index == 9) yaw = M_PI - yaw;
-		if(index == 10) yaw = M_PI - yaw;
+		if(index == 9) roll = M_PI - roll;
+		if(index == 10) roll = M_PI - roll;
 		if(index == 11);
-		if(index == 12) yaw = -(M_PI - yaw);
-		if(index == 13) yaw = M_PI - yaw;
+		if(index == 12) roll = -(M_PI - roll);
+		if(index == 13) roll = M_PI - roll;
 		if(index == 14);
-		if(index == 15) yaw = M_PI - yaw;
-		if(index == 16) yaw = -yaw;
-		if(index == 17) yaw = -(M_PI - yaw);
+		if(index == 15) roll = M_PI - roll;
+		if(index == 16) roll = -roll;
+		if(index == 17) roll = -(M_PI - roll);
 		if(index == 18);
-		if(index == 19) yaw = -yaw;
-		if(index == 20) yaw = M_PI - yaw;
+		if(index == 19) roll = -roll;
+		if(index == 20) roll = M_PI - roll;
 		if(index == 22);
-		if(index == 23) yaw = M_PI - yaw;
-		if(index == 24) yaw = M_PI - yaw;
-		if(index == 25) yaw = -(M_PI - yaw);
+		if(index == 23) roll = M_PI - roll;
+		if(index == 24) roll = M_PI - roll;
+		if(index == 25) roll = -(M_PI - roll);
 		if(index == 26);
-		if(index == 27) yaw = M_PI - yaw;
-		if(index == 28) yaw = M_PI - yaw;
+		if(index == 27) roll = M_PI - roll;
+		if(index == 28) roll = M_PI - roll;
 
 		if ( 0 && sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < SMALL_VALUE)
 		{
-			yaw = 0;
+			roll = 0;
 		}
 	}
 	else if(index < 42)
 	{
-		if(index == 30) yaw = 0;
-		if(index == 31) yaw = M_PI;
-		if(index == 32) yaw = M_PI;
-		if(index == 33) yaw = 0;
-		if(index == 34) yaw = M_PI;
-		if(index == 35) yaw = M_PI;
-		if(index == 36) yaw = 0;
-		if(index == 37) yaw = 0;
-		if(index == 38) yaw = M_PI * 0.5;
-		if(index == 39) yaw = M_PI * 1.5;
-		if(index == 40) yaw = M_PI * 0.5;
-		if(index == 41) yaw = M_PI * 1.5;
+		if(index == 30) roll = 0;
+		if(index == 31) roll = M_PI;
+		if(index == 32) roll = M_PI;
+		if(index == 33) roll = 0;
+		if(index == 34) roll = M_PI;
+		if(index == 35) roll = M_PI;
+		if(index == 36) roll = 0;
+		if(index == 37) roll = 0;
+		if(index == 38) roll = M_PI * 0.5;
+		if(index == 39) roll = M_PI * 1.5;
+		if(index == 40) roll = M_PI * 0.5;
+		if(index == 41) roll = M_PI * 1.5;
 	}
 	else
 	{
-		if(index == 42) yaw = M_PI * 0.5;
-		if(index == 43) yaw = M_PI * 1.5;
-		if(index == 44) yaw = M_PI * 0.5;
-		if(index == 45) yaw = M_PI * 1.5;
-		if(index == 46) yaw = 0;
-		if(index == 47) yaw = 0;
-		if(index == 48) yaw = M_PI;
-		if(index == 49) yaw = M_PI;
-		if(index == 50) yaw = M_PI;
-		if(index == 51) yaw = 0;
-		if(index == 52) yaw = 0;
-		if(index == 53) yaw = M_PI;
+		if(index == 42) roll = M_PI * 0.5;
+		if(index == 43) roll = M_PI * 1.5;
+		if(index == 44) roll = M_PI * 0.5;
+		if(index == 45) roll = M_PI * 1.5;
+		if(index == 46) roll = 0;
+		if(index == 47) roll = 0;
+		if(index == 48) roll = M_PI;
+		if(index == 49) roll = M_PI;
+		if(index == 50) roll = M_PI;
+		if(index == 51) roll = 0;
+		if(index == 52) roll = 0;
+		if(index == 53) roll = M_PI;
 
-		if(index == 54) yaw = 22.2369 / 180.0 * M_PI;
-		if(index == 55) yaw = -22.2369 / 180.0 * M_PI;
-		if(index == 56) yaw = -22.2369 / 180.0 * M_PI + M_PI;
-		if(index == 57) yaw = -22.2369 / 180.0 * M_PI;
-		if(index == 58) yaw = 22.2369 / 180.0 * M_PI + M_PI;
-		if(index == 59) yaw = 22.2369 / 180.0 * M_PI;
-		if(index == 60) yaw = 22.2369 / 180.0 * M_PI + M_PI;
-		if(index == 61) yaw = -22.2369 / 180.0 * M_PI + M_PI;
+		if(index == 54) roll = 22.2369 / 180.0 * M_PI;
+		if(index == 55) roll = -22.2369 / 180.0 * M_PI;
+		if(index == 56) roll = -22.2369 / 180.0 * M_PI + M_PI;
+		if(index == 57) roll = -22.2369 / 180.0 * M_PI;
+		if(index == 58) roll = 22.2369 / 180.0 * M_PI + M_PI;
+		if(index == 59) roll = 22.2369 / 180.0 * M_PI;
+		if(index == 60) roll = 22.2369 / 180.0 * M_PI + M_PI;
+		if(index == 61) roll = -22.2369 / 180.0 * M_PI + M_PI;
 	}
-	return yaw;
+	return -roll;
 }
 
 
@@ -241,23 +241,23 @@ GLfloat zomedir::face_length(int index, int size)
 	}
 	return length;
 }
-GLfloat zomedir::color_length(int index, int size )
+GLfloat zomedir::color_length(int index, int size)
 {
 	//1:46.3mm
 	GLfloat length;
-	if (index == COLOR_BLUE)
+	if(index == COLOR_BLUE)
 	{
 		if(size == SIZE_S) length = 1 * SCALE;//46.3
 		if(size == SIZE_M) length = GOLDEN * SCALE;//74.9
 		if(size == SIZE_L) length = GOLDEN * GOLDEN * SCALE;//121.2
 	}
-	else if ( index == COLOR_RED)
+	else if(index == COLOR_RED)
 	{
 		if(size == SIZE_S) length = sqrt( 2 + GOLDEN ) / 2 * SCALE;//43.8
 		if(size == SIZE_M) length = sqrt( 2 + GOLDEN ) / 2 * GOLDEN * SCALE;//71
 		if(size == SIZE_L) length = sqrt( 2 + GOLDEN ) / 2 * GOLDEN * GOLDEN * SCALE;//115
 	}
-	else if ( index == COLOR_YELLOW)
+	else if(index == COLOR_YELLOW)
 	{
 		if(size == SIZE_S) length = sqrt(3) / 2 * SCALE;//40.1
 		if(size == SIZE_M) length = sqrt(3) / 2 * GOLDEN * SCALE;//64.8
@@ -270,11 +270,11 @@ GLfloat zomedir::color_length(int index, int size )
 int zomedir::face_color(int index)
 {
 	int color;
-	if ( index < 30)
+	if(index < 30)
 	{
 		color = COLOR_BLUE;
 	}
-	else if ( index < 42)
+	else if(index < 42)
 	{
 		color = COLOR_RED;
 	}
@@ -287,7 +287,7 @@ int zomedir::face_color(int index)
 
 int zomedir::opposite_face(int index)
 {
-	if( index < 0 )
+	if(index < 0 )
 	{
 //		std::cout << "zomedir::GetOppositeFace error¡Gface id:-1" << std::endl;
 	}
@@ -300,7 +300,7 @@ int zomedir::opposite_face(int index)
 
 int zomedir::dir_face(vec3 &fdir)
 {
-	for( int i = 0; i < 62; i += 1)
+	for(int i = 0; i < 62; i += 1)
 	{
 		if(fdir == dir->at(i))
 		{
@@ -323,7 +323,7 @@ int zomedir::dir_face(vec3 &vecInitial, vec3 &vecEnd, int size)
 
 	GLfloat d = tempdir.length();
 
-	for( int i = 0; i < 62; i += 1)
+	for(int i = 0; i < 62; i += 1)
 	{
 		if(tempdir == dir->at(i) && d == face_length(i, size))
 		{

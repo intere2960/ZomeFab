@@ -120,8 +120,6 @@ int main(int argc, char **argv)
     myObj = glmReadOBJ(model_source);
     myObj_inner = glmCopy(myObj);
 
-//    myObj_inner = glmReadOBJ(model_source) ;
-
     init();
 
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -141,12 +139,6 @@ int main(int argc, char **argv)
 	setShaders();
 
 	glutMainLoop();
-//    zomedir t;
-//    for(unsigned int i = 0; i < t.dir->size(); i += 1){
-//        cout << i << " : " << t.dir->at(i)[0] << " " << t.dir->at(i)[1] << " " << t.dir->at(i)[2] << endl;
-//    }
-//    vec3 x(0.0, 0.0, 1.0);
-//    cout << t.dir_face(x);
 
     return 0;
 }

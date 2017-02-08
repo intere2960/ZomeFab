@@ -933,11 +933,25 @@ glmScale(GLMmodel* model, GLfloat scale)
 GLvoid
 glmRT(GLMmodel* model, vec3 rotate, vec3 translate)
 {
-    mat4 RT = (rotation3D(vec3(1.0, 0.0, 0.0), rotate[0])) * (rotation3D(vec3(1.0, 0.0, 0.0), rotate[1])) * rotation3D(vec3(1.0, 0.0, 0.0), rotate[2]) * (translation3D(translate));
+    mat4 RT = (rotation3Drad(vec3(1.0, 0.0, 0.0), rotate[0])) * (rotation3Drad(vec3(0.0, 1.0, 0.0), rotate[1])) * rotation3Drad(vec3(0.0, 0.0, 1.0), rotate[2]) * (translation3D(translate));
 
     for(unsigned int i = 1; i <= model->numvertices; i += 1) {
         vec3 temp(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
         temp = RT * temp;
+        model->vertices->at(3 * i + 0) = temp[0];
+        model->vertices->at(3 * i + 1) = temp[1];
+        model->vertices->at(3 * i + 2) = temp[2];
+    }
+}
+
+GLvoid
+glmR(GLMmodel* model, vec3 axis, GLfloat angle)
+{
+    mat4 R = rotation3Drad(axis, angle);
+
+    for(unsigned int i = 1; i <= model->numvertices; i += 1) {
+        vec3 temp(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
+        temp = R * temp;
         model->vertices->at(3 * i + 0) = temp[0];
         model->vertices->at(3 * i + 1) = temp[1];
         model->vertices->at(3 * i + 2) = temp[2];
