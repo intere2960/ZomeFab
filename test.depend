@@ -66,8 +66,9 @@
 	<vector>
 	"algebra3.h"
 
-1486543931 source:e:\pieceofshit\main.cpp
+1486647385 source:e:\pieceofshit\main.cpp
 	"main.h"
+	<omp.h>
 
 1486385372 source:e:\pieceofshit\textfile.cpp
 	<stdio.h>
@@ -286,20 +287,20 @@
 	"algebra3.h"
 	"zomedir.h"
 
-1486541804 e:\pieceofshit\zomedir.h
+1486556895 e:\pieceofshit\zomedir.h
 	<vector>
 	<cmath>
 	<GL/glut.h>
 	"algebra3.h"
 
-1486543563 source:e:\pieceofshit\zomedir.cpp
+1486631968 source:e:\pieceofshit\zomedir.cpp
 	"zomedir.h"
 	"glui_internal.h"
 
 1486385372 source:e:\pieceofshit\zomestruc.cpp
 	"zomestruc.h"
 
-1486385372 e:\pieceofshit\zomestruc.h
+1486647844 e:\pieceofshit\zomestruc.h
 	<GL/glut.h>
 	"algebra3.h"
 	"zomedir.h"

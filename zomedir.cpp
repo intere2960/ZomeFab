@@ -20,7 +20,7 @@ zomedir::zomedir()
 	dir->push_back(vec3(-0.5 * golden, -0.5 / golden, 0.5));
 
 	dir->push_back(vec3(-0.5 * golden, -0.5 / golden, -0.5));
-	dir->push_back(vec3(-0.5 * golden, -0.5 / golden, -0.5));
+	dir->push_back(vec3(-0.5 * golden, 0.5 / golden, -0.5));
 	dir->push_back(vec3(0.5 * golden, -0.5 / golden, -0.5));
 	dir->push_back(vec3(0.5 * golden, 0.5 / golden, -0.5));
 

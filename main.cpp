@@ -115,30 +115,124 @@ void init()
     fill_hole(temp_piece);
 }
 
+#include <omp.h>
+void findzoom()
+{
+    zomedir t;
+    vec3 origin_p(0.0, 0.0, 0.0);
+
+//    #pragma omp parallel for
+//    for(unsigned int hole = 0; hole < t.dir->size(); hole +=1){
+//        for(int i = 0; i < 3; i += 1){
+//            vec3 end_p = origin_p + t.dir->at(hole) * t.color_length(t.face_color(i), i);
+//            for(unsigned int j = 0; j < t.dir->size(); j += 1){
+//                if(j != hole && j != t.opposite_face(hole)){
+//                    for(int s_size = 0; s_size < 3; s_size += 1){
+//                        vec3 temp = origin_p + t.color_length(t.face_color(j), s_size) * t.dir->at(j);
+//                        vec3 l = temp - end_p;
+//                        vec3 n_l = l;
+//                        int x = t.dir_face(n_l.normalize());
+//                        if(x != -1){
+//                            if((ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)){
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+    cout << "Blue :" << endl;
+//    for(int tt = 0; tt < 29; tt +=1){
+    for(int i = 0; i < 3; i += 1){
+        vec3 end_p = origin_p + t.dir->at(0) * t.color_length(COLOR_BLUE, i);
+        for(int j = 0; j < t.dir->size(); j += 1){
+            if(j != 0 && j != t.opposite_face(0)){
+                for(int b = 0; b < 3; b += 1){ //size
+                    vec3 temp = origin_p + t.color_length(t.face_color(j), b) * t.dir->at(j);
+                    vec3 l = temp - end_p;
+                    vec3 n_l = l;
+                    int x = t.dir_face(n_l.normalize());
+                    if(x != -1){
+                        if((ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)){
+                            cout << "o: " << i << " hole: " << j << " stick color: " << t.face_color(j) << " stick size: " << b << " " << endl;
+                        }
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+//    }
+
+    cout << "Red :" << endl;
+    for(int i = 0; i < 3; i += 1){
+        vec3 end_p = origin_p + t.dir->at(30) * t.color_length(COLOR_RED, i);
+        for(int j = 0; j < t.dir->size(); j += 1){
+            if(j != 30 && j != t.opposite_face(30)){
+                for(int b = 0; b < 3; b += 1){ //size
+                    vec3 temp = origin_p + t.color_length(t.face_color(j), b) * t.dir->at(j);
+                    vec3 l = temp - end_p;
+                    vec3 n_l = l;
+                    int x = t.dir_face(n_l.normalize());
+                    if(x != -1){
+                        if((ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)){
+                            cout << "o: " << i << " hole: " << j << " stick color: " << t.face_color(j) << " stick size: " << b << " " << endl;
+                        }
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+
+    cout << "Yellow :" << endl;
+    for(int i = 0; i < 3; i += 1){
+        vec3 end_p = origin_p + t.dir->at(42) * t.color_length(COLOR_YELLOW, i);
+        for(int j = 0; j < t.dir->size(); j += 1){
+            if(j != 42 && j != t.opposite_face(42)){
+                for(int b = 0; b < 3; b += 1){ //size
+                    vec3 temp = origin_p + t.color_length(t.face_color(j), b) * t.dir->at(j);
+                    vec3 l = temp - end_p;
+                    vec3 n_l = l;
+                    int x = t.dir_face(n_l.normalize());
+                    if(x != -1){
+                        if((ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)){
+                            cout << "o: " << i << " hole: " << j << " stick color: " << t.face_color(j) << " stick size: " << b << " " << endl;
+                        }
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+}
+
 int main(int argc, char **argv)
 {
-    myObj = glmReadOBJ(model_source);
-    myObj_inner = glmCopy(myObj);
-
-    init();
-
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1000,1000);
-
-    glutCreateWindow("Zometool");
-	glutDisplayFunc(display);
-	glutReshapeFunc(myReshape);
-	glutMouseFunc(mouse);
-    glutMotionFunc(mouseMotion);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special);
-	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-
-	glewInit();
-
-	setShaders();
-
-	glutMainLoop();
+    findzoom();
+//    myObj = glmReadOBJ(model_source);
+//    myObj_inner = glmCopy(myObj);
+//
+//    init();
+//
+//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+//	glutInitWindowSize(1000,1000);
+//
+//    glutCreateWindow("Zometool");
+//	glutDisplayFunc(display);
+//	glutReshapeFunc(myReshape);
+//	glutMouseFunc(mouse);
+//    glutMotionFunc(mouseMotion);
+//    glutKeyboardFunc(keyboard);
+//    glutSpecialFunc(special);
+//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+//
+//	glewInit();
+//
+//	setShaders();
+//
+//	glutMainLoop();
 
     return 0;
 }

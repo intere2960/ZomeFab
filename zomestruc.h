@@ -42,8 +42,8 @@ public:
 	int index;
 	vec3 position;
 //	zomestruc* originalBall;
-//	ZomeConnection** faceConnection;//64
-//	zomestruc** nextBall;//64
+//	ZomeConnection** faceConnection;//62
+//	zomestruc** nextBall;//62
 //
 //	zomestruc* link;
 //	ModelObject* thisModel;
