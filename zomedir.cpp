@@ -367,3 +367,120 @@ float zomedir::weight(int color, int size)
 		return 0;
 	}
 }
+
+zometable::zometable(int type){
+    table.resize(62);
+    for(unsigned int i = 0; i < table.size(); i += 1){
+        table.at(i).resize(62);
+    }
+
+    if(type == SPLITE){
+        std::ifstream is("zome_splite.txt");
+        if (is){
+            vector_parser(SPLITE, is);
+            is.close();
+        }
+        else{
+            find_zomevector(SPLITE);
+        }
+    }
+    else if(type == MERAGE){
+        std::ifstream is("zome_merge.txt");
+        if (is){
+            vector_parser(MERAGE, is);
+            is.close();
+        }
+        else{
+            find_zomevector(MERAGE);
+        }
+    }
+}
+
+void zometable::find_zomevector(int type){
+    zomedir t;
+    vec3 origin_p(0.0, 0.0, 0.0);
+    vec3 end_p;
+    vec3 travel;
+    std::ofstream os;
+    bool judge;
+
+    if(type == SPLITE)
+        os.open("zome_splite.txt");
+    else if(type == MERAGE)
+        os.open("zome_merge.txt");
+
+    for(unsigned int hole = 0; hole < t.dir->size(); hole +=1){
+        for(int i = 0; i < 3; i += 1){
+            if(type == SPLITE)
+                end_p = origin_p + t.dir->at(hole) * t.color_length(t.face_color(hole), i);
+            else if(type == MERAGE)
+                travel = origin_p + t.dir->at(hole) * t.color_length(t.face_color(hole), i);
+
+            for(unsigned int j = 0; j < t.dir->size(); j += 1){
+                if(type == SPLITE)
+                    judge = !(j == hole && i < 2) && j != (unsigned)t.opposite_face(hole);
+                else if(type == MERAGE)
+                    judge = j != (unsigned)t.opposite_face(hole);
+                if(judge){
+                    for(int b = 0; b < 3; b += 1){ //size
+                        vec3 temp;
+                        vec3 l;
+                        if(type == SPLITE){
+                            temp = origin_p + t.color_length(t.face_color(j), b) * t.dir->at(j);
+                            l = temp - end_p;
+                        }
+                        else if(type == MERAGE){
+                            temp = travel + t.color_length(t.face_color(j), b) * t.dir->at(j);
+                            l = temp - origin_p;
+                        }
+
+                        vec3 n_l = l;
+                        int x = t.dir_face(n_l.normalize());
+                        if(x != -1){
+                            if((ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)){
+
+                                int s_l = -1;
+                                s_l = (ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE)? 0:s_l;
+                                s_l = (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE)? 1:s_l;
+                                s_l = (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)? 2:s_l;
+
+                                zomerecord temp_r;
+                                temp_r.origin[0] = hole;
+                                temp_r.origin[1] = i;
+                                temp_r.origin[2] = t.opposite_face(hole);
+
+                                temp_r.travel_1[0] = j;
+                                temp_r.travel_1[1] = b;
+                                temp_r.travel_1[2] = t.opposite_face(j);
+
+                                temp_r.travel_2[0] = x;
+                                temp_r.travel_2[1] = s_l;
+                                temp_r.travel_2[2] = t.opposite_face(x);
+
+
+                                if(type == SPLITE)
+                                    table.at(hole).at(j).push_back(temp_r);
+                                else if(type == MERAGE)
+                                    table.at(hole).at(hole).push_back(temp_r);
+
+                                os << hole << " " << i << " " << t.opposite_face(hole) << " " << j << " " << b << " " << t.opposite_face(j) << " " << x << " " << s_l << " " << t.opposite_face(x) << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    os.close();
+}
+
+void zometable::vector_parser(int type, std::ifstream &is)
+{
+    zomerecord temp_r;
+    while(is >> temp_r.origin[0] >> temp_r.origin[1] >> temp_r.origin[2] >> temp_r.travel_1[0] >> temp_r.travel_1[1] >> temp_r.travel_1[2] >> temp_r.travel_2[0] >> temp_r.travel_2[1] >> temp_r.travel_2[2]){
+        if(type == SPLITE)
+            table.at(temp_r.origin[0]).at(temp_r.travel_1[0]).push_back(temp_r);
+        else if(type == MERAGE)
+            table.at(temp_r.origin[0]).at(temp_r.origin[0]).push_back(temp_r);
+    }
+}

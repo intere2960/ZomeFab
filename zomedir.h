@@ -26,6 +26,10 @@
 #define WEIGHT_YELLOW_L 4.8
 #define WEIGHT_WHITE 3.0
 
+#define SPLITE 0
+#define MERAGE 1
+
+#include <fstream>
 #include <vector>
 #include <cmath>
 #include <GL/glut.h>
@@ -59,6 +63,24 @@ public:
 
 	float dir_parameter(int i, int d); //get 'i'th dir[d]
 	float weight(int color, int size); //get weight of different color by size
+};
+
+class zomerecord
+{
+public:
+    vec3 origin;
+    vec3 travel_1;
+    vec3 travel_2;
+};
+
+class zometable
+{
+public:
+    zometable(int type);
+    void find_zomevector(int type);
+    void vector_parser(int type, std::ifstream &is);
+
+    std::vector<std::vector<std::vector<zomerecord>>> table;
 };
 
 #endif // ZOMEDIR_H_INCLUDED
