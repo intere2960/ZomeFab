@@ -241,23 +241,23 @@ GLfloat zomedir::face_length(int index, int size)
 	}
 	return length;
 }
-GLfloat zomedir::color_length(int index, int size)
+GLfloat zomedir::color_length(int color, int size)
 {
 	//1:46.3mm
 	GLfloat length;
-	if(index == COLOR_BLUE)
+	if(color == COLOR_BLUE)
 	{
 		if(size == SIZE_S) length = 1 * SCALE;//46.3
 		if(size == SIZE_M) length = GOLDEN * SCALE;//74.9
 		if(size == SIZE_L) length = GOLDEN * GOLDEN * SCALE;//121.2
 	}
-	else if(index == COLOR_RED)
+	else if(color == COLOR_RED)
 	{
 		if(size == SIZE_S) length = sqrt( 2 + GOLDEN ) / 2 * SCALE;//43.8
 		if(size == SIZE_M) length = sqrt( 2 + GOLDEN ) / 2 * GOLDEN * SCALE;//71
 		if(size == SIZE_L) length = sqrt( 2 + GOLDEN ) / 2 * GOLDEN * GOLDEN * SCALE;//115
 	}
-	else if(index == COLOR_YELLOW)
+	else if(color == COLOR_YELLOW)
 	{
 		if(size == SIZE_S) length = sqrt(3) / 2 * SCALE;//40.1
 		if(size == SIZE_M) length = sqrt(3) / 2 * GOLDEN * SCALE;//64.8
@@ -289,7 +289,7 @@ int zomedir::opposite_face(int index)
 {
 	if(index < 0 )
 	{
-//		std::cout << "zomedir::GetOppositeFace error¡Gface id:-1" << std::endl;
+//		std::cout << "zomedir::GetOppositeFace errorÂ¡Gface id:-1" << std::endl;
 	}
 	vec3 fdir;
 	fdir = dir->at(index);

@@ -54,7 +54,7 @@ public:
 	std::vector<vec3> *dir;
 
 	GLfloat face_length(int index, int size);
-	GLfloat color_length(int index, int size);
+	GLfloat color_length(int color, int size);
 	int face_color(int index);
 	int opposite_face(int index);
 
