@@ -125,6 +125,8 @@ vector<edge> all_edge;
 vector<int> face_split_by_plane;
 vector<int> face_inner_split_by_plane;
 
+vector<voxel> all_voxel;
+
 //bounding box
 
 void polygon(int a, int b, int c , int d)

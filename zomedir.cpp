@@ -484,3 +484,9 @@ void zometable::vector_parser(int type, std::ifstream &is)
             table.at(temp_r.origin[0]).at(temp_r.origin[0]).push_back(temp_r);
     }
 }
+
+void findzoom()
+{
+    zometable splite_table(SPLITE);
+    zometable merage_table(MERAGE);
+}

@@ -115,79 +115,6 @@ void init()
 //    fill_hole(temp_piece);
 }
 
-void findzoom()
-{
-    zometable splite_table(SPLITE);
-    zometable merage_table(MERAGE);
-}
-
-vector<voxel> all_voxel;
-vec2 ans;
-
-vec2 check_bound(vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
-{
-    vec2 t_ans(-1,-1);
-    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-        for(int j = 0; j < 6; j += 1){
-            if(all_voxel.at(i).face_toward[j] == -1){
-                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * 3 * all_voxel.at(i).scale;
-                cout << temp_p[0] << " " << temp_p[1] << " " << temp_p[2] << endl;
-                cout << j % 3 << " " << bounding_min[j % 3] << " " << bounding_max[j % 3] << endl;
-                if((temp_p[j % 3] > bounding_min[j % 3]) && (temp_p[j % 3] < bounding_max[j % 3])){
-                    t_ans[0] = i;
-                    t_ans[1] = j;
-                    return t_ans;
-                }
-            }
-        }
-    }
-    return t_ans;
-}
-
-void voxelization()
-{
-    zomedir t;
-    voxel start(BLUE, SIZE_M, t.color_length(BLUE, SIZE_M) / 2.0);
-//    GLMmodel *x = glmReadOBJ("test_model/cube.obj");
-
-    all_voxel.push_back(start);
-
-    ans = check_bound(all_voxel, bounding_max, bounding_min);
-    cout << ans[0] << " " << ans[1] << endl;
-
-    int asdf = 1;
-    while(ans[0] != -1 && ans[1] != -1 && asdf < 6){
-        all_voxel.at(ans[0]).face_toward[(int)ans[1]] = ans[0] + 1;
-        vec3 new_p = all_voxel.at(ans[0]).position + all_voxel.at(ans[0]).toward_vector[(int)ans[1]] * all_voxel.at(ans[0]).scale * 2;
-        voxel temp(all_voxel.at(ans[0]), new_p, all_voxel.at(ans[0]).rotation);
-        int opposite_face = 1;
-        if((int)ans[0] % 2 == 1)
-            opposite_face = -1;
-        temp.face_toward[(int)ans[1] + opposite_face] = ans[1];
-        all_voxel.push_back(temp);
-        ans = check_bound(all_voxel, bounding_max, bounding_min);
-        cout << asdf << endl;
-        asdf += 1;
-    }
-
-    for(int i = 0; i < all_voxel.size(); i += 1){
-        for(int j = 0; j < 6; j += 1){
-            cout << all_voxel.at(i).face_toward[j] << " ";
-        }
-        cout << endl;
-    }
-
-//    vec3 xxx = start.position + start.toward_vector[0] * start.scale * 2;
-//    voxel test2(start, xxx, start.rotation);
-//    GLMmodel *x = glmReadOBJ("test_model/cube.obj");
-//    GLMmodel *x1 = glmCopy(x);
-//    glmScale(x, start.scale);
-//    glmScale(x1, test2.scale);
-//    glmRT(x1, test2.rotation, test2.position);
-//    glmCombine(x, x1);
-//    glmWriteOBJ(x, "123.obj", GLM_NONE);
-}
-
 int main(int argc, char **argv)
 {
 //    findzoom();
@@ -197,7 +124,7 @@ int main(int argc, char **argv)
 //
     init();
 
-    voxelization();
+    voxelization(all_voxel, bounding_max, bounding_min, COLOR_BLUE, SIZE_S);
 
 //	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 //	glutInitWindowSize(1000,1000);
