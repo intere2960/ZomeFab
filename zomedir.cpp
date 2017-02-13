@@ -384,14 +384,14 @@ zometable::zometable(int type){
             find_zomevector(SPLITE);
         }
     }
-    else if(type == MERAGE){
+    else if(type == MERGE){
         std::ifstream is("zome_merge.txt");
         if (is){
-            vector_parser(MERAGE, is);
+            vector_parser(MERGE, is);
             is.close();
         }
         else{
-            find_zomevector(MERAGE);
+            find_zomevector(MERGE);
         }
     }
 }
@@ -406,20 +406,20 @@ void zometable::find_zomevector(int type){
 
     if(type == SPLITE)
         os.open("zome_splite.txt");
-    else if(type == MERAGE)
+    else if(type == MERGE)
         os.open("zome_merge.txt");
 
     for(unsigned int hole = 0; hole < t.dir->size(); hole +=1){
         for(int i = 0; i < 3; i += 1){
             if(type == SPLITE)
                 end_p = origin_p + t.dir->at(hole) * t.color_length(t.face_color(hole), i);
-            else if(type == MERAGE)
+            else if(type == MERGE)
                 travel = origin_p + t.dir->at(hole) * t.color_length(t.face_color(hole), i);
 
             for(unsigned int j = 0; j < t.dir->size(); j += 1){
                 if(type == SPLITE)
                     judge = !(j == hole && i < 2) && j != (unsigned)t.opposite_face(hole);
-                else if(type == MERAGE)
+                else if(type == MERGE)
                     judge = j != (unsigned)t.opposite_face(hole);
                 if(judge){
                     for(int b = 0; b < 3; b += 1){ //size
@@ -429,7 +429,7 @@ void zometable::find_zomevector(int type){
                             temp = origin_p + t.color_length(t.face_color(j), b) * t.dir->at(j);
                             l = temp - end_p;
                         }
-                        else if(type == MERAGE){
+                        else if(type == MERGE){
                             temp = travel + t.color_length(t.face_color(j), b) * t.dir->at(j);
                             l = temp - origin_p;
                         }
@@ -460,7 +460,7 @@ void zometable::find_zomevector(int type){
 
                                 if(type == SPLITE)
                                     table.at(hole).at(j).push_back(temp_r);
-                                else if(type == MERAGE)
+                                else if(type == MERGE)
                                     table.at(hole).at(hole).push_back(temp_r);
 
                                 os << hole << " " << i << " " << t.opposite_face(hole) << " " << j << " " << b << " " << t.opposite_face(j) << " " << x << " " << s_l << " " << t.opposite_face(x) << std::endl;
@@ -480,13 +480,7 @@ void zometable::vector_parser(int type, std::ifstream &is)
     while(is >> temp_r.origin[0] >> temp_r.origin[1] >> temp_r.origin[2] >> temp_r.travel_1[0] >> temp_r.travel_1[1] >> temp_r.travel_1[2] >> temp_r.travel_2[0] >> temp_r.travel_2[1] >> temp_r.travel_2[2]){
         if(type == SPLITE)
             table.at(temp_r.origin[0]).at(temp_r.travel_1[0]).push_back(temp_r);
-        else if(type == MERAGE)
+        else if(type == MERGE)
             table.at(temp_r.origin[0]).at(temp_r.origin[0]).push_back(temp_r);
     }
-}
-
-void findzoom()
-{
-    zometable splite_table(SPLITE);
-    zometable merage_table(MERAGE);
 }

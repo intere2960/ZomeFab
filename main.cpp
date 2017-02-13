@@ -115,13 +115,19 @@ void init()
 //    fill_hole(temp_piece);
 }
 
+void findzoom()
+{
+    zometable splite_table(SPLITE);
+    zometable merge_table(MERGE);
+}
+
 int main(int argc, char **argv)
 {
 //    findzoom();
 
     myObj = glmReadOBJ(model_source);
-//    myObj_inner = glmCopy(myObj);
-//
+    myObj_inner = glmCopy(myObj);
+
     init();
 
     voxelization(all_voxel, bounding_max, bounding_min, COLOR_BLUE, SIZE_S);

@@ -27,7 +27,7 @@
 #define WEIGHT_WHITE 3.0
 
 #define SPLITE 0
-#define MERAGE 1
+#define MERGE 1
 
 #include <fstream>
 #include <vector>
@@ -72,6 +72,18 @@ public:
     vec3 travel_1;
     vec3 travel_2;
 };
+
+//split:
+//        *
+//  (t1) ^ ^ (t2)
+//      0-->0
+//       (o)
+//
+//merge:
+//        *
+//  (t2) ^ ^ (t1)
+//      0-->0
+//       (o)
 
 class zometable
 {
