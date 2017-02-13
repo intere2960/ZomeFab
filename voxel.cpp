@@ -58,13 +58,26 @@ voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
     toward_vector.push_back(R * vec3(0.0, 0.0, -1.0));
 }
 
+void assign_coord(voxel &judge, vec3 origin){
+    judge.coord_id = 0;
+    if(judge.position[0] <= 0){
+        judge.coord_id += 1;
+    }
+    if(judge.position[1] <= 0){
+        judge.coord_id += 2;
+    }
+    if(judge.position[2] <= 0){
+        judge.coord_id += 4;
+    }
+}
+
 vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
 {
     vec2 t_ans(-1,-1);
     for(unsigned int i = 0; i < all_voxel.size(); i += 1){
         for(int j = 0; j < 6; j += 1){
             if(all_voxel.at(i).face_toward[j] == -1){
-                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * 3 * all_voxel.at(i).scale;
+                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale;
 
                 if((temp_p[j / 2] > bounding_min[j / 2]) && (temp_p[j / 2] < bounding_max[j / 2])){
                     t_ans[0] = i;
@@ -95,10 +108,12 @@ void addexist_toward(std::vector<voxel> &all_voxel, voxel & check){
     }
 }
 
-void voxelization(std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, int v_color, float v_size)
+void voxelization(std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
 {
     zomedir t;
-    voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0);
+    voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
+    vec3 origin = vec3(bound_center) + vec3(start.scale, start.scale, start.scale);
+    assign_coord(start, origin);
     all_voxel.push_back(start);
     vec2 ans = check_bound(all_voxel, bounding_max, bounding_min);
 
@@ -112,6 +127,7 @@ void voxelization(std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bound
             opposite_face = -1;
         temp.face_toward[(int)ans[1] + opposite_face] = ans[0];
         addexist_toward(all_voxel, temp);
+        assign_coord(temp, origin);
         all_voxel.push_back(temp);
 
         ans = check_bound(all_voxel, bounding_max, bounding_min);

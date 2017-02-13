@@ -35,11 +35,6 @@
 #include <GL/glut.h>
 #include "algebra3.h"
 
-enum color
-{
-	_blue, _red, _yellow
-};
-
 const double golden((1.0 + sqrt(5.0)) / 2);
 
 class zomedir

@@ -126,11 +126,11 @@ int main(int argc, char **argv)
 //    findzoom();
 
     myObj = glmReadOBJ(model_source);
-    myObj_inner = glmCopy(myObj);
+//    myObj_inner = glmCopy(myObj);
 
     init();
 
-    voxelization(all_voxel, bounding_max, bounding_min, COLOR_BLUE, SIZE_S);
+    voxelization(all_voxel, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_M);
 
 //	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 //	glutInitWindowSize(1000,1000);

@@ -18,11 +18,13 @@ public:
     float scale;
     int face_toward[6] = {-1, -1, -1, -1, -1, -1};
     std::vector<vec3> toward_vector;
+    int coord_id;
 };
 
+void assign_coord(voxel &judge, vec3 origin);
 vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min);
 void addexist_toward(std::vector<voxel> &all_voxel, voxel & check);
-void voxelization(std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, int v_color, float v_size);
+void voxelization(std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size);
 
 //class all_voxel
 //{
