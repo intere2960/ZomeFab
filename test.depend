@@ -66,7 +66,7 @@
 	<vector>
 	"algebra3.h"
 
-1486990430 source:e:\pieceofshit\main.cpp
+1487064076 source:e:\pieceofshit\main.cpp
 	"main.h"
 
 1486385372 source:e:\pieceofshit\textfile.cpp
@@ -98,7 +98,7 @@
 	<cmath>
 	"glm.h"
 
-1486990723 e:\pieceofshit\main.h
+1487084889 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>
@@ -306,13 +306,14 @@
 	"algebra3.h"
 	"zomedir.h"
 
-1486990603 source:e:\pieceofshit\voxel.cpp
+1487084521 source:e:\pieceofshit\voxel.cpp
 	"voxel.h"
-	"zomedir.h"
-	"glm.h"
-	"glui_internal.h"
+	<iostream>
 
-1486992350 e:\pieceofshit\voxel.h
+1487052920 e:\pieceofshit\voxel.h
 	<vector>
 	"algebra3.h"
+	"glui_internal.h"
+	"zomedir.h"
+	"glm.h"
 

@@ -86,7 +86,7 @@ void init()
 
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
-//    recount_normal(myObj);
+    recount_normal(myObj);
 //    process_inner(myObj, myObj_inner);
 //
 ////    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 
     init();
 
-    voxelization(all_voxel, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_M);
+    voxelization(myObj, all_voxel, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_M);
 
 //	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 //	glutInitWindowSize(1000,1000);
