@@ -1,1 +1,3 @@
 . free vector memory
+. voxel have to store 8 points & 12 edges position
+. judge intersection by using more detail voxel data

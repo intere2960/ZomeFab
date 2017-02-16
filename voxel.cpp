@@ -82,32 +82,13 @@ int assign_coord_point(vec3 &p, vec3 &origin){
     return coord;
 }
 
-//vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
-//{
-//    vec2 t_ans(-1,-1);
-//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-//        for(int j = 0; j < 6; j += 1){
-//            if(all_voxel.at(i).face_toward[j] == -1){
-//                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 3;
-//
-//                if((temp_p[j / 2] > bounding_min[j / 2]) && (temp_p[j / 2] < bounding_max[j / 2])){
-//                    t_ans[0] = i;
-//                    t_ans[1] = j;
-//                    return t_ans;
-//                }
-//            }
-//        }
-//    }
-//    return t_ans;
-//}
-
-vec2 check_bound(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
+vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
 {
     vec2 t_ans(-1,-1);
     for(unsigned int i = 0; i < all_voxel.size(); i += 1){
         for(int j = 0; j < 6; j += 1){
             if(all_voxel.at(i).face_toward[j] == -1){
-                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 3;
+                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 1;
 
                 if((temp_p[j / 2] > bounding_min[j / 2]) && (temp_p[j / 2] < bounding_max[j / 2])){
                     t_ans[0] = i;
@@ -169,177 +150,78 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         ans = check_bound(all_voxel, bounding_max, bounding_min);
     }
 
-//    for(unsigned int i = 1; i <= model->numvertices; i += 1){
-//        vec3 p(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
-//        int p_coord = assign_coord_point(p, origin);
-//        for(unsigned int j = 0; j < coord.at(p_coord).size(); j += 1){
-//            if(all_voxel.at(coord.at(p_coord).at(j)).show){
-//                vec2 range_x(all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[0][0] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[1][0] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-//                vec2 range_y(all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[2][1] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[3][1] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-//                vec2 range_z(all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[4][2] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[5][2] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-//                bool check = (p[0] < range_x[0] && p[0] > range_x[1]) && (p[1] < range_y[0] && p[1] > range_y[1]) && (p[2] < range_z[0] && p[2] > range_z[1]);
-//
-//                if(check){
-//                    all_voxel.at(coord.at(p_coord).at(j)).show = false;
-//                }
-//            }
-//        }
-//    }
+    std::vector<int> mesh_bound;
+    for(unsigned int i = 1; i <= model->numvertices; i += 1){
+        vec3 p(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
+        int p_coord = assign_coord_point(p, origin);
+        for(unsigned int j = 0; j < coord.at(p_coord).size(); j += 1){
+            if(all_voxel.at(coord.at(p_coord).at(j)).show){
+                vec2 range_x(all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[0][0] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[1][0] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+                vec2 range_y(all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[2][1] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[3][1] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+                vec2 range_z(all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[4][2] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[5][2] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+                bool check = ((p[0] < range_x[0]) && (p[0] > range_x[1])) && ((p[1] < range_y[0]) && (p[1] > range_y[1])) && ((p[2] < range_z[0]) && (p[2] > range_z[1]));
 
-//    std::vector<int> check;
-//    for(unsigned int  i = 0; i < all_voxel.size(); i += 1){
-//        if(all_voxel.at(i).show){
-//            check.push_back(i);
-//        }
-//    }
-//    std::cout << check.size() << std::endl;
+                if(check){
+                    all_voxel.at(coord.at(p_coord).at(j)).show = false;
+                    mesh_bound.push_back(coord.at(p_coord).at(j));
+                }
+            }
+        }
+    }
 
-//    for(unsigned int i = 0; i < model->numtriangles; i += 1){
-////    for(unsigned int i = 0; i < 1; i += 1){
-//        vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
-////        vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
-////        vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
-////        vec3 v1 = p2 - p1;
-////        vec3 v2 = p3 - p1;
-////        vec3 n = (v1 ^ v2).normalize();
-//        vec3 n = vec3(model->facetnorms->at(3 * model->triangles->at(i).findex + 0), model->facetnorms->at(3 * model->triangles->at(i).findex + 1), model->facetnorms->at(3 * model->triangles->at(i).findex + 2));
-//        float d = n[0] * p1[0] + n[1] * p1[1] + n[2] * p1[2];
-//
-//        for(unsigned int j = 0; j < check.size(); j += 1){
-//            if(all_voxel.at(check.at(j)).show){
-//                int dir[3] = {0};
-//    //        for(unsigned int j = 0; j < 1; j += 1){
-//                for(int k = 0; k < 8; k += 1){
-//                    vec3 v_p = vec3(all_voxel.at(check.at(j)).position);
-//                    int dx = 1, dy = 1, dz = 1;
-//                    if(k % 2 == 1)
-//                        dx = -1;
-//                    if((k / 2) % 2 == 1)
-//                        dy = -1;
-//                    if(k / 4 == 1)
-//                        dz = -1;
-//                    v_p += vec3(all_voxel.at(check.at(j)).scale * dx, all_voxel.at(check.at(j)).scale * dy, all_voxel.at(check.at(j)).scale * dz);
-////                    std::cout << v_p[0] << " " << v_p[1] << " " << v_p[2] << std::endl;
-//
-//                    float judge = n[0] * v_p[0] + n[1] * v_p[1] + n[2] * v_p[2] - d;
-//                    if(judge > 0.0001){
-//                        dir[2] += 1;
-//                    }
-//                    else if(judge < -0.0001){
-//                        dir[0] += 1;
-//                    }
-//                    else{
-//                        dir[1] += 1;
-//                    }
-//                }
-//
-//                if((dir[0] + dir[1]) != 8){
-////                    std::cout << dir[0] << " " << dir[1] << " " << dir[2] << std::endl;
-//                    if((dir[2] + dir[1]) != 8){
-//                        all_voxel.at(check.at(j)).show = false;
-//                    }
-//                }
-////                std::cout << std::endl;
-//            }
-//        }
-//    }
+    std::vector<vec4> plane;
+    for(unsigned int i = 0; i < model->numtriangles; i += 1){
+        vec3 n = vec3(model->facetnorms->at(3 * model->triangles->at(i).findex + 0), model->facetnorms->at(3 * model->triangles->at(i).findex + 1), model->facetnorms->at(3 * model->triangles->at(i).findex + 2));
+        vec3 t_p = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+        float d = n[0] * t_p[0] + n[1] * t_p[1] + n[2] * t_p[2];
+        plane.push_back(vec4(n, d));
+    }
 
-//    for(unsigned int i = 0; i < check.size(); i += 1){
-////        std::cout << i << std::endl;
-////    for(unsigned int i = 0; i < 1; i += 1){
-//        for(unsigned int j = 0; j < model->numtriangles; j += 1){
-//            vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
-//    //        vec3 v1 = p2 - p1;
-//    //        vec3 v2 = p3 - p1;
-//    //        vec3 n = (v1 ^ v2).normalize();
-//            vec3 n = vec3(model->facetnorms->at(3 * model->triangles->at(j).findex + 0), model->facetnorms->at(3 * model->triangles->at(j).findex + 1), model->facetnorms->at(3 * model->triangles->at(j).findex + 2));
-//            float d = n[0] * p1[0] + n[1] * p1[1] + n[2] * p1[2];
-//            bool check_end = false;
-//
-//            for(int k = 0; k < 8; k += 1){
-//                vec3 v_p = vec3(all_voxel.at(check.at(i)).position);
-//                int dx = 1, dy = 1, dz = 1;
-//                if(k % 2 == 1)
-//                    dx = -1;
-//                if((k / 2) % 2 == 1)
-//                    dy = -1;1.000000 -1.000000 -1.000000
-//                if(k / 4 == 1)
-//                    dz = -1;
-//                v_p += vec3(all_voxel.at(check.at(i)).scale * dx, all_voxel.at(check.at(i)).scale * dy, all_voxel.at(check.at(i)).scale * dz);
-////                std::cout << v_p[0] << " " << v_p[1] << " " << v_p[2] << std::endl;
-//
-//                float judge = n[0] * v_p[0] + n[1] * v_p[1] + n[2] * v_p[2] - d;
-//
-//                if(judge > 0.0001){
-//                    std::cout << judge << std::endl;
-//                    check_end = true;
-//                    all_voxel.at(check.at(i)).show = false;
-//                    break;
-//                }
-////                else if(judge < -0.0001){
-////                    dir[0] += 1;
-////                }
-////                else{
-////                    dir[1] += 1;
-////                }
-//            }
-////            std::cout << std::endl;
-//            if(check_end)
-//                break;
-//        }
-//    }
+    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+        if(all_voxel.at(i).show){
+            int intersect = 0;
+            for(int j = 0; j < 6; j += 1){
+                for(unsigned int k = 0; k < model->numtriangles; k += 1){
+                    float t = (plane.at(k)[3] - all_voxel.at(i).position[0] * plane.at(k)[0] - all_voxel.at(i).position[1] * plane.at(k)[1] - all_voxel.at(i).position[2] * plane.at(k)[2]) / (all_voxel.at(i).toward_vector.at(j)[0] * plane.at(k)[0] + all_voxel.at(i).toward_vector.at(j)[1] * plane.at(k)[1] + all_voxel.at(i).toward_vector.at(j)[2] * plane.at(k)[2]);
+                    if(t > 0){
+                        vec3 new_p = all_voxel.at(i).position + t * all_voxel.at(i).toward_vector.at(j);
+                        vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[0] + 2));
+                        vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[1] + 2));
+                        vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[2] + 2));
+                        vec3 n = vec3(plane.at(k)[0], plane.at(k)[1], plane.at(k)[2]);
+                        float temp1 = ((p2 - p1) ^ (new_p - p1)) * n;
+                        float temp2 = ((p3 - p2) ^ (new_p - p2)) * n;
+                        float temp3 = ((p1 - p3) ^ (new_p - p3)) * n;
 
-//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-//        if(all_voxel.at(i).show){
-////            std::cout << i << std::endl;
-//            vec2 range_x(all_voxel.at(i).position[0] + all_voxel.at(i).toward_vector[0][0] * all_voxel.at(i).scale, all_voxel.at(i).position[0] + all_voxel.at(i).toward_vector[1][0] * all_voxel.at(i).scale);
-//            vec2 range_y(all_voxel.at(i).position[1] + all_voxel.at(i).toward_vector[2][1] * all_voxel.at(i).scale, all_voxel.at(i).position[1] + all_voxel.at(i).toward_vector[3][1] * all_voxel.at(i).scale);
-//            vec2 range_z(all_voxel.at(i).position[2] + all_voxel.at(i).toward_vector[4][2] * all_voxel.at(i).scale, all_voxel.at(i).position[2] + all_voxel.at(i).toward_vector[5][2] * all_voxel.at(i).scale);
-//            bool check = false;
-//
-//            if(bounding_max[0] < range_x[0] && bounding_max[0] > range_x[1]){
-//                check = true;
-//            }
-//            if(bounding_max[1] < range_y[0] && bounding_max[1] > range_y[1]){
-//                check = true;
-//            }
-//            if(bounding_max[2] < range_z[0] && bounding_max[2] > range_z[1]){
-//                check = true;
-//            }
-//
-//            if(bounding_min[0] < range_x[0] && bounding_min[0] > range_x[1]){
-//                check = true;
-//            }
-//            if(bounding_min[1] < range_y[0] && bounding_min[1] > range_y[1]){
-//                check = true;
-//            }
-//            if(bounding_min[2] < range_z[0] && bounding_min[2] > range_z[1]){
-//                check = true;
-//            }
-//
-//            if(check){
-//                all_voxel.at(i).show = false;
-//            }
-//        }
-//    }
+                        if((temp1 > 0) && (temp2 > 0) && (temp3 > 0)){
+                            intersect += 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(intersect != 6)
+                all_voxel.at(i).show = false;
+        }
+    }
 
-//    std::cout << all_voxel.size() << std::endl;
-
-//    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
-//    GLMmodel *output = glmCopy(cube);
-//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-////        if(all_voxel.at(i).show){
-//            if(i == 0){
-//                glmScale(output, start.scale);
-//                glmRT(output, start.rotation, start.position);
-//            }
-//            else{
-//                GLMmodel *temp = glmCopy(cube);
-//                glmScale(temp, all_voxel.at(i).scale);
-//                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
-//                glmCombine(output, temp);
-//            }
-////        }
-//    }
-//    glmWriteOBJ(output, "123.obj", GLM_NONE);
+    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
+    GLMmodel *output = glmCopy(cube);
+    int num = 0;
+    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+        if(all_voxel.at(i).show){
+            if(num == 0){
+                glmScale(output, all_voxel.at(i).scale);
+                glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
+            }
+            else{
+                GLMmodel *temp = glmCopy(cube);
+                glmScale(temp, all_voxel.at(i).scale);
+                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
+                glmCombine(output, temp);
+            }
+            num += 1;
+        }
+    }
+    glmWriteOBJ(output, "123.obj", GLM_NONE);
 }

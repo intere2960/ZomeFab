@@ -205,7 +205,7 @@
 	"glui_internal.h"
 	"bisect.h"
 
-1485931398 c:\users\rock\desktop\pieceofshit\glm.h
+1487238388 c:\users\rock\desktop\pieceofshit\glm.h
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<vector>
@@ -214,10 +214,10 @@
 1484645140 c:\users\rock\desktop\pieceofshit\bisect.h
 	<algorithm>
 
-1485943251 source:c:\users\rock\desktop\pieceofshit\main.cpp
+1487238388 source:c:\users\rock\desktop\pieceofshit\main.cpp
 	"main.h"
 
-1485943356 c:\users\rock\desktop\pieceofshit\main.h
+1487265533 c:\users\rock\desktop\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>
@@ -232,6 +232,7 @@
 	"bisect.h"
 	"fill.h"
 	"zomedir.h"
+	"voxel.h"
 
 1477884396 c:\users\rock\desktop\pieceofshit\textfile.h
 
@@ -243,7 +244,7 @@
 	<cmath>
 	"glm.h"
 
-1485944518 source:c:\users\rock\desktop\pieceofshit\glm.cpp
+1487238388 source:c:\users\rock\desktop\pieceofshit\glm.cpp
 	<math.h>
 	<stdio.h>
 	<stdlib.h>
@@ -269,11 +270,12 @@
 
 1484645157 c:\users\rock\desktop\pieceofshit\fill.h
 
-1485848797 source:c:\users\rock\desktop\pieceofshit\zomedir.cpp
+1487238388 source:c:\users\rock\desktop\pieceofshit\zomedir.cpp
 	"zomedir.h"
 	"glui_internal.h"
 
-1485848675 c:\users\rock\desktop\pieceofshit\zomedir.h
+1487239615 c:\users\rock\desktop\pieceofshit\zomedir.h
+	<fstream>
 	<vector>
 	<cmath>
 	<GL/glut.h>
@@ -282,7 +284,7 @@
 1485857113 source:c:\users\rock\desktop\pieceofshit\zomestruc.cpp
 	"zomestruc.h"
 
-1485857104 c:\users\rock\desktop\pieceofshit\zomestruc.h
+1487238388 c:\users\rock\desktop\pieceofshit\zomestruc.h
 	<GL/glut.h>
 	"algebra3.h"
 	"zomedir.h"
@@ -316,4 +318,15 @@
 	"glui_internal.h"
 	"zomedir.h"
 	"glm.h"
+
+1487265465 c:\users\rock\desktop\pieceofshit\voxel.h
+	<vector>
+	"algebra3.h"
+	"glui_internal.h"
+	"zomedir.h"
+	"glm.h"
+
+1487263314 source:c:\users\rock\desktop\pieceofshit\voxel.cpp
+	"voxel.h"
+	<iostream>
 
