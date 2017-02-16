@@ -27,7 +27,8 @@ public:
 
 void assign_coord(voxel &judge, vec3 &origin);
 int assign_coord_point(vec3 &p, vec3 &origin);
-vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min);
+//vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min);
+vec2 check_bound(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min);
 void addexist_toward(std::vector<voxel> &all_voxel, voxel & check);
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size);
 

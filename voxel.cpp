@@ -82,13 +82,32 @@ int assign_coord_point(vec3 &p, vec3 &origin){
     return coord;
 }
 
-vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
+//vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
+//{
+//    vec2 t_ans(-1,-1);
+//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+//        for(int j = 0; j < 6; j += 1){
+//            if(all_voxel.at(i).face_toward[j] == -1){
+//                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 3;
+//
+//                if((temp_p[j / 2] > bounding_min[j / 2]) && (temp_p[j / 2] < bounding_max[j / 2])){
+//                    t_ans[0] = i;
+//                    t_ans[1] = j;
+//                    return t_ans;
+//                }
+//            }
+//        }
+//    }
+//    return t_ans;
+//}
+
+vec2 check_bound(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
 {
     vec2 t_ans(-1,-1);
     for(unsigned int i = 0; i < all_voxel.size(); i += 1){
         for(int j = 0; j < 6; j += 1){
             if(all_voxel.at(i).face_toward[j] == -1){
-                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale;
+                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 3;
 
                 if((temp_p[j / 2] > bounding_min[j / 2]) && (temp_p[j / 2] < bounding_max[j / 2])){
                     t_ans[0] = i;
@@ -150,22 +169,22 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         ans = check_bound(all_voxel, bounding_max, bounding_min);
     }
 
-    for(unsigned int i = 1; i <= model->numvertices; i += 1){
-        vec3 p(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
-        int p_coord = assign_coord_point(p, origin);
-        for(unsigned int j = 0; j < coord.at(p_coord).size(); j += 1){
-            if(all_voxel.at(coord.at(p_coord).at(j)).show){
-                vec2 range_x(all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[0][0] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[1][0] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-                vec2 range_y(all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[2][1] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[3][1] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-                vec2 range_z(all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[4][2] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[5][2] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-                bool check = (p[0] < range_x[0] && p[0] > range_x[1]) && (p[1] < range_y[0] && p[1] > range_y[1]) && (p[2] < range_z[0] && p[2] > range_z[1]);
-
-                if(check){
-                    all_voxel.at(coord.at(p_coord).at(j)).show = false;
-                }
-            }
-        }
-    }
+//    for(unsigned int i = 1; i <= model->numvertices; i += 1){
+//        vec3 p(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
+//        int p_coord = assign_coord_point(p, origin);
+//        for(unsigned int j = 0; j < coord.at(p_coord).size(); j += 1){
+//            if(all_voxel.at(coord.at(p_coord).at(j)).show){
+//                vec2 range_x(all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[0][0] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[1][0] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+//                vec2 range_y(all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[2][1] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[3][1] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+//                vec2 range_z(all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[4][2] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[5][2] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+//                bool check = (p[0] < range_x[0] && p[0] > range_x[1]) && (p[1] < range_y[0] && p[1] > range_y[1]) && (p[2] < range_z[0] && p[2] > range_z[1]);
+//
+//                if(check){
+//                    all_voxel.at(coord.at(p_coord).at(j)).show = false;
+//                }
+//            }
+//        }
+//    }
 
 //    std::vector<int> check;
 //    for(unsigned int  i = 0; i < all_voxel.size(); i += 1){
@@ -243,7 +262,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
 //                if(k % 2 == 1)
 //                    dx = -1;
 //                if((k / 2) % 2 == 1)
-//                    dy = -1;
+//                    dy = -1;1.000000 -1.000000 -1.000000
 //                if(k / 4 == 1)
 //                    dz = -1;
 //                v_p += vec3(all_voxel.at(check.at(i)).scale * dx, all_voxel.at(check.at(i)).scale * dy, all_voxel.at(check.at(i)).scale * dz);
@@ -270,44 +289,46 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
 //        }
 //    }
 
-    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-        if(all_voxel.at(i).show){
-//            std::cout << i << std::endl;
-            vec2 range_x(all_voxel.at(i).position[0] + all_voxel.at(i).toward_vector[0][0] * all_voxel.at(i).scale, all_voxel.at(i).position[0] + all_voxel.at(i).toward_vector[1][0] * all_voxel.at(i).scale);
-            vec2 range_y(all_voxel.at(i).position[1] + all_voxel.at(i).toward_vector[2][1] * all_voxel.at(i).scale, all_voxel.at(i).position[1] + all_voxel.at(i).toward_vector[3][1] * all_voxel.at(i).scale);
-            vec2 range_z(all_voxel.at(i).position[2] + all_voxel.at(i).toward_vector[4][2] * all_voxel.at(i).scale, all_voxel.at(i).position[2] + all_voxel.at(i).toward_vector[5][2] * all_voxel.at(i).scale);
-            bool check = false;
+//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+//        if(all_voxel.at(i).show){
+////            std::cout << i << std::endl;
+//            vec2 range_x(all_voxel.at(i).position[0] + all_voxel.at(i).toward_vector[0][0] * all_voxel.at(i).scale, all_voxel.at(i).position[0] + all_voxel.at(i).toward_vector[1][0] * all_voxel.at(i).scale);
+//            vec2 range_y(all_voxel.at(i).position[1] + all_voxel.at(i).toward_vector[2][1] * all_voxel.at(i).scale, all_voxel.at(i).position[1] + all_voxel.at(i).toward_vector[3][1] * all_voxel.at(i).scale);
+//            vec2 range_z(all_voxel.at(i).position[2] + all_voxel.at(i).toward_vector[4][2] * all_voxel.at(i).scale, all_voxel.at(i).position[2] + all_voxel.at(i).toward_vector[5][2] * all_voxel.at(i).scale);
+//            bool check = false;
+//
+//            if(bounding_max[0] < range_x[0] && bounding_max[0] > range_x[1]){
+//                check = true;
+//            }
+//            if(bounding_max[1] < range_y[0] && bounding_max[1] > range_y[1]){
+//                check = true;
+//            }
+//            if(bounding_max[2] < range_z[0] && bounding_max[2] > range_z[1]){
+//                check = true;
+//            }
+//
+//            if(bounding_min[0] < range_x[0] && bounding_min[0] > range_x[1]){
+//                check = true;
+//            }
+//            if(bounding_min[1] < range_y[0] && bounding_min[1] > range_y[1]){
+//                check = true;
+//            }
+//            if(bounding_min[2] < range_z[0] && bounding_min[2] > range_z[1]){
+//                check = true;
+//            }
+//
+//            if(check){
+//                all_voxel.at(i).show = false;
+//            }
+//        }
+//    }
 
-            if(bounding_max[0] < range_x[0] && bounding_max[0] > range_x[1]){
-                check = true;
-            }
-            if(bounding_max[1] < range_y[0] && bounding_max[1] > range_y[1]){
-                check = true;
-            }
-            if(bounding_max[2] < range_z[0] && bounding_max[2] > range_z[1]){
-                check = true;
-            }
-
-            if(bounding_min[0] < range_x[0] && bounding_min[0] > range_x[1]){
-                check = true;
-            }
-            if(bounding_min[1] < range_y[0] && bounding_min[1] > range_y[1]){
-                check = true;
-            }
-            if(bounding_min[2] < range_z[0] && bounding_min[2] > range_z[1]){
-                check = true;
-            }
-
-            if(check){
-                all_voxel.at(i).show = false;
-            }
-        }
-    }
+//    std::cout << all_voxel.size() << std::endl;
 
 //    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
 //    GLMmodel *output = glmCopy(cube);
 //    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-//        if(all_voxel.at(i).show){
+////        if(all_voxel.at(i).show){
 //            if(i == 0){
 //                glmScale(output, start.scale);
 //                glmRT(output, start.rotation, start.position);
@@ -318,7 +339,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
 //                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
 //                glmCombine(output, temp);
 //            }
-//        }
+////        }
 //    }
 //    glmWriteOBJ(output, "123.obj", GLM_NONE);
 }
