@@ -115,7 +115,7 @@ GLfloat zomedir::phi(int index)
 	{
 		phi = M_PI - phi;
 	}
-	if(sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < SMALL_VALUE)
+	if(sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < 0.0001)
 	{
 		phi = 0;
 	}
@@ -165,7 +165,7 @@ GLfloat zomedir::roll(int index)
 		if(index == 27) roll = M_PI - roll;
 		if(index == 28) roll = M_PI - roll;
 
-		if ( 0 && sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < SMALL_VALUE)
+		if ( 0 && sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2)) < 0.0001)
 		{
 			roll = 0;
 		}
@@ -248,7 +248,7 @@ GLfloat zomedir::color_length(int color, int size)
 	if(color == COLOR_BLUE)
 	{
 		if(size == SIZE_S) length = 1 * SCALE;//46.3
-		if(size == SIZE_M) length = GOLDEN * SCALE;//74.9
+		if(size == SIZE_M) length = GOLDEN * SCALE;//74.9 76.533
 		if(size == SIZE_L) length = GOLDEN * GOLDEN * SCALE;//121.2
 	}
 	else if(color == COLOR_RED)
@@ -307,7 +307,7 @@ int zomedir::dir_face(vec3 &fdir)
 			return i;
 		}
 
-		if((fdir - dir->at(i)).length() < SMALL_VALUE )
+		if((fdir - dir->at(i)).length() < 0.0001 )
 		{
 
 			return i;
@@ -330,9 +330,9 @@ int zomedir::dir_face(vec3 &vecInitial, vec3 &vecEnd, int size)
 			return i;
 		}
 
-		if((tempdir - dir->at(i)).length() < SMALL_VALUE)
+		if((tempdir - dir->at(i)).length() < 0.0001)
 		{
-			if(abs(d - face_length(i, size)) < SMALL_VALUE)
+			if(abs(d - face_length(i, size)) < 0.0001)
 			{
 				return i;
 			}
@@ -437,12 +437,12 @@ void zometable::find_zomevector(int type){
                         vec3 n_l = l;
                         int x = t.dir_face(n_l.normalize());
                         if(x != -1){
-                            if((ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE) || (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)){
+                            if((ABS(t.face_length(x, 0) - l.length()) < 0.0001) || (ABS(t.face_length(x, 1) - l.length()) < 0.0001) || (ABS(t.face_length(x, 2) - l.length()) < 0.0001)){
 
                                 int s_l = -1;
-                                s_l = (ABS(t.face_length(x, 0) - l.length()) < SMALL_VALUE)? 0:s_l;
-                                s_l = (ABS(t.face_length(x, 1) - l.length()) < SMALL_VALUE)? 1:s_l;
-                                s_l = (ABS(t.face_length(x, 2) - l.length()) < SMALL_VALUE)? 2:s_l;
+                                s_l = (ABS(t.face_length(x, 0) - l.length()) < 0.0001)? 0:s_l;
+                                s_l = (ABS(t.face_length(x, 1) - l.length()) < 0.0001)? 1:s_l;
+                                s_l = (ABS(t.face_length(x, 2) - l.length()) < 0.0001)? 2:s_l;
 
                                 zomerecord temp_r;
                                 temp_r.origin[0] = hole;

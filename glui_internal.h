@@ -87,7 +87,7 @@
 
 /***** Small value when we want to do a comparison to 'close to zero' *****/
 #ifndef SMALL_VALUE
-#define SMALL_VALUE 0.00001
+#define SMALL_VALUE 0.0001
 #endif
 
 

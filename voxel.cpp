@@ -56,16 +56,18 @@ voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
 }
 
 void assign_coord(voxel &judge, vec3 &origin){
-    judge.coord_id = 0;
-    if(judge.position[0] <= 0){
-        judge.coord_id += 1;
+    int id = 0;
+    if(judge.position[0] <= origin[0]){
+        id += 1;
     }
-    if(judge.position[1] <= 0){
-        judge.coord_id += 2;
+    if(judge.position[1] <= origin[1]){
+        id += 2;
     }
-    if(judge.position[2] <= 0){
-        judge.coord_id += 4;
+    if(judge.position[2] <= origin[2]){
+        id += 4;
     }
+    judge.coord.push_back(id);
+    judge.coord_origin.push_back(origin);
 }
 
 int assign_coord_point(vec3 &p, vec3 &origin){
@@ -82,15 +84,25 @@ int assign_coord_point(vec3 &p, vec3 &origin){
     return coord;
 }
 
-vec2 check_bound(std::vector<voxel> &all_voxel, vec3 bounding_max, vec3 bounding_min)
+#include <iostream>
+
+vec2 check_bound(std::vector<voxel> &all_voxel, int max_d)
 {
     vec2 t_ans(-1,-1);
     for(unsigned int i = 0; i < all_voxel.size(); i += 1){
         for(int j = 0; j < 6; j += 1){
             if(all_voxel.at(i).face_toward[j] == -1){
-                vec3 temp_p = all_voxel.at(i).position + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 1;
+                int weight = 0;
+                if(j % 2 == 1)
+                    weight = 1;
+                vec3 bound = all_voxel.at(0).position + vec3(all_voxel.at(0).scale, all_voxel.at(0).scale, all_voxel.at(0).scale) + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 2 * max_d;
+                vec3 now = all_voxel.at(i).position + vec3(all_voxel.at(i).scale, all_voxel.at(i).scale, all_voxel.at(i).scale) + weight * all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 2;
 
-                if((temp_p[j / 2] > bounding_min[j / 2]) && (temp_p[j / 2] < bounding_max[j / 2])){
+                bool judge = !(fabs(now[j / 2] - bound[j / 2]) < 0.0001) && (now[j / 2] < bound[j / 2]);
+                if(j % 2 == 1)
+                    judge = !(fabs(now[j / 2] - bound[j / 2]) < 0.0001) && (now[j / 2] > bound[j / 2]);
+
+                if(judge){
                     t_ans[0] = i;
                     t_ans[1] = j;
                     return t_ans;
@@ -105,7 +117,7 @@ void addexist_toward(std::vector<voxel> &all_voxel, voxel & check){
     for(int i = 0; i < 6; i += 1){
         if(check.face_toward[i] == -1){
             for(unsigned int j = 0; j < all_voxel.size(); j += 1){
-                if(((check.position + check.toward_vector[i] * check.scale * 2) - all_voxel.at(j).position).length() < SMALL_VALUE){
+                if(((check.position + check.toward_vector[i] * check.scale * 2) - all_voxel.at(j).position).length() < 0.0001){
                     check.face_toward[i] = j;
 
                     int opposite_face = 1;
@@ -119,8 +131,6 @@ void addexist_toward(std::vector<voxel> &all_voxel, voxel & check){
     }
 }
 
-#include <iostream>
-
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
 {
     zomedir t;
@@ -128,10 +138,30 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
     voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
     vec3 origin = vec3(bound_center) + vec3(start.scale, start.scale, start.scale);
 
+    int max_d = -1;
+    for(int i = 0; i < 3; i += 1){
+        float pos = ceil((bounding_max[i] - origin[i]) / (start.scale * 2)),
+              neg = ceil((origin[i] - bounding_min[i]) / (start.scale * 2));
+        if(pos > max_d)
+            max_d = pos;
+        if(neg > max_d)
+            max_d = neg;
+    }
+
+    int test = 1;
+    while(true){
+        if(test < max_d)
+            test *= 2;
+        else{
+            max_d = test;
+            break;
+        }
+    }
+    std::cout << max_d << std::endl;
     assign_coord(start, origin);
-    coord.at(start.coord_id).push_back(0);
+//    coord.at(start.coord_id).push_back(0);
     all_voxel.push_back(start);
-    vec2 ans = check_bound(all_voxel, bounding_max, bounding_min);
+    vec2 ans = check_bound(all_voxel, max_d);
 
     while(ans[0] != -1 && ans[1] != -1){
         all_voxel.at(ans[0]).face_toward[(int)ans[1]] = all_voxel.size();
@@ -144,66 +174,79 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         temp.face_toward[(int)ans[1] + opposite_face] = ans[0];
         addexist_toward(all_voxel, temp);
         assign_coord(temp, origin);
-        coord.at(temp.coord_id).push_back(all_voxel.size());
+//        coord.at(temp.coord_id).push_back(all_voxel.size());
         all_voxel.push_back(temp);
 
-        ans = check_bound(all_voxel, bounding_max, bounding_min);
+        ans = check_bound(all_voxel, max_d);
     }
 
-    std::vector<int> mesh_bound;
-    for(unsigned int i = 1; i <= model->numvertices; i += 1){
-        vec3 p(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
-        int p_coord = assign_coord_point(p, origin);
-        for(unsigned int j = 0; j < coord.at(p_coord).size(); j += 1){
-            if(all_voxel.at(coord.at(p_coord).at(j)).show){
-                vec2 range_x(all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[0][0] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[1][0] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-                vec2 range_y(all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[2][1] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[3][1] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-                vec2 range_z(all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[4][2] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[5][2] * all_voxel.at(coord.at(p_coord).at(j)).scale);
-                bool check = ((p[0] < range_x[0]) && (p[0] > range_x[1])) && ((p[1] < range_y[0]) && (p[1] > range_y[1])) && ((p[2] < range_z[0]) && (p[2] > range_z[1]));
-
-                if(check){
-                    all_voxel.at(coord.at(p_coord).at(j)).show = false;
-                    mesh_bound.push_back(coord.at(p_coord).at(j));
-                }
-            }
-        }
+    for(int i = 0; i < all_voxel.size(); i += 1){
+        std::cout << all_voxel.at(i).coord.at(0) << std::endl;
+        std::cout << all_voxel.at(i).coord_origin.at(0)[0] << " " << all_voxel.at(i).coord_origin.at(0)[1] << " " << all_voxel.at(i).coord_origin.at(0)[2] << std::endl;
+        std::cout << std::endl;
     }
 
-    std::vector<vec4> plane;
-    for(unsigned int i = 0; i < model->numtriangles; i += 1){
-        vec3 n = vec3(model->facetnorms->at(3 * model->triangles->at(i).findex + 0), model->facetnorms->at(3 * model->triangles->at(i).findex + 1), model->facetnorms->at(3 * model->triangles->at(i).findex + 2));
-        vec3 t_p = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
-        float d = n[0] * t_p[0] + n[1] * t_p[1] + n[2] * t_p[2];
-        plane.push_back(vec4(n, d));
-    }
 
-    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-        if(all_voxel.at(i).show){
-            int intersect = 0;
-            for(int j = 0; j < 6; j += 1){
-                for(unsigned int k = 0; k < model->numtriangles; k += 1){
-                    float t = (plane.at(k)[3] - all_voxel.at(i).position[0] * plane.at(k)[0] - all_voxel.at(i).position[1] * plane.at(k)[1] - all_voxel.at(i).position[2] * plane.at(k)[2]) / (all_voxel.at(i).toward_vector.at(j)[0] * plane.at(k)[0] + all_voxel.at(i).toward_vector.at(j)[1] * plane.at(k)[1] + all_voxel.at(i).toward_vector.at(j)[2] * plane.at(k)[2]);
-                    if(t > 0){
-                        vec3 new_p = all_voxel.at(i).position + t * all_voxel.at(i).toward_vector.at(j);
-                        vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[0] + 2));
-                        vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[1] + 2));
-                        vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[2] + 2));
-                        vec3 n = vec3(plane.at(k)[0], plane.at(k)[1], plane.at(k)[2]);
-                        float temp1 = ((p2 - p1) ^ (new_p - p1)) * n;
-                        float temp2 = ((p3 - p2) ^ (new_p - p2)) * n;
-                        float temp3 = ((p1 - p3) ^ (new_p - p3)) * n;
 
-                        if((temp1 > 0) && (temp2 > 0) && (temp3 > 0)){
-                            intersect += 1;
-                            break;
-                        }
-                    }
-                }
-            }
-            if(intersect != 6)
-                all_voxel.at(i).show = false;
-        }
-    }
+//    std::cout << bounding_max[0] << " " << bounding_max[1] << " " << bounding_max[2] << std::endl;
+//    std::cout << bounding_min[0] << " " << bounding_min[1] << " " << bounding_min[2] << std::endl;
+//    std::cout << bound_center[0] << " " << bound_center[1] << " " << bound_center[2] << std::endl;
+//    std::cout << t.color_length(v_color, v_size) << std::endl;
+
+//    std::vector<int> mesh_bound;
+//    for(unsigned int i = 1; i <= model->numvertices; i += 1){
+//        vec3 p(model->vertices->at(3 * i + 0), model->vertices->at(3 * i + 1), model->vertices->at(3 * i + 2));
+//        int p_coord = assign_coord_point(p, origin);
+//        for(unsigned int j = 0; j < coord.at(p_coord).size(); j += 1){
+//            if(all_voxel.at(coord.at(p_coord).at(j)).show){
+//                vec2 range_x(all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[0][0] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[0] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[1][0] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+//                vec2 range_y(all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[2][1] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[1] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[3][1] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+//                vec2 range_z(all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[4][2] * all_voxel.at(coord.at(p_coord).at(j)).scale, all_voxel.at(coord.at(p_coord).at(j)).position[2] + all_voxel.at(coord.at(p_coord).at(j)).toward_vector[5][2] * all_voxel.at(coord.at(p_coord).at(j)).scale);
+//                bool check = ((p[0] < range_x[0]) && (p[0] > range_x[1])) && ((p[1] < range_y[0]) && (p[1] > range_y[1])) && ((p[2] < range_z[0]) && (p[2] > range_z[1]));
+//
+//                if(check){
+//                    all_voxel.at(coord.at(p_coord).at(j)).show = false;
+//                    mesh_bound.push_back(coord.at(p_coord).at(j));
+//                }
+//            }
+//        }
+//    }
+//
+//    std::vector<vec4> plane;
+//    for(unsigned int i = 0; i < model->numtriangles; i += 1){
+//        vec3 n = vec3(model->facetnorms->at(3 * model->triangles->at(i).findex + 0), model->facetnorms->at(3 * model->triangles->at(i).findex + 1), model->facetnorms->at(3 * model->triangles->at(i).findex + 2));
+//        vec3 t_p = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+//        float d = n[0] * t_p[0] + n[1] * t_p[1] + n[2] * t_p[2];
+//        plane.push_back(vec4(n, d));
+//    }
+//
+//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+//        if(all_voxel.at(i).show){
+//            int intersect = 0;
+//            for(int j = 0; j < 6; j += 1){
+//                for(unsigned int k = 0; k < model->numtriangles; k += 1){
+//                    float t = (plane.at(k)[3] - all_voxel.at(i).position[0] * plane.at(k)[0] - all_voxel.at(i).position[1] * plane.at(k)[1] - all_voxel.at(i).position[2] * plane.at(k)[2]) / (all_voxel.at(i).toward_vector.at(j)[0] * plane.at(k)[0] + all_voxel.at(i).toward_vector.at(j)[1] * plane.at(k)[1] + all_voxel.at(i).toward_vector.at(j)[2] * plane.at(k)[2]);
+//                    if(t > 0){
+//                        vec3 new_p = all_voxel.at(i).position + t * all_voxel.at(i).toward_vector.at(j);
+//                        vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[0] + 2));
+//                        vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[1] + 2));
+//                        vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(k).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(k).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(k).vindices[2] + 2));
+//                        vec3 n = vec3(plane.at(k)[0], plane.at(k)[1], plane.at(k)[2]);
+//                        float temp1 = ((p2 - p1) ^ (new_p - p1)) * n;
+//                        float temp2 = ((p3 - p2) ^ (new_p - p2)) * n;
+//                        float temp3 = ((p1 - p3) ^ (new_p - p3)) * n;
+//
+//                        if((temp1 > 0) && (temp2 > 0) && (temp3 > 0)){
+//                            intersect += 1;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//            if(intersect != 6)
+//                all_voxel.at(i).show = false;
+//        }
+//    }
 
     GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
     GLMmodel *output = glmCopy(cube);
