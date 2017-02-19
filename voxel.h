@@ -28,10 +28,10 @@ public:
 };
 
 void assign_coord(voxel &judge, vec3 &origin);
-int assign_coord_point(vec3 &p, vec3 &origin);
 vec2 check_bound(std::vector<voxel> &all_voxel, int max_d);
 void addexist_toward(std::vector<voxel> &all_voxel, voxel & check);
 void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3 origin, int coord_id);
+int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 p, int depth);
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size);
 
 #endif // VOXEL_H_INCLUDED
