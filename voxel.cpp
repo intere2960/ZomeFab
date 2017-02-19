@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "voxel.h"
 
 voxel::voxel(int t_color, int t_size, float t_scale)
@@ -131,6 +132,49 @@ void addexist_toward(std::vector<voxel> &all_voxel, voxel & check){
     }
 }
 
+void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3 origin, int coord_id){
+    if(end - start != 1){
+        if(depth == 0){
+            std::sort(all_voxel.begin(),
+                      all_voxel.end(),
+                      [](voxel a, voxel b){
+                        return b.coord.at(b.coord.size() - 1) > a.coord.at(a.coord.size() - 1);
+                      });
+        }
+        else{
+            int dx = 1;
+            int dy = 1;
+            int dz = 1;
+            if(coord_id % 2 == 1)
+                dx = -1;
+            if((coord_id / 2) % 2 == 1)
+                dy = -1;
+            if(coord_id / 4 == 1)
+                dz = -1;
+            origin += all_voxel.at(start).scale * pow((all_voxel.size() / pow(8, depth)), 1.0 / 3.0) * vec3(dx, dy, dz);
+
+            for(int i = start; i < end; i += 1){
+                assign_coord(all_voxel.at(i), origin);
+            }
+            std::sort(all_voxel.begin() + start,
+                      all_voxel.begin() + end,
+                      [](voxel a, voxel b){
+                        return b.coord.at(b.coord.size() - 1) > a.coord.at(a.coord.size() - 1);
+                      });
+        }
+
+        int d = (end - start) / 8;
+        oct_tree(all_voxel, start + 0 * d, start + 1 * d, depth + 1, origin, 0);
+        oct_tree(all_voxel, start + 1 * d, start + 2 * d, depth + 1, origin, 1);
+        oct_tree(all_voxel, start + 2 * d, start + 3 * d, depth + 1, origin, 2);
+        oct_tree(all_voxel, start + 3 * d, start + 4 * d, depth + 1, origin, 3);
+        oct_tree(all_voxel, start + 4 * d, start + 5 * d, depth + 1, origin, 4);
+        oct_tree(all_voxel, start + 5 * d, start + 6 * d, depth + 1, origin, 5);
+        oct_tree(all_voxel, start + 6 * d, start + 7 * d, depth + 1, origin, 6);
+        oct_tree(all_voxel, start + 7 * d, start + 8 * d, depth + 1, origin, 7);
+    }
+}
+
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
 {
     zomedir t;
@@ -157,9 +201,8 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
             break;
         }
     }
-    std::cout << max_d << std::endl;
+//    std::cout << max_d << std::endl;
     assign_coord(start, origin);
-//    coord.at(start.coord_id).push_back(0);
     all_voxel.push_back(start);
     vec2 ans = check_bound(all_voxel, max_d);
 
@@ -174,19 +217,21 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         temp.face_toward[(int)ans[1] + opposite_face] = ans[0];
         addexist_toward(all_voxel, temp);
         assign_coord(temp, origin);
-//        coord.at(temp.coord_id).push_back(all_voxel.size());
         all_voxel.push_back(temp);
 
         ans = check_bound(all_voxel, max_d);
     }
 
-    for(int i = 0; i < all_voxel.size(); i += 1){
-        std::cout << all_voxel.at(i).coord.at(0) << std::endl;
-        std::cout << all_voxel.at(i).coord_origin.at(0)[0] << " " << all_voxel.at(i).coord_origin.at(0)[1] << " " << all_voxel.at(i).coord_origin.at(0)[2] << std::endl;
-        std::cout << std::endl;
-    }
+    oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
 
-
+//    for(int i = 0; i < all_voxel.size(); i += 1){
+//        std::cout << i << " : " <<std::endl;
+//        for(int j = 0; j < all_voxel.at(i).coord.size(); j += 1)
+//            std::cout << all_voxel.at(i).coord.at(j) << " ";
+//
+////        std::cout << all_voxel.at(i).coord_origin.at(0)[0] << " " << all_voxel.at(i).coord_origin.at(0)[1] << " " << all_voxel.at(i).coord_origin.at(0)[2] << std::endl;
+//        std::cout << std::endl;
+//    }
 
 //    std::cout << bounding_max[0] << " " << bounding_max[1] << " " << bounding_max[2] << std::endl;
 //    std::cout << bounding_min[0] << " " << bounding_min[1] << " " << bounding_min[2] << std::endl;

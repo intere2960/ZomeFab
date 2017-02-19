@@ -98,7 +98,7 @@
 	<cmath>
 	"glm.h"
 
-1487407251 e:\pieceofshit\main.h
+1487475845 e:\pieceofshit\main.h
 	<Windows.h>
 	<iostream>
 	<cmath>
@@ -308,7 +308,8 @@
 	"algebra3.h"
 	"zomedir.h"
 
-1487407670 source:e:\pieceofshit\voxel.cpp
+1487475767 source:e:\pieceofshit\voxel.cpp
+	<algorithm>
 	"voxel.h"
 	<iostream>
 
