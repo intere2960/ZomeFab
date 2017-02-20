@@ -264,15 +264,8 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
     vec2 ans = check_bound(all_voxel, max_d);
 
     while(ans[0] != -1 && ans[1] != -1){
-//        std::cout << ans[0] << " " << ans[1] << " " << all_voxel.size() << std::endl;
 
         all_voxel.at(ans[0]).face_toward[(int)ans[1]] = all_voxel.size();
-
-//        std::cout << "new" << std::endl;
-//        for(int i = 0; i < 6; i += 1){
-//            std::cout << all_voxel.at(ans[0]).face_toward[i] << " ";
-//        }
-//        std::cout << std::endl;
 
         vec3 new_p = all_voxel.at(ans[0]).position + all_voxel.at(ans[0]).toward_vector[(int)ans[1]] * all_voxel.at(ans[0]).scale * 2;
         voxel temp(all_voxel.at(ans[0]), new_p, all_voxel.at(ans[0]).rotation);
@@ -283,12 +276,6 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         temp.face_toward[(int)ans[1] + opposite_face] = ans[0];
         addexist_toward(all_voxel, temp);
 
-//        std::cout << "new test" << std::endl;
-//        for(int i = 0; i < 6; i += 1){
-//            std::cout << temp.face_toward[i] << " ";
-//        }
-//        std::cout << std::endl;
-
         assign_coord(temp, origin);
         all_voxel.push_back(temp);
 
@@ -297,35 +284,6 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
 
     oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
     rebuild_facetoward(all_voxel);
-
-//    for(int i = 0; i < all_voxel.size(); i += 1){
-//        std::cout << i << " : " <<std::endl;
-//        for(int j = 0; j < all_voxel.at(i).coord.size(); j += 1)
-//            std::cout << all_voxel.at(i).coord.at(j) << " ";
-//
-////        std::cout << all_voxel.at(i).coord_origin.at(0)[0] << " " << all_voxel.at(i).coord_origin.at(0)[1] << " " << all_voxel.at(i).coord_origin.at(0)[2] << std::endl;
-//        std::cout << std::endl;
-//    }
-
-//    int abc = search_coord(all_voxel, 0, all_voxel.size(), vec3(39.0, 60.0, 90.0), 0);
-//    std::cout << abc << std::endl;
-//    std::cout << all_voxel.at(58).position[0] << " " << all_voxel.at(58).position[1] << " " << all_voxel.at(58).position[2] << std::endl;
-//    std::cout << all_voxel.at(51).position[0] << " " << all_voxel.at(51).position[1] << " " << all_voxel.at(51).position[2] << std::endl;
-//    std::cout << all_voxel.at(42).position[0] << " " << all_voxel.at(42).position[1] << " " << all_voxel.at(42).position[2] << std::endl;
-//    std::cout << all_voxel.at(9).position[0] << " " << all_voxel.at(9).position[1] << " " << all_voxel.at(9).position[2] << std::endl;
-//    std::cout << all_voxel.at(23).position[0] << " " << all_voxel.at(23).position[1] << " " << all_voxel.at(23).position[2] << std::endl;
-//    for(int i = 0; i < 6; i += 1){
-//        std::cout << all_voxel.at(58).face_toward[i] << " ";
-//    }
-//    std::cout << std::endl;
-//    for(int i = 0; i < 6; i += 1){
-//        std::cout << all_voxel.at(51).face_toward[i] << " ";
-//    }
-//    std::cout << std::endl;
-//    for(int i = 0; i < 6; i += 1){
-//        std::cout << all_voxel.at(42).face_toward[i] << " ";
-//    }
-//    std::cout << std::endl;
 
     for(unsigned int i = 0; i < model->numtriangles; i += 1){
         int test_coord[3];
@@ -336,17 +294,76 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
             if(all_voxel.at(test_coord[j]).show)
                 all_voxel.at(test_coord[j]).show = false;
         }
-//        std::cout << test_coord[0] << " " << test_coord[1] << " " << test_coord[2] << std::endl;
         cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1]);
         cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2]);
         cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0]);
+    }
+
+    bool use[all_voxel.size()] = {false};
+    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+        if(!all_voxel.at(i).show)
+            use[i] = true;
+    }
+
+    std::vector<std::vector<int>> region;
+    while(true){
+        std::vector<int> t_queue;
+        for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+            if(!use[i]){
+                t_queue.push_back(i);
+                use[i] = true;
+                break;
+            }
+        }
+
+        for(unsigned int i = 0; i < t_queue.size(); i += 1){
+            for(int j = 0; j < 6; j += 1){
+                if(all_voxel.at(t_queue.at(i)).face_toward[j] != -1){
+                    if(!use[all_voxel.at(t_queue.at(i)).face_toward[j]]){
+                        t_queue.push_back(all_voxel.at(t_queue.at(i)).face_toward[j]);
+                        use[all_voxel.at(t_queue.at(i)).face_toward[j]] = true;
+                    }
+                }
+            }
+        }
+
+        region.push_back(t_queue);
+
+        bool test = true;
+        for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+            if(!use[i]){
+                test = false;
+                break;
+            }
+        }
+
+        if(test)
+            break;
+    }
+
+    for(unsigned int i = 0; i < region.size(); i += 1){
+        bool test = false;
+        for(unsigned int j = 0; j < region.at(i).size(); j += 1){
+            if(test){
+                all_voxel.at(region.at(i).at(j)).show = false;
+            }
+            else{
+                for(int k = 0 ; k < 6; k += 1){
+                    if(all_voxel.at(region.at(i).at(j)).face_toward[j] == -1){
+                        j = -1;
+                        test = true;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
     GLMmodel *output = glmCopy(cube);
     int num = 0;
     for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-        if(!all_voxel.at(i).show){
+        if(all_voxel.at(i).show){
             if(num == 0){
                 glmScale(output, all_voxel.at(i).scale);
                 glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
