@@ -20,8 +20,8 @@ public:
 	vec3 endposition;
 
 	int type; //0 none 1 single 2 double
-	int fromindex;
-	int towardindex;
+	vec2 fromindex;
+	vec2 towardindex;
 	int fromface;
 	int towardface;
 	int size; // S M L

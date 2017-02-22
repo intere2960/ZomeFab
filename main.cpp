@@ -130,6 +130,24 @@ int main(int argc, char **argv)
 
     init();
 
+//    zomedir t;
+//    voxel start(COLOR_BLUE, SIZE_M, t.color_length(COLOR_BLUE, SIZE_M) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
+//    for(int i = 0; i < 6; i += 1)
+//        cout << start.plane_d[i] << endl;
+//    cout << endl;
+//    for(int i = 0; i < 8; i += 1){
+//        for(int j = 0; j < start.face_p[i].size(); j += 1)
+//            cout << start.face_p[i].at(j) << " ";
+//        cout << endl;
+//    }
+//    cout << endl;
+//    for(int i = 0; i < 12; i += 1){
+////        for(int j = 0; j < start.face_edge[i].size(); j += 1)
+////            cout << start.face_edge[i].at(j) << " ";
+//        cout << start.edge_point[i][0] << " " << start.edge_point[i][1];
+//        cout << endl;
+//    }
+
     voxelization(myObj, all_voxel, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_M);
 
 //	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);

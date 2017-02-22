@@ -5,6 +5,7 @@
 #include "algebra3.h"
 #include "glui_internal.h"
 #include "zomedir.h"
+#include "zomestruc.h"
 #include "glm.h"
 
 class voxel
@@ -21,7 +22,14 @@ public:
     float scale;
     int face_toward[6] = {-1, -1, -1, -1, -1, -1};
     std::vector<vec3> toward_vector;
-//    int coord_id;
+    float plane_d[6];
+
+    vec3 vertex_p[8];
+    std::vector<int> face_p[8];
+    vec3 edge_p[12];
+    std::vector<int> face_edge[12];
+    vec2 edge_point[12];
+
     bool show = true;
     std::vector<int> coord;
     std::vector<vec3> coord_origin;

@@ -7,9 +7,9 @@ zomeconn::zomeconn()
 	position = zero;
 	rotation = zero;
 	endposition = zero;
-	fromindex = -1;
+	fromindex = vec2(-1, -1);
 	fromface = -1;
-	towardindex = -1;
+	towardindex = vec2(-1, -1);
 	towardface = -1;
 }
 

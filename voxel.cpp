@@ -1,6 +1,9 @@
 #include <algorithm>
 #include "voxel.h"
 
+#include <iostream>
+using namespace std;
+
 voxel::voxel(int t_color, int t_size, float t_scale)
 {
     color = t_color;
@@ -16,6 +19,70 @@ voxel::voxel(int t_color, int t_size, float t_scale)
     toward_vector.push_back(vec3(0.0, -1.0, 0.0));
     toward_vector.push_back(vec3(0.0, 0.0, 1.0));
     toward_vector.push_back(vec3(0.0, 0.0, -1.0));
+
+    for(int i = 0; i < 8; i += 1){
+        int dx = 1;
+        int dy = 1;
+        int dz = 1;
+
+        if(i % 2 == 1)
+            dx = -1;
+        if((i / 2) % 2 == 1)
+            dy = -1;
+        if(i / 4 == 1)
+            dz = -1;
+        vec3 temp = position + scale * vec3(dx, dy, dz);
+        vertex_p[i] = temp;
+    }
+
+    edge_p[0] = position + scale * vec3(1, 1, 0);
+    edge_p[1] = position + scale * vec3(0, 1, 1);
+    edge_p[2] = position + scale * vec3(-1, 1, 0);
+    edge_p[3] = position + scale * vec3(0, 1, -1);
+    edge_p[4] = position + scale * vec3(1, 0, 1);
+    edge_p[5] = position + scale * vec3(-1, 0, 1);
+    edge_p[6] = position + scale * vec3(-1, 0, -1);
+    edge_p[7] = position + scale * vec3(1, 0, -1);
+    edge_p[8] = position + scale * vec3(1, -1, 0);
+    edge_p[9] = position + scale * vec3(0, -1, 1);
+    edge_p[10] = position + scale * vec3(-1, -1, 0);
+    edge_p[11] = position + scale * vec3(0, -1, -1);
+
+    plane_d[0] = vertex_p[0] * toward_vector.at(0);
+    plane_d[1] = vertex_p[1] * toward_vector.at(1);
+    plane_d[2] = vertex_p[0] * toward_vector.at(2);
+    plane_d[3] = vertex_p[2] * toward_vector.at(3);
+    plane_d[4] = vertex_p[0] * toward_vector.at(4);
+    plane_d[5] = vertex_p[4] * toward_vector.at(5);
+
+    for(int i = 0; i < 8; i += 1){
+        for(int j = 0; j < 6; j += 1){
+            if(fabs(vertex_p[i] * toward_vector.at(j) - plane_d[j]) < 0.0001){
+                face_p[i].push_back(j);
+            }
+        }
+    }
+
+    for(int i = 0; i < 12; i += 1){
+        for(int j = 0; j < 6; j += 1){
+            if(fabs(edge_p[i] * toward_vector.at(j) - plane_d[j]) < 0.0001){
+                face_edge[i].push_back(j);
+            }
+        }
+    }
+
+    for(int i = 0; i < 8; i += 1){
+        for(int j = i; j < 8; j += 1){
+            vec3 temp = (vertex_p[i] + vertex_p[j]) / 2;
+            for(int k = 0; k < 12; k += 1){
+                if((temp - edge_p[k]).length() < 0.0001){
+                    edge_point[k][0] = i;
+                    edge_point[k][1] = j;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rotation)
@@ -35,6 +102,70 @@ voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rot
     toward_vector.push_back(R * vec3(0.0, -1.0, 0.0));
     toward_vector.push_back(R * vec3(0.0, 0.0, 1.0));
     toward_vector.push_back(R * vec3(0.0, 0.0, -1.0));
+
+    for(int i = 0; i < 8; i += 1){
+        int dx = 1;
+        int dy = 1;
+        int dz = 1;
+
+        if(i % 2 == 1)
+            dx = -1;
+        if((i / 2) % 2 == 1)
+            dy = -1;
+        if(i / 4 == 1)
+            dz = -1;
+        vec3 temp = position + scale * vec3(dx, dy, dz);
+        vertex_p[i] = temp;
+    }
+
+    edge_p[0] = position + scale * vec3(1, 1, 0);
+    edge_p[1] = position + scale * vec3(0, 1, 1);
+    edge_p[2] = position + scale * vec3(-1, 1, 0);
+    edge_p[3] = position + scale * vec3(0, 1, -1);
+    edge_p[4] = position + scale * vec3(1, 0, 1);
+    edge_p[5] = position + scale * vec3(-1, 0, 1);
+    edge_p[6] = position + scale * vec3(-1, 0, -1);
+    edge_p[7] = position + scale * vec3(1, 0, -1);
+    edge_p[8] = position + scale * vec3(1, -1, 0);
+    edge_p[9] = position + scale * vec3(0, -1, 1);
+    edge_p[10] = position + scale * vec3(-1, -1, 0);
+    edge_p[11] = position + scale * vec3(0, -1, -1);
+
+    plane_d[0] = vertex_p[0] * toward_vector.at(0);
+    plane_d[1] = vertex_p[1] * toward_vector.at(1);
+    plane_d[2] = vertex_p[0] * toward_vector.at(2);
+    plane_d[3] = vertex_p[2] * toward_vector.at(3);
+    plane_d[4] = vertex_p[0] * toward_vector.at(4);
+    plane_d[5] = vertex_p[4] * toward_vector.at(5);
+
+    for(int i = 0; i < 8; i += 1){
+        for(int j = 0; j < 6; j += 1){
+            if(fabs(vertex_p[i] * toward_vector.at(j) - plane_d[j]) < 0.0001){
+                face_p[i].push_back(j);
+            }
+        }
+    }
+
+    for(int i = 0; i < 12; i += 1){
+        for(int j = 0; j < 6; j += 1){
+            if(fabs(edge_p[i] * toward_vector.at(j) - plane_d[j]) < 0.0001){
+                face_edge[i].push_back(j);
+            }
+        }
+    }
+
+    for(int i = 0; i < 8; i += 1){
+        for(int j = i; j < 8; j += 1){
+            vec3 temp = (vertex_p[i] + vertex_p[j]) / 2;
+            for(int k = 0; k < 12; k += 1){
+                if((temp - edge_p[k]).length() < 0.0001){
+                    edge_point[k][0] = i;
+                    edge_point[k][1] = j;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
@@ -54,6 +185,70 @@ voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
     toward_vector.push_back(R * vec3(0.0, -1.0, 0.0));
     toward_vector.push_back(R * vec3(0.0, 0.0, 1.0));
     toward_vector.push_back(R * vec3(0.0, 0.0, -1.0));
+
+    for(int i = 0; i < 8; i += 1){
+        int dx = 1;
+        int dy = 1;
+        int dz = 1;
+
+        if(i % 2 == 1)
+            dx = -1;
+        if((i / 2) % 2 == 1)
+            dy = -1;
+        if(i / 4 == 1)
+            dz = -1;
+        vec3 temp = position + scale * vec3(dx, dy, dz);
+        vertex_p[i] = temp;
+    }
+
+    edge_p[0] = position + scale * vec3(1, 1, 0);
+    edge_p[1] = position + scale * vec3(0, 1, 1);
+    edge_p[2] = position + scale * vec3(-1, 1, 0);
+    edge_p[3] = position + scale * vec3(0, 1, -1);
+    edge_p[4] = position + scale * vec3(1, 0, 1);
+    edge_p[5] = position + scale * vec3(-1, 0, 1);
+    edge_p[6] = position + scale * vec3(-1, 0, -1);
+    edge_p[7] = position + scale * vec3(1, 0, -1);
+    edge_p[8] = position + scale * vec3(1, -1, 0);
+    edge_p[9] = position + scale * vec3(0, -1, 1);
+    edge_p[10] = position + scale * vec3(-1, -1, 0);
+    edge_p[11] = position + scale * vec3(0, -1, -1);
+
+    plane_d[0] = vertex_p[0] * toward_vector.at(0);
+    plane_d[1] = vertex_p[1] * toward_vector.at(1);
+    plane_d[2] = vertex_p[0] * toward_vector.at(2);
+    plane_d[3] = vertex_p[2] * toward_vector.at(3);
+    plane_d[4] = vertex_p[0] * toward_vector.at(4);
+    plane_d[5] = vertex_p[4] * toward_vector.at(5);
+
+    for(int i = 0; i < 8; i += 1){
+        for(int j = 0; j < 6; j += 1){
+            if(fabs(vertex_p[i] * toward_vector.at(j) - plane_d[j]) < 0.0001){
+                face_p[i].push_back(j);
+            }
+        }
+    }
+
+    for(int i = 0; i < 12; i += 1){
+        for(int j = 0; j < 6; j += 1){
+            if(fabs(edge_p[i] * toward_vector.at(j) - plane_d[j]) < 0.0001){
+                face_edge[i].push_back(j);
+            }
+        }
+    }
+
+    for(int i = 0; i < 8; i += 1){
+        for(int j = i; j < 8; j += 1){
+            vec3 temp = (vertex_p[i] + vertex_p[j]) / 2;
+            for(int k = 0; k < 12; k += 1){
+                if((temp - edge_p[k]).length() < 0.0001){
+                    edge_point[k][0] = i;
+                    edge_point[k][1] = j;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void assign_coord(voxel &judge, vec3 &origin){
@@ -70,8 +265,6 @@ void assign_coord(voxel &judge, vec3 &origin){
     judge.coord.push_back(id);
     judge.coord_origin.push_back(origin);
 }
-
-#include <iostream>
 
 vec2 check_bound(std::vector<voxel> &all_voxel, int max_d)
 {
@@ -235,7 +428,6 @@ void cross_edge(std::vector<voxel> &all_voxel, vec3 p1, vec3 p2, int index1, int
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
 {
     zomedir t;
-    std::vector<std::vector<int>> coord(8);
     voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
     vec3 origin = vec3(bound_center) + vec3(start.scale, start.scale, start.scale);
 
@@ -346,10 +538,12 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         for(unsigned int j = 0; j < region.at(i).size(); j += 1){
             if(test){
                 all_voxel.at(region.at(i).at(j)).show = false;
+                region.at(i).erase(region.at(i).begin() + j);
+                j -= 1;
             }
             else{
                 for(int k = 0 ; k < 6; k += 1){
-                    if(all_voxel.at(region.at(i).at(j)).face_toward[j] == -1){
+                    if(all_voxel.at(region.at(i).at(j)).face_toward[k] == -1){
                         j = -1;
                         test = true;
                         break;
@@ -359,23 +553,148 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         }
     }
 
-    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
-    GLMmodel *output = glmCopy(cube);
-    int num = 0;
-    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-        if(all_voxel.at(i).show){
-            if(num == 0){
-                glmScale(output, all_voxel.at(i).scale);
-                glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
+//    for(unsigned int i = 0; i < region.size(); i += 1){
+//        cout << region.at(i).size() << endl;
+//    }
+
+    std::vector<std::vector<zomeconn>> zome_queue(4);
+
+    for(unsigned int i = 0; i < region.size(); i += 1){
+        if(region.at(i).size() > 0){
+            std::vector<int> done;
+            for(unsigned int j = 0; j < region.at(i).size(); j += 1){
+                bool p[8] = {false};
+                bool e[12] = {false};
+                for(int k = 0 ; k < 6; k += 1){
+                    if(all_voxel.at(all_voxel.at(region.at(i).at(j)).face_toward[k]).show){
+                    }
+                    else{
+                        for(int a = 0; a < 8; a += 1){
+                            for(int b = 0; b < all_voxel.at(region.at(i).at(j)).face_p[a].size(); b += 2){
+                                if((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+                                    if(!p[a]){
+                                        zomeconn new_point;
+                                        new_point.position = all_voxel.at(region.at(i).at(j)).vertex_p[a];
+                                        new_point.color = COLOR_WHITE;
+                                        zome_queue.at(COLOR_WHITE).push_back(new_point);
+                                        p[a] = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        for(int a = 0; a < 12; a += 1){
+                            for(int b = 0; b < all_voxel.at(region.at(i).at(j)).face_edge[a].size(); b += 2){
+                                if((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+                                    if(!e[a]){
+                                        zomeconn new_edge;
+                                        new_edge.position = all_voxel.at(region.at(i).at(j)).edge_p[a];
+                                        new_edge.color = all_voxel.at(region.at(i).at(j)).color;
+                                        new_edge.size = all_voxel.at(region.at(i).at(j)).stick_size;
+
+                                        int index[2];
+                                        for(int c = 0; c < 2; c += 1){
+                                            for(unsigned d = 0; d < zome_queue.at(COLOR_WHITE).size(); d += 1){
+                                                if((all_voxel.at(region.at(i).at(j)).vertex_p[(int)all_voxel.at(region.at(i).at(j)).edge_point[a][c]] - zome_queue.at(COLOR_WHITE).at(d).position).length() < 0.0001){
+                                                    index[c] = d;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
+                                        new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
+
+                                        new_edge.fromface = t.dir_face((new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize());
+                                        new_edge.towardface = t.opposite_face(new_edge.fromface);
+
+                                        zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
+                                        e[a] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            else{
-                GLMmodel *temp = glmCopy(cube);
-                glmScale(temp, all_voxel.at(i).scale);
-                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
-                glmCombine(output, temp);
-            }
-            num += 1;
         }
     }
-    glmWriteOBJ(output, "123.obj", GLM_NONE);
+
+    for(unsigned int  i = 0; i < 4; i += 1){
+        cout << i << " : " << endl;
+        for(unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
+            cout << zome_queue.at(i).at(j).position[0] << " " << zome_queue.at(i).at(j).position[1] << " " << zome_queue.at(i).at(j).position[2] << endl;
+            cout << zome_queue.at(i).at(j).fromindex[0] << " " << zome_queue.at(i).at(j).fromindex[1] << " " << zome_queue.at(i).at(j).towardindex[0] << " " << zome_queue.at(i).at(j).towardindex[1] << endl;
+            cout << zome_queue.at(i).at(j).fromface << " " << zome_queue.at(i).at(j).towardface << endl;
+        }
+        cout << endl;
+    }
+
+    GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+
+    for(unsigned int i = 0; i < zome_queue.at(3).size(); i += 1){
+        if(i == 0){
+            glmRT(zome, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
+        }
+        else{
+            GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
+            glmRT(new_ball, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
+            glmCombine(zome, new_ball);
+        }
+    }
+
+    for(unsigned int i = 0; i < zome_queue.size() - 1; i += 1){
+        for(unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
+            GLMmodel *new_stick;
+            if(i == COLOR_BLUE){
+                if(zome_queue.at(i).at(j).size == SIZE_S)
+                    new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
+                if(zome_queue.at(i).at(j).size == SIZE_M)
+                    new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
+                if(zome_queue.at(i).at(j).size == SIZE_L)
+                    new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
+            }
+            else if(i == COLOR_RED){
+                if(zome_queue.at(i).at(j).size == SIZE_S)
+                    new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
+                if(zome_queue.at(i).at(j).size == SIZE_M)
+                    new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
+                if(zome_queue.at(i).at(j).size == SIZE_L)
+                    new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
+            }
+            else if(i == COLOR_YELLOW){
+                if(zome_queue.at(i).at(j).size == SIZE_S)
+                    new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
+                if(zome_queue.at(i).at(j).size == SIZE_M)
+                    new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
+                if(zome_queue.at(i).at(j).size == SIZE_L)
+                    new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
+            }
+            glmR(new_stick, vec3(0.0, 1.0, 0.0), t.roll(zome_queue.at(i).at(j).fromface));
+            glmRT(new_stick, vec3(0.0, t.phi(zome_queue.at(i).at(j).fromface), t.theta(zome_queue.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+            glmRT(new_stick, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
+            glmCombine(zome, new_stick);
+        }
+    }
+
+    glmWriteOBJ(zome, "123zome.obj", GLM_NONE);
+
+//    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
+//    GLMmodel *output = glmCopy(cube);
+//    int num = 0;
+//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+//        if(all_voxel.at(i).show){
+//            if(num == 0){
+//                glmScale(output, all_voxel.at(i).scale);
+//                glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
+//            }
+//            else{
+//                GLMmodel *temp = glmCopy(cube);
+//                glmScale(temp, all_voxel.at(i).scale);
+//                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
+//                glmCombine(output, temp);
+//            }
+//            num += 1;
+//        }
+//    }
+//    glmWriteOBJ(output, "123.obj", GLM_NONE);
 }
