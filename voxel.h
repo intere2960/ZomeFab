@@ -40,6 +40,7 @@ vec2 check_bound(std::vector<voxel> &all_voxel, int max_d);
 void addexist_toward(std::vector<voxel> &all_voxel, voxel & check);
 void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3 origin, int coord_id);
 int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 p, int depth);
-void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size);
+void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region);
+void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size);
 
 #endif // VOXEL_H_INCLUDED

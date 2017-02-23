@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 //        cout << endl;
 //    }
 
-    voxelization(myObj, all_voxel, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_M);
+    voxelization(myObj, all_voxel, zome_queue, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_S);
 
 //	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 //	glutInitWindowSize(1000,1000);

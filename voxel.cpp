@@ -425,7 +425,171 @@ void cross_edge(std::vector<voxel> &all_voxel, vec3 p1, vec3 p2, int index1, int
     }
 }
 
-void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
+void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region){
+    zomedir t;
+    for(unsigned int i = 0; i < region.size(); i += 1){
+        if(region.at(i).size() > 0){
+            std::vector<int> done;
+            for(unsigned int j = 0; j < region.at(i).size(); j += 1){
+                bool p[8] = {false};
+                bool e[12] = {false};
+
+                for(int k = 0 ; k < 6; k += 1){
+                    if(all_voxel.at(all_voxel.at(region.at(i).at(j)).face_toward[k]).show){
+                        if(find(done.begin(), done.end(), all_voxel.at(region.at(i).at(j)).face_toward[k]) - done.begin() < done.size()){
+                            for(int a = 0; a < 8; a += 1){
+                                if(!p[a]){
+                                    if((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+                                        p[a] = true;
+                                    }
+                                }
+                            }
+
+                            for(int a = 0; a < 12; a += 1){
+                                if(!e[a]){
+                                    if((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+                                        e[a] = true;
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            for(int a = 0; a < 8; a += 1){
+                                if(!p[a]){
+                                    if((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+                                        bool exist = false;
+                                        for(unsigned int b = 0; b < zome_queue.at(COLOR_WHITE).size(); b += 1){
+                                            if((zome_queue.at(COLOR_WHITE).at(b).position - all_voxel.at(region.at(i).at(j)).vertex_p[a]).length() < 0.0001){
+                                                exist = true;
+                                                p[a] = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if(!exist){
+                                            zomeconn new_point;
+                                            new_point.position = all_voxel.at(region.at(i).at(j)).vertex_p[a];
+                                            new_point.color = COLOR_WHITE;
+                                            zome_queue.at(COLOR_WHITE).push_back(new_point);
+                                            p[a] = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            for(int a = 0; a < 12; a += 1){
+                                if(!e[a]){
+                                    if((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+                                        bool exist = false;
+                                        for(unsigned int b = 0; b < zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size(); b += 1){
+                                            if((zome_queue.at(all_voxel.at(region.at(i).at(j)).color).at(b).position - all_voxel.at(region.at(i).at(j)).edge_p[a]).length() < 0.0001){
+                                                exist = true;
+                                                e[a] = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if(!exist){
+                                            zomeconn new_edge;
+                                            new_edge.position = all_voxel.at(region.at(i).at(j)).edge_p[a];
+                                            new_edge.color = all_voxel.at(region.at(i).at(j)).color;
+                                            new_edge.size = all_voxel.at(region.at(i).at(j)).stick_size;
+
+                                            int index[2];
+                                            for(int b = 0; b < 2; b += 1){
+                                                for(unsigned d = 0; d < zome_queue.at(COLOR_WHITE).size(); d += 1){
+                                                    if((all_voxel.at(region.at(i).at(j)).vertex_p[(int)all_voxel.at(region.at(i).at(j)).edge_point[a][b]] - zome_queue.at(COLOR_WHITE).at(d).position).length() < 0.0001){
+                                                        index[b] = d;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
+                                            new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
+
+                                            new_edge.fromface = t.dir_face((new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize());
+                                            new_edge.towardface = t.opposite_face(new_edge.fromface);
+
+                                            zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
+                                            e[a] = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        for(int a = 0; a < 8; a += 1){
+                            if(!p[a]){
+                                if((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+                                    bool exist = false;
+                                    for(unsigned int b = 0; b < zome_queue.at(COLOR_WHITE).size(); b += 1){
+                                        if((zome_queue.at(COLOR_WHITE).at(b).position - all_voxel.at(region.at(i).at(j)).vertex_p[a]).length() < 0.0001){
+                                            exist = true;
+                                            p[a] = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if(!exist){
+                                        zomeconn new_point;
+                                        new_point.position = all_voxel.at(region.at(i).at(j)).vertex_p[a];
+                                        new_point.color = COLOR_WHITE;
+                                        zome_queue.at(COLOR_WHITE).push_back(new_point);
+                                        p[a] = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        for(int a = 0; a < 12; a += 1){
+                            if(!e[a]){
+                                if((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+                                    bool exist = false;
+                                    for(unsigned int b = 0; b < zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size(); b += 1){
+                                        if((zome_queue.at(all_voxel.at(region.at(i).at(j)).color).at(b).position - all_voxel.at(region.at(i).at(j)).edge_p[a]).length() < 0.0001){
+                                            exist = true;
+                                            e[a] = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if(!exist){
+                                        zomeconn new_edge;
+                                        new_edge.position = all_voxel.at(region.at(i).at(j)).edge_p[a];
+                                        new_edge.color = all_voxel.at(region.at(i).at(j)).color;
+                                        new_edge.size = all_voxel.at(region.at(i).at(j)).stick_size;
+
+                                        int index[2];
+                                        for(int b = 0; b < 2; b += 1){
+                                            for(unsigned d = 0; d < zome_queue.at(COLOR_WHITE).size(); d += 1){
+                                                if((all_voxel.at(region.at(i).at(j)).vertex_p[(int)all_voxel.at(region.at(i).at(j)).edge_point[a][b]] - zome_queue.at(COLOR_WHITE).at(d).position).length() < 0.0001){
+                                                    index[b] = d;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
+                                        new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
+
+                                        new_edge.fromface = t.dir_face((new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize());
+                                        new_edge.towardface = t.opposite_face(new_edge.fromface);
+
+                                        zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
+                                        e[a] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                done.push_back(region.at(i).at(j));
+            }
+        }
+    }
+}
+
+void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
 {
     zomedir t;
     voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
@@ -553,80 +717,10 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
         }
     }
 
-//    for(unsigned int i = 0; i < region.size(); i += 1){
-//        cout << region.at(i).size() << endl;
-//    }
+    voxel_zometool(all_voxel, zome_queue, region);
 
-    std::vector<std::vector<zomeconn>> zome_queue(4);
-
-    for(unsigned int i = 0; i < region.size(); i += 1){
-        if(region.at(i).size() > 0){
-            std::vector<int> done;
-            for(unsigned int j = 0; j < region.at(i).size(); j += 1){
-                bool p[8] = {false};
-                bool e[12] = {false};
-                for(int k = 0 ; k < 6; k += 1){
-                    if(all_voxel.at(all_voxel.at(region.at(i).at(j)).face_toward[k]).show){
-                    }
-                    else{
-                        for(int a = 0; a < 8; a += 1){
-                            for(int b = 0; b < all_voxel.at(region.at(i).at(j)).face_p[a].size(); b += 2){
-                                if((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
-                                    if(!p[a]){
-                                        zomeconn new_point;
-                                        new_point.position = all_voxel.at(region.at(i).at(j)).vertex_p[a];
-                                        new_point.color = COLOR_WHITE;
-                                        zome_queue.at(COLOR_WHITE).push_back(new_point);
-                                        p[a] = true;
-                                    }
-                                }
-                            }
-                        }
-
-                        for(int a = 0; a < 12; a += 1){
-                            for(int b = 0; b < all_voxel.at(region.at(i).at(j)).face_edge[a].size(); b += 2){
-                                if((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
-                                    if(!e[a]){
-                                        zomeconn new_edge;
-                                        new_edge.position = all_voxel.at(region.at(i).at(j)).edge_p[a];
-                                        new_edge.color = all_voxel.at(region.at(i).at(j)).color;
-                                        new_edge.size = all_voxel.at(region.at(i).at(j)).stick_size;
-
-                                        int index[2];
-                                        for(int c = 0; c < 2; c += 1){
-                                            for(unsigned d = 0; d < zome_queue.at(COLOR_WHITE).size(); d += 1){
-                                                if((all_voxel.at(region.at(i).at(j)).vertex_p[(int)all_voxel.at(region.at(i).at(j)).edge_point[a][c]] - zome_queue.at(COLOR_WHITE).at(d).position).length() < 0.0001){
-                                                    index[c] = d;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
-                                        new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
-
-                                        new_edge.fromface = t.dir_face((new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize());
-                                        new_edge.towardface = t.opposite_face(new_edge.fromface);
-
-                                        zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
-                                        e[a] = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for(unsigned int  i = 0; i < 4; i += 1){
-        cout << i << " : " << endl;
-        for(unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
-            cout << zome_queue.at(i).at(j).position[0] << " " << zome_queue.at(i).at(j).position[1] << " " << zome_queue.at(i).at(j).position[2] << endl;
-            cout << zome_queue.at(i).at(j).fromindex[0] << " " << zome_queue.at(i).at(j).fromindex[1] << " " << zome_queue.at(i).at(j).towardindex[0] << " " << zome_queue.at(i).at(j).towardindex[1] << endl;
-            cout << zome_queue.at(i).at(j).fromface << " " << zome_queue.at(i).at(j).towardface << endl;
-        }
-        cout << endl;
+    for(int i = 0; i < zome_queue.size(); i += 1){
+        cout << zome_queue.at(i).size() << endl;
     }
 
     GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
@@ -678,23 +772,23 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding
 
     glmWriteOBJ(zome, "123zome.obj", GLM_NONE);
 
-//    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
-//    GLMmodel *output = glmCopy(cube);
-//    int num = 0;
-//    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-//        if(all_voxel.at(i).show){
-//            if(num == 0){
-//                glmScale(output, all_voxel.at(i).scale);
-//                glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
-//            }
-//            else{
-//                GLMmodel *temp = glmCopy(cube);
-//                glmScale(temp, all_voxel.at(i).scale);
-//                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
-//                glmCombine(output, temp);
-//            }
-//            num += 1;
-//        }
-//    }
-//    glmWriteOBJ(output, "123.obj", GLM_NONE);
+    GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
+    GLMmodel *output = glmCopy(cube);
+    int num = 0;
+    for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+        if(all_voxel.at(i).show){
+            if(num == 0){
+                glmScale(output, all_voxel.at(i).scale);
+                glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
+            }
+            else{
+                GLMmodel *temp = glmCopy(cube);
+                glmScale(temp, all_voxel.at(i).scale);
+                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
+                glmCombine(output, temp);
+            }
+            num += 1;
+        }
+    }
+    glmWriteOBJ(output, "123.obj", GLM_NONE);
 }
