@@ -354,24 +354,25 @@ void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3
     }
 }
 
-int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 p, int depth)
+int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int depth, vec3 &ball_error)
 {
     if(end - start != 1){
         int id = 0;
-        if(p[0] <= all_voxel.at(start).coord_origin.at(depth)[0]){
+        vec3 now_o = all_voxel.at(start).coord_origin.at(depth) + ball_error;
+        if(p[0] <= now_o[0]){
             id += 1;
         }
-        if(p[1] <= all_voxel.at(start).coord_origin.at(depth)[1]){
+        if(p[1] <= now_o[1]){
             id += 2;
         }
-        if(p[2] <= all_voxel.at(start).coord_origin.at(depth)[2]){
+        if(p[2] <= now_o[2]){
             id += 4;
         }
 
         depth += 1;
         int d = all_voxel.size() / pow(8, depth);
 
-        return search_coord(all_voxel, start + d * id, start + d * (id + 1), p, depth);
+        return search_coord(all_voxel, start + d * id, start + d * (id + 1), p, depth, ball_error);
     }
     return start;
 }
@@ -403,7 +404,7 @@ void rebuild_facetoward(std::vector<voxel> &all_voxel)
     }
 }
 
-void cross_edge(std::vector<voxel> &all_voxel, vec3 p1, vec3 p2, int index1, int index2)
+void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, int index2, vec3 &ball_error)
 {
     if(index1 != index2){
         bool judge = false;
@@ -413,9 +414,9 @@ void cross_edge(std::vector<voxel> &all_voxel, vec3 p1, vec3 p2, int index1, int
         }
         if(!judge){
             vec3 new_p = (p1 + p2) / 2;
-            int new_index = search_coord(all_voxel, 0, all_voxel.size(), new_p, 0);
-            cross_edge(all_voxel, p1, new_p, index1, new_index);
-            cross_edge(all_voxel, p2, new_p, index2, new_index);
+            int new_index = search_coord(all_voxel, 0, all_voxel.size(), new_p, 0, ball_error);
+            cross_edge(all_voxel, p1, new_p, index1, new_index, ball_error);
+            cross_edge(all_voxel, p2, new_p, index2, new_index, ball_error);
         }
 
         if(all_voxel.at(index1).show)
@@ -642,17 +643,30 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
     rebuild_facetoward(all_voxel);
 
     for(unsigned int i = 0; i < model->numtriangles; i += 1){
-        int test_coord[3];
-        vec3 test_p[3];
-        for(int j = 0; j < 3; j += 1){
-            test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
-            test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0);
-            if(all_voxel.at(test_coord[j]).show)
-                all_voxel.at(test_coord[j]).show = false;
+        for(int k = 0; k < 8; k += 1){
+            int dx = 1;
+            int dy = 1;
+            int dz = 1;
+            if(k % 2 == 1)
+                dx = -1;
+            if((k / 2) % 2 == 1)
+                dy = -1;
+            if(k / 4 == 1)
+                dz = -1;
+            vec3 ball_error = vec3(dx, dy, dz) * NODE_DIAMETER / 2.0;
+
+            int test_coord[3];
+            vec3 test_p[3];
+            for(int j = 0; j < 3; j += 1){
+                test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
+                test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
+                if(all_voxel.at(test_coord[j]).show)
+                    all_voxel.at(test_coord[j]).show = false;
+            }
+            cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
+            cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2], ball_error);
+            cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0], ball_error);
         }
-        cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1]);
-        cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2]);
-        cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0]);
     }
 
     bool use[all_voxel.size()] = {false};
