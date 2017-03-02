@@ -117,6 +117,7 @@
     <ClInclude Include="fill.h" />
     <ClInclude Include="glm.h" />
     <ClInclude Include="glui_internal.h" />
+    <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="shell.h" />
     <ClInclude Include="textfile.h" />

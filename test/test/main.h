@@ -19,6 +19,7 @@
 #include "fill.h"
 #include "zomedir.h"
 #include "voxel.h"
+#include "ImportOBJ.h"
 
 using namespace std;
 

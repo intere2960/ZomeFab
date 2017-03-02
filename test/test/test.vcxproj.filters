@@ -80,6 +80,9 @@
     <ClInclude Include="zomestruc.h">
       <Filter>原始程式檔</Filter>
     </ClInclude>
+    <ClInclude Include="ImportOBJ.h">
+      <Filter>原始程式檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="myshader.frag">
