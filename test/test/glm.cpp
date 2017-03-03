@@ -15,12 +15,18 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <assert.h>
 #include "glm.h"
 
 #define T(x) (model->triangles->at(x))
 
+char *my_strdup(const char *str) {
+	size_t len = strlen(str);
+	char *x = (char *)malloc(len + 1); /* 1 for the null terminator */
+	if (!x) return NULL; /* malloc could not allocate memory */
+	memcpy(x, str, len + 1); /* copy the string into the new buffer */
+	return x;
+}
 
 /* _GLMnode: general purpose node */
 typedef struct _GLMnode {
@@ -28,14 +34,6 @@ typedef struct _GLMnode {
     GLboolean averaged;
     struct _GLMnode* next;
 } GLMnode;
-
-char *my_strdup(const char *str) {
-    size_t len = strlen(str);
-    char *x = (char *)malloc(len+1); /* 1 for the null terminator */
-    if(!x) return NULL; /* malloc could not allocate memory */
-    memcpy(x,str,len+1); /* copy the string into the new buffer */
-    return x;
-}
 
 /* glmMax: returns the maximum of two floats */
 static GLfloat

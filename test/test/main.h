@@ -12,14 +12,13 @@
 #include "textfile.h"
 #include "glm.h"
 #include "algebra3.h"
-#include "glui_internal.h"
 
 #include "shell.h"
 #include "bisect.h"
 #include "fill.h"
 #include "zomedir.h"
 #include "voxel.h"
-#include "ImportOBJ.h"
+#include "segment.h"
 
 using namespace std;
 
@@ -28,7 +27,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/dolphin.obj";
+char model_source[] = "test_model/cube.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -129,6 +128,7 @@ vector<int> face_inner_split_by_plane;
 
 vector<voxel> all_voxel;
 vector<vector<zomeconn>> zome_queue(4);
+vector<GLMmodel> seg;
 
 //bounding box
 

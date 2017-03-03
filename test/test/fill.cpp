@@ -1,7 +1,6 @@
 #include <vector>
 #include "glm.h"
 #include "algebra3.h"
-#include "glui_internal.h"
 #include "fill.h"
 
 void convert_2d(GLMmodel &temp_piece, Loop &loop)

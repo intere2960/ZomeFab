@@ -45,6 +45,9 @@
     <ClCompile Include="zomestruc.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="segment.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algebra3.h">
@@ -81,6 +84,9 @@
       <Filter>原始程式檔</Filter>
     </ClInclude>
     <ClInclude Include="ImportOBJ.h">
+      <Filter>原始程式檔</Filter>
+    </ClInclude>
+    <ClInclude Include="segment.h">
       <Filter>原始程式檔</Filter>
     </ClInclude>
   </ItemGroup>

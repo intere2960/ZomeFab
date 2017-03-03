@@ -105,6 +105,7 @@
     <ClCompile Include="fill.cpp" />
     <ClCompile Include="glm.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="segment.cpp" />
     <ClCompile Include="shell.cpp" />
     <ClCompile Include="textfile.cpp" />
     <ClCompile Include="voxel.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="glui_internal.h" />
     <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="segment.h" />
     <ClInclude Include="shell.h" />
     <ClInclude Include="textfile.h" />
     <ClInclude Include="voxel.h" />

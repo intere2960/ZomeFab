@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cmath>
+#include <string.h>
 
 #ifndef AND
 #define AND &&
@@ -100,6 +101,5 @@
 
 /**** Return the ASCII control code given the non-control ASCII character */
 #define CTRL(c) ( (c>=('a'-1)) ? (c-'a'+1) : (c-'A'+1) )
-
 
 #endif /* GLUI_INTERNAL_H */

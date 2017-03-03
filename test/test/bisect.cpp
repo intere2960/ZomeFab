@@ -1,7 +1,6 @@
 #include <vector>
 #include "glm.h"
 #include "algebra3.h"
-#include "glui_internal.h"
 #include "bisect.h"
 
 edge::edge()
