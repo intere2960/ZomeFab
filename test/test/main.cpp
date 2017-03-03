@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 {
 //    findzoom();
 
-    //myObj = glmReadOBJ(model_source);
+    myObj = glmReadOBJ(model_source);
 //    myObj_inner = glmCopy(myObj);
 
     //init();
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 
 	// create and read Polyhedron
 	Polyhedron mesh;
-	SMeshLib::IO::importOBJ("test_model/cube.obj", &mesh);
+	SMeshLib::IO::importOBJ(model_source, &mesh);
 	/*std::ifstream input("sphere.off");
 	if (!input || !(input >> mesh) || mesh.empty()) {
 		std::cerr << "Not a valid off file." << std::endl;
@@ -192,28 +192,77 @@ int main(int argc, char **argv)
 	}*/
 
 
-	//// create a property-map for segment-ids
-	//typedef std::map<Polyhedron::Facet_const_handle, std::size_t> Facet_int_map;
-	//Facet_int_map internal_segment_map;
-	//boost::associative_property_map<Facet_int_map> segment_property_map(internal_segment_map);
-	//// calculate SDF values and segment the mesh using default parameters.
-	//std::size_t number_of_segments = CGAL::segmentation_via_sdf_values(mesh, segment_property_map);
-	//std::cout << "Number of segments: " << number_of_segments << std::endl;
-	//// print segment-ids
-	//for (Polyhedron::Facet_const_iterator facet_it = mesh.facets_begin();
-	//	facet_it != mesh.facets_end(); ++facet_it) {
-	//	std::cout << segment_property_map[facet_it] << " ";
-	//}
-	//std::cout << std::endl;
-	
-	
-	cout << mesh.size_of_vertices() << endl;
-	Vertex_iterator v = mesh.vertices_begin();
-	//for (v = mesh.vertices_begin(); v != mesh.vertices_end(); v++){
-	for (int i = 0; i < mesh.size_of_vertices(); i += 1){
-		std::cout << v->point() << std::endl;
-		v++;
+	// create a property-map for segment-ids
+	typedef std::map<Polyhedron::Facet_const_handle, std::size_t> Facet_int_map;
+	Facet_int_map internal_segment_map;
+	boost::associative_property_map<Facet_int_map> segment_property_map(internal_segment_map);
+	// calculate SDF values and segment the mesh using default parameters.
+	std::size_t number_of_segments = CGAL::segmentation_via_sdf_values(mesh, segment_property_map);
+	std::cout << "Number of segments: " << number_of_segments << std::endl;
+
+	vector<vector<int>> segment_tri(number_of_segments);
+	// print segment-ids
+	int now = 0;
+	for (Polyhedron::Facet_const_iterator facet_it = mesh.facets_begin();
+		facet_it != mesh.facets_end(); ++facet_it) {
+		std::cout << segment_property_map[facet_it] << " ";	
+		segment_tri.at(segment_property_map[facet_it]).push_back(now);
+		now += 1;
 	}
+
+	//int **temp_index = new int*[number_of_segments];
+	std::cout << std::endl;
+	std::cout << std::endl;
+	string s = "piece";
+	for (int i = 0; i < number_of_segments; i += 1){
+		GLMmodel temp_seg;
+		process_piece(temp_seg, myObj, segment_tri.at(i));
+		string piece = s + to_string(i) + ".obj";
+		glmWriteOBJ(&temp_seg, my_strdup(piece.c_str()), GLM_NONE);
+		//int index = 1;
+		//temp_index[i] = new int[myObj->numvertices + 1];
+		/*for (int a = 1; a <= myObj->numvertices + 1; a += 1)
+			temp_index[i][a] = -1;*/
+
+		//cout << i << " : " << endl;
+		/*for (int j = 0; j < segment_tri[i].size(); j += 1){
+			cout << segment_tri.at(i).at(j) << " ";
+			for (int k = 0; k < 3; k += 1){
+				if (temp_index[i][myObj->triangles->at(segment_tri.at(i).at(j)).vindices[k]] == -1){
+					temp_index[i][myObj->triangles->at(segment_tri.at(i).at(j)).vindices[k]] = index;
+					index += 1;
+				}
+			}
+		}*/
+		cout << endl;
+	}
+	cout << endl;
+	
+	/*for (int i = 0; i < number_of_segments; i += 1){
+		cout << i << " : " << endl;
+		for (int j = 1; j <= myObj->numvertices; j += 1){
+			cout << temp_index[i][j] << " ";
+		}
+		cout << endl;
+	}*/
+
+
+
+	/*for (int i = 0; i < number_of_segments; i += 1){
+		cout << i << " : " << endl;
+		for (int j = 0; j < segment_tri[i].size(); j += 1){
+			cout << segment_tri.at(i).at(j) << " ";
+		}
+		cout << endl;
+	}	*/
+	
+	//cout << mesh.size_of_vertices() << endl;
+	//Vertex_iterator v = mesh.vertices_begin();
+	////for (v = mesh.vertices_begin(); v != mesh.vertices_end(); v++){
+	//for (int i = 0; i < mesh.size_of_vertices(); i += 1){
+	//	std::cout << v->point() << std::endl;
+	//	v++;
+	//}
 
 	/*Face_iterator f;
 	for (f = mesh.facets_begin(); f != mesh.facets_end(); f++)
@@ -231,7 +280,7 @@ int main(int argc, char **argv)
 	//}
 
 	//ofstream os;
-	//os.open("test.obj");
+	//os.open("sphere.obj");
 
 	////os << mesh;
 	//Vertex_iterator v = mesh.vertices_begin();

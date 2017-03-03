@@ -1480,6 +1480,7 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
         }
     }
 }
+#include <iostream>
 
 void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face_split_by_plane)
 {
@@ -1498,7 +1499,10 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
 
     temp_piece.triangles = new std::vector<GLMtriangle>();
 
-    temp_piece.loop = new std::vector<Loop>(myObj->loop->size());
+	if (!myObj->loop){
+		std::cout << "g" << std::endl;
+		temp_piece.loop = new std::vector<Loop>(myObj->loop->size());
+	}
 
     int current_index = 1;
     for(unsigned int i = 0; i < face_split_by_plane.size(); i += 1){
@@ -1540,13 +1544,15 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
         temp_piece.triangles->push_back(temp_t);
     }
 
-    for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
-        temp_piece.loop->at(i).loop_line = new std::vector<int>();
-        temp_piece.loop->at(i).plane_normal[0] = myObj->loop->at(i).plane_normal[0];
-        temp_piece.loop->at(i).plane_normal[1] = myObj->loop->at(i).plane_normal[1];
-        temp_piece.loop->at(i).plane_normal[2] = myObj->loop->at(i).plane_normal[2];
-        for(unsigned int j = 0; j < myObj->loop->at(i).loop_line->size(); j += 1){
-            temp_piece.loop->at(i).loop_line->push_back(vertex_map.at(myObj->loop->at(i).loop_line->at(j)));
-        }
-    }
+	if (!myObj->loop){
+		for (unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
+			temp_piece.loop->at(i).loop_line = new std::vector<int>();
+			temp_piece.loop->at(i).plane_normal[0] = myObj->loop->at(i).plane_normal[0];
+			temp_piece.loop->at(i).plane_normal[1] = myObj->loop->at(i).plane_normal[1];
+			temp_piece.loop->at(i).plane_normal[2] = myObj->loop->at(i).plane_normal[2];
+			for (unsigned int j = 0; j < myObj->loop->at(i).loop_line->size(); j += 1){
+				temp_piece.loop->at(i).loop_line->push_back(vertex_map.at(myObj->loop->at(i).loop_line->at(j)));
+			}
+		}
+	}
 }

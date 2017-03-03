@@ -123,7 +123,7 @@ public:
 
   GLfloat position[3];          /* position of the model */
 
-  std::vector<Loop> *loop;
+  std::vector<Loop> *loop = NULL;
 };
 
 GLMmodel* glmCopy(GLMmodel* m1);
@@ -328,5 +328,7 @@ glmReadPPM(char* filename, int* width, int* height);
 
 GLvoid
 glmCombine(GLMmodel *model, GLMmodel *source);
+
+char *my_strdup(const char *str);
 
 #endif
