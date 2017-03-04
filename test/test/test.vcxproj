@@ -101,8 +101,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="algebra3.cpp" />
+    <ClCompile Include="bestfitobb.cpp" />
     <ClCompile Include="bisect.cpp" />
     <ClCompile Include="fill.cpp" />
+    <ClCompile Include="float_math.cpp" />
     <ClCompile Include="glm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="segment.cpp" />
@@ -114,8 +116,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algebra3.h" />
+    <ClInclude Include="bestfitobb.h" />
     <ClInclude Include="bisect.h" />
     <ClInclude Include="fill.h" />
+    <ClInclude Include="float_math.h" />
     <ClInclude Include="glm.h" />
     <ClInclude Include="glui_internal.h" />
     <ClInclude Include="ImportOBJ.h" />

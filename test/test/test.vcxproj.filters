@@ -48,6 +48,12 @@
     <ClCompile Include="segment.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="bestfitobb.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="float_math.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algebra3.h">
@@ -87,6 +93,12 @@
       <Filter>原始程式檔</Filter>
     </ClInclude>
     <ClInclude Include="segment.h">
+      <Filter>原始程式檔</Filter>
+    </ClInclude>
+    <ClInclude Include="bestfitobb.h">
+      <Filter>原始程式檔</Filter>
+    </ClInclude>
+    <ClInclude Include="float_math.h">
       <Filter>原始程式檔</Filter>
     </ClInclude>
   </ItemGroup>

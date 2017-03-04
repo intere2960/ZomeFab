@@ -19,6 +19,7 @@
 #include "zomedir.h"
 #include "voxel.h"
 #include "segment.h"
+#include "bestfitobb.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/cube.obj";
+char model_source[] = "test_model/dolphin.obj";
 //cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -164,31 +165,6 @@ void draw_bounding_box()
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_FILL);
     glScalef(1/bound_size[0],1/bound_size[1],1/bound_size[2]);
-}
-
-void bounding_box()
-{
-    bounding_min[0] = bounding_max[0] = myObj->vertices->at(3 * 1 + 0);
-    bounding_min[1] = bounding_max[1] = myObj->vertices->at(3 * 1 + 1);
-    bounding_min[2] = bounding_max[2] = myObj->vertices->at(3 * 1 + 2);
-
-    for(unsigned int i = 1 ; i <= myObj->numvertices ; i += 1)
-    {
-        if (myObj->vertices->at(3 * i + 0) < bounding_min[0]) bounding_min[0] = myObj->vertices->at(3 * i + 0);
-        if (myObj->vertices->at(3 * i + 0) > bounding_max[0]) bounding_max[0] = myObj->vertices->at(3 * i + 0);
-        if (myObj->vertices->at(3 * i + 1) < bounding_min[1]) bounding_min[1] = myObj->vertices->at(3 * i + 1);
-        if (myObj->vertices->at(3 * i + 1) > bounding_max[1]) bounding_max[1] = myObj->vertices->at(3 * i + 1);
-        if (myObj->vertices->at(3 * i + 2) < bounding_min[2]) bounding_min[2] = myObj->vertices->at(3 * i + 2);
-        if (myObj->vertices->at(3 * i + 2) > bounding_max[2]) bounding_max[2] = myObj->vertices->at(3 * i + 2);
-    }
-
-    bound_size[0] = bounding_max[0] - bounding_min[0];
-    bound_size[1] = bounding_max[1] - bounding_min[1];
-    bound_size[2] = bounding_max[2] - bounding_min[2];
-
-    bound_center[0] = (bounding_max[0] + bounding_min[0])/2.0;
-    bound_center[1] = (bounding_max[1] + bounding_min[1])/2.0;
-    bound_center[2] = (bounding_max[2] + bounding_min[2])/2.0;
 }
 
 //shader

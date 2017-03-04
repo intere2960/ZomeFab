@@ -60,7 +60,7 @@ void display(void)
 
     glPopMatrix();
 
-//    draw_bounding_box();
+    draw_bounding_box();
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -82,7 +82,7 @@ void init()
 {
 //    glmRT(myObj, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 0.0));
 
-    bounding_box();
+	computeSimpleBB(myObj->numvertices, myObj->vertices, bound_size, bounding_max, bounding_min, bound_center);
 
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
@@ -121,12 +121,21 @@ void findzoom()
     zometable merge_table(MERGE);
 }
 
+void test()
+{
+	//sdf_segment(seg, myObj, model_source);
+	mat4 start_m;
+	float slides[3];
+	computeBestFitOBB(myObj->numvertices, myObj->vertices, slides, start_m);
+}
+
 int main(int argc, char **argv)
 {
 //    findzoom();
 
     myObj = glmReadOBJ(model_source);
 //    myObj_inner = glmCopy(myObj);
+	test();
 
     //init();
 
@@ -150,26 +159,24 @@ int main(int argc, char **argv)
 
     //voxelization(myObj, all_voxel, zome_queue, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_S);
 
-//	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitWindowSize(1000,1000);
-//
-//    glutCreateWindow("Zometool");
-//	glutDisplayFunc(display);
-//	glutReshapeFunc(myReshape);
-//	glutMouseFunc(mouse);
-//    glutMotionFunc(mouseMotion);
-//    glutKeyboardFunc(keyboard);
-//    glutSpecialFunc(special);
-//	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
-//
-//	glewInit();
-//
-//	setShaders();
-//
-//	glutMainLoop();
+	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	//glutInitWindowSize(1000,1000);
 
-	sdf_segment(seg, myObj, model_source);
+ //   glutCreateWindow("Zometool");
+	//glutDisplayFunc(display);
+	//glutReshapeFunc(myReshape);
+	//glutMouseFunc(mouse);
+ //   glutMotionFunc(mouseMotion);
+ //   glutKeyboardFunc(keyboard);
+ //   glutSpecialFunc(special);
+	//glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
 
+	//glewInit();
+
+	//setShaders();
+
+	//glutMainLoop();
+	
 	system("pause");
     return 0;
 }
