@@ -60,7 +60,8 @@ void display(void)
 
     glPopMatrix();
 
-    draw_bounding_box();
+    //draw_bounding_box();
+	draw_best_bounding_box();
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -124,9 +125,8 @@ void findzoom()
 void test()
 {
 	//sdf_segment(seg, myObj, model_source);
-	mat4 start_m;
-	float slides[3];
-	computeBestFitOBB(myObj->numvertices, myObj->vertices, slides, start_m);
+	
+	computeBestFitOBB(myObj->numvertices, myObj->vertices, obb_size, obb_max, obb_min, obb_angle, start_m);
 }
 
 int main(int argc, char **argv)
@@ -135,12 +135,20 @@ int main(int argc, char **argv)
 
     myObj = glmReadOBJ(model_source);
 //    myObj_inner = glmCopy(myObj);
+
+    init();
+
 	test();
 
-    //init();
-
-//    zomedir t;
-//    voxel start(COLOR_BLUE, SIZE_M, t.color_length(COLOR_BLUE, SIZE_M) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
+    zomedir t;
+	voxel start(COLOR_BLUE, SIZE_M, t.color_length(COLOR_BLUE, SIZE_M) / 2.0, bound_center, vec3(obb_angle[0], obb_angle[1], obb_angle[2]));
+	for (int i = 0; i < 8; i += 1){
+		cout << start.vertex_p[i][0] << " " << start.vertex_p[i][1] << " " << start.vertex_p[i][2] << endl;
+	}
+	cout << endl;
+	for (int i = 0; i < 12; i += 1){
+		cout << start.edge_p[i][0] << " " << start.edge_p[i][1] << " " << start.edge_p[i][2] << endl;
+	}
 //    for(int i = 0; i < 6; i += 1)
 //        cout << start.plane_d[i] << endl;
 //    cout << endl;

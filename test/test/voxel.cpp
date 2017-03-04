@@ -124,32 +124,32 @@ voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rot
 	face_toward[5] = -1;
 
     for(int i = 0; i < 8; i += 1){
-        int dx = 1;
-        int dy = 1;
-        int dz = 1;
+        int dx = 0;
+        int dy = 2;
+        int dz = 4;
 
         if(i % 2 == 1)
-            dx = -1;
+            dx = 1;
         if((i / 2) % 2 == 1)
-            dy = -1;
+            dy = 3;
         if(i / 4 == 1)
-            dz = -1;
-        vec3 temp = position + scale * vec3(dx, dy, dz);
+            dz = 5;
+		vec3 temp = position + scale * (toward_vector.at(dx) + toward_vector.at(dy) + toward_vector.at(dz));
         vertex_p[i] = temp;
     }
 
-    edge_p[0] = position + scale * vec3(1, 1, 0);
-    edge_p[1] = position + scale * vec3(0, 1, 1);
-    edge_p[2] = position + scale * vec3(-1, 1, 0);
-    edge_p[3] = position + scale * vec3(0, 1, -1);
-    edge_p[4] = position + scale * vec3(1, 0, 1);
-    edge_p[5] = position + scale * vec3(-1, 0, 1);
-    edge_p[6] = position + scale * vec3(-1, 0, -1);
-    edge_p[7] = position + scale * vec3(1, 0, -1);
-    edge_p[8] = position + scale * vec3(1, -1, 0);
-    edge_p[9] = position + scale * vec3(0, -1, 1);
-    edge_p[10] = position + scale * vec3(-1, -1, 0);
-    edge_p[11] = position + scale * vec3(0, -1, -1);
+	edge_p[0] = position + scale * (toward_vector.at(0) + toward_vector.at(2)); //0 2
+	edge_p[1] = position + scale * (toward_vector.at(2) + toward_vector.at(4)); //2 4
+	edge_p[2] = position + scale * (toward_vector.at(1) + toward_vector.at(2)); //1 2
+	edge_p[3] = position + scale * (toward_vector.at(2) + toward_vector.at(5)); //2 5
+	edge_p[4] = position + scale * (toward_vector.at(0) + toward_vector.at(4)); //0 4
+	edge_p[5] = position + scale * (toward_vector.at(1) + toward_vector.at(4)); //1 4
+	edge_p[6] = position + scale * (toward_vector.at(1) + toward_vector.at(5)); //1 5
+	edge_p[7] = position + scale * (toward_vector.at(0) + toward_vector.at(5)); //0 5
+	edge_p[8] = position + scale * (toward_vector.at(0) + toward_vector.at(3)); //0 3
+	edge_p[9] = position + scale * (toward_vector.at(3) + toward_vector.at(4)); //3 4
+	edge_p[10] = position + scale * (toward_vector.at(1) + toward_vector.at(3)); //1 3
+	edge_p[11] = position + scale * (toward_vector.at(3) + toward_vector.at(5)); //3 5
 
     plane_d[0] = vertex_p[0] * toward_vector.at(0);
     plane_d[1] = vertex_p[1] * toward_vector.at(1);
@@ -217,32 +217,32 @@ voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
 	face_toward[5] = -1;
 
     for(int i = 0; i < 8; i += 1){
-        int dx = 1;
-        int dy = 1;
-        int dz = 1;
+		int dx = 0;
+		int dy = 2;
+		int dz = 4;
 
-        if(i % 2 == 1)
-            dx = -1;
-        if((i / 2) % 2 == 1)
-            dy = -1;
-        if(i / 4 == 1)
-            dz = -1;
-        vec3 temp = position + scale * vec3(dx, dy, dz);
+		if (i % 2 == 1)
+			dx = 1;
+		if ((i / 2) % 2 == 1)
+			dy = 3;
+		if (i / 4 == 1)
+			dz = 5;
+		vec3 temp = position + scale * (toward_vector.at(dx) + toward_vector.at(dy) + toward_vector.at(dz));
         vertex_p[i] = temp;
     }
 
-    edge_p[0] = position + scale * vec3(1, 1, 0);
-    edge_p[1] = position + scale * vec3(0, 1, 1);
-    edge_p[2] = position + scale * vec3(-1, 1, 0);
-    edge_p[3] = position + scale * vec3(0, 1, -1);
-    edge_p[4] = position + scale * vec3(1, 0, 1);
-    edge_p[5] = position + scale * vec3(-1, 0, 1);
-    edge_p[6] = position + scale * vec3(-1, 0, -1);
-    edge_p[7] = position + scale * vec3(1, 0, -1);
-    edge_p[8] = position + scale * vec3(1, -1, 0);
-    edge_p[9] = position + scale * vec3(0, -1, 1);
-    edge_p[10] = position + scale * vec3(-1, -1, 0);
-    edge_p[11] = position + scale * vec3(0, -1, -1);
+	edge_p[0] = position + scale * (toward_vector.at(0) + toward_vector.at(2)); //0 2
+	edge_p[1] = position + scale * (toward_vector.at(2) + toward_vector.at(4)); //2 4
+	edge_p[2] = position + scale * (toward_vector.at(1) + toward_vector.at(2)); //1 2
+	edge_p[3] = position + scale * (toward_vector.at(2) + toward_vector.at(5)); //2 5
+	edge_p[4] = position + scale * (toward_vector.at(0) + toward_vector.at(4)); //0 4
+	edge_p[5] = position + scale * (toward_vector.at(1) + toward_vector.at(4)); //1 4
+	edge_p[6] = position + scale * (toward_vector.at(1) + toward_vector.at(5)); //1 5
+	edge_p[7] = position + scale * (toward_vector.at(0) + toward_vector.at(5)); //0 5
+	edge_p[8] = position + scale * (toward_vector.at(0) + toward_vector.at(3)); //0 3
+	edge_p[9] = position + scale * (toward_vector.at(3) + toward_vector.at(4)); //3 4
+	edge_p[10] = position + scale * (toward_vector.at(1) + toward_vector.at(3)); //1 3
+	edge_p[11] = position + scale * (toward_vector.at(3) + toward_vector.at(5)); //3 5
 
     plane_d[0] = vertex_p[0] * toward_vector.at(0);
     plane_d[1] = vertex_p[1] * toward_vector.at(1);

@@ -46,8 +46,6 @@ void computeSimpleBB(unsigned int vcount, const std::vector<float> *points, vec3
 	float bmax[3];
 	fm_getAABB(vcount, points, bmin, bmax);
 
-	float center[3];
-
 	bound_center[0] = (bmax[0] - bmin[0])*0.5f + bmin[0];
 	bound_center[1] = (bmax[1] - bmin[1])*0.5f + bmin[1];
 	bound_center[2] = (bmax[2] - bmin[2])*0.5f + bmin[2];
@@ -63,10 +61,6 @@ void computeSimpleBB(unsigned int vcount, const std::vector<float> *points, vec3
 	bound_size[0] = bounding_max[0] - bounding_min[0];
 	bound_size[1] = bounding_max[1] - bounding_min[1];
 	bound_size[2] = bounding_max[2] - bounding_min[2];
-
-	bound_center[0] = (bounding_max[0] + bounding_min[0]) / 2.0;
-	bound_center[1] = (bounding_max[1] + bounding_min[1]) / 2.0;
-	bound_center[2] = (bounding_max[2] + bounding_min[2]) / 2.0;
 }
 
 // computes the OBB for this set of points relative to this transform matrix.
@@ -150,7 +144,7 @@ void computeOBB(unsigned int vcount,const float *points,unsigned int pstride,flo
 
 }
 
-void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, float *sides, mat4 &matrix)
+void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, vec3 &obb_size, vec3 &obb_max, vec3 &obb_min, vec3 &obb_angle, mat4 &matrix)
 {
 
 	float bmin[3];
@@ -172,7 +166,7 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, fl
 	float steps = 8.0f; // 16 steps on each axis.
 
 	float bestVolume = 1e9;
-	float angle[3] = { 0.f, 0.f, 0.f };
+	float t_angle[3] = { 0.f, 0.f, 0.f };
 
 	while (sweep >= 1)
 	{
@@ -206,13 +200,13 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, fl
 						//printf("ya\n");
 						bestVolume = volume;
 
-						sides[0] = psides[0];
-						sides[1] = psides[1];
-						sides[2] = psides[2];
+						obb_size[0] = psides[0];
+						obb_size[1] = psides[1];
+						obb_size[2] = psides[2];
 
-						angle[0] = x;
-						angle[1] = y;
-						angle[2] = z;
+						t_angle[0] = x;
+						t_angle[1] = y;
+						t_angle[2] = z;
 
 						/*printf("a: %f %f %f\n", ax, ay, az);
 						printf("%f %f %f\n", angle[0], angle[1], angle[2]);*/
@@ -227,9 +221,9 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, fl
 		if (found)
 		{
 
-			ax = angle[0];
-			ay = angle[1];
-			az = angle[2];
+			ax = t_angle[0];
+			ay = t_angle[1];
+			az = t_angle[2];
 
 			sweep *= 0.5f; // sweep 1/2 the distance as the last time.
 		}
@@ -240,11 +234,23 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, fl
 
 	}
 
-	printf("%f %f %f\n", bmax[0], bmax[1], bmax[2]);
+	obb_max[0] = bmax[0];
+	obb_max[1] = bmax[1];
+	obb_max[2] = bmax[2];
+
+	obb_min[0] = bmin[0];
+	obb_min[1] = bmin[1];
+	obb_min[2] = bmin[2];
+
+	obb_angle[0] = ax;
+	obb_angle[1] = ay;
+	obb_angle[2] = az;
+
+	/*printf("%f %f %f\n", bmax[0], bmax[1], bmax[2]);
 	printf("%f %f %f\n", bmin[0], bmin[1], bmin[2]);
 	printf("%f %f %f\n", center[0], center[1], center[2]);
-	printf("%f %f %f\n", sides[0], sides[1], sides[2]);
-	printf("%f %f %f\n", ax, ay, az);
+	printf("%f %f %f\n", obb_size[0], obb_size[1], obb_size[2]);
+	printf("%f %f %f\n", ax, ay, az);*/
 }
 
 void computeBestFitOBB(unsigned int vcount,const float *points,unsigned int pstride,float *sides,float *matrix)

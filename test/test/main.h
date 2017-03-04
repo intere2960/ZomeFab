@@ -65,6 +65,12 @@ vec3 bounding_min;
 vec3 bound_size;
 vec3 bound_center;
 
+mat4 start_m;
+vec3 obb_max;
+vec3 obb_min;
+vec3 obb_size;
+vec3 obb_angle;
+
 bool show = true;
 bool show_piece = true;
 
@@ -158,13 +164,29 @@ void cube(void)
 
 void draw_bounding_box()
 {
-    glScalef(bound_size[0],bound_size[1],bound_size[2]);
+	glPushMatrix();
+	glScalef(bound_size[0], bound_size[1], bound_size[2]);	
     glPolygonMode(GL_FRONT, GL_LINE);
     glPolygonMode(GL_BACK, GL_LINE);
     cube();
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_FILL);
-    glScalef(1/bound_size[0],1/bound_size[1],1/bound_size[2]);
+	glPopMatrix();
+}
+
+void draw_best_bounding_box()
+{
+	glPushMatrix();
+	glRotatef(obb_angle[0], 1.0, 0.0, 0.0);
+	glRotatef(obb_angle[1], 0.0, 1.0, 0.0);
+	glRotatef(obb_angle[2], 0.0, 0.0, 1.0);
+	glScalef(obb_size[0], obb_size[1], obb_size[2]);
+	glPolygonMode(GL_FRONT, GL_LINE);
+	glPolygonMode(GL_BACK, GL_LINE);
+	cube();
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glPolygonMode(GL_BACK, GL_FILL);
+	glPopMatrix();
 }
 
 //shader
