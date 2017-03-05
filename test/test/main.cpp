@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
 	test();
 
-    zomedir t;
+    /*zomedir t;
 	voxel start(COLOR_BLUE, SIZE_M, t.color_length(COLOR_BLUE, SIZE_M) / 2.0, bound_center, vec3(obb_angle[0], obb_angle[1], obb_angle[2]));
 	for (int i = 0; i < 8; i += 1){
 		cout << start.vertex_p[i][0] << " " << start.vertex_p[i][1] << " " << start.vertex_p[i][2] << endl;
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 	cout << endl;
 	for (int i = 0; i < 12; i += 1){
 		cout << start.edge_p[i][0] << " " << start.edge_p[i][1] << " " << start.edge_p[i][2] << endl;
-	}
+	}*/
 //    for(int i = 0; i < 6; i += 1)
 //        cout << start.plane_d[i] << endl;
 //    cout << endl;
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 //        cout << endl;
 //    }
 
-    //voxelization(myObj, all_voxel, zome_queue, bounding_max, bounding_min, bound_center, COLOR_BLUE, SIZE_S);
+	voxelization(myObj, all_voxel, zome_queue, obb_max, obb_min, bound_center, COLOR_BLUE, SIZE_S);
 
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);

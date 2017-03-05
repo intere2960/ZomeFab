@@ -769,7 +769,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
         cout << zome_queue.at(i).size() << endl;
     }
 
-    GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+    /*GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
 
     for(unsigned int i = 0; i < zome_queue.at(3).size(); i += 1){
         if(i == 0){
@@ -816,7 +816,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
         }
     }
 
-    glmWriteOBJ(zome, "123zome.obj", GLM_NONE);
+    glmWriteOBJ(zome, "123zome.obj", GLM_NONE);*/
 
     GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
     GLMmodel *output = glmCopy(cube);
