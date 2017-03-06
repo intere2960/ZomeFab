@@ -104,14 +104,29 @@ voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rot
     position = t_position;
     rotation = t_rotation;
 
-    mat4 R = rotation3D(vec3(1.0, 0.0, 0.0), rotation[0]) * rotation3D(vec3(0.0, 1.0, 0.0), rotation[1]) * rotation3D(vec3(0.0, 0.0, 1.0), rotation[2]);
+	//mat4 R = rotation3D(vec3(1.0, 0.0, 0.0), rotation[0]) * rotation3D(vec3(0.0, 1.0, 0.0), rotation[1]) * rotation3D(vec3(0.0, 0.0, 1.0), rotation[2]);
 
-    toward_vector.push_back(R * vec3(1.0, 0.0, 0.0));
-    toward_vector.push_back(R * vec3(-1.0, 0.0, 0.0));
-    toward_vector.push_back(R * vec3(0.0, 1.0, 0.0));
-    toward_vector.push_back(R * vec3(0.0, -1.0, 0.0));
-    toward_vector.push_back(R * vec3(0.0, 0.0, 1.0));
-    toward_vector.push_back(R * vec3(0.0, 0.0, -1.0));
+    toward_vector.push_back(vec3(1.0, 0.0, 0.0));
+    toward_vector.push_back(vec3(-1.0, 0.0, 0.0));
+    toward_vector.push_back(vec3(0.0, 1.0, 0.0));
+    toward_vector.push_back(vec3(0.0, -1.0, 0.0));
+    toward_vector.push_back(vec3(0.0, 0.0, 1.0));
+    toward_vector.push_back(vec3(0.0, 0.0, -1.0));
+
+	for (int i = 0; i < 6; i += 1){
+		mat4 R = rotation3D(vec3(1.0, 0.0, 0.0), rotation[0]);
+		toward_vector.at(i) = R * toward_vector.at(i);
+	}
+
+	for (int i = 0; i < 6; i += 1){
+		mat4 R = rotation3D(vec3(0.0, 1.0, 0.0), rotation[1]);
+		toward_vector.at(i) = R * toward_vector.at(i);
+	}
+
+	for (int i = 0; i < 6; i += 1){
+		mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), rotation[2]);
+		toward_vector.at(i) = R * toward_vector.at(i);
+	}
 
 	/*for (int i = 0; i < 6; i += 1){
 	face_toward[i] = -1;
@@ -197,14 +212,29 @@ voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
     position = t_position;
     rotation = t_rotation;
 
-    mat4 R = rotation3D(vec3(1.0, 0.0, 0.0), rotation[0]) * rotation3D(vec3(0.0, 1.0, 0.0), rotation[1]) * rotation3D(vec3(0.0, 0.0, 1.0), rotation[2]);
+	//mat4 R = rotation3D(vec3(1.0, 0.0, 0.0), rotation[0]) * rotation3D(vec3(0.0, 1.0, 0.0), rotation[1]) * rotation3D(vec3(0.0, 0.0, 1.0), rotation[2]);
 
-    toward_vector.push_back(R * vec3(1.0, 0.0, 0.0));
-    toward_vector.push_back(R * vec3(-1.0, 0.0, 0.0));
-    toward_vector.push_back(R * vec3(0.0, 1.0, 0.0));
-    toward_vector.push_back(R * vec3(0.0, -1.0, 0.0));
-    toward_vector.push_back(R * vec3(0.0, 0.0, 1.0));
-    toward_vector.push_back(R * vec3(0.0, 0.0, -1.0));
+	toward_vector.push_back(vec3(1.0, 0.0, 0.0));
+	toward_vector.push_back(vec3(-1.0, 0.0, 0.0));
+	toward_vector.push_back(vec3(0.0, 1.0, 0.0));
+	toward_vector.push_back(vec3(0.0, -1.0, 0.0));
+	toward_vector.push_back(vec3(0.0, 0.0, 1.0));
+	toward_vector.push_back(vec3(0.0, 0.0, -1.0));
+
+	for (int i = 0; i < 6; i += 1){
+		mat4 R = rotation3D(vec3(1.0, 0.0, 0.0), rotation[0]);
+		toward_vector.at(i) = R * toward_vector.at(i);
+	}
+
+	for (int i = 0; i < 6; i += 1){
+		mat4 R = rotation3D(vec3(0.0, 1.0, 0.0), rotation[1]);
+		toward_vector.at(i) = R * toward_vector.at(i);
+	}
+
+	for (int i = 0; i < 6; i += 1){
+		mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), rotation[2]);
+		toward_vector.at(i) = R * toward_vector.at(i);
+	}
 
 	/*for (int i = 0; i < 6; i += 1){
 	face_toward[i] = -1;
@@ -305,16 +335,28 @@ vec2 check_bound(std::vector<voxel> &all_voxel, int max_d)
                 int weight = 0;
                 if(j % 2 == 1)
                     weight = 1;
-                vec3 bound = all_voxel.at(0).position + vec3(all_voxel.at(0).scale, all_voxel.at(0).scale, all_voxel.at(0).scale) + all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 2 * max_d;
-                vec3 now = all_voxel.at(i).position + vec3(all_voxel.at(i).scale, all_voxel.at(i).scale, all_voxel.at(i).scale) + weight * all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 2;
-
-                bool judge = !(fabs(now[j / 2] - bound[j / 2]) < 0.0001) && (now[j / 2] < bound[j / 2]);
+				vec3 bound = all_voxel.at(0).position + all_voxel.at(0).scale * (all_voxel.at(0).toward_vector.at(0) + all_voxel.at(0).toward_vector.at(2) + all_voxel.at(0).toward_vector.at(4)) + all_voxel.at(0).toward_vector.at(j) * all_voxel.at(0).scale * 2 * max_d;
+				float d = all_voxel.at(0).toward_vector.at(j) * bound;
+				vec3 now = all_voxel.at(i).position + all_voxel.at(i).scale * (all_voxel.at(i).toward_vector.at(0) + all_voxel.at(i).toward_vector.at(2) + all_voxel.at(i).toward_vector.at(4)) + weight * all_voxel.at(i).toward_vector.at(j) * all_voxel.at(i).scale * 2;
+				
+                /*bool judge = !(fabs(now[j / 2] - bound[j / 2]) < 0.0001) && (now[j / 2] < bound[j / 2]);
                 if(j % 2 == 1)
-                    judge = !(fabs(now[j / 2] - bound[j / 2]) < 0.0001) && (now[j / 2] > bound[j / 2]);
+                    judge = !(fabs(now[j / 2] - bound[j / 2]) < 0.0001) && (now[j / 2] > bound[j / 2]);*/
+				float p_d = all_voxel.at(i).toward_vector.at(j) * now - d;
+				
+				bool judge = (!(fabs(p_d) < 0.0001) && !(p_d > 0));
+				
+				/*if (j == 0){
+					cout << fabs((bound - now) * all_voxel.at(i).toward_vector.at(j)) << endl;
+					cout << judge << endl;
+				}*/
 
                 if(judge){
                     t_ans[0] = i;
                     t_ans[1] = j;
+					//cout << bound[0] << " " << bound[1] << " " << bound[2] << endl;
+					//float asd = fabs((bound - now) * all_voxel.at(i).toward_vector.at(j));
+					//cout << asd << endl;
                     return t_ans;
                 }
             }
@@ -620,11 +662,12 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
     }
 }
 
-void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, int v_color, float v_size)
+void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, float v_size)
 {
     zomedir t;
-    voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, vec3(0.0, 0.0, 0.0));
-    vec3 origin = vec3(bound_center) + vec3(start.scale, start.scale, start.scale);
+	voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, angle);
+	vec3 origin = vec3(bound_center) + start.scale * (start.toward_vector.at(0) + start.toward_vector.at(2) + start.toward_vector.at(4));
+	//cout << "o : " << origin[0] << " " << origin[1] << " " << origin[2] << endl;
 
     int max_d = -1;
     for(int i = 0; i < 3; i += 1){
@@ -645,17 +688,33 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
             break;
         }
     }
+	cout << max_d << endl;
 
     assign_coord(start, origin);
     all_voxel.push_back(start);
     vec2 ans = check_bound(all_voxel, max_d);
 
-    while(ans[0] != -1 && ans[1] != -1){
+	
+	/*cout << origin[0] << " " << origin[1] << " " << origin[2] << endl;
+
+	for (int i = 0; i < 6; i += 1){
+		vec3 bound = all_voxel.at(0).position + all_voxel.at(0).scale * (all_voxel.at(0).toward_vector.at(0) + all_voxel.at(0).toward_vector.at(2) + all_voxel.at(0).toward_vector.at(4)) + all_voxel.at(0).toward_vector.at(i) * all_voxel.at(0).scale * 2 * max_d;
+		cout << bound[0] << " " << bound[1] << " " << bound[2] << endl;
+	}*/
+
+	int i = 0;
+	while (ans[0] != -1 && ans[1] != -1 && i < 5000){
 
         all_voxel.at(ans[0]).face_toward[(int)ans[1]] = all_voxel.size();
 
         vec3 new_p = all_voxel.at(ans[0]).position + all_voxel.at(ans[0]).toward_vector[(int)ans[1]] * all_voxel.at(ans[0]).scale * 2;
-        voxel temp(all_voxel.at(ans[0]), new_p, all_voxel.at(ans[0]).rotation);
+		
+		/*cout << all_voxel.at(ans[0]).scale * 2 << endl;
+		cout << all_voxel.at(ans[0]).position[0] << " " << all_voxel.at(ans[0]).position[1] << " " << all_voxel.at(ans[0]).position[2] << endl;
+		cout << all_voxel.at(ans[0]).toward_vector[(int)ans[1]][0] << " " << all_voxel.at(ans[0]).toward_vector[(int)ans[1]][1] << " " << all_voxel.at(ans[0]).toward_vector[(int)ans[1]][2] << endl;
+		cout << new_p[0] << " " << new_p[1] << " " << new_p[2] << endl;*/
+        
+		voxel temp(all_voxel.at(ans[0]), new_p, all_voxel.at(ans[0]).rotation);
 
         int opposite_face = 1;
         if((int)ans[1] % 2 == 1)
@@ -667,9 +726,12 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
         all_voxel.push_back(temp);
 
         ans = check_bound(all_voxel, max_d);
+		
+		cout << i << endl;
+		i += 1;
     }
 
-    oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
+    /*oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
     rebuild_facetoward(all_voxel);
 
     for(unsigned int i = 0; i < model->numtriangles; i += 1){
@@ -767,7 +829,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 
     for(int i = 0; i < zome_queue.size(); i += 1){
         cout << zome_queue.at(i).size() << endl;
-    }
+    }*/
 
     /*GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
 
@@ -825,12 +887,14 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
         if(all_voxel.at(i).show){
             if(num == 0){
                 glmScale(output, all_voxel.at(i).scale);
-                glmRT(output, all_voxel.at(i).rotation, all_voxel.at(i).position);
+				glmR(output, all_voxel.at(i).rotation);
+				glmT(output, all_voxel.at(i).position);
             }
             else{
                 GLMmodel *temp = glmCopy(cube);
-                glmScale(temp, all_voxel.at(i).scale);
-                glmRT(temp, all_voxel.at(i).rotation, all_voxel.at(i).position);
+				glmScale(temp, all_voxel.at(i).scale);
+				glmR(temp, all_voxel.at(i).rotation);
+				glmT(temp, all_voxel.at(i).position);
                 glmCombine(output, temp);
             }
             num += 1;
