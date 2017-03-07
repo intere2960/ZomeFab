@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 //    }
 
 	//voxelization(myObj, all_voxel, zome_queue, bounding_max, bounding_min, bound_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_M);
-	voxelization(myObj, all_voxel, zome_queue, obb_max, obb_min, bound_center, obb_angle, COLOR_BLUE, SIZE_M);
+	voxelization(myObj, all_voxel, zome_queue, obb_max, obb_min, bound_center, obb_angle, COLOR_BLUE, SIZE_S);
 
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
