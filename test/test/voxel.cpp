@@ -416,16 +416,6 @@ int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int
 		vec3 now_o = all_voxel.at(start).coord_origin.at(depth) + ball_error;
 		vec3 v = p - now_o;
 
-		/*if (p[0] <= now_o[0]){
-			id += 1;
-		}
-		if (p[1] <= now_o[1]){
-			id += 2;
-		}
-		if (p[2] <= now_o[2]){
-			id += 4;
-		}*/
-
 		if (v * all_voxel.at(start).toward_vector.at(0) <= 0){
 			id += 1;
 		}
@@ -493,7 +483,7 @@ void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, i
 	}
 }
 
-void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region){
+void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region, vec3 &angle){
 	zomedir t;
 	for (unsigned int i = 0; i < region.size(); i += 1){
 		if (region.at(i).size() > 0){
@@ -575,7 +565,15 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 											new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
 											new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
 
-											new_edge.fromface = t.dir_face((new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize());
+											vec3 v = (new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize();
+											mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), angle[2]).inverse();
+											v = R * v;
+											R = rotation3D(vec3(0.0, 1.0, 0.0), angle[1]).inverse();
+											v = R * v;
+											R = rotation3D(vec3(1.0, 0.0, 0.0), angle[0]).inverse();
+											v = R * v;
+
+											new_edge.fromface = t.dir_face(v);
 											new_edge.towardface = t.opposite_face(new_edge.fromface);
 
 											zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
@@ -637,10 +635,19 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 												}
 											}
 										}
+
 										new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
 										new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
 
-										new_edge.fromface = t.dir_face((new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize());
+										vec3 v = (new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize();										
+										mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), angle[2]).inverse();
+										v = R * v;
+										R = rotation3D(vec3(0.0, 1.0, 0.0), angle[1]).inverse();
+										v = R * v;
+										R = rotation3D(vec3(1.0, 0.0, 0.0), angle[0]).inverse();
+										v = R * v;
+
+										new_edge.fromface = t.dir_face(v);
 										new_edge.towardface = t.opposite_face(new_edge.fromface);
 
 										zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
@@ -810,9 +817,9 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 		}
 	}
 
-	voxel_zometool(all_voxel, zome_queue, region);
+	voxel_zometool(all_voxel, zome_queue, region, angle);
 
-	/*for(int i = 0; i < zome_queue.size(); i += 1){
+	for(int i = 0; i < zome_queue.size(); i += 1){
 		cout << zome_queue.at(i).size() << endl;
 	}
 
@@ -858,7 +865,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 				if(zome_queue.at(i).at(j).size == SIZE_L)
 					new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
 			}
-			glmR(new_stick, vec3(0.0, 1.0, 0.0), t.roll(zome_queue.at(i).at(j).fromface));
+			glmRT(new_stick, vec3(0.0, t.roll(zome_queue.at(i).at(j).fromface),0.0), vec3(0.0, 0.0, 0.0));
 			glmRT(new_stick, vec3(0.0, t.phi(zome_queue.at(i).at(j).fromface), t.theta(zome_queue.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
 			glmR(new_stick, all_voxel.at(0).rotation);
 			glmRT(new_stick, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
@@ -866,7 +873,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 		}
 	}
 
-	glmWriteOBJ(zome, "123zome.obj", GLM_NONE);*/
+	glmWriteOBJ(zome, "123zome.obj", GLM_NONE);
 
 	GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
 	GLMmodel *output = glmCopy(cube);
