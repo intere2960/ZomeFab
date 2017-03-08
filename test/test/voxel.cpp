@@ -463,7 +463,7 @@ void rebuild_facetoward(std::vector<voxel> &all_voxel)
 
 void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, int index2, vec3 &ball_error)
 {
-	if (index1 != index2){
+	if ((index1 != index2) && ((p1 - p2).length() > 0.001)){
 		bool judge = false;
 		for (int i = 0; i < 6; i += 1){
 			if (all_voxel.at(index1).face_toward[i] == index2)
@@ -819,62 +819,14 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 
 	voxel_zometool(all_voxel, zome_queue, region, angle);
 
-	for(int i = 0; i < zome_queue.size(); i += 1){
+	/*for(int i = 0; i < zome_queue.size(); i += 1){
 		cout << zome_queue.at(i).size() << endl;
-	}
+	}*/
+}
 
-	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
-
-	for(unsigned int i = 0; i < zome_queue.at(3).size(); i += 1){
-		if(i == 0){
-			glmR(zome, all_voxel.at(0).rotation);
-			glmRT(zome, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
-		}
-		else{
-			GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
-			glmR(new_ball, all_voxel.at(0).rotation);
-			glmRT(new_ball, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
-			glmCombine(zome, new_ball);
-		}
-	}
-
-	for(unsigned int i = 0; i < zome_queue.size() - 1; i += 1){
-		for(unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
-			GLMmodel *new_stick = NULL;
-			if(i == COLOR_BLUE){
-				if(zome_queue.at(i).at(j).size == SIZE_S)
-					new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
-				if(zome_queue.at(i).at(j).size == SIZE_M)
-					new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
-				if(zome_queue.at(i).at(j).size == SIZE_L)
-					new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
-			}
-			else if(i == COLOR_RED){
-				if(zome_queue.at(i).at(j).size == SIZE_S)
-					new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
-				if(zome_queue.at(i).at(j).size == SIZE_M)
-					new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
-				if(zome_queue.at(i).at(j).size == SIZE_L)
-					new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
-			}
-			else if(i == COLOR_YELLOW){
-				if(zome_queue.at(i).at(j).size == SIZE_S)
-					new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
-				if(zome_queue.at(i).at(j).size == SIZE_M)
-					new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
-				if(zome_queue.at(i).at(j).size == SIZE_L)
-					new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
-			}
-			glmRT(new_stick, vec3(0.0, t.roll(zome_queue.at(i).at(j).fromface),0.0), vec3(0.0, 0.0, 0.0));
-			glmRT(new_stick, vec3(0.0, t.phi(zome_queue.at(i).at(j).fromface), t.theta(zome_queue.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
-			glmR(new_stick, all_voxel.at(0).rotation);
-			glmRT(new_stick, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
-			glmCombine(zome, new_stick);
-		}
-	}
-
-	glmWriteOBJ(zome, "123zome.obj", GLM_NONE);
-
+void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
+{
+	
 	GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
 	GLMmodel *output = glmCopy(cube);
 	int num = 0;
@@ -894,6 +846,68 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 			}
 			num += 1;
 		}
+	}	
+
+	if (num != 0){
+		std::string s = "voxel_" + std::to_string(piece_id) + ".obj";
+		glmWriteOBJ(output, my_strdup(s.c_str()), GLM_NONE);
 	}
-	glmWriteOBJ(output, "123.obj", GLM_NONE);
+}
+
+void output_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id)
+{
+	if (zome_queue.at(3).size() != 0){
+		zomedir t;
+		GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+
+		for (unsigned int i = 0; i < zome_queue.at(3).size(); i += 1){
+			if (i == 0){
+				glmR(zome, all_voxel.at(0).rotation);
+				glmRT(zome, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
+			}
+			else{
+				GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
+				glmR(new_ball, all_voxel.at(0).rotation);
+				glmRT(new_ball, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
+				glmCombine(zome, new_ball);
+			}
+		}
+
+		for (unsigned int i = 0; i < zome_queue.size() - 1; i += 1){
+			for (unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
+				GLMmodel *new_stick = NULL;
+				if (i == COLOR_BLUE){
+					if (zome_queue.at(i).at(j).size == SIZE_S)
+						new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
+					if (zome_queue.at(i).at(j).size == SIZE_M)
+						new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
+					if (zome_queue.at(i).at(j).size == SIZE_L)
+						new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
+				}
+				else if (i == COLOR_RED){
+					if (zome_queue.at(i).at(j).size == SIZE_S)
+						new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
+					if (zome_queue.at(i).at(j).size == SIZE_M)
+						new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
+					if (zome_queue.at(i).at(j).size == SIZE_L)
+						new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
+				}
+				else if (i == COLOR_YELLOW){
+					if (zome_queue.at(i).at(j).size == SIZE_S)
+						new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
+					if (zome_queue.at(i).at(j).size == SIZE_M)
+						new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
+					if (zome_queue.at(i).at(j).size == SIZE_L)
+						new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
+				}
+				glmRT(new_stick, vec3(0.0, t.roll(zome_queue.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+				glmRT(new_stick, vec3(0.0, t.phi(zome_queue.at(i).at(j).fromface), t.theta(zome_queue.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+				glmR(new_stick, all_voxel.at(0).rotation);
+				glmRT(new_stick, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
+				glmCombine(zome, new_stick);
+			}
+		}
+		std::string s = "voxel_zome_" + std::to_string(piece_id) + ".obj";
+		glmWriteOBJ(zome, my_strdup(s.c_str()), GLM_NONE);
+	}
 }

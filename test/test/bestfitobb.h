@@ -55,7 +55,7 @@
 void computeSimpleBB(unsigned int vcount, const std::vector<float> *points, vec3 &bound_size, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center);
 void computeOBB(unsigned int vcount, const std::vector<float> *points, float *sides, const mat4 &matrix);
 void computeOBB(unsigned int vcount, const float *points, unsigned int pstride, float *sides, const float *matrix);
-void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, vec3 &obb_size, vec3 &obb_max, vec3 &obb_min, vec3 &obb_angle, mat4 &matrix);
+void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, vec3 &obb_size, vec3 &obb_max, vec3 &obb_min, vec3 &obb_angle, mat4 matrix);
 void computeBestFitOBB(unsigned int vcount,const float *points,unsigned int pstride,float *sides,float *matrix);
 
 #endif

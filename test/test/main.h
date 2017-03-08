@@ -28,8 +28,8 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/dolphin.obj";
-//cube bunny alduin TestBall kitten dolphin Column4 ateneav0525 sphere
+char model_source[] = "test_model/kitten.obj";
+//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere
 char model_out[] = "test_model/out/out_p.obj";
 
 int width, height;
@@ -66,10 +66,11 @@ vec3 bound_size;
 vec3 bound_center;
 
 mat4 start_m;
-vec3 obb_max;
-vec3 obb_min;
-vec3 obb_size;
-vec3 obb_angle;
+vector<vec3> obb_max;
+vector<vec3> obb_min;
+vector<vec3> obb_size;
+vector<vec3> obb_center;
+vector<vec3> obb_angle;
 
 bool show = true;
 bool show_piece = true;
@@ -133,8 +134,8 @@ vector<edge> all_edge;
 vector<int> face_split_by_plane;
 vector<int> face_inner_split_by_plane;
 
-vector<voxel> all_voxel;
-vector<vector<zomeconn>> zome_queue(4);
+vector<vector<voxel>> all_voxel;
+vector<vector<vector<zomeconn>>> zome_queue;
 vector<GLMmodel> seg;
 
 //bounding box
@@ -174,20 +175,20 @@ void draw_bounding_box()
 	glPopMatrix();
 }
 
-void draw_best_bounding_box()
-{
-	glPushMatrix();
-	glRotatef(obb_angle[0], 1.0, 0.0, 0.0);
-	glRotatef(obb_angle[1], 0.0, 1.0, 0.0);
-	glRotatef(obb_angle[2], 0.0, 0.0, 1.0);
-	glScalef(obb_size[0], obb_size[1], obb_size[2]);
-	glPolygonMode(GL_FRONT, GL_LINE);
-	glPolygonMode(GL_BACK, GL_LINE);
-	cube();
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glPolygonMode(GL_BACK, GL_FILL);
-	glPopMatrix();
-}
+//void draw_best_bounding_box()
+//{
+//	glPushMatrix();
+//	glRotatef(obb_angle[0], 1.0, 0.0, 0.0);
+//	glRotatef(obb_angle[1], 0.0, 1.0, 0.0);
+//	glRotatef(obb_angle[2], 0.0, 0.0, 1.0);
+//	glScalef(obb_size[0], obb_size[1], obb_size[2]);
+//	glPolygonMode(GL_FRONT, GL_LINE);
+//	glPolygonMode(GL_BACK, GL_LINE);
+//	cube();
+//	glPolygonMode(GL_FRONT, GL_FILL);
+//	glPolygonMode(GL_BACK, GL_FILL);
+//	glPopMatrix();
+//}
 
 //shader
 

@@ -144,7 +144,7 @@ void computeOBB(unsigned int vcount,const float *points,unsigned int pstride,flo
 
 }
 
-void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, vec3 &obb_size, vec3 &obb_max, vec3 &obb_min, vec3 &obb_angle, mat4 &matrix)
+void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, vec3 &obb_size, vec3 &obb_max, vec3 &obb_min, vec3 &obb_angle, mat4 matrix)
 {
 
 	float bmin[3];

@@ -42,7 +42,7 @@ void display(void)
 
     glPushMatrix();
 
-    glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
+	glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
     if(show){
         glPolygonMode(GL_FRONT, GL_LINE);
@@ -61,7 +61,7 @@ void display(void)
     glPopMatrix();
 
     //draw_bounding_box();
-	draw_best_bounding_box();
+	//draw_best_bounding_box();
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -124,9 +124,28 @@ void findzoom()
 
 void test()
 {
-	//sdf_segment(seg, myObj, model_source);
-	
-	computeBestFitOBB(myObj->numvertices, myObj->vertices, obb_size, obb_max, obb_min, obb_angle, start_m);
+	cout << "sdf segment" << endl;
+	sdf_segment(seg, myObj, model_source);
+
+	all_voxel.resize(seg.size());
+	zome_queue.resize(seg.size());
+
+	obb_center.resize(seg.size());
+	obb_max.resize(seg.size());
+	obb_min.resize(seg.size());
+	obb_size.resize(seg.size());
+	obb_angle.resize(seg.size());
+
+	cout << "generate piece" << endl;
+	for (unsigned int i = 0; i < seg.size(); i += 1){
+		cout << "piece " << i + 1 << " :" << endl;
+		zome_queue.at(i).resize(4);
+		computeBestFitOBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_angle.at(i), start_m);
+		voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), COLOR_BLUE, SIZE_S);
+		cout << "output piece " << i + 1 << endl;
+		output_voxel(all_voxel.at(i), i);
+		output_zometool(all_voxel.at(i), zome_queue.at(i), i);
+	}
 }
 
 int main(int argc, char **argv)
@@ -174,10 +193,7 @@ int main(int argc, char **argv)
 //        cout << start.edge_point[i][0] << " " << start.edge_point[i][1];
 //        cout << endl;
 //    }
-
-	//voxelization(myObj, all_voxel, zome_queue, bounding_max, bounding_min, bound_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_M);
-	voxelization(myObj, all_voxel, zome_queue, obb_max, obb_min, bound_center, obb_angle, COLOR_BLUE, SIZE_S);
-
+	
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
 
@@ -196,6 +212,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	
-	system("pause");
+	//system("pause");
     return 0;
 }
