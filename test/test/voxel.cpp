@@ -1,9 +1,6 @@
 #include <algorithm>
 #include "voxel.h"
 
-#include <iostream>
-using namespace std;
-
 voxel::voxel(int t_color, int t_size, float t_scale)
 {
 	color = t_color;
@@ -717,13 +714,6 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
 	rebuild_facetoward(all_voxel);
 
-	/*for (unsigned int i = 0; i < all_voxel.size(); i += 1){
-		for (unsigned int j = 0; j < all_voxel.at(i).coord.size(); j += 1){
-			cout << all_voxel.at(i).coord.at(j) << " ";
-		}
-		cout << endl;
-	}*/
-
 	for(unsigned int i = 0; i < model->numtriangles; i += 1){
 		for(int k = 0; k < 8; k += 1){
 			int dx = 0;
@@ -818,15 +808,10 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	}
 
 	voxel_zometool(all_voxel, zome_queue, region, angle);
-
-	/*for(int i = 0; i < zome_queue.size(); i += 1){
-		cout << zome_queue.at(i).size() << endl;
-	}*/
 }
 
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
 {
-	
 	GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
 	GLMmodel *output = glmCopy(cube);
 	int num = 0;

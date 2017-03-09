@@ -87,7 +87,7 @@ void init()
 
     eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
 
-    recount_normal(myObj);
+//    recount_normal(myObj);
 //    process_inner(myObj, myObj_inner);
 //
 ////    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
@@ -113,7 +113,7 @@ void init()
 //
 //    process_piece(temp_piece, myObj, face_split_by_plane);
 //
-//    fill_hole(temp_piece);
+//    fill_hole(temp_piece, true);
 }
 
 void findzoom()
@@ -138,6 +138,32 @@ void test()
 
 	cout << "generate piece" << endl;
 	for (unsigned int i = 0; i < seg.size(); i += 1){
+		if (seg.size() > 1){
+			vector<edge> fill_edge;
+			collect_edge(&seg.at(i), fill_edge);
+			inform_vertex(&seg.at(i), fill_edge);
+
+			std::vector<int> single_use;
+			for (int i = 0; i < fill_edge.size(); i += 1){
+				if (fill_edge.at(i).face_id[1] == -1){
+					if ((find(single_use.begin(), single_use.end(), fill_edge.at(i).index[0]) - single_use.begin()) >= single_use.size()){
+						single_use.push_back(fill_edge.at(i).index[0]);
+					}
+					if ((find(single_use.begin(), single_use.end(), fill_edge.at(i).index[1]) - single_use.begin()) >= single_use.size()){
+						single_use.push_back(fill_edge.at(i).index[1]);
+					}
+				}
+			}
+
+			find_easy_loop(&seg.at(i), fill_edge, single_use);
+			fill_hole(seg.at(i), false);
+		}
+
+		std::string s = "test";
+		std::string piece = s + std::to_string(i) + ".obj";
+		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);
+		
+
 		cout << "piece " << i + 1 << " :" << endl;
 		zome_queue.at(i).resize(4);
 		computeBestFitOBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_angle.at(i), start_m);
@@ -153,46 +179,11 @@ int main(int argc, char **argv)
 //    findzoom();
 
     myObj = glmReadOBJ(model_source);
-//    myObj_inner = glmCopy(myObj);
+    //myObj_inner = glmCopy(myObj);
 
     init();
 
 	test();
-
-	/*cout << "center : " << bound_center[0] << " " << bound_center[1] << " " << bound_center[2] << endl;
-	cout << "size : " << obb_size[0] << " " << obb_size[1] << " " << obb_size[2] << endl;
-	cout << "angle : " << obb_angle[0] << " " << obb_angle[1] << " " << obb_angle[2] << endl;
-
-    zomedir t;
-	voxel start(COLOR_BLUE, SIZE_M, t.color_length(COLOR_BLUE, SIZE_M) / 2.0, bound_center, vec3(obb_angle[0], obb_angle[1], obb_angle[2]));
-	for (int i = 0; i < 8; i += 1){
-		cout << start.vertex_p[i][0] << " " << start.vertex_p[i][1] << " " << start.vertex_p[i][2] << endl;
-	}
-	cout << endl;
-	for (int i = 0; i < 12; i += 1){
-		cout << start.edge_p[i][0] << " " << start.edge_p[i][1] << " " << start.edge_p[i][2] << endl;
-	}
-	cout << endl;
-	for (int i = 0; i < 6; i += 1){
-		cout << start.toward_vector[i][0] << " " << start.toward_vector[i][1] << " " << start.toward_vector[i][2] << endl;
-	}
-	cout << endl << endl;*/
-
-//    for(int i = 0; i < 6; i += 1)
-//        cout << start.plane_d[i] << endl;
-//    cout << endl;
-//    for(int i = 0; i < 8; i += 1){
-//        for(int j = 0; j < start.face_p[i].size(); j += 1)
-//            cout << start.face_p[i].at(j) << " ";
-//        cout << endl;
-//    }
-//    cout << endl;
-//    for(int i = 0; i < 12; i += 1){
-////        for(int j = 0; j < start.face_edge[i].size(); j += 1)
-////            cout << start.face_edge[i].at(j) << " ";
-//        cout << start.edge_point[i][0] << " " << start.edge_point[i][1];
-//        cout << endl;
-//    }
 	
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
@@ -211,7 +202,7 @@ int main(int argc, char **argv)
 	//setShaders();
 
 	//glutMainLoop();
-	
+	//
 	//system("pause");
     return 0;
 }

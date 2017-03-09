@@ -5,6 +5,10 @@ void sdf_segment(std::vector<GLMmodel> &seg, GLMmodel *model, char *model_source
 	// create and read Polyhedron
 	Polyhedron mesh;
 	SMeshLib::IO::importOBJ(model_source, &mesh);
+	/*std::ifstream input("test_model/tricertp.off");
+	if (!input || !(input >> mesh) || mesh.empty()) {
+		std::cerr << "Not a valid off file." << std::endl;		
+	}*/
 
 	// create a property-map for segment-ids
 	typedef std::map<Polyhedron::Facet_const_handle, std::size_t> Facet_int_map;
@@ -23,9 +27,11 @@ void sdf_segment(std::vector<GLMmodel> &seg, GLMmodel *model, char *model_source
 
 	std::string s = "piece";
 	seg.resize(number_of_segments);
-	for (int i = 0; i < seg.size(); i += 1){
+
+	model->loop = new std::vector<Loop>();
+	for (int i = 0; i < seg.size(); i += 1){		
 		process_piece(seg.at(i), model, segment_tri.at(i));
-		/*std::string piece = s + std::to_string(i) + ".obj";
-		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);*/
+		std::string piece = s + std::to_string(i) + ".obj";
+		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);
 	}
 }

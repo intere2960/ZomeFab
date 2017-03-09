@@ -83,6 +83,7 @@ class Loop{
 public:
     vec3 plane_normal;
     std::vector<int> *loop_line;
+	std::vector<vec3> *three_d_point;
     std::vector<vec2> *two_d_point;
     bool travel_reverse;
     std::vector<int> *sign;

@@ -70,16 +70,7 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
         myObj_inner->vertices->at(3 * i + 2) = myObj->vertices->at(3 * i + 2) - 10.05 * myObj->normals[3 * i + 2];
         myObj_inner->normals[3 * i + 2] = myObj->normals[3 * i + 2];
     }
-
-    myObj_inner->numfacetnorms = myObj->numfacetnorms;
-    myObj_inner->facetnorms = new std::vector<GLfloat>(3 * (myObj_inner->numfacetnorms + 1));
-
-    for(unsigned int i = 1 ; i <= myObj->numfacetnorms ; i += 1)
-    {
-        myObj_inner->facetnorms->at(3 * i + 0) =  myObj->facetnorms->at(3 * i + 0);
-        myObj_inner->facetnorms->at(3 * i + 1) =  myObj->facetnorms->at(3 * i + 1);
-        myObj_inner->facetnorms->at(3 * i + 2) =  myObj->facetnorms->at(3 * i + 2);
-    }
+	glmFacetNormals(myObj_inner);
 }
 
 void combine_inner_outfit(GLMmodel *myObj,GLMmodel *myObj_inner)

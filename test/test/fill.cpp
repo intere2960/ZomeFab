@@ -44,16 +44,27 @@ void convert_2d(GLMmodel &temp_piece, Loop &loop)
     }
 }
 
-int span_tri(Loop &loop, int index1, int index2, int index3)
+int span_tri(Loop &loop, int index1, int index2, int index3, bool two_d)
 {
-    vec2 p1 = loop.two_d_point->at(index1);
-    vec2 p2 = loop.two_d_point->at(index2);
-    vec2 p3 = loop.two_d_point->at(index3);
+	vec3 cross;
+	if (two_d){
+		vec2 p1 = loop.two_d_point->at(index1);
+		vec2 p2 = loop.two_d_point->at(index2);
+		vec2 p3 = loop.two_d_point->at(index3);
 
-    vec2 vector1 = p3 - p2;
-    vec2 vector2 = p1 - p2;
+		vec2 vector1 = p3 - p2;
+		vec2 vector2 = p1 - p2;
+		cross = vector1 ^ vector2;
+	}
+	else{
+		vec3 p1 = loop.three_d_point->at(index1);
+		vec3 p2 = loop.three_d_point->at(index2);
+		vec3 p3 = loop.three_d_point->at(index3);
 
-    vec3 cross = vector1 ^ vector2;
+		vec3 vector1 = p3 - p2;
+		vec3 vector2 = p1 - p2;
+		cross = vector1 ^ vector2;
+	}
 
     float judge = (cross[0] + cross[1] + cross[2]) * loop.sign_flip;
     loop.num_concave += 1;
@@ -87,11 +98,13 @@ void judge_inverse(Loop &loop)
     }
 }
 
-void fill_prepare(GLMmodel &temp_piece)
+void fill_prepare(GLMmodel &temp_piece, bool two_d)
 {
     for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
-        temp_piece.loop->at(i).two_d_point = new std::vector<vec2>();
-        convert_2d(temp_piece, temp_piece.loop->at(i));
+		if (two_d){
+			temp_piece.loop->at(i).two_d_point = new std::vector<vec2>();
+			convert_2d(temp_piece, temp_piece.loop->at(i));
+		}
 
         temp_piece.loop->at(i).sign_flip = 1.0;
         temp_piece.loop->at(i).travel_reverse = false;
@@ -102,14 +115,14 @@ void fill_prepare(GLMmodel &temp_piece)
         for(unsigned int j = 0; j < temp_piece.loop->at(i).loop_line->size(); j += 1){
             int prev = (j - 1 + line_size) % line_size;
             int next = (j + 1) % line_size;
-            temp_piece.loop->at(i).sign->push_back(span_tri(temp_piece.loop->at(i), prev, j, next));
+            temp_piece.loop->at(i).sign->push_back(span_tri(temp_piece.loop->at(i), prev, j, next, two_d));
         }
         if(temp_piece.loop->at(i).sign->size() > 0)
             judge_inverse(temp_piece.loop->at(i));
     }
 }
 
-bool check_ear_index(Loop &loop, int current)
+bool check_ear_index(Loop &loop, int current, bool two_d)
 {
     if(loop.num_concave == 0)
         return true;
@@ -127,9 +140,9 @@ bool check_ear_index(Loop &loop, int current)
             break;
 
         if(loop.sign->at(index) != _convex){
-            if(span_tri(loop, next_index, prev_index, index) != _concave &&
-               span_tri(loop, prev_index, current, index) != _concave &&
-               span_tri(loop, current, next_index, index) != _concave ){
+            if(span_tri(loop, next_index, prev_index, index, two_d) != _concave &&
+				span_tri(loop, prev_index, current, index, two_d) != _concave &&
+				span_tri(loop, current, next_index, index, two_d) != _concave){
                 return false;
             }
 
@@ -142,12 +155,12 @@ bool check_ear_index(Loop &loop, int current)
     return true;
 }
 
-int find_ear_index(Loop &loop, int current)
+int find_ear_index(Loop &loop, int current, bool two_d)
 {
     int index = current;
     int total_size = loop.sign->size();
     for(unsigned int i = 0; i < loop.sign->size(); i += 1){
-        if(check_ear_index(loop, index)){
+        if(check_ear_index(loop, index, two_d)){
             return index;
         }
         if(loop.travel_reverse)
@@ -166,12 +179,12 @@ int find_ear_index(Loop &loop, int current)
     return index;
 }
 
-void triangulate(Loop &loop)
+void triangulate(Loop &loop, bool two_d)
 {
     int travel_index = 0;
     loop.tri = new std::vector<vec3>();
     while(loop.loop_line->size() > 3){
-        int ear_index = find_ear_index(loop, travel_index);
+        int ear_index = find_ear_index(loop, travel_index, two_d);
         int prev_index = (ear_index - 1 + loop.loop_line->size()) % loop.loop_line->size();
         int next_index = (ear_index + 1) % loop.loop_line->size();
 
@@ -187,7 +200,7 @@ void triangulate(Loop &loop)
 
         if(loop.sign->at(prev_index) != _convex){
             int prev_prev_index = (ear_index - 2 + loop.loop_line->size()) % loop.loop_line->size();
-            loop.sign->at(prev_index) = span_tri(loop, prev_prev_index, prev_index, next_index);
+            loop.sign->at(prev_index) = span_tri(loop, prev_prev_index, prev_index, next_index, two_d);
             if(loop.sign->at(prev_index) == _convex){
                 loop.num_concave -= 1;
             }
@@ -195,7 +208,7 @@ void triangulate(Loop &loop)
 
         if(loop.sign->at(next_index) != _convex){
             int next_next_index = (ear_index + 2) % loop.loop_line->size();
-            loop.sign->at(next_index) = span_tri(loop, prev_index, next_index, next_next_index);
+            loop.sign->at(next_index) = span_tri(loop, prev_index, next_index, next_next_index, two_d);
             if(loop.sign->at(next_index) == _convex){
                 loop.num_concave -= 1;
             }
@@ -203,7 +216,10 @@ void triangulate(Loop &loop)
 
         loop.loop_line->erase(loop.loop_line->begin() + ear_index);
         loop.sign->erase(loop.sign->begin() + ear_index);
-        loop.two_d_point->erase(loop.two_d_point->begin() + ear_index);
+		if (two_d)
+			loop.two_d_point->erase(loop.two_d_point->begin() + ear_index);
+		else
+			loop.three_d_point->erase(loop.three_d_point->begin() + ear_index);
 
         if(loop.travel_reverse)
             travel_index = (prev_index - 1 + loop.loop_line->size()) % loop.loop_line->size();
@@ -229,11 +245,11 @@ void triangulate(Loop &loop)
 	}
 }
 
-void fill_hole(GLMmodel &temp_piece)
+void fill_hole(GLMmodel &temp_piece, bool two_d)
 {
-    fill_prepare(temp_piece);
+    fill_prepare(temp_piece, two_d);
     for(unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
-        triangulate(temp_piece.loop->at(i));
+        triangulate(temp_piece.loop->at(i), two_d);
         for(unsigned int j = 0; j < temp_piece.loop->at(i).tri->size(); j += 1){
             vec3 tri_vindex = temp_piece.loop->at(i).tri->at(j);
             GLMtriangle temp;

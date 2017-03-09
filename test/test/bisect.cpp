@@ -1265,23 +1265,18 @@ void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
         it = set_intersection(temp_point_tri[all_edge.at(i).index[0]].begin(), temp_point_tri[all_edge.at(i).index[0]].begin() + temp_point_tri[all_edge.at(i).index[0]].size(), temp_point_tri[all_edge.at(i).index[1]].begin(), temp_point_tri[all_edge.at(i).index[1]].begin() + temp_point_tri[all_edge[i].index[1]].size(), temp_vector.begin());
         temp_vector.resize(it - temp_vector.begin());
 
-        all_edge.at(i).face_id[0] = temp_vector[0];
+        all_edge.at(i).face_id[0] = temp_vector.at(0);
         if(temp_vector.size() > 1)
-            all_edge.at(i).face_id[1] = temp_vector[1];
+			all_edge.at(i).face_id[1] = temp_vector.at(1);
 
-        for(int j = 0; j < 3; j += 1){
-            if(myObj->triangles->at(temp_vector[0]).edge_index[j] == -1){
-                myObj->triangles->at(temp_vector[0]).edge_index[j] = i;
-                break;
-            }
-        }
-
-        for(int j = 0; j < 3; j += 1){
-            if(myObj->triangles->at(temp_vector[1]).edge_index[j] == -1){
-                myObj->triangles->at(temp_vector[1]).edge_index[j] = i;
-                break;
-            }
-        }
+		for (int k = 0; k < temp_vector.size(); k += 1){
+			for (int j = 0; j < 3; j += 1){
+				if (myObj->triangles->at(temp_vector.at(k)).edge_index[j] == -1){
+					myObj->triangles->at(temp_vector.at(k)).edge_index[j] = i;
+					break;
+				}
+			}
+		}
     }
 
     for(unsigned int i = 0; i < myObj->numtriangles; i += 1){
@@ -1323,8 +1318,16 @@ void collect_edge(GLMmodel *myObj, std::vector<edge> &all_edge)
         }
     }
 
-    delete temp_edge;
-    delete temp_point_tri;
+    /*delete temp_edge;
+    delete temp_point_tri;*/
+}
+
+void inform_vertex(GLMmodel *model, std::vector<edge> &all_edge)
+{
+	for (int i = 0; i < all_edge.size(); i += 1){
+		model->cut_loop->at(all_edge.at(i).index[0]).connect_edge.push_back(i);
+		model->cut_loop->at(all_edge.at(i).index[1]).connect_edge.push_back(i);
+	}
 }
 
 void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> &planes)
@@ -1479,7 +1482,75 @@ void find_loop(GLMmodel *myObj, std::vector<edge> &all_edge, std::vector<plane> 
         }
     }
 }
-#include <iostream>
+
+void find_easy_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<int> &single_use)
+{
+	int num_l = 1;
+	std::vector<Loop> all_l;
+
+	int start = single_use.at(0);
+	int travel = single_use.at(0);
+	int pre = -1;
+	Loop new_loop;
+	new_loop.loop_line = new std::vector<int>();
+	new_loop.loop_line->push_back(start);
+
+	while (true){
+		for (int i = 0; i < model->cut_loop->at(travel).connect_edge.size(); i += 1){
+			int judge;
+			if (all_edge.at(model->cut_loop->at(travel).connect_edge.at(i)).index[0] == travel){
+				if (all_edge.at(model->cut_loop->at(travel).connect_edge.at(i)).face_id[1] == -1)
+					judge = all_edge.at(model->cut_loop->at(travel).connect_edge.at(i)).index[1];
+			}
+			else{
+				if (all_edge.at(model->cut_loop->at(travel).connect_edge.at(i)).face_id[1] == -1)
+					judge = all_edge.at(model->cut_loop->at(travel).connect_edge.at(i)).index[0];
+			}
+			int pos = (find(single_use.begin(), single_use.end(), judge) - single_use.begin());
+			if (pos < single_use.size()){
+				if (judge != pre){
+					pre = travel;
+					travel = judge;
+					new_loop.loop_line->push_back(travel);
+					single_use.erase(single_use.begin() + pos);
+					break;
+				}
+			}
+		}
+
+		if (travel == start){
+			new_loop.loop_line->erase(new_loop.loop_line->begin() + new_loop.loop_line->size() - 1);
+			Loop temp_loop;
+			all_l.push_back(temp_loop);
+			all_l.at(num_l - 1).loop_line = new std::vector<int>();
+			for (int i = 0; i < new_loop.loop_line->size(); i += 1){
+				all_l.at(num_l - 1).loop_line->push_back(new_loop.loop_line->at(i));
+			}
+			num_l += 1;
+			delete new_loop.loop_line;
+			if (single_use.size() > 0){
+				new_loop.loop_line = new std::vector<int>();
+				start = single_use.at(0);
+				travel = single_use.at(0);
+				pre = -1;
+				new_loop.loop_line->push_back(start);
+			}
+			else
+				break;
+		}
+	}
+
+	model->loop = new std::vector<Loop>(all_l.size());
+	for (int i = 0; i < model->loop->size(); i += 1){
+		model->loop->at(i).loop_line = new std::vector<int>();
+		model->loop->at(i).three_d_point = new std::vector<vec3>();
+		for (int j = 0; j < all_l.at(i).loop_line->size(); j += 1){
+			model->loop->at(i).loop_line->push_back(all_l.at(i).loop_line->at(j));
+			vec3 p(model->vertices->at(3 * all_l.at(i).loop_line->at(j) + 0), model->vertices->at(3 * all_l.at(i).loop_line->at(j) + 1), model->vertices->at(3 * all_l.at(i).loop_line->at(j) + 2));
+			model->loop->at(i).three_d_point->push_back(p);
+		}
+	}
+}
 
 void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face_split_by_plane)
 {
@@ -1498,8 +1569,7 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
 
     temp_piece.triangles = new std::vector<GLMtriangle>();
 
-	if (!myObj->loop){
-		std::cout << "g" << std::endl;
+	if (myObj->loop->size() > 0){
 		temp_piece.loop = new std::vector<Loop>(myObj->loop->size());
 	}
 
@@ -1543,7 +1613,9 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *myObj, std::vector<int> &face
         temp_piece.triangles->push_back(temp_t);
     }
 
-	if (!myObj->loop){
+	temp_piece.cut_loop = new std::vector<vertex>(temp_piece.numvertices + 1);
+
+	if (myObj->loop->size() > 0){
 		for (unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
 			temp_piece.loop->at(i).loop_line = new std::vector<int>();
 			temp_piece.loop->at(i).plane_normal[0] = myObj->loop->at(i).plane_normal[0];

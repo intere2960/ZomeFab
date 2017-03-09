@@ -123,10 +123,10 @@ private:
 template<class TPoly>
 void importOBJ(const std::string& fileName, TPoly* polyhedron)
 {
-	if(polyhedron)
+	/*if(polyhedron)
 	{
 		try
-		{
+		{*/
 			// Build Polyhedron_3 from the OBJ file.
 			BuildCgalPolyhedronFromObj<TPoly::HalfedgeDS> _buildPolyhedron(fileName);
 			
@@ -139,7 +139,8 @@ void importOBJ(const std::string& fileName, TPoly* polyhedron)
 			// However, in the release mode assertions is disabled and hence no exception is thrown.
 			// Thus for uniform error reporting, if the polyhedron is not valid then throw a dummy 
 			// exception in release mode.
-			if(!polyhedron->is_valid())
+			
+			/*if(!polyhedron->is_valid())
 			{
 				throw CGAL::Assertion_exception("", "", "", 0, "");
 			}
@@ -149,7 +150,7 @@ void importOBJ(const std::string& fileName, TPoly* polyhedron)
 			std::string _msg = "SMeshLib::importOBJ: Error loading " + fileName;
 			throw std::exception(_msg.c_str());
 		}
-	}
+	}*/
 }
 
 };	// End namespace IO.
