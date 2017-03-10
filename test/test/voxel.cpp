@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <omp.h>
 #include "voxel.h"
 
 voxel::voxel(int t_color, int t_size, float t_scale)
@@ -344,9 +345,10 @@ vec2 check_bound(std::vector<voxel> &all_voxel, int max_d)
 }
 
 void addexist_toward(std::vector<voxel> &all_voxel, voxel &check){
+	#pragma omp parallel for
 	for (int i = 0; i < 6; i += 1){
 		if (check.face_toward[i] == -1){
-			for (unsigned int j = 0; j < all_voxel.size(); j += 1){
+			for (int j = 0; j < all_voxel.size(); j += 1){
 				if (((check.position + check.toward_vector[i] * check.scale * 2) - all_voxel.at(j).position).length() < 0.001){
 					check.face_toward[i] = j;
 
@@ -433,13 +435,15 @@ int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int
 
 void rebuild_facetoward(std::vector<voxel> &all_voxel)
 {
-	for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+	#pragma omp parallel for
+	for (int i = 0; i < all_voxel.size(); i += 1){
 		for (int j = 0; j < 6; j += 1){
 			all_voxel.at(i).face_toward[j] = -1;
 		}
 	}
 
-	for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+	#pragma omp parallel for
+	for (int i = 0; i < all_voxel.size(); i += 1){
 		for (int j = 0; j < 6; j += 1){
 			if (all_voxel.at(i).face_toward[j] == -1){
 				for (unsigned int k = 0; k < all_voxel.size(); k += 1){
@@ -485,7 +489,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 	for (unsigned int i = 0; i < region.size(); i += 1){
 		if (region.at(i).size() > 0){
 			std::vector<int> done;
-			for (unsigned int j = 0; j < region.at(i).size(); j += 1){
+			for (int j = 0; j < region.at(i).size(); j += 1){
 				bool p[8] = { false };
 				bool e[12] = { false };
 
@@ -714,7 +718,9 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
 	rebuild_facetoward(all_voxel);
 
-	for(unsigned int i = 0; i < model->numtriangles; i += 1){
+	#pragma omp parallel for
+	for(int i = 0; i < model->numtriangles; i += 1){
+		#pragma omp parallel for
 		for(int k = 0; k < 8; k += 1){
 			int dx = 0;
 			int dy = 2;
@@ -744,7 +750,8 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	}
 
 	bool *use = new bool[all_voxel.size()];
-	for(unsigned int i = 0; i < all_voxel.size(); i += 1){
+	#pragma omp parallel for
+	for(int i = 0; i < all_voxel.size(); i += 1){
 		if(!all_voxel.at(i).show)
 			use[i] = true;
 		else
@@ -762,7 +769,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 			}
 		}
 
-		for(unsigned int i = 0; i < t_queue.size(); i += 1){
+		for(int i = 0; i < t_queue.size(); i += 1){
 			for(int j = 0; j < 6; j += 1){
 				if(all_voxel.at(t_queue.at(i)).face_toward[j] != -1){
 					if(!use[all_voxel.at(t_queue.at(i)).face_toward[j]]){
@@ -787,7 +794,8 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 			break;
 	}
 
-	for(unsigned int i = 0; i < region.size(); i += 1){
+	#pragma omp parallel for
+	for(int i = 0; i < region.size(); i += 1){
 		bool test = false;
 		for(unsigned int j = 0; j < region.at(i).size(); j += 1){
 			if(test){

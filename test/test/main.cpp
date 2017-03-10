@@ -1,4 +1,5 @@
 #include "main.h"
+#include <omp.h>
 
 void drawObj(GLMmodel *myObj)
 {
@@ -137,7 +138,8 @@ void test()
 	obb_angle.resize(seg.size());
 
 	cout << "generate piece" << endl;
-	for (unsigned int i = 0; i < seg.size(); i += 1){
+	#pragma omp parallel for
+	for (int i = 0; i < seg.size(); i += 1){
 		if (seg.size() > 1){
 			vector<edge> fill_edge;
 			collect_edge(&seg.at(i), fill_edge);
