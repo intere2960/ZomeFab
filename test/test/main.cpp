@@ -173,6 +173,25 @@ void test()
 		cout << "output piece " << i + 1 << endl;
 		output_voxel(all_voxel.at(i), i);
 		output_zometool(all_voxel.at(i), zome_queue.at(i), i);
+
+		/*for (int j = 0; j < 4; j += 1){
+			cout << j << " : " << endl;
+			if (j != 3){
+				for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
+					cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
+						<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
+				}
+			}
+			else{
+				for (int k = 0; k < zome_queue.at(i).at(3).size(); k += 1){
+					cout << "\t " << k << " : ";
+					for (int a = 0; a < zome_queue.at(i).at(3).at(k).connect_stick.size(); a += 1){
+						cout << " (" << zome_queue.at(i).at(3).at(k).connect_stick.at(a)[0] << " , " << zome_queue.at(i).at(3).at(k).connect_stick.at(a)[1] << ")";
+					}
+					cout << endl;
+				}
+			}
+		}*/
 	}
 }
 
@@ -205,6 +224,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	//system("pause");
+	system("pause");
     return 0;
 }

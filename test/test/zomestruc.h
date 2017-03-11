@@ -2,6 +2,7 @@
 #define ZOMESTRUC_H_INCLUDED
 
 #include <GL/glut.h>
+#include <vector>
 #include "algebra3.h"
 #include "zomedir.h"
 
@@ -26,6 +27,7 @@ public:
 	int towardface;
 	int size; // S M L
 //	ModelObject* thisModel;
+	std::vector<vec2> connect_stick;
 
 	bool isAnalyzed; //analyze force
 	float force;
