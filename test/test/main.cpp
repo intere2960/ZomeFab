@@ -168,7 +168,7 @@ void test()
 
 		cout << "piece " << i + 1 << " :" << endl;
 		zome_queue.at(i).resize(4);
-		computeBestFitOBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_angle.at(i), start_m);
+		computeBestFitOBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), start_m);
 		voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), COLOR_BLUE, SIZE_S);
 		cout << "output piece " << i + 1 << endl;
 		output_voxel(all_voxel.at(i), i);

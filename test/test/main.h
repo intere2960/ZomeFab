@@ -28,8 +28,8 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/TestBall.obj";
-//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std
+char model_source[] = "test_model/triceratops.obj";
+//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops
 char model_out[] = "test_model/out/out_p.obj";
 
 int width, height;

@@ -331,7 +331,7 @@ vec2 check_bound(std::vector<voxel> &all_voxel, int max_d)
 
 				float p_d = all_voxel.at(i).toward_vector.at(j) * now - d;
 				
-				bool judge = (!(fabs(p_d) < 0.001) && !(p_d > 0));
+				bool judge = (!(fabs(p_d) < 0.001) && !(p_d > 0.001));
 				
 				if (judge){
 					t_ans[0] = i;
