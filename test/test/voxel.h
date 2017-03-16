@@ -37,7 +37,6 @@ public:
 };
 
 void assign_coord(voxel &judge, vec3 &origin);
-vec2 check_bound(std::vector<voxel> &all_voxel, int max_d);
 void addexist_toward(std::vector<voxel> &all_voxel, voxel & check);
 void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3 origin, int coord_id);
 int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int depth, vec3 &ball_error);

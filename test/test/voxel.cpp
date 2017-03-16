@@ -2,6 +2,9 @@
 #include <omp.h>
 #include "voxel.h"
 
+#include <iostream>
+using namespace std;
+
 voxel::voxel(int t_color, int t_size, float t_scale)
 {
 	color = t_color;
@@ -310,38 +313,6 @@ void assign_coord(voxel &judge, vec3 &origin){
 	}
 	judge.coord.push_back(id);
 	judge.coord_origin.push_back(origin);
-}
-
-vec2 check_bound(std::vector<voxel> &all_voxel, int max_d)
-{
-	vec2 t_ans(-1, -1);
-	for (unsigned int i = 0; i < all_voxel.size(); i += 1){
-		for (int j = 0; j < 6; j += 1){
-			if (all_voxel.at(i).face_toward[j] == -1){
-				int weight = 0;
-				if (j % 2 == 1)
-					weight = 1;
-				vec3 bound = all_voxel.at(0).position + all_voxel.at(0).scale * (all_voxel.at(0).toward_vector.at(0) + all_voxel.at(0).toward_vector.at(2) + all_voxel.at(0).toward_vector.at(4)) + all_voxel.at(0).toward_vector.at(j) * all_voxel.at(0).scale * 2 * max_d;
-				float d = all_voxel.at(0).toward_vector.at(j) * bound;
-				
-				int index = 0;
-				if (j % 2)
-					index = 7;
-				vec3 now = all_voxel.at(i).vertex_p[index];
-
-				float p_d = all_voxel.at(i).toward_vector.at(j) * now - d;
-				
-				bool judge = (!(fabs(p_d) < 0.001) && !(p_d > 0.001));
-				
-				if (judge){
-					t_ans[0] = i;
-					t_ans[1] = j;
-					return t_ans;
-				}
-			}
-		}
-	}
-	return t_ans;
 }
 
 void addexist_toward(std::vector<voxel> &all_voxel, voxel &check){
@@ -695,28 +666,17 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 		}
 	}
 
-	assign_coord(start, origin);
-	all_voxel.push_back(start);
-	vec2 ans = check_bound(all_voxel, max_d);
-	
-	while (ans[0] != -1 && ans[1] != -1){
+	start.position += (max_d - 1) * (start.toward_vector.at(1) + start.toward_vector.at(3) + start.toward_vector.at(5)) * start.scale * 2;
 
-		all_voxel.at(ans[0]).face_toward[(int)ans[1]] = all_voxel.size();
-
-		vec3 new_p = all_voxel.at(ans[0]).position + all_voxel.at(ans[0]).toward_vector[(int)ans[1]] * all_voxel.at(ans[0]).scale * 2;
-		
-		voxel temp(all_voxel.at(ans[0]), new_p, all_voxel.at(ans[0]).rotation);
-
-		int opposite_face = 1;
-		if ((int)ans[1] % 2 == 1)
-			opposite_face = -1;
-		temp.face_toward[(int)ans[1] + opposite_face] = ans[0];
-		addexist_toward(all_voxel, temp);
-
-		assign_coord(temp, origin);
-		all_voxel.push_back(temp);
-
-		ans = check_bound(all_voxel, max_d);
+	for (int i = 0; i < max_d * 2; i += 1){
+		for (int j = 0; j < max_d * 2; j += 1){
+			for (int k = 0; k < max_d * 2; k += 1){
+				vec3 new_p = start.position + start.scale * 2 * (i * start.toward_vector.at(0) + j * start.toward_vector.at(2) + k * start.toward_vector.at(4));
+				voxel temp(start, new_p, start.rotation);
+				assign_coord(temp, origin);
+				all_voxel.push_back(temp);
+			}
+		}
 	}
 
 	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
