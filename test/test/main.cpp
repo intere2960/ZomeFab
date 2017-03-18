@@ -3,124 +3,124 @@
 
 void drawObj(GLMmodel *myObj)
 {
-    glBegin(GL_TRIANGLES);
-    for (unsigned int i=0; i<myObj->numtriangles; i+=1) {
-        for (int v=0; v<3; v+=1) {
-//		    glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
-//		    glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
-//		    glColor3f(& myObj->vertices[ myObj->triangles[i].vindices[v]*3 ]);
-//		    glNormal3fv( & myObj->facetnorms.at(3 * (i + 1)));
-		    glVertex3fv( & myObj->vertices->at( myObj->triangles->at(i).vindices[v]*3 ) );
-        }
-    }
-    glEnd();
+	glBegin(GL_TRIANGLES);
+	for (unsigned int i = 0; i<myObj->numtriangles; i += 1) {
+		for (int v = 0; v<3; v += 1) {
+			//		    glColor3fv( & myObj->vertices[ myObj->triangles[i].vindices[v]*3 ] );
+			//		    glNormal3fv( & myObj->normals[ myObj->triangles[i].nindices[v]*3 ] );
+			//		    glColor3f(& myObj->vertices[ myObj->triangles[i].vindices[v]*3 ]);
+			//		    glNormal3fv( & myObj->facetnorms.at(3 * (i + 1)));
+			glVertex3fv(&myObj->vertices->at(myObj->triangles->at(i).vindices[v] * 3));
+		}
+	}
+	glEnd();
 }
 
 void display(void)
 {
-    /* display callback, clear frame buffer and z buffer,
-        rotate cube and draw, swap buffers */
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	/* display callback, clear frame buffer and z buffer,
+	rotate cube and draw, swap buffers */
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(eye_pos[0], eye_pos[1], eye_pos[2], center[0], center[1], center[2], up[0], up[1], up[2]);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(eye_pos[0], eye_pos[1], eye_pos[2], center[0], center[1], center[2], up[0], up[1], up[2]);
 
-    //lighting
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+	//lighting
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 
-    light0_pos[0] = bound_size[0] * cos(lightTheta*M_PI/180.0);
-    light0_pos[1] = bound_size[1] * 1/sin(M_PI/4) * sin(lightTheta*M_PI/180.0);
-    light0_pos[2] = bound_size[2] * cos(lightTheta*M_PI/180.0);
+	light0_pos[0] = bound_size[0] * cos(lightTheta*M_PI / 180.0f);
+	light0_pos[1] = bound_size[1] * 1.0f / sin(M_PI / 4.0f) * sin(lightTheta*M_PI / 180.0f);
+	light0_pos[2] = bound_size[2] * cos(lightTheta*M_PI / 180.0f);
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
 
-//    setShaders();
+	//    setShaders();
 
-    glPushMatrix();
+	glPushMatrix();
 
 	glTranslatef(-bound_center[0], -bound_center[1], -bound_center[2]);
 
-    if(show){
-        glPolygonMode(GL_FRONT, GL_LINE);
-        glPolygonMode(GL_BACK, GL_LINE);
-//        drawObj(&temp_piece);
-        drawObj(myObj);
-//        drawObj(myObj_inner);
-        glPolygonMode(GL_FRONT, GL_FILL);
-        glPolygonMode(GL_BACK, GL_FILL);
-    }
+	if (show){
+		glPolygonMode(GL_FRONT, GL_LINE);
+		glPolygonMode(GL_BACK, GL_LINE);
+		//        drawObj(&temp_piece);
+		drawObj(myObj);
+		//        drawObj(myObj_inner);
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glPolygonMode(GL_BACK, GL_FILL);
+	}
 
-//    drawObj(myObj_inner);
-    if(show_piece)
-        drawObj(&temp_piece);
+	//    drawObj(myObj_inner);
+	if (show_piece)
+		drawObj(&temp_piece);
 
-    glPopMatrix();
+	glPopMatrix();
 
-    //draw_bounding_box();
+	//draw_bounding_box();
 	//draw_best_bounding_box();
 
-    glutSwapBuffers();
-    glutPostRedisplay();
+	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 void myReshape(int w, int h)
 {
-    width = w;
-    height = h;
-    float ratio = w * 1.0 / h;
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glViewport(0, 0, w, h);
-    gluPerspective(50.0, ratio, 0.1, 100000.0);
-    glMatrixMode(GL_MODELVIEW);
+	width = w;
+	height = h;
+	float ratio = w * 1.0f / h;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glViewport(0, 0, w, h);
+	gluPerspective(50.0, ratio, 0.1, 100000.0);
+	glMatrixMode(GL_MODELVIEW);
 }
 
 void init()
 {
-//    glmRT(myObj, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 0.0));
+	//    glmRT(myObj, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 0.0));
 
 	computeSimpleBB(myObj->numvertices, myObj->vertices, bound_size, bounding_max, bounding_min, bound_center);
 
-    eye_pos[2] = eye_pos[2] + 2.0 * bound_size[2];
+	eye_pos[2] = eye_pos[2] + 2.0f * bound_size[2];
 
-//    recount_normal(myObj);
-//    process_inner(myObj, myObj_inner);
-//
-////    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
-//
-//    combine_inner_outfit(myObj, myObj_inner);
-//
-//    collect_edge(myObj, all_edge);
-//
-//    planes.push_back(test_plane1);
-//    planes.push_back(test_plane2);
-//    planes.push_back(test_plane3);
-//    planes.push_back(test_plane4);
-//    planes.push_back(test_plane5); //dir_plane
-////    planes.push_back(test_plane6); //dir_plane
-////    planes.push_back(test_plane7); //dir_plane
-////    planes.push_back(test_plane8); //dir_plane
-//
-//    cut_intersection(myObj, planes, face_split_by_plane, false);
-//
-//    split_face(myObj, all_edge, face_split_by_plane, planes);
-//
-//    find_loop(myObj, all_edge, planes);
-//
-//    process_piece(temp_piece, myObj, face_split_by_plane);
-//
-//    fill_hole(temp_piece, true);
+	//    recount_normal(myObj);
+	//    process_inner(myObj, myObj_inner);
+	//
+	////    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
+	//
+	//    combine_inner_outfit(myObj, myObj_inner);
+	//
+	//    collect_edge(myObj, all_edge);
+	//
+	//    planes.push_back(test_plane1);
+	//    planes.push_back(test_plane2);
+	//    planes.push_back(test_plane3);
+	//    planes.push_back(test_plane4);
+	//    planes.push_back(test_plane5); //dir_plane
+	////    planes.push_back(test_plane6); //dir_plane
+	////    planes.push_back(test_plane7); //dir_plane
+	////    planes.push_back(test_plane8); //dir_plane
+	//
+	//    cut_intersection(myObj, planes, face_split_by_plane, false);
+	//
+	//    split_face(myObj, all_edge, face_split_by_plane, planes);
+	//
+	//    find_loop(myObj, all_edge, planes);
+	//
+	//    process_piece(temp_piece, myObj, face_split_by_plane);
+	//
+	//    fill_hole(temp_piece, true);
 }
 
 void findzoom()
 {
-    zometable splite_table(SPLITE);
-    zometable merge_table(MERGE);
+	zometable splite_table(SPLITE);
+	zometable merge_table(MERGE);
 }
 
 void test()
@@ -146,13 +146,13 @@ void test()
 			inform_vertex(&seg.at(i), fill_edge);
 
 			std::vector<int> single_use;
-			for (int i = 0; i < fill_edge.size(); i += 1){
-				if (fill_edge.at(i).face_id[1] == -1){
-					if ((find(single_use.begin(), single_use.end(), fill_edge.at(i).index[0]) - single_use.begin()) >= single_use.size()){
-						single_use.push_back(fill_edge.at(i).index[0]);
+			for (unsigned int j = 0; j < fill_edge.size(); j += 1){
+				if (fill_edge.at(j).face_id[1] == -1){
+					if ((unsigned)(find(single_use.begin(), single_use.end(), fill_edge.at(j).index[0]) - single_use.begin()) >= single_use.size()){
+						single_use.push_back(fill_edge.at(j).index[0]);
 					}
-					if ((find(single_use.begin(), single_use.end(), fill_edge.at(i).index[1]) - single_use.begin()) >= single_use.size()){
-						single_use.push_back(fill_edge.at(i).index[1]);
+					if ((unsigned)(find(single_use.begin(), single_use.end(), fill_edge.at(j).index[1]) - single_use.begin()) >= single_use.size()){
+						single_use.push_back(fill_edge.at(j).index[1]);
 					}
 				}
 			}
@@ -164,7 +164,7 @@ void test()
 		std::string s = "test";
 		std::string piece = s + std::to_string(i) + ".obj";
 		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);
-		
+
 
 		cout << "piece " << i + 1 << " :" << endl;
 		zome_queue.at(i).resize(4);
@@ -177,48 +177,114 @@ void test()
 		output_voxel(all_voxel.at(i), i);
 		output_zometool(all_voxel.at(i), zome_queue.at(i), i);
 
-		/*for (int j = 0; j < 4; j += 1){
-			cout << j << " : " << endl;
-			if (j != 3){
-				for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
-					cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
-						<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
-				}
-			}
-			else{
-				for (int k = 0; k < zome_queue.at(i).at(3).size(); k += 1){
-					cout << "\t " << k << " : ";
-					for (int a = 0; a < zome_queue.at(i).at(3).at(k).connect_stick.size(); a += 1){
-						cout << " (" << zome_queue.at(i).at(3).at(k).connect_stick.at(a)[0] << " , " << zome_queue.at(i).at(3).at(k).connect_stick.at(a)[1] << ")";
-					}
-					cout << endl;
-				}
-			}
-		}*/
+		//for (int j = 0; j < 4; j += 1){
+		//	cout << j << " : " << endl;
+		//	if (j != 3){
+		//		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
+		//			cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
+		//			<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
+		//		}*/
+		//	}
+		//	else{
+		//		for (int k = 0; k < zome_queue.at(i).at(3).size(); k += 1){
+		//			if (zome_queue.at(i).at(3).at(k).connect_stick.size() != 6){
+		//				cout << "\t " << k << " : ";
+		//				for (int a = 0; a < zome_queue.at(i).at(3).at(k).connect_stick.size(); a += 1){
+		//					cout << " (" << zome_queue.at(i).at(3).at(k).connect_stick.at(a)[0] << " , " << zome_queue.at(i).at(3).at(k).connect_stick.at(a)[1] << ")";
+		//				}
+		//				cout << endl;
+		//				cout << "\t " << zome_queue.at(i).at(3).at(k).position[0] << " " << zome_queue.at(i).at(3).at(k).position[1] << " " << zome_queue.at(i).at(3).at(k).position[2] << endl;
+		//			}
+		//		}
+		//	}
+		//}
 	}
 }
 
 int main(int argc, char **argv)
 {
-//    findzoom();
+	//    findzoom();
 
-    myObj = glmReadOBJ(model_source);
-    //myObj_inner = glmCopy(myObj);
+	myObj = glmReadOBJ(model_source);
+	//myObj_inner = glmCopy(myObj);
 
-    init();
+	init();
 
-	test();
+	//test();
+
+	vec3 p1(26.576f, 120.994f, 75.2333f);
+	vec3 p2(14.3096f, 238.576f, 69.4521f);
 	
+	vector<vec2> path;
+	vec3 asd = p2 - p1;
+	cout << asd.length() << endl;
+	cout << t.find_near_dir(asd) << endl;
+		
+	//int x = 0;
+	//while (x < 8){
+	//	float e = 1e9;
+	//	vec3 now_path;
+	//	vec3 now_p1 = p1;
+	//	float now_l = 0.0;
+	//	int good_i, good_j;
+	//	bool change = false;
+	//	for (int i = 0; i < path.size(); i += 1){
+	//		now_path += t.dir->at(path.at(i)[0])* t.face_length(path.at(i)[0], path.at(i)[1]);
+	//		now_l += t.face_length(path.at(i)[0], path.at(i)[1]);
+	//	}
+	//	now_p1 += now_path;
+	//	
+	//	vec3 d = p2 - now_p1;
+	//	cout << d.length() << endl;
+	//	if (d.length() < 0.001){
+	//		break;
+	//	}
+
+	//	//cout << now_l << endl;
+
+	//	for (int i = 0; i < t.dir->size(); i += 1){
+	//		if ((path.size() > 0) && (i == t.opposite_face(path.at(path.size() - 1)[0])))
+	//			continue;
+
+	//		for (int j = 0; j < 3; j += 1){
+	//			vec3 temp_path = t.dir->at(i) * t.face_length(i, j);
+	//			float temp_l = now_l + t.face_length(i, j);
+	//			vec3 temp_d = p2 - (now_p1 + temp_path);
+	//			float temp_e = temp_l + temp_d.length();
+	//		
+	//			/*if (path.size() > 0){
+	//				cout << "d : " << d.length() << endl;
+	//				cout << "temp_l : " << temp_l << endl;
+	//				cout << "\t" << "temp_e : " << temp_e << endl;
+	//			}*/
+
+	//			if (temp_e < e){
+	//				e = temp_e;
+	//				good_i = i;
+	//				good_j = j;
+	//				change = true;
+	//				//cout << good_i << " " << good_j << " " << e << endl;
+	//			}
+	//		}
+	//	}
+
+	//	if (change){
+	//		cout << good_i << " " << good_j << " " << e << endl;
+	//		path.push_back(vec2(good_i, good_j));
+	//	}
+	//	x += 1;
+	//}
+
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
 
- //   glutCreateWindow("Zometool");
+	//   glutCreateWindow("Zometool");
 	//glutDisplayFunc(display);
 	//glutReshapeFunc(myReshape);
 	//glutMouseFunc(mouse);
- //   glutMotionFunc(mouseMotion);
- //   glutKeyboardFunc(keyboard);
- //   glutSpecialFunc(special);
+	//   glutMotionFunc(mouseMotion);
+	//   glutKeyboardFunc(keyboard);
+	//   glutSpecialFunc(special);
 	//glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
 
 	//glewInit();
@@ -227,6 +293,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	//system("pause");
-    return 0;
+	system("pause");
+	return 0;
 }

@@ -1,5 +1,8 @@
+#include <cmath>
+#include <fstream>
 #include "zomedir.h"
 #include "glui_internal.h"
+#include "global.h"
 
 zomedir::zomedir()
 {
@@ -14,88 +17,135 @@ zomedir::zomedir()
 	dir->push_back(vec3(0.0, 0.0, -1.0));
 	// diagonals
     // around x axis (6-13)
-    dir->push_back(vec3(0.5 * golden, 0.5 / golden, 0.5));
-	dir->push_back(vec3(0.5 * golden, -0.5 / golden, 0.5));
-	dir->push_back(vec3(-0.5 * golden, 0.5 / golden, 0.5));
-	dir->push_back(vec3(-0.5 * golden, -0.5 / golden, 0.5));
+    dir->push_back(vec3(0.5f * golden, 0.5f / golden, 0.5f));
+	dir->push_back(vec3(0.5f * golden, -0.5f / golden, 0.5f));
+	dir->push_back(vec3(-0.5f * golden, 0.5f / golden, 0.5f));
+	dir->push_back(vec3(-0.5f * golden, -0.5f / golden, 0.5f));
 
-	dir->push_back(vec3(-0.5 * golden, -0.5 / golden, -0.5));
-	dir->push_back(vec3(-0.5 * golden, 0.5 / golden, -0.5));
-	dir->push_back(vec3(0.5 * golden, -0.5 / golden, -0.5));
-	dir->push_back(vec3(0.5 * golden, 0.5 / golden, -0.5));
+	dir->push_back(vec3(-0.5f * golden, -0.5f / golden, -0.5f));
+	dir->push_back(vec3(-0.5f * golden, 0.5f / golden, -0.5f));
+	dir->push_back(vec3(0.5f * golden, -0.5f / golden, -0.5f));
+	dir->push_back(vec3(0.5f * golden, 0.5f / golden, -0.5f));
 
     // around y axis (14-21)
-    dir->push_back(vec3(0.5, 0.5 * golden, 0.5 / golden));
-	dir->push_back(vec3(-0.5, 0.5 * golden, 0.5 / golden));
-	dir->push_back(vec3(0.5, -0.5 * golden, 0.5 / golden));
-	dir->push_back(vec3(-0.5, -0.5 * golden, 0.5 / golden));
+    dir->push_back(vec3(0.5f, 0.5f * golden, 0.5f / golden));
+	dir->push_back(vec3(-0.5f, 0.5f * golden, 0.5f / golden));
+	dir->push_back(vec3(0.5f, -0.5f * golden, 0.5f / golden));
+	dir->push_back(vec3(-0.5f, -0.5f * golden, 0.5f / golden));
 
-	dir->push_back(vec3(-0.5, -0.5 * golden, -0.5 / golden));
-	dir->push_back(vec3(0.5, -0.5 * golden, -0.5 / golden));
-	dir->push_back(vec3(-0.5, 0.5 * golden, -0.5 / golden));
-	dir->push_back(vec3(0.5, 0.5 * golden, -0.5 / golden));
+	dir->push_back(vec3(-0.5f, -0.5f * golden, -0.5f / golden));
+	dir->push_back(vec3(0.5f, -0.5f * golden, -0.5f / golden));
+	dir->push_back(vec3(-0.5f, 0.5f * golden, -0.5f / golden));
+	dir->push_back(vec3(0.5f, 0.5f * golden, -0.5f / golden));
 
     // around z axis (22-29)
-    dir->push_back(vec3(0.5 / golden, 0.5, 0.5 * golden));
-	dir->push_back(vec3(-0.5 / golden, 0.5, 0.5 * golden));
-	dir->push_back(vec3(0.5 / golden, -0.5, 0.5 * golden));
-	dir->push_back(vec3(-0.5 / golden, -0.5, 0.5 * golden));
+    dir->push_back(vec3(0.5f / golden, 0.5f, 0.5f * golden));
+	dir->push_back(vec3(-0.5f / golden, 0.5f, 0.5f * golden));
+	dir->push_back(vec3(0.5f / golden, -0.5f, 0.5f * golden));
+	dir->push_back(vec3(-0.5f / golden, -0.5f, 0.5f * golden));
 
-	dir->push_back(vec3(-0.5 / golden, -0.5, -0.5 * golden));
-	dir->push_back(vec3(0.5 / golden, -0.5, -0.5 * golden));
-	dir->push_back(vec3(-0.5 / golden, 0.5, -0.5 * golden));
-	dir->push_back(vec3(0.5 / golden, 0.5, -0.5 * golden));
+	dir->push_back(vec3(-0.5f / golden, -0.5f, -0.5f * golden));
+	dir->push_back(vec3(0.5f / golden, -0.5f, -0.5f * golden));
+	dir->push_back(vec3(-0.5f / golden, 0.5f, -0.5f * golden));
+	dir->push_back(vec3(0.5f / golden, 0.5f, -0.5f * golden));
 
     // reds (diagonals in planes)
     // around x axis (30-33)
-    dir->push_back(vec3(golden * sqrt((5 - sqrt(5)) / 10), sqrt((5 - sqrt(5)) / 10), 0.0)); // (5 + sqrt(5)) / 2 = (5 - sqrt(5)) / 10
-	dir->push_back(vec3(golden * sqrt((5 - sqrt(5)) / 10), -sqrt((5 - sqrt(5)) / 10), 0.0));
-	dir->push_back(vec3(-golden * sqrt((5 - sqrt(5)) / 10), -sqrt((5 - sqrt(5)) / 10), 0.0));
-	dir->push_back(vec3(-golden * sqrt((5 - sqrt(5)) / 10), sqrt((5 - sqrt(5)) / 10), 0.0));
+    dir->push_back(vec3(golden * sqrt((5 - sqrt(5.0f)) / 10), sqrt((5 - sqrt(5.0f)) / 10), 0.0)); // (5 + sqrt(5.0f)) / 2 = (5 - sqrt(5.0f)) / 10
+	dir->push_back(vec3(golden * sqrt((5 - sqrt(5.0f)) / 10), -sqrt((5 - sqrt(5.0f)) / 10), 0.0));
+	dir->push_back(vec3(-golden * sqrt((5 - sqrt(5.0f)) / 10), -sqrt((5 - sqrt(5.0f)) / 10), 0.0));
+	dir->push_back(vec3(-golden * sqrt((5 - sqrt(5.0f)) / 10), sqrt((5 - sqrt(5.0f)) / 10), 0.0));
 
     // around y axis (34-37)
-    dir->push_back(vec3(0.0, golden * sqrt((5 - sqrt(5)) / 10), sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(0.0, golden * sqrt((5 - sqrt(5)) / 10), -sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(0.0, -golden * sqrt((5 - sqrt(5)) / 10), -sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(0.0, -golden * sqrt((5 - sqrt(5)) / 10), sqrt((5 - sqrt(5)) / 10)));
+    dir->push_back(vec3(0.0, golden * sqrt((5 - sqrt(5.0f)) / 10), sqrt((5 - sqrt(5.0f)) / 10)));
+	dir->push_back(vec3(0.0, golden * sqrt((5 - sqrt(5.0f)) / 10), -sqrt((5 - sqrt(5.0f)) / 10)));
+	dir->push_back(vec3(0.0, -golden * sqrt((5 - sqrt(5.0f)) / 10), -sqrt((5 - sqrt(5.0f)) / 10)));
+	dir->push_back(vec3(0.0, -golden * sqrt((5 - sqrt(5.0f)) / 10), sqrt((5 - sqrt(5.0f)) / 10)));
 
     // around z axis (38-41)
-    dir->push_back(vec3(sqrt((5 - sqrt(5)) / 10), 0.0, golden * sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(-sqrt((5 - sqrt(5)) / 10), 0.0, golden * sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(-sqrt((5 - sqrt(5)) / 10), 0.0, -golden * sqrt((5 - sqrt(5)) / 10)));
-	dir->push_back(vec3(sqrt((5 - sqrt(5)) / 10), 0.0, -golden * sqrt((5 - sqrt(5)) / 10)));
+    dir->push_back(vec3(sqrt((5 - sqrt(5.0f)) / 10), 0.0f, golden * sqrt((5 - sqrt(5.0f)) / 10)));
+	dir->push_back(vec3(-sqrt((5 - sqrt(5.0f)) / 10), 0.0f, golden * sqrt((5 - sqrt(5.0f)) / 10)));
+	dir->push_back(vec3(-sqrt((5 - sqrt(5.0f)) / 10), 0.0f, -golden * sqrt((5 - sqrt(5.0f)) / 10)));
+	dir->push_back(vec3(sqrt((5 - sqrt(5.0f)) / 10), 0.0f, -golden * sqrt((5 - sqrt(5.0f)) / 10)));
 
     // yellows (diagonals in planes)
     // around x axis (42-35)
-    dir->push_back(vec3(golden / sqrt(3), 0.0,  1.0 / golden / sqrt(3)));
-	dir->push_back(vec3(golden / sqrt(3), 0.0, -1.0 / golden / sqrt(3)));
-	dir->push_back(vec3(-golden / sqrt(3), 0.0, -1.0 / golden / sqrt(3)));
-	dir->push_back(vec3(-golden / sqrt(3), 0.0, 1.0 / golden / sqrt(3)));
+    dir->push_back(vec3(golden / sqrt(3.0f), 0.0f,  1.0f / golden / sqrt(3.0f)));
+	dir->push_back(vec3(golden / sqrt(3.0f), 0.0f, -1.0f / golden / sqrt(3.0f)));
+	dir->push_back(vec3(-golden / sqrt(3.0f), 0.0f, -1.0f / golden / sqrt(3.0f)));
+	dir->push_back(vec3(-golden / sqrt(3.0f), 0.0f, 1.0f / golden / sqrt(3.0f)));
 
     // around y axis (46-49)
-    dir->push_back(vec3(1.0 / golden / sqrt(3), golden / sqrt(3), 0.0));
-	dir->push_back(vec3(-1.0 / golden / sqrt(3), golden / sqrt(3), 0.0));
-	dir->push_back(vec3(-1.0 / golden / sqrt(3), -golden / sqrt(3), 0.0));
-	dir->push_back(vec3(1.0 / golden / sqrt(3), -golden / sqrt(3), 0.0));
+    dir->push_back(vec3(1.0f / golden / sqrt(3.0f), golden / sqrt(3.0f), 0.0f));
+	dir->push_back(vec3(-1.0f / golden / sqrt(3.0f), golden / sqrt(3.0f), 0.0f));
+	dir->push_back(vec3(-1.0f / golden / sqrt(3.0f), -golden / sqrt(3.0f), 0.0f));
+	dir->push_back(vec3(1.0f / golden / sqrt(3.0f), -golden / sqrt(3.0f), 0.0f));
 
     // around z axis (50-53)
-    dir->push_back(vec3(0.0, 1.0 / golden / sqrt(3), golden / sqrt(3)));
-	dir->push_back(vec3(0.0, -1.0 / golden / sqrt(3), golden / sqrt(3)));
-	dir->push_back(vec3(0.0, -1.0 / golden / sqrt(3), -golden / sqrt(3)));
-	dir->push_back(vec3(0.0, 1.0 / golden / sqrt(3), -golden / sqrt(3)));
+    dir->push_back(vec3(0.0f, 1.0f / golden / sqrt(3.0f), golden / sqrt(3.0f)));
+	dir->push_back(vec3(0.0f, -1.0f / golden / sqrt(3.0f), golden / sqrt(3.0f)));
+	dir->push_back(vec3(0.0f, -1.0f / golden / sqrt(3.0f), -golden / sqrt(3.0f)));
+	dir->push_back(vec3(0.0f, 1.0f / golden / sqrt(3.0f), -golden / sqrt(3.0f)));
 
     // 54-61 (diagonals)
-    dir->push_back(vec3(sqrt(3) / 3 , sqrt(3) / 3 , sqrt(3) / 3));
-	dir->push_back(vec3(-sqrt(3) / 3 , sqrt(3) / 3 , sqrt(3) / 3));
-	dir->push_back(vec3(sqrt(3) / 3 , -sqrt(3) / 3 , sqrt(3) / 3));
-	dir->push_back(vec3(sqrt(3) / 3 , sqrt(3) / 3 , -sqrt(3) / 3));
-	dir->push_back(vec3(sqrt(3) / 3 , -sqrt(3) / 3 , -sqrt(3) / 3));
-	dir->push_back(vec3(-sqrt(3) / 3 , sqrt(3) / 3 , -sqrt(3) / 3));
-	dir->push_back(vec3(-sqrt(3) / 3 , -sqrt(3) / 3 , sqrt(3) / 3));
-	dir->push_back(vec3(-sqrt(3) / 3 , -sqrt(3) / 3 , -sqrt(3) / 3));
+    dir->push_back(vec3(sqrt(3.0f) / 3 , sqrt(3.0f) / 3 , sqrt(3.0f) / 3));
+	dir->push_back(vec3(-sqrt(3.0f) / 3 , sqrt(3.0f) / 3 , sqrt(3.0f) / 3));
+	dir->push_back(vec3(sqrt(3.0f) / 3 , -sqrt(3.0f) / 3 , sqrt(3.0f) / 3));
+	dir->push_back(vec3(sqrt(3.0f) / 3 , sqrt(3.0f) / 3 , -sqrt(3.0f) / 3));
+	dir->push_back(vec3(sqrt(3.0f) / 3 , -sqrt(3.0f) / 3 , -sqrt(3.0f) / 3));
+	dir->push_back(vec3(-sqrt(3.0f) / 3 , sqrt(3.0f) / 3 , -sqrt(3.0f) / 3));
+	dir->push_back(vec3(-sqrt(3.0f) / 3 , -sqrt(3.0f) / 3 , sqrt(3.0f) / 3));
+	dir->push_back(vec3(-sqrt(3.0f) / 3 , -sqrt(3.0f) / 3 , -sqrt(3.0f) / 3));
 
     for(unsigned int i = 0; i < 62; i += 1)
         dir->at(i) = dir->at(i).normalize();
+
+	double dir_angles[62][62];
+	for (int i = 0; i< 62; i += 1)
+	{
+		for (int j = 0; j < 62; j += 1)
+		{
+			double tmpDot = (dir->at(i) * dir->at(j));
+			if (tmpDot<-1.0)
+				tmpDot = -1.0;
+			if (tmpDot>1.0)
+				tmpDot = 1.0;
+			dir_angles[i][j] = acos(tmpDot);
+		}
+	}
+	for (int i = 0; i<62; i++)
+		dir_angles[i][i] = 100.0;
+
+
+	for (int i = 0; i < 62; i += 1)
+	{
+		std::vector<std::vector<int>> dirs_of_dir;
+		for (int m = 0; m < 2; m += 1)
+		{
+			std::vector<int> dirs_in_layer;
+			if (m == 0)
+				dirs_in_layer.push_back(i);
+			double tmpMin = 1e100;
+			for (int j = 0; j < 62; j += 1)
+			{
+				if (dir_angles[i][j] < tmpMin)
+					tmpMin = dir_angles[i][j];
+			}
+
+			for (int j = 0; j < 62; j += 1)
+			{
+				if (fabs(dir_angles[i][j] - tmpMin)<0.3)
+				{
+					dirs_in_layer.push_back(j);
+					dir_angles[i][j] = 100.0;
+				}
+			}
+			dirs_of_dir.push_back(dirs_in_layer);
+			dirs_in_layer.clear();
+		}
+		near_dir.push_back(dirs_of_dir);
+		dirs_of_dir.clear();
+	}
 }
 
 zomedir::~zomedir()
@@ -107,10 +157,10 @@ zomedir::~zomedir()
     delete dir;
 }
 
-GLfloat zomedir::phi(int index)
+float zomedir::phi(int index)
 {
-	GLfloat sinPhi = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2) );
-	GLfloat phi = asin(sinPhi);
+	float sinPhi = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2) );
+	float phi = asin(sinPhi);
 	if(dir->at(index)[0] < 0)
 	{
 		phi = M_PI - phi;
@@ -122,22 +172,22 @@ GLfloat zomedir::phi(int index)
 	return -phi;
 }
 
-GLfloat zomedir::theta(int index)
+float zomedir::theta(int index)
 {
-	GLfloat sinTheta = dir->at(index)[1] / sqrt(pow(dir->at(index)[0] , 2) + pow(dir->at(index)[1] , 2) + pow(dir->at(index)[2] , 2));
-	GLfloat theta = acos(sinTheta);
+	float sinTheta = dir->at(index)[1] / sqrt(pow(dir->at(index)[0] , 2) + pow(dir->at(index)[1] , 2) + pow(dir->at(index)[2] , 2));
+	float theta = acos(sinTheta);
 	return -theta;
 }
 
-GLfloat zomedir::roll(int index)
+float zomedir::roll(int index)
 {
-	GLfloat roll;
+	float roll;
 	if(index < 30)
 	{
-		GLfloat sinroll = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2));
+		float sinroll = dir->at(index)[2] / sqrt(pow(dir->at(index)[0], 2) + pow(dir->at(index)[2], 2));
 		roll = asin(sinroll);
-		if(index == 0) roll = M_PI * 0.5;
-		if(index == 1) roll = M_PI * 0.5;
+		if(index == 0) roll = M_PI * 0.5f;
+		if(index == 1) roll = M_PI * 0.5f;
 		if(index == 2) roll = 0.0;
 		if(index == 3) roll = 0.0;
 		if(index == 4) roll = 0.0;
@@ -180,17 +230,17 @@ GLfloat zomedir::roll(int index)
 		if(index == 35) roll = M_PI;
 		if(index == 36) roll = 0;
 		if(index == 37) roll = 0;
-		if(index == 38) roll = M_PI * 0.5;
-		if(index == 39) roll = M_PI * 1.5;
-		if(index == 40) roll = M_PI * 0.5;
-		if(index == 41) roll = M_PI * 1.5;
+		if(index == 38) roll = M_PI * 0.5f;
+		if(index == 39) roll = M_PI * 1.5f;
+		if(index == 40) roll = M_PI * 0.5f;
+		if(index == 41) roll = M_PI * 1.5f;
 	}
 	else
 	{
-		if(index == 42) roll = M_PI * 0.5;
-		if(index == 43) roll = M_PI * 1.5;
-		if(index == 44) roll = M_PI * 0.5;
-		if(index == 45) roll = M_PI * 1.5;
+		if(index == 42) roll = M_PI * 0.5f;
+		if(index == 43) roll = M_PI * 1.5f;
+		if(index == 44) roll = M_PI * 0.5f;
+		if(index == 45) roll = M_PI * 1.5f;
 		if(index == 46) roll = 0;
 		if(index == 47) roll = 0;
 		if(index == 48) roll = M_PI;
@@ -200,27 +250,27 @@ GLfloat zomedir::roll(int index)
 		if(index == 52) roll = 0;
 		if(index == 53) roll = M_PI;
 
-		if(index == 54) roll = 22.2369 / 180.0 * M_PI;
-		if(index == 55) roll = -22.2369 / 180.0 * M_PI;
-		if(index == 56) roll = -22.2369 / 180.0 * M_PI + M_PI;
-		if(index == 57) roll = -22.2369 / 180.0 * M_PI;
-		if(index == 58) roll = 22.2369 / 180.0 * M_PI + M_PI;
-		if(index == 59) roll = 22.2369 / 180.0 * M_PI;
-		if(index == 60) roll = 22.2369 / 180.0 * M_PI + M_PI;
-		if(index == 61) roll = -22.2369 / 180.0 * M_PI + M_PI;
+		if(index == 54) roll = 22.2369f / 180.0f * M_PI;
+		if(index == 55) roll = -22.2369f / 180.0f * M_PI;
+		if(index == 56) roll = -22.2369f / 180.0f * M_PI + M_PI;
+		if(index == 57) roll = -22.2369f / 180.0f * M_PI;
+		if(index == 58) roll = 22.2369f / 180.0f * M_PI + M_PI;
+		if(index == 59) roll = 22.2369f / 180.0f * M_PI;
+		if(index == 60) roll = 22.2369f / 180.0f * M_PI + M_PI;
+		if(index == 61) roll = -22.2369f / 180.0f * M_PI + M_PI;
 	}
 	return -roll;
 }
 
 
-GLfloat zomedir::face_length(int index, int size)
+float zomedir::face_length(int index, int size)
 {
 	if(index == -1 || size < 0)
 	{
 		//error
 	}
 	//1:46.3mm
-	GLfloat length;
+	float length;
 	if(index < 30)
 	{
 		if(size == SIZE_S) length = 1 * SCALE;//46.3
@@ -235,16 +285,17 @@ GLfloat zomedir::face_length(int index, int size)
 	}
 	else
 	{
-		if(size == SIZE_S) length = sqrt(3) / 2 * SCALE;//40.1
-		if(size == SIZE_M) length = sqrt(3) / 2 * GOLDEN * SCALE;//64.8
-		if(size == SIZE_L) length = sqrt(3) / 2 * GOLDEN * GOLDEN * SCALE;//104.9
+		if(size == SIZE_S) length = sqrt(3.0f) / 2 * SCALE;//40.1
+		if(size == SIZE_M) length = sqrt(3.0f) / 2 * GOLDEN * SCALE;//64.8
+		if(size == SIZE_L) length = sqrt(3.0f) / 2 * GOLDEN * GOLDEN * SCALE;//104.9
 	}
 	return length;
 }
-GLfloat zomedir::color_length(int color, int size)
+
+float zomedir::color_length(int color, int size)
 {
 	//1:46.3mm
-	GLfloat length;
+	float length;
 	if(color == COLOR_BLUE)
 	{
 		if(size == SIZE_S) length = 1 * SCALE;//46.3
@@ -259,9 +310,9 @@ GLfloat zomedir::color_length(int color, int size)
 	}
 	else if(color == COLOR_YELLOW)
 	{
-		if(size == SIZE_S) length = sqrt(3) / 2 * SCALE;//40.1
-		if(size == SIZE_M) length = sqrt(3) / 2 * GOLDEN * SCALE;//64.8
-		if(size == SIZE_L) length = sqrt(3) / 2 * GOLDEN * GOLDEN * SCALE;//104.9
+		if(size == SIZE_S) length = sqrt(3.0f) / 2 * SCALE;//40.1
+		if(size == SIZE_M) length = sqrt(3.0f) / 2 * GOLDEN * SCALE;//64.8
+		if(size == SIZE_L) length = sqrt(3.0f) / 2 * GOLDEN * GOLDEN * SCALE;//104.9
 	}
 
 	return length;
@@ -321,7 +372,7 @@ int zomedir::dir_face(vec3 &vecInitial, vec3 &vecEnd, int size)
 	vec3 tempdir;
 	tempdir = (vecEnd - vecInitial).normalize();
 
-	GLfloat d = tempdir.length();
+	float d = tempdir.length();
 
 	for(int i = 0; i < 62; i += 1)
 	{
@@ -341,6 +392,22 @@ int zomedir::dir_face(vec3 &vecInitial, vec3 &vecEnd, int size)
 	return -1;
 }
 
+int zomedir::find_near_dir(vec3 input)
+{
+	vec3 n_input = input.normalize();
+	float temp_max = -1.0;
+	int ans;
+
+	for (unsigned int i = 0; i < dir->size(); i += 1){
+		float temp = n_input * dir->at(i);
+		if (temp > temp_max){
+			temp_max = temp;
+			ans = i;
+		}
+	}
+	return ans;
+}
+
 float zomedir::dir_parameter(int i, int d)
 {
 	return -dir->at(i)[d];
@@ -348,7 +415,7 @@ float zomedir::dir_parameter(int i, int d)
 
 float zomedir::weight(int color, int size)
 {
-	GLfloat weight[3][3] =
+	float weight[3][3] =
 	{{WEIGHT_BLUE_S, WEIGHT_BLUE_M, WEIGHT_BLUE_L},
 	  {WEIGHT_RED_S, WEIGHT_RED_M, WEIGHT_RED_L},
 	  {WEIGHT_YELLOW_S, WEIGHT_YELLOW_M, WEIGHT_YELLOW_L}};
@@ -445,17 +512,17 @@ void zometable::find_zomevector(int type){
                                 s_l = (ABS(t.face_length(x, 2) - l.length()) < 0.0001)? 2:s_l;
 
                                 zomerecord temp_r;
-                                temp_r.origin[0] = hole;
-                                temp_r.origin[1] = i;
-                                temp_r.origin[2] = t.opposite_face(hole);
+								temp_r.origin[0] = (float)hole;
+								temp_r.origin[1] = (float)i;
+								temp_r.origin[2] = (float)t.opposite_face(hole);
 
-                                temp_r.travel_1[0] = j;
-                                temp_r.travel_1[1] = b;
-                                temp_r.travel_1[2] = t.opposite_face(j);
+								temp_r.travel_1[0] = (float)j;
+								temp_r.travel_1[1] = (float)b;
+								temp_r.travel_1[2] = (float)t.opposite_face(j);
 
-                                temp_r.travel_2[0] = x;
-                                temp_r.travel_2[1] = s_l;
-                                temp_r.travel_2[2] = t.opposite_face(x);
+								temp_r.travel_2[0] = (float)x;
+								temp_r.travel_2[1] = (float)s_l;
+								temp_r.travel_2[2] = (float)t.opposite_face(x);
 
 
                                 if(type == SPLITE)
@@ -479,8 +546,8 @@ void zometable::vector_parser(int type, std::ifstream &is)
     zomerecord temp_r;
     while(is >> temp_r.origin[0] >> temp_r.origin[1] >> temp_r.origin[2] >> temp_r.travel_1[0] >> temp_r.travel_1[1] >> temp_r.travel_1[2] >> temp_r.travel_2[0] >> temp_r.travel_2[1] >> temp_r.travel_2[2]){
         if(type == SPLITE)
-            table.at(temp_r.origin[0]).at(temp_r.travel_1[0]).push_back(temp_r);
+			table.at((int)temp_r.origin[0]).at((int)temp_r.travel_1[0]).push_back(temp_r);
         else if(type == MERGE)
-            table.at(temp_r.origin[0]).at(temp_r.origin[0]).push_back(temp_r);
+			table.at((int)temp_r.origin[0]).at((int)temp_r.origin[0]).push_back(temp_r);
     }
 }

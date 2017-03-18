@@ -1,10 +1,8 @@
 #ifndef ZOMESTRUC_H_INCLUDED
 #define ZOMESTRUC_H_INCLUDED
 
-#include <GL/glut.h>
 #include <vector>
 #include "algebra3.h"
-#include "zomedir.h"
 
 class zomeconn
 {
@@ -34,7 +32,6 @@ public:
 
 //	zomeconn* link;
 };
-
 
 class zomestruc
 {

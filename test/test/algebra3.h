@@ -77,7 +77,7 @@ class mat3;
 class mat4;
 
 #ifndef M_PI
-#define M_PI 3.141592654
+#define M_PI 3.141592654f
 #endif
 
 enum {VX, VY, VZ, VW};           // axes

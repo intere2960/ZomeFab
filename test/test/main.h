@@ -12,6 +12,7 @@
 #include "textfile.h"
 #include "glm.h"
 #include "algebra3.h"
+#include "global.h"
 
 #include "shell.h"
 #include "bisect.h"
@@ -28,16 +29,16 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/triceratops.obj";
+char model_source[] = "test_model/kitten.obj";
 //cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops
 char model_out[] = "test_model/out/out_p.obj";
 
 int width, height;
 int start_x, start_y;
-GLdouble theta = -M_PI/2, phi = M_PI / 2;
+GLfloat theta = -M_PI/2, phi = M_PI / 2;
 
 vec3 eye_pos(0.0, 0.0, 0.0);
-vec3 center(eye_pos[0] + sin(phi) * cos(theta), eye_pos[1] + cos(phi), 4 * sin(phi) * sin(theta));
+vec3 center(eye_pos[0] + sin(phi) * cos(theta), eye_pos[1] + cos(phi), 4.0f * sin(phi) * sin(theta));
 vec3 up(0.0, 1.0, 0.0);
 
 GLfloat vertices[][3] =
@@ -53,12 +54,12 @@ GLfloat vertices[][3] =
 char vertex_shader[] = "myshader.vert",
      fragment_shader[] = "myshader.frag";
 
-GLdouble lightTheta = 10.0;
-GLfloat light0_ambient[] = {0.9, 0.9, 0.9, 1.0};
-GLfloat light0_diffuse[] = {0.7, 0.7, 0.7, 1.0};
-GLfloat light0_specular[] = {0.7, 0.7, 0.7, 1.0};
-GLfloat light0_pos[] = {0.0, 0.0, 0.0, 1.0};
-GLfloat light0_shininess = 50;
+GLfloat lightTheta = 10.0f;
+GLfloat light0_ambient[] = {0.9f, 0.9f, 0.9f, 1.0f};
+GLfloat light0_diffuse[] = {0.7f, 0.7f, 0.7f, 1.0f};
+GLfloat light0_specular[] = {0.7f, 0.7f, 0.7f, 1.0f};
+GLfloat light0_pos[] = {0.0f, 0.0f, 0.0f, 1.0f};
+GLfloat light0_shininess = 50.0f;
 
 vec3 bounding_max;
 vec3 bounding_min;
@@ -134,6 +135,7 @@ vector<edge> all_edge;
 vector<int> face_split_by_plane;
 vector<int> face_inner_split_by_plane;
 
+zomedir t;
 vector<vector<voxel>> all_voxel;
 vector<vector<vector<zomeconn>>> zome_queue;
 vector<GLMmodel> seg;
@@ -253,12 +255,12 @@ void mouse(int btn, int state, int x, int y)
 
 void mouseMotion(int x, int y)
 {
-    theta += 2 * static_cast<double> (x - start_x) / width;
-    if(theta > 2 * M_PI) theta -= 2 * M_PI;
-    if(theta < -2 * M_PI) theta += 2 * M_PI;
-    GLdouble tmp = phi;
-    phi += 2 * static_cast<double> (y - start_y) / height;
-    if(phi > 0 && phi < M_PI)
+    theta += 2.0f * static_cast<float> (x - start_x) / width;
+    if(theta > 2.0f * M_PI) theta -= 2.0f * M_PI;
+    if(theta < -2.0f * M_PI) theta += 2.0f * M_PI;
+    GLfloat tmp = phi;
+    phi += 2.0f * static_cast<float> (y - start_y) / height;
+    if(phi > 0.0f && phi < M_PI)
         center[1] = eye_pos[1]  + bound_size[1] * cos(phi);
     else
         phi = tmp;
@@ -272,51 +274,51 @@ void keyboard(unsigned char key,int x,int y)
 {
     if(key == 'w' || key == 'W') //move forward
     {
-        eye_pos[0] += 0.1 * bound_size[0] * sin(phi) * cos(theta);
-        eye_pos[1] += 0.1 * bound_size[1] * cos(phi);
-        eye_pos[2] += 0.1 * bound_size[2] * sin(phi) * sin(theta);
-        center[0] += 0.1 * bound_size[0] * sin(phi) * cos(theta);
-        center[1] += 0.1 * bound_size[1] * cos(phi);
-        center[2] += 0.1 * bound_size[2] * sin(phi) * sin(theta);
+        eye_pos[0] += 0.1f * bound_size[0] * sin(phi) * cos(theta);
+        eye_pos[1] += 0.1f * bound_size[1] * cos(phi);
+        eye_pos[2] += 0.1f * bound_size[2] * sin(phi) * sin(theta);
+        center[0] += 0.1f * bound_size[0] * sin(phi) * cos(theta);
+        center[1] += 0.1f * bound_size[1] * cos(phi);
+        center[2] += 0.1f * bound_size[2] * sin(phi) * sin(theta);
     }
     if(key == 's' || key == 'S') //move backward
     {
-        eye_pos[0] -= 0.1 * bound_size[0] * sin(phi) * cos(theta);
-        eye_pos[1] -= 0.1 * bound_size[1] * cos(phi);
-        eye_pos[2] -= 0.1 * bound_size[2] * sin(phi) * sin(theta);
-        center[0] -= 0.1 * bound_size[0] * sin(phi) * cos(theta);
-        center[1] -= 0.1 * bound_size[1] * cos(phi);
-        center[2] -= 0.1 * bound_size[2] * sin(phi) * sin(theta);
+        eye_pos[0] -= 0.1f * bound_size[0] * sin(phi) * cos(theta);
+        eye_pos[1] -= 0.1f * bound_size[1] * cos(phi);
+        eye_pos[2] -= 0.1f * bound_size[2] * sin(phi) * sin(theta);
+        center[0] -= 0.1f * bound_size[0] * sin(phi) * cos(theta);
+        center[1] -= 0.1f * bound_size[1] * cos(phi);
+        center[2] -= 0.1f * bound_size[2] * sin(phi) * sin(theta);
      }
     if(key == 'a' || key == 'A') //move left
     {
-        eye_pos[0] += 0.1 * bound_size[0] * sin(phi) * sin(theta);
-        eye_pos[2] += -0.1 * bound_size[2] * sin(phi) * cos(theta);
-        center[0] += 0.1 * bound_size[0] * sin(phi) * sin(theta);
-        center[2] += -0.1 * bound_size[2] * sin(phi) * cos(theta);
+        eye_pos[0] += 0.1f * bound_size[0] * sin(phi) * sin(theta);
+        eye_pos[2] += -0.1f * bound_size[2] * sin(phi) * cos(theta);
+        center[0] += 0.1f * bound_size[0] * sin(phi) * sin(theta);
+        center[2] += -0.1f * bound_size[2] * sin(phi) * cos(theta);
     }
     if(key == 'd' || key == 'D') //move right
     {
-        eye_pos[0] += -0.1 * bound_size[0] * sin(phi) * sin(theta);
-        eye_pos[2] += 0.1 * bound_size[2] * sin(phi) * cos(theta);
-        center[0] += -0.1 * bound_size[0] * sin(phi) * sin(theta);
-        center[2] += 0.1 * bound_size[2] * sin(phi) * cos(theta);
+        eye_pos[0] += -0.1f * bound_size[0] * sin(phi) * sin(theta);
+        eye_pos[2] += 0.1f * bound_size[2] * sin(phi) * cos(theta);
+        center[0] += -0.1f * bound_size[0] * sin(phi) * sin(theta);
+        center[2] += 0.1f * bound_size[2] * sin(phi) * cos(theta);
     }
     if(key == 'r' || key == 'R') // up
     {
-        eye_pos[1] += 0.1 * bound_size[1];
-        center[1] += 0.1 * bound_size[1];
+        eye_pos[1] += 0.1f * bound_size[1];
+        center[1] += 0.1f * bound_size[1];
     }
     if(key == 'f' || key == 'F') // down
     {
-        eye_pos[1] -= 0.1 * bound_size[1];
-        center[1] -= 0.1 * bound_size[1];
+        eye_pos[1] -= 0.1f * bound_size[1];
+        center[1] -= 0.1f * bound_size[1];
     }
 
     if(key == 'z' || key == 'Z')
     {
         theta = -M_PI/2, phi = M_PI / 2;
-        eye_pos[0] = 0.0, eye_pos[1] = 0.0, eye_pos[2] = 0.0 + 2.0 * bound_size[2],
+        eye_pos[0] = 0.0f, eye_pos[1] = 0.0f, eye_pos[2] = 0.0f + 2.0f * bound_size[2],
         center[0] = eye_pos[0] + sin(phi) * cos(theta), center[1] = eye_pos[1] + cos(phi), center[2] = 4*sin(phi) * sin(theta);
     }
 
@@ -353,17 +355,17 @@ void keyboard(unsigned char key,int x,int y)
 void special(int key, int x, int y)
 {
     if(key == GLUT_KEY_UP) // look up
-        if(phi - 0.02 > 0) phi -= 0.02;
+        if(phi - 0.02f > 0) phi -= 0.02f;
     if(key == GLUT_KEY_DOWN) // look down
-        if(phi + 0.02 < M_PI) phi += 0.02;
+        if(phi + 0.02f < M_PI) phi += 0.02f;
     if(key == GLUT_KEY_LEFT) // turn left
     {
-        theta -= 0.1;
+        theta -= 0.1f;
         if(theta <= -2 * M_PI) theta += 2 * M_PI;
     }
     if(key == GLUT_KEY_RIGHT) // turn right
     {
-        theta += 0.1;
+        theta += 0.1f;
         if(theta >= 2 * M_PI) theta -= 2 * M_PI;
     }
     center[0] = eye_pos[0] + bound_size[0] * sin(phi) * cos(theta);

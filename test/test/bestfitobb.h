@@ -3,7 +3,6 @@
 #define BEST_FIT_OBB_H
 
 #include <vector>
-#include "float_math.h"
 #include "algebra3.h"
 /*----------------------------------------------------------------------
 		Copyright (c) 2004 Open Dynamics Framework Group

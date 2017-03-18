@@ -3,12 +3,8 @@
 #include <CGAL/IO/Polyhedron_iostream.h>
 #include <CGAL/mesh_segmentation.h>
 #include <CGAL/property_map.h>
-#include <fstream>
 #include <vector>
 #include "glm.h"
-#include "glui_internal.h"
-#include "ImportOBJ.h"
-#include "bisect.h"
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Polyhedron_3<Kernel, CGAL::Polyhedron_items_3, CGAL::HalfedgeDS_list> Polyhedron;

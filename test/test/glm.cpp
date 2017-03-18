@@ -304,19 +304,19 @@ glmReadMTL(GLMmodel* model, char* name)
     /* set the default material */
     for (i = 0; i < nummaterials; i++) {
         model->materials[i].name = NULL;
-        model->materials[i].shininess = 65.0;
-        model->materials[i].diffuse[0] = 0.8;
-        model->materials[i].diffuse[1] = 0.8;
-        model->materials[i].diffuse[2] = 0.8;
-        model->materials[i].diffuse[3] = 1.0;
-        model->materials[i].ambient[0] = 0.2;
-        model->materials[i].ambient[1] = 0.2;
-        model->materials[i].ambient[2] = 0.2;
-        model->materials[i].ambient[3] = 1.0;
-        model->materials[i].specular[0] = 0.0;
-        model->materials[i].specular[1] = 0.0;
-        model->materials[i].specular[2] = 0.0;
-        model->materials[i].specular[3] = 1.0;
+        model->materials[i].shininess = 65.0f;
+        model->materials[i].diffuse[0] = 0.8f;
+        model->materials[i].diffuse[1] = 0.8f;
+        model->materials[i].diffuse[2] = 0.8f;
+        model->materials[i].diffuse[3] = 1.0f;
+        model->materials[i].ambient[0] = 0.2f;
+        model->materials[i].ambient[1] = 0.2f;
+        model->materials[i].ambient[2] = 0.2f;
+        model->materials[i].ambient[3] = 1.0f;
+        model->materials[i].specular[0] = 0.0f;
+        model->materials[i].specular[1] = 0.0f;
+        model->materials[i].specular[2] = 0.0f;
+        model->materials[i].specular[3] = 1.0f;
     }
     model->materials[0].name = my_strdup("default");
 
@@ -849,12 +849,12 @@ glmUnitize(GLMmodel* model)
     d = glmAbs(maxz) + glmAbs(minz);
 
     /* calculate center of the model */
-    cx = (maxx + minx) / 2.0;
-    cy = (maxy + miny) / 2.0;
-    cz = (maxz + minz) / 2.0;
+    cx = (maxx + minx) / 2.0f;
+    cy = (maxy + miny) / 2.0f;
+    cz = (maxz + minz) / 2.0f;
 
     /* calculate unitizing scale factor */
-    scale = 2.0 / glmMax(glmMax(w, h), d);
+    scale = 2.0f / glmMax(glmMax(w, h), d);
 
     /* translate around center then scale */
     for (i = 1; i <= model->numvertices; i++) {
@@ -1167,7 +1167,7 @@ glmVertexNormals(GLMmodel* model, GLfloat angle)
     assert(model);
 
     /* calculate the cosine of the angle (in degrees) */
-    cos_angle = cos(angle * M_PI / 180.0);
+    cos_angle = cos(angle * M_PI / 180.0f);
 
     /* nuke any previous normals */
     if (model->normals)
@@ -1323,15 +1323,15 @@ glmLinearTexture(GLMmodel* model)
     model->texcoords=(GLfloat*)malloc(sizeof(GLfloat)*2*(model->numtexcoords+1));
 
     glmDimensions(model, dimensions);
-    scalefactor = 2.0 /
+    scalefactor = 2.0f /
         glmAbs(glmMax(glmMax(dimensions[0], dimensions[1]), dimensions[2]));
 
     /* do the calculations */
     for(i = 1; i <= model->numvertices; i++) {
         x = model->vertices->at(3 * i + 0) * scalefactor;
         y = model->vertices->at(3 * i + 2) * scalefactor;
-        model->texcoords[2 * i + 0] = (x + 1.0) / 2.0;
-        model->texcoords[2 * i + 1] = (y + 1.0) / 2.0;
+        model->texcoords[2 * i + 0] = (x + 1.0f) / 2.0f;
+        model->texcoords[2 * i + 1] = (y + 1.0f) / 2.0f;
     }
 
     /* go through and put texture coordinate indices in all the triangles */
@@ -1389,18 +1389,18 @@ glmSpheremapTexture(GLMmodel* model)
             phi = 0.0;
         } else {
             if(z == 0.0)
-                phi = 3.14159265 / 2.0;
+                phi = 3.14159265f / 2.0f;
             else
                 phi = acos(z / rho);
 
             if(y == 0.0)
-                theta = 3.141592365 / 2.0;
+                theta = 3.141592365f / 2.0f;
             else
-                theta = asin(y / r) + (3.14159265 / 2.0);
+                theta = asin(y / r) + (3.14159265f / 2.0f);
         }
 
-        model->texcoords[2 * i + 0] = theta / 3.14159265;
-        model->texcoords[2 * i + 1] = phi / 3.14159265;
+        model->texcoords[2 * i + 0] = theta / 3.14159265f;
+        model->texcoords[2 * i + 1] = phi / 3.14159265f;
     }
 
     /* go through and put texcoord indices in all the triangles */
@@ -1554,7 +1554,7 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
 {
     GLuint i;
     FILE* file;
-    GLMgroup* group;
+    //GLMgroup* group;
 
     assert(model);
 

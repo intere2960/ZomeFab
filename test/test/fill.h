@@ -1,6 +1,8 @@
 #ifndef FILL_H_INCLUDED
 #define FILL_H_INCLUDED
 
+#include "glm.h"
+
 enum point_type { _concave = -1, _tangential = 0, _convex = 1 };
 
 void convert_2d(GLMmodel &temp_piece, Loop &loop);

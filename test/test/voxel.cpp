@@ -1,9 +1,9 @@
 #include <algorithm>
+#include <string>
 #include <omp.h>
 #include "voxel.h"
-
-#include <iostream>
-using namespace std;
+#include "zomedir.h"
+#include "global.h"
 
 voxel::voxel(int t_color, int t_size, float t_scale)
 {
@@ -39,7 +39,7 @@ voxel::voxel(int t_color, int t_size, float t_scale)
 			dy = -1;
 		if (i / 4 == 1)
 			dz = -1;
-		vec3 temp = position + scale * vec3(dx, dy, dz);
+		vec3 temp = position + scale * vec3((float)dx, (float)dy, (float)dz);
 		vertex_p[i] = temp;
 	}
 
@@ -84,8 +84,8 @@ voxel::voxel(int t_color, int t_size, float t_scale)
 			vec3 temp = (vertex_p[i] + vertex_p[j]) / 2;
 			for (int k = 0; k < 12; k += 1){
 				if ((temp - edge_p[k]).length() < 0.001){
-					edge_point[k][0] = i;
-					edge_point[k][1] = j;
+					edge_point[k][0] = (float)i;
+					edge_point[k][1] = (float)j;
 					break;
 				}
 			}
@@ -187,8 +187,8 @@ voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rot
 			vec3 temp = (vertex_p[i] + vertex_p[j]) / 2;
 			for (int k = 0; k < 12; k += 1){
 				if ((temp - edge_p[k]).length() < 0.001){
-					edge_point[k][0] = i;
-					edge_point[k][1] = j;
+					edge_point[k][0] = (float)i;
+					edge_point[k][1] = (float)j;
 					break;
 				}
 			}
@@ -290,8 +290,8 @@ voxel::voxel(voxel t, vec3 t_position, vec3 t_rotation)
 			vec3 temp = (vertex_p[i] + vertex_p[j]) / 2;
 			for (int k = 0; k < 12; k += 1){
 				if ((temp - edge_p[k]).length() < 0.001){
-					edge_point[k][0] = i;
-					edge_point[k][1] = j;
+					edge_point[k][0] = (float)i;
+					edge_point[k][1] = (float)j;
 					break;
 				}
 			}
@@ -319,7 +319,7 @@ void addexist_toward(std::vector<voxel> &all_voxel, voxel &check){
 	#pragma omp parallel for
 	for (int i = 0; i < 6; i += 1){
 		if (check.face_toward[i] == -1){
-			for (int j = 0; j < all_voxel.size(); j += 1){
+			for (unsigned int j = 0; j < all_voxel.size(); j += 1){
 				if (((check.position + check.toward_vector[i] * check.scale * 2) - all_voxel.at(j).position).length() < 0.001){
 					check.face_toward[i] = j;
 
@@ -355,7 +355,7 @@ void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3
 			if (coord_id / 4 == 1)
 				dz = 5;
 
-			origin += all_voxel.at(start).scale * pow((all_voxel.size() / pow(8, depth)), 1.0 / 3.0) * (all_voxel.at(start).toward_vector.at(dx) + all_voxel.at(start).toward_vector.at(dy) + all_voxel.at(start).toward_vector.at(dz));
+			origin += all_voxel.at(start).scale * pow((all_voxel.size() / pow(8.0f, depth)), 1.0f / 3.0f) * (all_voxel.at(start).toward_vector.at(dx) + all_voxel.at(start).toward_vector.at(dy) + all_voxel.at(start).toward_vector.at(dz));
 
 			for (int i = start; i < end; i += 1){
 				assign_coord(all_voxel.at(i), origin);
@@ -397,7 +397,7 @@ int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int
 		}
 
 		depth += 1;
-		int d = all_voxel.size() / pow(8, depth);
+		int d = (int)(all_voxel.size() / pow(8.0f, depth));
 
 		return search_coord(all_voxel, start + d * id, start + d * (id + 1), p, depth, ball_error);
 	}
@@ -460,16 +460,16 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 	for (unsigned int i = 0; i < region.size(); i += 1){
 		if (region.at(i).size() > 0){
 			std::vector<int> done;
-			for (int j = 0; j < region.at(i).size(); j += 1){
+			for (unsigned int j = 0; j < region.at(i).size(); j += 1){
 				bool p[8] = { false };
 				bool e[12] = { false };
 
 				for (int k = 0; k < 6; k += 1){
 					if (all_voxel.at(all_voxel.at(region.at(i).at(j)).face_toward[k]).show){
-						if (find(done.begin(), done.end(), all_voxel.at(region.at(i).at(j)).face_toward[k]) - done.begin() < done.size()){
+						if ((unsigned)(find(done.begin(), done.end(), all_voxel.at(region.at(i).at(j)).face_toward[k]) - done.begin()) < done.size()){
 							for (int a = 0; a < 8; a += 1){
 								if (!p[a]){
-									if ((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+									if ((unsigned)(find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
 										p[a] = true;
 									}
 								}
@@ -477,7 +477,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 
 							for (int a = 0; a < 12; a += 1){
 								if (!e[a]){
-									if ((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+									if ((unsigned)(find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
 										e[a] = true;
 									}
 								}
@@ -486,7 +486,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 						else{
 							for (int a = 0; a < 8; a += 1){
 								if (!p[a]){
-									if ((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+									if ((unsigned)(find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
 										bool exist = false;
 										for (unsigned int b = 0; b < zome_queue.at(COLOR_WHITE).size(); b += 1){
 											if ((zome_queue.at(COLOR_WHITE).at(b).position - all_voxel.at(region.at(i).at(j)).vertex_p[a]).length() < 0.001){
@@ -509,7 +509,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 
 							for (int a = 0; a < 12; a += 1){
 								if (!e[a]){
-									if ((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+									if ((unsigned)(find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
 										bool exist = false;
 										for (unsigned int b = 0; b < zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size(); b += 1){
 											if ((zome_queue.at(all_voxel.at(region.at(i).at(j)).color).at(b).position - all_voxel.at(region.at(i).at(j)).edge_p[a]).length() < 0.001){
@@ -534,8 +534,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 													}
 												}
 											}
-											new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
-											new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
+											new_edge.fromindex = vec2(COLOR_WHITE, (float)index[0]);
+											new_edge.towardindex = vec2(COLOR_WHITE, (float)index[1]);
 
 											vec3 v = (new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize();
 											mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), angle[2]).inverse();
@@ -548,8 +548,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 											new_edge.fromface = t.dir_face(v);
 											new_edge.towardface = t.opposite_face(new_edge.fromface);
 
-											zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick.push_back(vec2(all_voxel.at(region.at(i).at(j)).color, zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
-											zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick.push_back(vec2(all_voxel.at(region.at(i).at(j)).color, zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
+											zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
+											zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
 											zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
 											e[a] = true;
 										}
@@ -561,7 +561,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 					else{
 						for (int a = 0; a < 8; a += 1){
 							if (!p[a]){
-								if ((find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
+								if ((unsigned)(find(all_voxel.at(region.at(i).at(j)).face_p[a].begin(), all_voxel.at(region.at(i).at(j)).face_p[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_p[a].begin()) < all_voxel.at(region.at(i).at(j)).face_p[a].size()){
 									bool exist = false;
 									for (unsigned int b = 0; b < zome_queue.at(COLOR_WHITE).size(); b += 1){
 										if ((zome_queue.at(COLOR_WHITE).at(b).position - all_voxel.at(region.at(i).at(j)).vertex_p[a]).length() < 0.001){
@@ -584,7 +584,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 
 						for (int a = 0; a < 12; a += 1){
 							if (!e[a]){
-								if ((find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
+								if ((unsigned)(find(all_voxel.at(region.at(i).at(j)).face_edge[a].begin(), all_voxel.at(region.at(i).at(j)).face_edge[a].end(), k) - all_voxel.at(region.at(i).at(j)).face_edge[a].begin()) < all_voxel.at(region.at(i).at(j)).face_edge[a].size()){
 									bool exist = false;
 									for (unsigned int b = 0; b < zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size(); b += 1){
 										if ((zome_queue.at(all_voxel.at(region.at(i).at(j)).color).at(b).position - all_voxel.at(region.at(i).at(j)).edge_p[a]).length() < 0.001){
@@ -610,8 +610,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 											}
 										}
 
-										new_edge.fromindex = vec2(COLOR_WHITE, index[0]);
-										new_edge.towardindex = vec2(COLOR_WHITE, index[1]);
+										new_edge.fromindex = vec2(COLOR_WHITE, (float)index[0]);
+										new_edge.towardindex = vec2(COLOR_WHITE, (float)index[1]);
 
 										vec3 v = (new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize();										
 										mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), angle[2]).inverse();
@@ -624,8 +624,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 										new_edge.fromface = t.dir_face(v);
 										new_edge.towardface = t.opposite_face(new_edge.fromface);
 
-										zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick.push_back(vec2(all_voxel.at(region.at(i).at(j)).color, zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
-										zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick.push_back(vec2(all_voxel.at(region.at(i).at(j)).color, zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
+										zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
+										zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
 										zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
 										e[a] = true;
 									}
@@ -640,10 +640,10 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 	}
 }
 
-void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, float v_size)
+void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, int v_size)
 {
 	zomedir t;
-	voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0, bound_center, angle);
+	voxel start(v_color, v_size, t.color_length(v_color, v_size) / 2.0f, bound_center, angle);
 	vec3 origin = vec3(bound_center) + start.scale * (start.toward_vector.at(0) + start.toward_vector.at(2) + start.toward_vector.at(4));
 
 	int max_d = -1;
@@ -651,9 +651,9 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 		float pos = ceil((bounding_max[i] - origin[i]) / (start.scale * 2)),
 			neg = ceil((origin[i] - bounding_min[i]) / (start.scale * 2));
 		if (pos > max_d)
-			max_d = pos;
+			max_d = (int)pos;
 		if (neg > max_d)
-			max_d = neg;
+			max_d = (int)neg;
 	}
 
 	int half_edge = 1;
@@ -666,12 +666,12 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 		}
 	}
 
-	start.position += (max_d - 1) * (start.toward_vector.at(1) + start.toward_vector.at(3) + start.toward_vector.at(5)) * start.scale * 2;
+	start.position += (float)(max_d - 1) * (start.toward_vector.at(1) + start.toward_vector.at(3) + start.toward_vector.at(5)) * start.scale * 2.0f;
 
 	for (int i = 0; i < max_d * 2; i += 1){
 		for (int j = 0; j < max_d * 2; j += 1){
 			for (int k = 0; k < max_d * 2; k += 1){
-				vec3 new_p = start.position + start.scale * 2 * (i * start.toward_vector.at(0) + j * start.toward_vector.at(2) + k * start.toward_vector.at(4));
+				vec3 new_p = start.position + start.scale * 2.0f * ((float)i * start.toward_vector.at(0) + (float)j * start.toward_vector.at(2) + (float)k * start.toward_vector.at(4));
 				voxel temp(start, new_p, start.rotation);
 				assign_coord(temp, origin);
 				all_voxel.push_back(temp);
@@ -733,7 +733,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 			}
 		}
 
-		for(int i = 0; i < t_queue.size(); i += 1){
+		for(unsigned int i = 0; i < t_queue.size(); i += 1){
 			for(int j = 0; j < 6; j += 1){
 				if(all_voxel.at(t_queue.at(i)).face_toward[j] != -1){
 					if(!use[all_voxel.at(t_queue.at(i)).face_toward[j]]){

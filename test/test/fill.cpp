@@ -1,5 +1,4 @@
 #include <vector>
-#include "glm.h"
 #include "algebra3.h"
 #include "fill.h"
 
@@ -23,8 +22,8 @@ void convert_2d(GLMmodel &temp_piece, Loop &loop)
 
     vec3 zero(0.0, 0.0, 0.0);
     if(row_0 == zero && row_1 == zero){
-        row_0[0] = (axis_mat[2][2] < 0.0) ? -1.0 : 1.0;
-        row_1[1] = 1.0;
+        row_0[0] = (axis_mat[2][2] < 0.0f) ? -1.0f : 1.0f;
+        row_1[1] = 1.0f;
         axis_mat[0] = row_0;
         axis_mat[1] = row_1;
     }
@@ -81,8 +80,8 @@ int span_tri(Loop &loop, int index1, int index2, int index3, bool two_d)
 
 void judge_inverse(Loop &loop)
 {
-    float start_s = loop.sign->at(0);
-    float end_s = loop.sign->at(loop.sign->size() - 1);
+	float start_s = (float)loop.sign->at(0);
+	float end_s = (float)loop.sign->at(loop.sign->size() - 1);
 
     bool judge1 = start_s < 0;
     bool judge2 = end_s < 0;
@@ -90,7 +89,7 @@ void judge_inverse(Loop &loop)
         loop.sign_flip = -1.0;
         loop.num_concave = 0;
         for(unsigned i = 0; i < loop.sign->size(); i += 1){
-            loop.sign->at(i) = loop.sign_flip * loop.sign->at(i);
+            loop.sign->at(i) = (int)loop.sign_flip * loop.sign->at(i);
             if(loop.sign->at(i) != _convex){
                 loop.num_concave += 1;
             }
@@ -193,9 +192,9 @@ void triangulate(Loop &loop, bool two_d)
         }
 
         vec3 tri_vindex;
-        tri_vindex[0] = loop.loop_line->at(prev_index);
-        tri_vindex[1] = loop.loop_line->at(ear_index);
-        tri_vindex[2] = loop.loop_line->at(next_index);
+		tri_vindex[0] = (float)loop.loop_line->at(prev_index);
+		tri_vindex[1] = (float)loop.loop_line->at(ear_index);
+		tri_vindex[2] = (float)loop.loop_line->at(next_index);
         loop.tri->push_back(tri_vindex);
 
         if(loop.sign->at(prev_index) != _convex){
@@ -238,9 +237,9 @@ void triangulate(Loop &loop, bool two_d)
 
     if(loop.loop_line->size() == 3) {
         vec3 tri_vindex;
-        tri_vindex[0] = loop.loop_line->at(0);
-        tri_vindex[1] = loop.loop_line->at(1);
-        tri_vindex[2] = loop.loop_line->at(2);
+		tri_vindex[0] = (float)loop.loop_line->at(0);
+		tri_vindex[1] = (float)loop.loop_line->at(1);
+		tri_vindex[2] = (float)loop.loop_line->at(2);
         loop.tri->push_back(tri_vindex);
 	}
 }
@@ -253,9 +252,9 @@ void fill_hole(GLMmodel &temp_piece, bool two_d)
         for(unsigned int j = 0; j < temp_piece.loop->at(i).tri->size(); j += 1){
             vec3 tri_vindex = temp_piece.loop->at(i).tri->at(j);
             GLMtriangle temp;
-            temp.vindices[0] = tri_vindex[0];
-            temp.vindices[1] = tri_vindex[1];
-            temp.vindices[2] = tri_vindex[2];
+			temp.vindices[0] = (GLuint)tri_vindex[0];
+			temp.vindices[1] = (GLuint)tri_vindex[1];
+            temp.vindices[2] = (GLuint)tri_vindex[2];
             temp_piece.triangles->push_back(temp);
             temp_piece.numtriangles += 1;
         }

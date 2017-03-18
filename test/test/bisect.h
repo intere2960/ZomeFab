@@ -1,7 +1,8 @@
 #ifndef BISECT_H_INCLUDED
 #define BISECT_H_INCLUDED
 
-#include <algorithm>
+#include <vector>
+#include "algebra3.h"
 
 class edge
 {
@@ -28,7 +29,7 @@ public:
     int dir;
 };
 
-int plane_dir_point(vec3 &point, plane plane);
+float plane_dir_point(vec3 &point, plane plane);
 void plane_dir_edge(edge &temp, plane plane, int dir[2]);
 void plane_dist_edge(edge &temp, plane plane, float dist[2]);
 void cut_intersection(GLMmodel *myObj, std::vector<plane> planes, std::vector<int> &face_split_by_plane, bool have_dir);

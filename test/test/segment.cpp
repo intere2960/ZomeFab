@@ -1,4 +1,8 @@
+#include <fstream>
 #include "segment.h"
+#include "ImportOBJ.h"
+#include "bisect.h"
+#include "glui_internal.h"
 
 void sdf_segment(std::vector<GLMmodel> &seg, GLMmodel *model, char *model_source)
 {
@@ -29,7 +33,7 @@ void sdf_segment(std::vector<GLMmodel> &seg, GLMmodel *model, char *model_source
 	seg.resize(number_of_segments);
 
 	model->loop = new std::vector<Loop>();
-	for (int i = 0; i < seg.size(); i += 1){		
+	for (unsigned int i = 0; i < seg.size(); i += 1){		
 		process_piece(seg.at(i), model, segment_tri.at(i));
 		std::string piece = s + std::to_string(i) + ".obj";
 		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);

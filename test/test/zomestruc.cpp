@@ -1,5 +1,6 @@
 #include "zomestruc.h"
-
+#include "zomedir.h"
+#include "global.h"
 
 zomeconn::zomeconn()
 {

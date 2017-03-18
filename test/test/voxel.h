@@ -2,10 +2,7 @@
 #define VOXEL_H_INCLUDED
 
 #include <vector>
-#include <string>
 #include "algebra3.h"
-#include "glui_internal.h"
-#include "zomedir.h"
 #include "zomestruc.h"
 #include "glm.h"
 
@@ -42,7 +39,7 @@ void oct_tree(std::vector<voxel> &all_voxel, int start, int end, int depth, vec3
 int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int depth, vec3 &ball_error);
 void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, int index2, vec3 &ball_error);
 void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region, vec3 &angle);
-void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, float v_size);
+void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, int v_size);
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id);
 void output_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 
