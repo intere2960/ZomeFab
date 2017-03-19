@@ -26,6 +26,7 @@ public:
 	int dir_face(vec3 &fdir);
 	int dir_face(vec3 &vecInitial, vec3 &vecEnd, int size);
 	int find_near_dir(vec3 input);
+	void find_best_zome(vec3 start, vec3 end, int near_index, int &choose_size, int &choose_dir);
 
 	float dir_parameter(int i, int d); //get 'i'th dir[d]
 	float weight(int color, int size); //get weight of different color by size

@@ -106,14 +106,14 @@ zomedir::zomedir()
 		for (int j = 0; j < 62; j += 1)
 		{
 			double tmpDot = (dir->at(i) * dir->at(j));
-			if (tmpDot<-1.0)
+			if (tmpDot < -1.0)
 				tmpDot = -1.0;
-			if (tmpDot>1.0)
+			if (tmpDot > 1.0)
 				tmpDot = 1.0;
 			dir_angles[i][j] = acos(tmpDot);
 		}
 	}
-	for (int i = 0; i<62; i++)
+	for (int i = 0; i < 62; i += 1)
 		dir_angles[i][i] = 100.0;
 
 
@@ -134,7 +134,7 @@ zomedir::zomedir()
 
 			for (int j = 0; j < 62; j += 1)
 			{
-				if (fabs(dir_angles[i][j] - tmpMin)<0.3)
+				if (fabs(dir_angles[i][j] - tmpMin) < 0.3)
 				{
 					dirs_in_layer.push_back(j);
 					dir_angles[i][j] = 100.0;
@@ -406,6 +406,31 @@ int zomedir::find_near_dir(vec3 input)
 		}
 	}
 	return ans;
+}
+
+void zomedir::find_best_zome(vec3 start, vec3 end, int near_index, int &choose_size, int &choose_dir)
+{
+	double tmpMin = 1e100;
+
+	std::vector<int> close_dirs = near_dir.at(near_index).at(0);
+	close_dirs.insert(close_dirs.end(), near_dir.at(near_index).at(1).begin(), near_dir.at(near_index).at(1).end());
+
+	for (unsigned int j = 0; j < close_dirs.size(); j += 1)
+	{
+		int tmpDir = close_dirs[j];
+		int tmpColor = face_color(tmpDir);
+		for (int i = 0; i < 3; i += 1)
+		{
+			vec3 tmp_end_point = start + color_length(tmpColor, i) * dir->at(tmpDir);
+			double tmpDis = (tmp_end_point - end).length();
+			if (tmpDis < tmpMin)
+			{
+				tmpMin = tmpDis;
+				choose_size = i;
+				choose_dir = tmpDir;
+			}
+		}
+	}
 }
 
 float zomedir::dir_parameter(int i, int d)

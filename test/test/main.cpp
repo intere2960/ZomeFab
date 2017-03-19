@@ -212,68 +212,53 @@ int main(int argc, char **argv)
 
 	//test();
 
+	zomedir t;
+
 	vec3 p1(26.576f, 120.994f, 75.2333f);
-	vec3 p2(14.3096f, 238.576f, 69.4521f);
-	
-	vector<vec2> path;
-	vec3 asd = p2 - p1;
-	cout << asd.length() << endl;
-	cout << t.find_near_dir(asd) << endl;
+	vec3 p2 = p1 + t.dir->at(2) * t.color_length(COLOR_BLUE, SIZE_M) + t.dir->at(30) * t.color_length(COLOR_RED, SIZE_S) + t.dir->at(34) * t.color_length(COLOR_RED, SIZE_S) + t.dir->at(54) * t.color_length(COLOR_YELLOW, SIZE_S) + t.dir->at(35) * t.color_length(COLOR_RED, SIZE_M);
+	//vec3 p2 = p1 + t.dir->at(2) * t.color_length(COLOR_BLUE, SIZE_S); 
+	//cout << p2[0] << " " << p2[1] << " " << p2[2] << endl;
+	//vec3 p2(14.3096f, 238.576f, 69.4521f);
 		
-	//int x = 0;
-	//while (x < 8){
-	//	float e = 1e9;
-	//	vec3 now_path;
-	//	vec3 now_p1 = p1;
-	//	float now_l = 0.0;
-	//	int good_i, good_j;
-	//	bool change = false;
-	//	for (int i = 0; i < path.size(); i += 1){
-	//		now_path += t.dir->at(path.at(i)[0])* t.face_length(path.at(i)[0], path.at(i)[1]);
-	//		now_l += t.face_length(path.at(i)[0], path.at(i)[1]);
-	//	}
-	//	now_p1 += now_path;
-	//	
-	//	vec3 d = p2 - now_p1;
-	//	cout << d.length() << endl;
-	//	if (d.length() < 0.001){
-	//		break;
-	//	}
+	vec3 asd = p2 - p1;
+	int near_d = t.find_near_dir(asd);
+	int best_s, best_i;
+	cout << asd.length() << endl;
+	cout << near_d << endl;
+	t.find_best_zome(p1, p2, near_d, best_s, best_i);
+	cout << best_s << " " << best_i << endl;
 
-	//	//cout << now_l << endl;
+	vector<vec3> record;
+	record.push_back(p1);
+	connect_points_optimize(p1, p2, record);
+	
+	t.find_best_zome(p1, record.at(0), near_d, best_s, best_i);
+	
+	cout << record.at(0)[0] << " " << record.at(0)[1] << " " << record.at(0)[2] << endl;
+	cout << best_i << " " << best_s << endl;
 
-	//	for (int i = 0; i < t.dir->size(); i += 1){
-	//		if ((path.size() > 0) && (i == t.opposite_face(path.at(path.size() - 1)[0])))
-	//			continue;
+	for (unsigned int i = 1; i < record.size(); i += 1){		
+		cout << record.at(0)[0] << " " << record.at(0)[1] << " " << record.at(0)[2] << endl;
+		t.find_best_zome(record.at(i - 1), record.at(i), near_d, best_s, best_i);
+		cout << best_i << " " << best_s << endl;
+	}
+	
+	/*vector<vec2> path;
+	vec3 asd = p2 - p1;
 
-	//		for (int j = 0; j < 3; j += 1){
-	//			vec3 temp_path = t.dir->at(i) * t.face_length(i, j);
-	//			float temp_l = now_l + t.face_length(i, j);
-	//			vec3 temp_d = p2 - (now_p1 + temp_path);
-	//			float temp_e = temp_l + temp_d.length();
-	//		
-	//			/*if (path.size() > 0){
-	//				cout << "d : " << d.length() << endl;
-	//				cout << "temp_l : " << temp_l << endl;
-	//				cout << "\t" << "temp_e : " << temp_e << endl;
-	//			}*/
-
-	//			if (temp_e < e){
-	//				e = temp_e;
-	//				good_i = i;
-	//				good_j = j;
-	//				change = true;
-	//				//cout << good_i << " " << good_j << " " << e << endl;
-	//			}
-	//		}
-	//	}
-
-	//	if (change){
-	//		cout << good_i << " " << good_j << " " << e << endl;
-	//		path.push_back(vec2(good_i, good_j));
-	//	}
-	//	x += 1;
-	//}
+	int near_d = t.find_near_dir(asd);
+	int best_s, best_i;
+	cout << asd.length() << endl;
+	cout << near_d << endl;
+	t.find_best_zome(p1, p2, near_d, best_s, best_i);
+	cout << best_s << " " << best_i << endl;
+	
+	vector<vec3> record;
+	record.push_back(p1);
+	connect_points_optimize(p1, p2, record);
+	for (unsigned int i = 0; i < record.size(); i += 1){
+		cout << record.at(i)[0] << " " << record.at(i)[1] << " " << record.at(i)[2] << endl;
+	}*/
 
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);

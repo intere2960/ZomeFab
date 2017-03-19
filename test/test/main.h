@@ -21,6 +21,7 @@
 #include "voxel.h"
 #include "segment.h"
 #include "bestfitobb.h"
+#include "pathdata.h"
 
 using namespace std;
 
@@ -135,7 +136,6 @@ vector<edge> all_edge;
 vector<int> face_split_by_plane;
 vector<int> face_inner_split_by_plane;
 
-zomedir t;
 vector<vector<voxel>> all_voxel;
 vector<vector<vector<zomeconn>>> zome_queue;
 vector<GLMmodel> seg;

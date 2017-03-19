@@ -14,5 +14,7 @@ public:
 	std::vector<vec3> road_path;
 	double dis_to_end;
 	double line_weight;
-
 };
+
+void connect_points(vec3 start, vec3 end, std::vector<vec3> &path_points);
+void connect_points_optimize(vec3 start, vec3 end, std::vector<vec3> &path_points);
