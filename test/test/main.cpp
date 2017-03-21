@@ -201,25 +201,25 @@ void test()
 	}
 }
 
-int main(int argc, char **argv)
+vector<vector<zomeconn>> test_connect(4);
+vec3 delta;
+
+void fake()
 {
-	//    findzoom();
-
-	myObj = glmReadOBJ(model_source);
-	//myObj_inner = glmCopy(myObj);
-
-	init();
-
-	//test();
-
 	zomedir t;
 
 	vec3 p1(26.576f, 120.994f, 75.2333f);
-	vec3 p2 = p1 + t.dir->at(2) * t.color_length(COLOR_BLUE, SIZE_M) + t.dir->at(30) * t.color_length(COLOR_RED, SIZE_S) + t.dir->at(34) * t.color_length(COLOR_RED, SIZE_S) + t.dir->at(54) * t.color_length(COLOR_YELLOW, SIZE_S) + t.dir->at(35) * t.color_length(COLOR_RED, SIZE_M);
+	//vec3 p2 = p1 + t.dir->at(2) * t.color_length(COLOR_BLUE, SIZE_M) + t.dir->at(30) * t.color_length(COLOR_RED, SIZE_S) + t.dir->at(34) * t.color_length(COLOR_RED, SIZE_S) + t.dir->at(54) * t.color_length(COLOR_YELLOW, SIZE_S) + t.dir->at(35) * t.color_length(COLOR_RED, SIZE_M);
 	//vec3 p2 = p1 + t.dir->at(2) * t.color_length(COLOR_BLUE, SIZE_S); 
 	//cout << p2[0] << " " << p2[1] << " " << p2[2] << endl;
-	//vec3 p2(14.3096f, 238.576f, 69.4521f);
-		
+	vec3 temp1(61.6096f, 285.876f, 69.4521f);
+	vec3 temp2(64.8425f, 288.677f, 69.6503f);
+	delta = temp2 - temp1;
+	vec3 p2(61.6096f, 285.876f, -25.1479f);
+	//vec3 p2(61.6096f, 238.576f, -25.1479f);
+	cout << delta[0] << " " << delta[1] << " " << delta[2] << endl;
+	p2 += delta;
+
 	vec3 asd = p2 - p1;
 	int near_d = t.find_near_dir(asd);
 	int best_s, best_i;
@@ -231,17 +231,221 @@ int main(int argc, char **argv)
 	vector<vec3> record;
 	record.push_back(p1);
 	connect_points_optimize(p1, p2, record);
-	
+
 	t.find_best_zome(p1, record.at(0), near_d, best_s, best_i);
 	
 	cout << record.at(0)[0] << " " << record.at(0)[1] << " " << record.at(0)[2] << endl;
 	cout << best_i << " " << best_s << endl;
 
-	for (unsigned int i = 1; i < record.size(); i += 1){		
-		cout << record.at(0)[0] << " " << record.at(0)[1] << " " << record.at(0)[2] << endl;
+	zomeconn start_ball;
+	start_ball.position = record.at(0);
+	test_connect.at(COLOR_WHITE).push_back(start_ball);
+
+	zomeconn start_stick;
+	start_stick.position = (record.at(0) + p1) / 2;
+	start_stick.fromface = best_i;
+	start_stick.size = best_s;
+	test_connect.at(t.face_color(best_i)).push_back(start_stick);
+
+
+	test_connect.at(COLOR_WHITE).at(0).connect_stick.push_back(vec2(t.face_color(best_i), test_connect.at(t.face_color(best_i)).size() - 1));
+	test_connect.at(t.face_color(best_i)).at(0).towardindex = vec2(COLOR_WHITE, 0);
+
+
+	for (unsigned int i = 1; i < record.size(); i += 1){
+		if (i < record.size() - 1){
+			zomeconn temp_ball;
+			temp_ball.position = record.at(i);
+			test_connect.at(COLOR_WHITE).push_back(temp_ball);
+		}
+
+		cout << record.at(i)[0] << " " << record.at(i)[1] << " " << record.at(i)[2] << endl;
 		t.find_best_zome(record.at(i - 1), record.at(i), near_d, best_s, best_i);
 		cout << best_i << " " << best_s << endl;
+
+		zomeconn temp_stick;
+		temp_stick.position = (record.at(i) + record.at(i - 1)) / 2;
+		temp_stick.fromface = best_i;
+		temp_stick.size = best_s;
+		if (i < record.size() - 1)
+			temp_stick.towardindex = vec2(COLOR_WHITE, i);
+		temp_stick.fromindex = vec2(COLOR_WHITE, i - 1);
+		test_connect.at(t.face_color(best_i)).push_back(temp_stick);
+
+		test_connect.at(COLOR_WHITE).at(i - 1).connect_stick.push_back(vec2(t.face_color(best_i), test_connect.at(t.face_color(best_i)).size() - 1));
+		if (i < record.size() - 1)
+			test_connect.at(COLOR_WHITE).at(i).connect_stick.push_back(vec2(t.face_color(best_i), test_connect.at(t.face_color(best_i)).size() - 1));
 	}
+
+	//for (int j = 0; j < 4; j += 1){
+	//	cout << j << " : " << endl;
+	//	if (j != 3){
+	//		for (int k = 0; k < test_connect.at(j).size(); k += 1){
+	//			cout << "\t " << k << " : (" << test_connect.at(j).at(k).fromindex[0] << " , " << test_connect.at(j).at(k).fromindex[1]
+	//				<< ") (" << test_connect.at(j).at(k).towardindex[0] << " , " << test_connect.at(j).at(k).towardindex[1] << ")" << endl;
+	//		}
+	//	}
+	//	else{
+	//		for (int k = 0; k < test_connect.at(3).size(); k += 1){
+	//			if (test_connect.at(3).at(k).connect_stick.size() != 6){
+	//				cout << "\t " << k << " : ";
+	//				for (int a = 0; a < test_connect.at(3).at(k).connect_stick.size(); a += 1){
+	//					cout << " (" << test_connect.at(3).at(k).connect_stick.at(a)[0] << " , " << test_connect.at(3).at(k).connect_stick.at(a)[1] << ")";
+	//				}
+	//				cout << endl;
+	//				//cout << "\t " << test_connect.at(3).at(k).position[0] << " " << test_connect.at(3).at(k).position[1] << " " << test_connect.at(3).at(k).position[2] << endl;
+	//			}
+	//		}
+	//	}
+	//}
+	
+	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+	for (unsigned int i = 0; i < test_connect.at(3).size(); i += 1){
+		if (i == 0){
+			glmR(zome, vec3(0.0, 0.0, 0.0));
+			glmRT(zome, vec3(0.0, 0.0, 0.0), test_connect.at(3).at(i).position);
+		}
+		else{
+			GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
+			glmR(new_ball, vec3(0.0, 0.0, 0.0));
+			glmRT(new_ball, vec3(0.0, 0.0, 0.0), test_connect.at(3).at(i).position);
+			glmCombine(zome, new_ball);
+		}
+	}
+
+	for (unsigned int i = 0; i < test_connect.size() - 1; i += 1){
+		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+			GLMmodel *new_stick = NULL;
+			if (i == COLOR_BLUE){
+				if (test_connect.at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
+				if (test_connect.at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
+				if (test_connect.at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
+			}
+			else if (i == COLOR_RED){
+				if (test_connect.at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
+				if (test_connect.at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
+				if (test_connect.at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
+			}
+			else if (i == COLOR_YELLOW){
+				if (test_connect.at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
+				if (test_connect.at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
+				if (test_connect.at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
+			}
+			glmRT(new_stick, vec3(0.0, t.roll(test_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+			glmRT(new_stick, vec3(0.0, t.phi(test_connect.at(i).at(j).fromface), t.theta(test_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+			glmR(new_stick, vec3(0.0, 0.0, 0.0));
+			glmRT(new_stick, vec3(0.0, 0.0, 0.0), test_connect.at(i).at(j).position);
+			glmCombine(zome, new_stick);
+		}
+	}
+
+	glmWriteOBJ(zome, "test123.obj", GLM_NONE);
+}
+
+int main(int argc, char **argv)
+{
+	//    findzoom();
+
+	myObj = glmReadOBJ(model_source);
+	//myObj_inner = glmCopy(myObj);
+
+	init();
+
+	test();
+
+	fake();
+
+	for (int j = 0; j < 4; j += 1){
+		for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
+			zome_queue.at(2).at(j).at(k).position += delta;
+		}
+	}
+
+	combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
+	combine_zome_ztruc(zome_queue.at(1), test_connect);
+
+	for (int j = 0; j < 4; j += 1){
+		cout << j << " : " << endl;
+		if (j != 3){
+			for (int k = 0; k < zome_queue.at(1).at(j).size(); k += 1){
+				cout << "\t " << k << " : (" << zome_queue.at(1).at(j).at(k).fromindex[0] << " , " << zome_queue.at(1).at(j).at(k).fromindex[1]
+				<< ") (" << zome_queue.at(1).at(j).at(k).towardindex[0] << " , " << zome_queue.at(1).at(j).at(k).towardindex[1] << ")" << endl;
+			}
+		}
+		else{
+			for (int k = 0; k < zome_queue.at(1).at(3).size(); k += 1){
+				if (zome_queue.at(1).at(3).at(k).connect_stick.size() != 6){
+					cout << "\t " << k << " : ";
+					for (int a = 0; a < zome_queue.at(1).at(3).at(k).connect_stick.size(); a += 1){
+						cout << " (" << zome_queue.at(1).at(3).at(k).connect_stick.at(a)[0] << " , " << zome_queue.at(1).at(3).at(k).connect_stick.at(a)[1] << ")";
+					}
+					cout << endl;
+					cout << "\t " << zome_queue.at(1).at(3).at(k).position[0] << " " << zome_queue.at(1).at(3).at(k).position[1] << " " << zome_queue.at(1).at(3).at(k).position[2] << endl;
+				}
+			}
+		}
+	}
+	
+	zomedir t;
+	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+	for (unsigned int i = 0; i < zome_queue.at(1).at(3).size(); i += 1){
+		if (i == 0){
+			glmR(zome, vec3(0.0, 0.0, 0.0));
+			glmRT(zome, vec3(0.0, 0.0, 0.0), zome_queue.at(1).at(3).at(i).position);
+		}
+		else{
+			GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
+			glmR(new_ball, vec3(0.0, 0.0, 0.0));
+			glmRT(new_ball, vec3(0.0, 0.0, 0.0), zome_queue.at(1).at(3).at(i).position);
+			glmCombine(zome, new_ball);
+		}
+	}
+
+	for (unsigned int i = 0; i < zome_queue.at(1).size() - 1; i += 1){
+		for (unsigned int j = 0; j < zome_queue.at(1).at(i).size(); j += 1){
+			GLMmodel *new_stick = NULL;
+			if (i == COLOR_BLUE){
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
+			}
+			else if (i == COLOR_RED){
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
+			}
+			else if (i == COLOR_YELLOW){
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
+				if (zome_queue.at(1).at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
+			}
+			glmRT(new_stick, vec3(0.0, t.roll(zome_queue.at(1).at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+			glmRT(new_stick, vec3(0.0, t.phi(zome_queue.at(1).at(i).at(j).fromface), t.theta(zome_queue.at(1).at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+			glmR(new_stick, vec3(0.0, 0.0, 0.0));
+			glmRT(new_stick, vec3(0.0, 0.0, 0.0), zome_queue.at(1).at(i).at(j).position);
+			glmCombine(zome, new_stick);
+		}
+	}
+
+	glmWriteOBJ(zome, "test.obj", GLM_NONE);	
 	
 	/*vector<vec2> path;
 	vec3 asd = p2 - p1;

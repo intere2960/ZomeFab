@@ -67,4 +67,6 @@ public:
 //	void AddConn( ZomeConnection* c);
 //};
 
+void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source);
+
 #endif // ZOMESTRUC_H_INCLUDED

@@ -116,18 +116,18 @@ void connect_points_optimize(vec3 start, vec3 end, std::vector<vec3> &path_point
 					}
 					cout << endl;*/
 					int temp_dir;
-					temp_dir = t.dir_face((new_pd.road_path.at(0) - start).normalize());
-					/*cout << new_pd.road_path.at(0)[0] << " " << new_pd.road_path.at(0)[1] << " " << new_pd.road_path.at(0)[2] << endl;
+					/*temp_dir = t.dir_face((new_pd.road_path.at(0) - start).normalize());
+					cout << new_pd.road_path.at(0)[0] << " " << new_pd.road_path.at(0)[1] << " " << new_pd.road_path.at(0)[2] << endl;
 					cout << start[0] << " " << start[1] << " " << start[2] << endl;
 					cout << (new_pd.road_path.at(0) - start).normalize()[0] << " " << (new_pd.road_path.at(0) - start).normalize()[1] << " " << (new_pd.road_path.at(0) - start).normalize()[2] << endl;
 					cout << " ( " << temp_dir << " ) ";*/
-					/*for (int k = 0; k < new_pd.road_path.size(); k += 1){
+					for (int k = 0; k < new_pd.road_path.size(); k += 1){
 						if (k > 0){
 							temp_dir = t.dir_face((new_pd.road_path.at(k) - new_pd.road_path.at(k - 1)).normalize());
-							cout << "( " << temp_dir << " , " << (new_pd.road_path.at(k) - new_pd.road_path.at(k - 1)).length() << " ) ";
+							//cout << "( " << temp_dir << " , " << (new_pd.road_path.at(k) - new_pd.road_path.at(k - 1)).length() << " ) ";
 						}
 					}
-					cout << endl;*/
+					//cout << endl;
 
 					if (new_pd.dis_to_end < 0.3f)
 						get_ans = true;	

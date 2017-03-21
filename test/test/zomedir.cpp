@@ -4,6 +4,9 @@
 #include "glui_internal.h"
 #include "global.h"
 
+#include <iostream>
+using namespace std;
+
 zomedir::zomedir()
 {
 	dir = new std::vector<vec3>();
@@ -111,6 +114,7 @@ zomedir::zomedir()
 			if (tmpDot > 1.0)
 				tmpDot = 1.0;
 			dir_angles[i][j] = acos(tmpDot);
+			//cout << dir_angles[i][j] << endl;
 		}
 	}
 	for (int i = 0; i < 62; i += 1)
@@ -131,6 +135,7 @@ zomedir::zomedir()
 				if (dir_angles[i][j] < tmpMin)
 					tmpMin = dir_angles[i][j];
 			}
+			//cout << tmpMin << endl;
 
 			for (int j = 0; j < 62; j += 1)
 			{
