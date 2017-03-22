@@ -68,5 +68,7 @@ public:
 //};
 
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source);
+void output_struc(std::vector<std::vector<zomeconn>> &target);
+void struc_parser(std::vector<std::vector<zomeconn>> &target);
 
 #endif // ZOMESTRUC_H_INCLUDED

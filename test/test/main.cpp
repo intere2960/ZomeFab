@@ -238,12 +238,15 @@ void fake()
 	cout << best_i << " " << best_s << endl;
 
 	zomeconn start_ball;
+	start_ball.color = COLOR_WHITE;
 	start_ball.position = record.at(0);
 	test_connect.at(COLOR_WHITE).push_back(start_ball);
 
 	zomeconn start_stick;
+	start_stick.color = t.face_color(best_i);
 	start_stick.position = (record.at(0) + p1) / 2;
 	start_stick.fromface = best_i;
+	start_stick.towardface = t.opposite_face(best_i);
 	start_stick.size = best_s;
 	test_connect.at(t.face_color(best_i)).push_back(start_stick);
 
@@ -255,6 +258,7 @@ void fake()
 	for (unsigned int i = 1; i < record.size(); i += 1){
 		if (i < record.size() - 1){
 			zomeconn temp_ball;
+			temp_ball.color = COLOR_WHITE;
 			temp_ball.position = record.at(i);
 			test_connect.at(COLOR_WHITE).push_back(temp_ball);
 		}
@@ -264,8 +268,10 @@ void fake()
 		cout << best_i << " " << best_s << endl;
 
 		zomeconn temp_stick;
+		temp_stick.color = t.face_color(best_i);
 		temp_stick.position = (record.at(i) + record.at(i - 1)) / 2;
 		temp_stick.fromface = best_i;
+		temp_stick.towardface = t.opposite_face(best_i);
 		temp_stick.size = best_s;
 		if (i < record.size() - 1)
 			temp_stick.towardindex = vec2(COLOR_WHITE, i);
@@ -360,10 +366,10 @@ int main(int argc, char **argv)
 
 	init();
 
-	test();
+	/*test();
 
 	fake();
-
+		
 	for (int j = 0; j < 4; j += 1){
 		for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
 			zome_queue.at(2).at(j).at(k).position += delta;
@@ -446,7 +452,63 @@ int main(int argc, char **argv)
 	}
 
 	glmWriteOBJ(zome, "test.obj", GLM_NONE);	
+
+	output_struc(zome_queue.at(1));*/
+
+	struc_parser(test_connect);
+	/*zomedir t;
+	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+	for (unsigned int i = 0; i < test_connect.at(3).size(); i += 1){
+		if (i == 0){
+			glmR(zome, vec3(0.0, 0.0, 0.0));
+			glmRT(zome, vec3(0.0, 0.0, 0.0), test_connect.at(3).at(i).position);
+		}
+		else{
+			GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
+			glmR(new_ball, vec3(0.0, 0.0, 0.0));
+			glmRT(new_ball, vec3(0.0, 0.0, 0.0), test_connect.at(3).at(i).position);
+			glmCombine(zome, new_ball);
+		}
+	}
+
+	for (unsigned int i = 0; i < test_connect.size() - 1; i += 1){
+		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+			GLMmodel *new_stick = NULL;
+			if (i == COLOR_BLUE){
+				if (test_connect.at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
+				if (test_connect.at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
+				if (test_connect.at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
+			}
+			else if (i == COLOR_RED){
+				if (test_connect.at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
+				if (test_connect.at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
+				if (test_connect.at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
+			}
+			else if (i == COLOR_YELLOW){
+				if (test_connect.at(i).at(j).size == SIZE_S)
+					new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
+				if (test_connect.at(i).at(j).size == SIZE_M)
+					new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
+				if (test_connect.at(i).at(j).size == SIZE_L)
+					new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
+			}
+			glmRT(new_stick, vec3(0.0, t.roll(test_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+			glmRT(new_stick, vec3(0.0, t.phi(test_connect.at(i).at(j).fromface), t.theta(test_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+			glmR(new_stick, vec3(0.0, 0.0, 0.0));
+			glmRT(new_stick, vec3(0.0, 0.0, 0.0), test_connect.at(i).at(j).position);
+			glmCombine(zome, new_stick);
+		}
+	}
+
+	glmWriteOBJ(zome, "fake.obj", GLM_NONE);*/
 	
+
 	/*vector<vec2> path;
 	vec3 asd = p2 - p1;
 
@@ -463,6 +525,7 @@ int main(int argc, char **argv)
 	for (unsigned int i = 0; i < record.size(); i += 1){
 		cout << record.at(i)[0] << " " << record.at(i)[1] << " " << record.at(i)[2] << endl;
 	}*/
+
 
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
