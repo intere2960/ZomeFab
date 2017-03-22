@@ -14,6 +14,7 @@ zomeconn::zomeconn()
 	fromface = -1;
 	towardindex = vec2(-1, -1);
 	towardface = -1;
+	surface_d = 100000000000000.0;
 }
 
 zomeconn::~zomeconn()
@@ -132,7 +133,6 @@ void output_struc(std::vector<std::vector<zomeconn>> &target)
 	std::ofstream os;
 	os.open("fake.txt");
 	for (int i = 0; i < 4; i += 1){
-		//os << i << " : " << std::endl;
 		for (unsigned int j = 0; j < target.at(i).size(); j += 1){
 			os << target.at(i).at(j).color << " ";
 			os << target.at(i).at(j).position[0] << " " << target.at(i).at(j).position[1] << " " << target.at(i).at(j).position[2] << " ";
@@ -154,8 +154,6 @@ void output_struc(std::vector<std::vector<zomeconn>> &target)
 	os.close();
 }
 
-#include <iostream>
-
 void struc_parser(std::vector<std::vector<zomeconn>> &target)
 {
 	std::ifstream is;
@@ -163,7 +161,6 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target)
 	int temp_color;
 	vec3 temp_pos;
 	while (is >> temp_color >> temp_pos[0] >> temp_pos[1] >> temp_pos[2]){
-		//std::cout << temp_color << " " << temp_pos[0] << " " << temp_pos[1] << " " << temp_pos[2] << std::endl;
 		if (temp_color != 3){
 			int temp_size, temp_fromface, temp_towardface;
 			vec2  temp_fromindex, temp_towardindex;
@@ -181,10 +178,6 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target)
 			temp_stick.fromindex = temp_fromindex;
 			temp_stick.towardindex = temp_towardindex;
 			target.at(temp_color).push_back(temp_stick);
-
-			//std::cout << temp_fromface << " " << temp_towardface << " ";
-			//std::cout << temp_fromindex[0] << " " << temp_fromindex[1] << " ";
-			//std::cout << towardindex[0] << " " << towardindex[1] << " ";
 		}
 		else{
 			zomeconn temp_ball;
@@ -194,15 +187,12 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target)
 			int temp_size;
 			vec2 temp_connect;
 			is >> temp_size;
-			//std::cout << temp_size << " ";
 			for (int i = 0; i < temp_size; i += 1){
 				is >> temp_connect[0] >> temp_connect[1];
 				temp_ball.connect_stick.push_back(temp_connect);
-				//std::cout << temp_connect[0] << " " << temp_connect[1] << " ";
 			}
 			target.at(COLOR_WHITE).push_back(temp_ball);
 		}
-		//std::cout << std::endl;
 	}
 
 	is.close();

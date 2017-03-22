@@ -357,6 +357,65 @@ void fake()
 	glmWriteOBJ(zome, "test123.obj", GLM_NONE);
 }
 
+void inital_energy()
+{
+	zomedir t;
+
+	for (unsigned int i = 0; i < myObj->triangles->size(); i += 1){
+		vec3 p1(myObj->vertices->at(3 * myObj->triangles->at(i).vindices[0] + 0), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[0] + 1), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[0] + 2));
+		vec3 p2(myObj->vertices->at(3 * myObj->triangles->at(i).vindices[1] + 0), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[1] + 1), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[1] + 2));
+		vec3 p3(myObj->vertices->at(3 * myObj->triangles->at(i).vindices[2] + 0), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[2] + 1), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[2] + 2));
+		vec3 v1 = p1 - p2;
+		vec3 v2 = p3 - p2;
+		vec3 n = v1 ^ v2;
+		float d = n * p1;
+
+		for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+			vec3 ball_n;
+			for (unsigned int k = 0; k < test_connect.at(COLOR_WHITE).at(j).connect_stick.size(); k += 1){
+				int f_index = test_connect.at(test_connect.at(COLOR_WHITE).at(j).connect_stick.at(k)[0]).at(test_connect.at(COLOR_WHITE).at(j).connect_stick.at(k)[1]).fromface;
+				ball_n += t.dir->at(f_index);
+			}
+			ball_n = ball_n.normalize();
+
+			vec3 edge1 = p2 - p1;
+			vec3 edge2 = p3 - p2;
+			vec3 edge3 = p1 - p3;
+
+			float t = (d - (test_connect.at(COLOR_WHITE).at(j).position * n)) / (n * ball_n);
+			vec3 insect_p = test_connect.at(COLOR_WHITE).at(j).position + ball_n * t;
+
+			vec3 judge1 = insect_p - p1;
+			vec3 judge2 = insect_p - p2;
+			vec3 judge3 = insect_p - p3;
+
+			if ((edge1 * judge1 > 0) && (edge2 * judge2 > 0) && (edge3 * judge3 > 0)){
+				if ((insect_p - test_connect.at(COLOR_WHITE).at(j).position).length() < test_connect.at(COLOR_WHITE).at(j).surface_d){
+					test_connect.at(COLOR_WHITE).at(j).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(j).position).length();
+				}
+			}
+
+			ball_n *= -1;
+			t = (d - (test_connect.at(COLOR_WHITE).at(j).position * n)) / (n * ball_n);
+			insect_p = test_connect.at(COLOR_WHITE).at(j).position + ball_n * t;
+
+			judge1 = insect_p - p1;
+			judge2 = insect_p - p2;
+			judge3 = insect_p - p3;
+
+			if ((edge1 * judge1 > 0) && (edge2 * judge2 > 0) && (edge3 * judge3 > 0)){
+				if ((insect_p - test_connect.at(COLOR_WHITE).at(j).position).length() < test_connect.at(COLOR_WHITE).at(j).surface_d){
+					test_connect.at(COLOR_WHITE).at(j).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(j).position).length();
+				}
+			}
+		}
+	}
+
+	/*for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+	cout << test_connect.at(COLOR_WHITE).at(i).surface_d << endl;
+	}*/
+}
+
 int main(int argc, char **argv)
 {
 	//    findzoom();
@@ -456,6 +515,9 @@ int main(int argc, char **argv)
 	output_struc(zome_queue.at(1));*/
 
 	struc_parser(test_connect);
+	
+	inital_energy();
+
 	/*zomedir t;
 	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
 	for (unsigned int i = 0; i < test_connect.at(3).size(); i += 1){
@@ -508,25 +570,6 @@ int main(int argc, char **argv)
 
 	glmWriteOBJ(zome, "fake.obj", GLM_NONE);*/
 	
-
-	/*vector<vec2> path;
-	vec3 asd = p2 - p1;
-
-	int near_d = t.find_near_dir(asd);
-	int best_s, best_i;
-	cout << asd.length() << endl;
-	cout << near_d << endl;
-	t.find_best_zome(p1, p2, near_d, best_s, best_i);
-	cout << best_s << " " << best_i << endl;
-	
-	vector<vec3> record;
-	record.push_back(p1);
-	connect_points_optimize(p1, p2, record);
-	for (unsigned int i = 0; i < record.size(); i += 1){
-		cout << record.at(i)[0] << " " << record.at(i)[1] << " " << record.at(i)[2] << endl;
-	}*/
-
-
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
 

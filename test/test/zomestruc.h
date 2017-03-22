@@ -30,6 +30,8 @@ public:
 	bool isAnalyzed; //analyze force
 	float force;
 
+	float surface_d;
+
 //	zomeconn* link;
 };
 
