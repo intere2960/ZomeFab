@@ -357,14 +357,33 @@ void fake()
 	glmWriteOBJ(zome, "test123.obj", GLM_NONE);
 }
 
-void inital_energy()
+float forbidden_energy(float dist)
 {
 	zomedir t;
+	vec2 p1(t.color_length(COLOR_BLUE, SIZE_S) / 3.0f, 0.0f);
+	vec2 p2(t.color_length(COLOR_BLUE, SIZE_S) * 1.5f, 35.0f);
+	float a = p2[0] * 1 / pow((p2[0] - p1[0]), 2);
 
-	for (unsigned int i = 0; i < myObj->triangles->size(); i += 1){
-		vec3 p1(myObj->vertices->at(3 * myObj->triangles->at(i).vindices[0] + 0), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[0] + 1), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[0] + 2));
-		vec3 p2(myObj->vertices->at(3 * myObj->triangles->at(i).vindices[1] + 0), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[1] + 1), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[1] + 2));
-		vec3 p3(myObj->vertices->at(3 * myObj->triangles->at(i).vindices[2] + 0), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[2] + 1), myObj->vertices->at(3 * myObj->triangles->at(i).vindices[2] + 2));
+	if (dist > p2[0]){
+		return p2[1];
+	}
+	if (dist < p1[0]){
+		return 0.0f;
+	}
+
+	return a * pow((dist - p1[0]), 2);
+}
+
+
+float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
+{
+	float energy = 0.0f;
+	zomedir t;
+
+	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
+		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
 		vec3 v1 = p1 - p2;
 		vec3 v2 = p3 - p2;
 		vec3 n = v1 ^ v2;
@@ -381,39 +400,135 @@ void inital_energy()
 			vec3 edge1 = p2 - p1;
 			vec3 edge2 = p3 - p2;
 			vec3 edge3 = p1 - p3;
+			vec3 insect_p;
+			vec3 judge1;
+			vec3 judge2;
+			vec3 judge3;
 
 			float t = (d - (test_connect.at(COLOR_WHITE).at(j).position * n)) / (n * ball_n);
-			vec3 insect_p = test_connect.at(COLOR_WHITE).at(j).position + ball_n * t;
+			if (t > 0){
+				insect_p = test_connect.at(COLOR_WHITE).at(j).position + ball_n * t;
 
-			vec3 judge1 = insect_p - p1;
-			vec3 judge2 = insect_p - p2;
-			vec3 judge3 = insect_p - p3;
+				judge1 = insect_p - p1;
+				judge2 = insect_p - p2;
+				judge3 = insect_p - p3;
 
-			if ((edge1 * judge1 > 0) && (edge2 * judge2 > 0) && (edge3 * judge3 > 0)){
-				if ((insect_p - test_connect.at(COLOR_WHITE).at(j).position).length() < test_connect.at(COLOR_WHITE).at(j).surface_d){
-					test_connect.at(COLOR_WHITE).at(j).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(j).position).length();
+				if ((edge1 * judge1 > 0) && (edge2 * judge2 > 0) && (edge3 * judge3 > 0)){
+					if ((insect_p - test_connect.at(COLOR_WHITE).at(j).position).length() < test_connect.at(COLOR_WHITE).at(j).surface_d){
+						test_connect.at(COLOR_WHITE).at(j).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(j).position).length();
+					}
 				}
 			}
 
 			ball_n *= -1;
 			t = (d - (test_connect.at(COLOR_WHITE).at(j).position * n)) / (n * ball_n);
-			insect_p = test_connect.at(COLOR_WHITE).at(j).position + ball_n * t;
+			if (t > 0){
+				insect_p = test_connect.at(COLOR_WHITE).at(j).position + ball_n * t;
 
-			judge1 = insect_p - p1;
-			judge2 = insect_p - p2;
-			judge3 = insect_p - p3;
+				judge1 = insect_p - p1;
+				judge2 = insect_p - p2;
+				judge3 = insect_p - p3;
 
-			if ((edge1 * judge1 > 0) && (edge2 * judge2 > 0) && (edge3 * judge3 > 0)){
-				if ((insect_p - test_connect.at(COLOR_WHITE).at(j).position).length() < test_connect.at(COLOR_WHITE).at(j).surface_d){
-					test_connect.at(COLOR_WHITE).at(j).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(j).position).length();
+				if ((edge1 * judge1 > 0) && (edge2 * judge2 > 0) && (edge3 * judge3 > 0)){
+					if ((insect_p - test_connect.at(COLOR_WHITE).at(j).position).length() < test_connect.at(COLOR_WHITE).at(j).surface_d){
+						test_connect.at(COLOR_WHITE).at(j).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(j).position).length();
+					}
 				}
 			}
 		}
 	}
 
+	float energy_dist = 0.0f;
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		//cout << test_connect.at(COLOR_WHITE).at(i).surface_d << endl;
+		//cout << "\t" << forbidden_energy(test_connect.at(COLOR_WHITE).at(i).surface_d) << endl;
+		energy_dist += pow(test_connect.at(COLOR_WHITE).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(COLOR_WHITE).at(i).surface_d));
+		cout << pow(test_connect.at(COLOR_WHITE).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(COLOR_WHITE).at(i).surface_d)) / (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size()) << endl;
+	}
+	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
+	//cout << "test e : " << energy_dist << endl;
+
+	float energy_fair = 0.0f;
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		vec3 temp_ring_p;
+		for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).at(i).connect_stick.size(); j += 1){
+			temp_ring_p += test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick.at(j)[0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick.at(j)[1]).position;
+		}
+		temp_ring_p /= test_connect.at(COLOR_WHITE).at(i).connect_stick.size();
+		energy_fair += (test_connect.at(COLOR_WHITE).at(i).position - temp_ring_p).length2();
+		
+		//cout << (test_connect.at(COLOR_WHITE).at(i).position - temp_ring_p).length2() / (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size()) << endl;
+	}
+	energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
+	//cout << energy_fair << endl;
+
+	energy = energy_dist + energy_fair;
+	cout << energy << endl;
+
+	return energy;
+}
+
+void cool_down()
+{
 	/*for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-	cout << test_connect.at(COLOR_WHITE).at(i).surface_d << endl;
 	}*/
+	zomedir t;
+
+	vec2 test = test_connect.at(COLOR_WHITE).at(0).connect_stick.at(0);
+	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
+	int from_size = test_connect.at(test[0]).at(test[1]).size;
+	vector<zomerecord> temp;
+	for (unsigned int i = 0; i < splite_table.table.at(from_face).size(); i += 1){
+		for (unsigned int j = 0; j < splite_table.table.at(from_face).at(i).size(); j += 1){
+			if (splite_table.table.at(from_face).at(i).at(j).origin[1] == from_size){
+				temp.push_back(splite_table.table.at(from_face).at(i).at(j));
+			}
+		}
+	}
+
+	/*for (int i = 0; i < temp.size(); i += 1){
+		cout << temp.at(i).origin[0] << " " << temp.at(i).origin[1] << " " << temp.at(i).origin[2] << " ";
+		cout << temp.at(i).travel_1[0] << " " << temp.at(i).travel_1[1] << " " << temp.at(i).travel_1[2] << " ";
+		cout << temp.at(i).travel_2[0] << " " << temp.at(i).travel_2[1] << " " << temp.at(i).travel_2[2] << " ";
+		cout << endl;
+	}*/
+	/*cout << test_connect.at(COLOR_WHITE).at(0).position[0] << " " << test_connect.at(COLOR_WHITE).at(0).position[1] << " " << test_connect.at(COLOR_WHITE).at(0).position[2] << endl;
+	cout << temp.at(0).travel_1[0] << endl;
+	cout << temp.at(0).travel_1[1] << endl;*/
+
+	zomeconn new_ball;
+	zomeconn new_stick_f, new_stick_t;
+
+	new_ball.position = test_connect.at(COLOR_WHITE).at(0).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]);
+	new_ball.color = COLOR_WHITE;
+
+	new_stick_f.position = test_connect.at(COLOR_WHITE).at(0).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]) / 2;
+	new_stick_f.color = t.face_color(temp.at(2).travel_1[0]);
+	new_stick_f.size = temp.at(2).travel_1[1];
+	new_stick_f.fromface = temp.at(2).travel_1[0];
+	new_stick_f.towardface = t.opposite_face(temp.at(2).travel_1[0]);
+
+	int toward_ball_index = test_connect.at(test[0]).at(test[1]).towardindex[1];
+	new_stick_t.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at(temp.at(2).travel_2[0]) * t.face_length(temp.at(2).travel_2[0], temp.at(2).travel_2[1]) / 2;
+	new_stick_t.color = t.face_color(temp.at(2).travel_2[0]);
+	new_stick_t.size = temp.at(2).travel_2[1];
+	new_stick_t.fromface = temp.at(2).travel_2[0];
+	new_stick_t.towardface = t.opposite_face(temp.at(2).travel_2[0]);
+
+	test_connect.at(COLOR_WHITE).at(0).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
+	new_ball.connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
+	test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
+	new_ball.connect_stick.push_back(vec2(new_stick_t.color, test_connect.at(new_stick_f.color).size() + 1));
+
+	new_stick_f.fromindex = vec2(COLOR_WHITE, 0);
+	new_stick_f.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
+
+	new_stick_t.fromindex = vec2(COLOR_WHITE, toward_ball_index);
+	new_stick_t.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
+
+	test_connect.at(COLOR_WHITE).push_back(new_ball);
+	test_connect.at(new_stick_f.color).push_back(new_stick_f);
+	test_connect.at(new_stick_f.color).push_back(new_stick_t);
 }
 
 int main(int argc, char **argv)
@@ -516,8 +631,23 @@ int main(int argc, char **argv)
 
 	struc_parser(test_connect);
 	
-	inital_energy();
+	compute_energy(test_connect, myObj);
 
+	/*for (unsigned int i = 0; i < splite_table.table.size(); i += 1){
+		for (unsigned int j = 0; j < splite_table.table.at(i).size(); j += 1){
+			for (unsigned int k = 0; k < splite_table.table.at(i).at(j).size(); k += 1){
+				cout << splite_table.table.at(i).at(j).at(k).origin[0] << " " << splite_table.table.at(i).at(j).at(k).origin[1] << " " << splite_table.table.at(i).at(j).at(k).origin[2] << " ";
+				cout << splite_table.table.at(i).at(j).at(k).travel_1[0] << " " << splite_table.table.at(i).at(j).at(k).travel_1[1] << " " << splite_table.table.at(i).at(j).at(k).travel_1[2] << " ";
+				cout << splite_table.table.at(i).at(j).at(k).travel_2[0] << " " << splite_table.table.at(i).at(j).at(k).travel_2[1] << " " << splite_table.table.at(i).at(j).at(k).travel_2[2] << " ";
+				cout << endl;
+			}
+		}
+	}*/
+
+	cool_down();
+
+	compute_energy(test_connect, myObj);
+	
 	/*zomedir t;
 	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
 	for (unsigned int i = 0; i < test_connect.at(3).size(); i += 1){
@@ -568,7 +698,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	glmWriteOBJ(zome, "fake.obj", GLM_NONE);*/
+	glmWriteOBJ(zome, "fake123.obj", GLM_NONE);*/
 	
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);

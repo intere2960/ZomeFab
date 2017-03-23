@@ -1,3 +1,6 @@
+#ifndef GLOBAL_H_INCLUDED
+#define GLOBAL_H_INCLUDED
+
 #define SIZE_S 0
 #define SIZE_M 1
 #define SIZE_L 2
@@ -25,3 +28,5 @@
 
 #define SPLITE 0
 #define MERGE 1
+
+#endif

@@ -140,6 +140,10 @@ vector<vector<voxel>> all_voxel;
 vector<vector<vector<zomeconn>>> zome_queue;
 vector<GLMmodel> seg;
 
+
+zometable splite_table(SPLITE);
+zometable merge_table(MERGE);
+
 //bounding box
 
 void polygon(int a, int b, int c , int d)
