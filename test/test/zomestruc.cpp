@@ -15,6 +15,7 @@ zomeconn::zomeconn()
 	towardindex = vec2(-1, -1);
 	towardface = -1;
 	surface_d = 100000000000000.0;
+	near_dir = -1;
 }
 
 zomeconn::~zomeconn()
