@@ -1,7 +1,7 @@
 #define GLEW_STATIC
 
 #include <Windows.h>    // for solving the Code::Blocks errors
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <cmath>
 #include <vector>

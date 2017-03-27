@@ -379,65 +379,71 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
 	float energy = 0.0f;
 	zomedir t;
 
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		vec3 ball_n;
-		bool use[62] = { false };
-		for (unsigned int k = 0; k < test_connect.at(COLOR_WHITE).at(i).connect_stick.size(); k += 1){
-			int f_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick.at(k)[0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick.at(k)[1]).fromface;
-			use[f_index] = true;
-		}
+	for (unsigned int a = 0; a < test_connect.size(); a += 1){
+		for (unsigned int i = 0; i < test_connect.at(a).size(); i += 1){
+			vec3 ball_n;
+			bool use[62] = { false };
+			if (a == 3){
+				for (unsigned int k = 0; k < test_connect.at(a).at(i).connect_stick.size(); k += 1){
+					int f_index = test_connect.at(test_connect.at(a).at(i).connect_stick.at(k)[0]).at(test_connect.at(a).at(i).connect_stick.at(k)[1]).fromface;
+					use[f_index] = true;
+				}
+			}			
 
-		if (test_connect.at(COLOR_WHITE).at(i).near_dir == -1 || use[test_connect.at(COLOR_WHITE).at(i).near_dir]){
+			if (test_connect.at(a).at(i).near_dir == -1 || use[test_connect.at(a).at(i).near_dir]){
 
-			for (unsigned int j = 0; j < model->triangles->size(); j += 1){
-				vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
-				vec3 p2(model->vertices->at(3 * model->triangles->at(j).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 2));
-				vec3 p3(model->vertices->at(3 * model->triangles->at(j).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 2));
-				vec3 v1 = p1 - p2;
-				vec3 v2 = p3 - p2;
-				vec3 n = v2 ^ v1;
-				float d = n * p1;
+				for (unsigned int j = 0; j < model->triangles->size(); j += 1){
+					vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
+					vec3 p2(model->vertices->at(3 * model->triangles->at(j).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 2));
+					vec3 p3(model->vertices->at(3 * model->triangles->at(j).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 2));
+					vec3 v1 = p1 - p2;
+					vec3 v2 = p3 - p2;
+					vec3 n = v2 ^ v1;
+					float d = n * p1;
 
-				int near_index = -1;
-				for (unsigned int k = 0; k < t.dir->size(); k += 1){
-					if (!use[k]){
-						ball_n = t.dir->at(k);
-						vec3 edge1 = p2 - p1;
-						vec3 edge2 = p3 - p2;
-						vec3 edge3 = p1 - p3;
-						vec3 insect_p;
-						vec3 judge1;
-						vec3 judge2;
-						vec3 judge3;
+					int near_index = -1;
+					for (unsigned int k = 0; k < t.dir->size(); k += 1){
+						if (!use[k]){
+							ball_n = t.dir->at(k);
+							vec3 edge1 = p2 - p1;
+							vec3 edge2 = p3 - p2;
+							vec3 edge3 = p1 - p3;
+							vec3 insect_p;
+							vec3 judge1;
+							vec3 judge2;
+							vec3 judge3;
 
-						float t = (d - (test_connect.at(COLOR_WHITE).at(i).position * n)) / (n * ball_n);
-						if (t > 0){
-							insect_p = test_connect.at(COLOR_WHITE).at(i).position + ball_n * t;
+							float t = (d - (test_connect.at(a).at(i).position * n)) / (n * ball_n);
+							if (t > 0){
+								insect_p = test_connect.at(a).at(i).position + ball_n * t;
 
-							judge1 = insect_p - p1;
-							judge2 = insect_p - p2;
-							judge3 = insect_p - p3;
+								judge1 = insect_p - p1;
+								judge2 = insect_p - p2;
+								judge3 = insect_p - p3;
 
-							if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-								if ((insect_p - test_connect.at(COLOR_WHITE).at(i).position).length() < test_connect.at(COLOR_WHITE).at(i).surface_d){
-									test_connect.at(COLOR_WHITE).at(i).surface_d = (insect_p - test_connect.at(COLOR_WHITE).at(i).position).length();
-									near_index = k;
+								if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+									if ((insect_p - test_connect.at(a).at(i).position).length() < test_connect.at(a).at(i).surface_d){
+										test_connect.at(a).at(i).surface_d = (insect_p - test_connect.at(a).at(i).position).length();
+										near_index = k;
+									}
 								}
 							}
 						}
 					}
+					if (near_index != -1)
+						test_connect.at(a).at(i).near_dir = near_index;
 				}
-				if (near_index != -1)
-					test_connect.at(COLOR_WHITE).at(i).near_dir = near_index;
 			}
 		}
 	}
 
 	float energy_dist = 0.0f;
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		energy_dist += pow(test_connect.at(COLOR_WHITE).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(COLOR_WHITE).at(i).surface_d));
+	for (unsigned int a = 0; a < test_connect.size(); a += 1){
+		for (unsigned int i = 0; i < test_connect.at(a).size(); i += 1){
+			energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
+		}
 	}
-	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
+	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
 
 	float energy_fair = 0.0f;
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -456,15 +462,37 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
 	return energy;
 }
 
-void cool_down()
+void splite(vector<vector<zomeconn>> &test_connect, int s_index)
 {
-	/*for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-	}*/
 	zomedir t;
 
-	vec2 test = test_connect.at(COLOR_WHITE).at(0).connect_stick.at(0);
+	int c_index;
+	float dist = 100000000000000000.0f;
+	
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).at(s_index).connect_stick.size(); i += 1){
+		vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick.at(i);
+		if (test_connect.at(test[0]).at(test[1]).surface_d < dist){
+			dist = test_connect.at(test[0]).at(test[1]).surface_d;
+			c_index = i;
+		}
+	}
+
+	vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick.at(c_index);
 	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
 	int from_size = test_connect.at(test[0]).at(test[1]).size;
+
+	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(s_index).position;
+
+	vec3 use_stick_p = test_connect.at(test[0]).at(test[1]).position;
+	vec3 judge = use_stick_p + 0.5f * t.dir->at(from_face) * t.color_length(test[0], from_size) - use_ball_p;
+	
+	int toward_ball_index = test_connect.at(test[0]).at(test[1]).towardindex[1];
+	
+	if (judge.length() < 0.001){
+		from_face = t.opposite_face(from_face);
+		toward_ball_index = test_connect.at(test[0]).at(test[1]).fromindex[1];
+	}
+
 	vector<zomerecord> temp;
 	for (unsigned int i = 0; i < splite_table.table.at(from_face).size(); i += 1){
 		for (unsigned int j = 0; j < splite_table.table.at(from_face).at(i).size(); j += 1){
@@ -474,41 +502,34 @@ void cool_down()
 		}
 	}
 
-	/*for (int i = 0; i < temp.size(); i += 1){
-		cout << temp.at(i).origin[0] << " " << temp.at(i).origin[1] << " " << temp.at(i).origin[2] << " ";
-		cout << temp.at(i).travel_1[0] << " " << temp.at(i).travel_1[1] << " " << temp.at(i).travel_1[2] << " ";
-		cout << temp.at(i).travel_2[0] << " " << temp.at(i).travel_2[1] << " " << temp.at(i).travel_2[2] << " ";
-		cout << endl;
-	}*/
-	/*cout << test_connect.at(COLOR_WHITE).at(0).position[0] << " " << test_connect.at(COLOR_WHITE).at(0).position[1] << " " << test_connect.at(COLOR_WHITE).at(0).position[2] << endl;
-	cout << temp.at(0).travel_1[0] << endl;
-	cout << temp.at(0).travel_1[1] << endl;*/
-
 	zomeconn new_ball;
 	zomeconn new_stick_f, new_stick_t;
 
-	new_ball.position = test_connect.at(COLOR_WHITE).at(0).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]);
+	new_ball.position = test_connect.at(COLOR_WHITE).at(s_index).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]);
 	new_ball.color = COLOR_WHITE;
 
-	new_stick_f.position = test_connect.at(COLOR_WHITE).at(0).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]) / 2;
+	new_stick_f.position = test_connect.at(COLOR_WHITE).at(s_index).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]) / 2;
 	new_stick_f.color = t.face_color(temp.at(2).travel_1[0]);
 	new_stick_f.size = temp.at(2).travel_1[1];
 	new_stick_f.fromface = temp.at(2).travel_1[0];
-	new_stick_f.towardface = t.opposite_face(temp.at(2).travel_1[0]);
+	new_stick_f.towardface = temp.at(2).travel_1[2];
 
-	int toward_ball_index = test_connect.at(test[0]).at(test[1]).towardindex[1];
 	new_stick_t.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at(temp.at(2).travel_2[0]) * t.face_length(temp.at(2).travel_2[0], temp.at(2).travel_2[1]) / 2;
 	new_stick_t.color = t.face_color(temp.at(2).travel_2[0]);
 	new_stick_t.size = temp.at(2).travel_2[1];
 	new_stick_t.fromface = temp.at(2).travel_2[0];
-	new_stick_t.towardface = t.opposite_face(temp.at(2).travel_2[0]);
+	new_stick_t.towardface = temp.at(2).travel_2[2];
+	
+	/*cout << toward_ball_index << endl;
+	cout << new_stick_t.fromface << endl;
+	cout << new_stick_t.towardface << endl;*/
 
-	test_connect.at(COLOR_WHITE).at(0).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
+	test_connect.at(COLOR_WHITE).at(s_index).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
 	new_ball.connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
 	test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
 	new_ball.connect_stick.push_back(vec2(new_stick_t.color, test_connect.at(new_stick_f.color).size() + 1));
 
-	new_stick_f.fromindex = vec2(COLOR_WHITE, 0);
+	new_stick_f.fromindex = vec2(COLOR_WHITE, s_index);
 	new_stick_f.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
 
 	new_stick_t.fromindex = vec2(COLOR_WHITE, toward_ball_index);
@@ -517,6 +538,50 @@ void cool_down()
 	test_connect.at(COLOR_WHITE).push_back(new_ball);
 	test_connect.at(new_stick_f.color).push_back(new_stick_f);
 	test_connect.at(new_stick_f.color).push_back(new_stick_t);
+}
+
+void merge()
+{
+	zomedir t;
+
+	vec2 test = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).connect_stick.at(0);
+	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
+	int from_size = test_connect.at(test[0]).at(test[1]).size;
+	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).position;
+	vec3 use_stick_p = test_connect.at(test[0]).at(test[1]).position;
+	vec3 judge = use_stick_p + t.dir->at(from_face) * t.color_length(test[0], from_size) / 2 - use_ball_p;
+	if (judge.length() < 0.001){
+		from_face = t.opposite_face(from_face);
+	}
+
+	vector<zomerecord> temp;
+	for (unsigned int i = 0; i < merge_table.table.at(from_face).size(); i += 1){
+		for (unsigned int j = 0; j < merge_table.table.at(from_face).at(i).size(); j += 1){
+			if (merge_table.table.at(from_face).at(i).at(j).origin[1] == from_size){
+				temp.push_back(merge_table.table.at(from_face).at(i).at(j));
+			}
+		}
+	}
+
+	zomeconn new_stick;
+	new_stick.position = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).position + t.dir->at(temp.at(3).travel_2[0]) * t.face_length(temp.at(3).travel_2[0], temp.at(3).travel_2[1]) / 2;
+	new_stick.color = t.face_color(temp.at(3).travel_2[0]);
+	new_stick.size = temp.at(3).travel_2[1];
+	new_stick.fromface = temp.at(3).travel_2[0];
+	new_stick.towardface = temp.at(3).travel_2[2];
+
+	new_stick.fromindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size() - 1);
+	vec3 toward_position = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).position + t.dir->at(temp.at(3).travel_2[0]) * t.face_length(temp.at(3).travel_2[0], temp.at(3).travel_2[1]);
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		if ((test_connect.at(COLOR_WHITE).at(i).position - toward_position).length() < 0.0001f){
+			new_stick.towardindex = vec2(COLOR_WHITE, i);
+			break;
+		}
+	}
+	
+	test_connect.at(new_stick.color).push_back(new_stick);
+
+	cout << new_stick.fromindex[1] << " " << new_stick.towardindex[1] << endl;
 }
 
 int main(int argc, char **argv)
@@ -617,26 +682,61 @@ int main(int argc, char **argv)
 
 	output_struc(zome_queue.at(1));*/
 
+	srand((unsigned)time(NULL));
+
 	struc_parser(test_connect);
+
+	float origin_e = compute_energy(test_connect, myObj);
 	
-	compute_energy(test_connect, myObj);
-	
-	/*for (unsigned int i = 0; i < splite_table.table.size(); i += 1){
-		for (unsigned int j = 0; j < splite_table.table.at(i).size(); j += 1){
-			for (unsigned int k = 0; k < splite_table.table.at(i).at(j).size(); k += 1){
-				cout << splite_table.table.at(i).at(j).at(k).origin[0] << " " << splite_table.table.at(i).at(j).at(k).origin[1] << " " << splite_table.table.at(i).at(j).at(k).origin[2] << " ";
-				cout << splite_table.table.at(i).at(j).at(k).travel_1[0] << " " << splite_table.table.at(i).at(j).at(k).travel_1[1] << " " << splite_table.table.at(i).at(j).at(k).travel_1[2] << " ";
-				cout << splite_table.table.at(i).at(j).at(k).travel_2[0] << " " << splite_table.table.at(i).at(j).at(k).travel_2[1] << " " << splite_table.table.at(i).at(j).at(k).travel_2[2] << " ";
-				cout << endl;
-			}
-		}
+	/*for (unsigned int i = 0; i < 6; i += 1){
+		int result = rand() % test_connect.at(COLOR_WHITE).size();
+		cout << result << endl;
 	}*/
+
+	cout << "start" << endl;
+	int result;
+	for (int i = 0; i < 30; i += 1){
+		result = rand() % test_connect.at(COLOR_WHITE).size();
+		cout << result << endl;
 		
-	cool_down();
+		vector<vector<zomeconn>> temp_connect(4);
+		temp_connect = test_connect;
+
+		splite(temp_connect, result);
+
+		float temp_e = compute_energy(temp_connect, myObj);
+
+		if (temp_e < origin_e){
+			test_connect = temp_connect;
+		}
+	}
+
+	/*vector<vector<zomeconn>> temp_connect(4);
+	temp_connect = test_connect;
+
+	splite(temp_connect, 0);
+
+	float temp_e = compute_energy(temp_connect, myObj);
+
+	if (temp_e < origin_e){
+		test_connect = temp_connect;
+	}*/
+
+	/*result = rand() % test_connect.at(COLOR_WHITE).size();
+	cout << result << endl;
+
+	splite(test_connect, result);
 
 	compute_energy(test_connect, myObj);
-	
-	/*zomedir t;
+
+	result = rand() % test_connect.at(COLOR_WHITE).size();
+	cout << result << endl;
+
+	splite(test_connect, result);
+
+	compute_energy(test_connect, myObj);*/
+
+	zomedir t;
 	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
 	for (unsigned int i = 0; i < test_connect.at(3).size(); i += 1){
 		if (i == 0){
@@ -686,7 +786,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	glmWriteOBJ(zome, "fake123.obj", GLM_NONE);*/
+	glmWriteOBJ(zome, "fake123.obj", GLM_NONE);
 	
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
