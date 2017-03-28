@@ -462,7 +462,7 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
 	return energy;
 }
 
-void splite(vector<vector<zomeconn>> &test_connect, int s_index)
+void split(vector<vector<zomeconn>> &test_connect, int s_index)
 {
 	zomedir t;
 
@@ -481,7 +481,11 @@ void splite(vector<vector<zomeconn>> &test_connect, int s_index)
 	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
 	int from_size = test_connect.at(test[0]).at(test[1]).size;
 
+	//cout << "from_size : " << from_size << endl;
+
 	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(s_index).position;
+
+	//cout << "use_ball_p : " << use_ball_p[0] << " " << use_ball_p[1] << " " << use_ball_p[2] << endl;
 
 	vec3 use_stick_p = test_connect.at(test[0]).at(test[1]).position;
 	vec3 judge = use_stick_p + 0.5f * t.dir->at(from_face) * t.color_length(test[0], from_size) - use_ball_p;
@@ -489,9 +493,13 @@ void splite(vector<vector<zomeconn>> &test_connect, int s_index)
 	int toward_ball_index = test_connect.at(test[0]).at(test[1]).towardindex[1];
 	
 	if (judge.length() < 0.001){
+		//cout << "in" << endl;
 		from_face = t.opposite_face(from_face);
 		toward_ball_index = test_connect.at(test[0]).at(test[1]).fromindex[1];
 	}
+
+	//cout << "from_face" << endl;
+	//cout << from_face << endl;
 
 	vector<zomerecord> temp;
 	for (unsigned int i = 0; i < splite_table.table.at(from_face).size(); i += 1){
@@ -501,6 +509,10 @@ void splite(vector<vector<zomeconn>> &test_connect, int s_index)
 			}
 		}
 	}
+	
+	//cout << "o : " << temp.at(2).origin[0] << " " << temp.at(2).origin[1] << " " << temp.at(2).origin[2] << endl;
+	//cout << "t1 : " << temp.at(2).travel_1[0] << " " << temp.at(2).travel_1[1] << " " << temp.at(2).travel_1[2] << endl;
+	//cout << "t2 : " << temp.at(2).travel_2[0] << " " << temp.at(2).travel_2[1] << " " << temp.at(2).travel_2[2] << endl;
 
 	zomeconn new_ball;
 	zomeconn new_stick_f, new_stick_t;
@@ -514,11 +526,23 @@ void splite(vector<vector<zomeconn>> &test_connect, int s_index)
 	new_stick_f.fromface = temp.at(2).travel_1[0];
 	new_stick_f.towardface = temp.at(2).travel_1[2];
 
+	/*cout << "f:" << endl;
+	cout << new_stick_f.color << endl;
+	cout << new_stick_f.size << endl;
+	cout << new_stick_f.fromface << endl;
+	cout << new_stick_f.towardface << endl;*/
+
 	new_stick_t.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at(temp.at(2).travel_2[0]) * t.face_length(temp.at(2).travel_2[0], temp.at(2).travel_2[1]) / 2;
 	new_stick_t.color = t.face_color(temp.at(2).travel_2[0]);
 	new_stick_t.size = temp.at(2).travel_2[1];
 	new_stick_t.fromface = temp.at(2).travel_2[0];
 	new_stick_t.towardface = temp.at(2).travel_2[2];
+
+	/*cout << "t:" << endl;
+	cout << new_stick_t.color << endl;
+	cout << new_stick_t.size << endl;
+	cout << new_stick_t.fromface << endl;
+	cout << new_stick_t.towardface << endl;*/
 	
 	/*cout << toward_ball_index << endl;
 	cout << new_stick_t.fromface << endl;
@@ -526,18 +550,19 @@ void splite(vector<vector<zomeconn>> &test_connect, int s_index)
 
 	test_connect.at(COLOR_WHITE).at(s_index).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
 	new_ball.connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
-	test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size()));
-	new_ball.connect_stick.push_back(vec2(new_stick_t.color, test_connect.at(new_stick_f.color).size() + 1));
-
+	
 	new_stick_f.fromindex = vec2(COLOR_WHITE, s_index);
 	new_stick_f.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
+	test_connect.at(new_stick_f.color).push_back(new_stick_f);
 
+	test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick.push_back(vec2(new_stick_f.color, test_connect.at(new_stick_t.color).size()));
+	new_ball.connect_stick.push_back(vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size()));
+	
 	new_stick_t.fromindex = vec2(COLOR_WHITE, toward_ball_index);
 	new_stick_t.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
-
-	test_connect.at(COLOR_WHITE).push_back(new_ball);
-	test_connect.at(new_stick_f.color).push_back(new_stick_f);
 	test_connect.at(new_stick_f.color).push_back(new_stick_t);
+	
+	test_connect.at(COLOR_WHITE).push_back(new_ball);	
 }
 
 void merge()
@@ -695,46 +720,22 @@ int main(int argc, char **argv)
 
 	cout << "start" << endl;
 	int result;
-	for (int i = 0; i < 30; i += 1){
+	for (int i = 0; i < 100; i += 1){
 		result = rand() % test_connect.at(COLOR_WHITE).size();
 		cout << result << endl;
 		
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
 
-		splite(temp_connect, result);
+		split(temp_connect, result);
 
 		float temp_e = compute_energy(temp_connect, myObj);
 
 		if (temp_e < origin_e){
 			test_connect = temp_connect;
+			origin_e = temp_e;
 		}
 	}
-
-	/*vector<vector<zomeconn>> temp_connect(4);
-	temp_connect = test_connect;
-
-	splite(temp_connect, 0);
-
-	float temp_e = compute_energy(temp_connect, myObj);
-
-	if (temp_e < origin_e){
-		test_connect = temp_connect;
-	}*/
-
-	/*result = rand() % test_connect.at(COLOR_WHITE).size();
-	cout << result << endl;
-
-	splite(test_connect, result);
-
-	compute_energy(test_connect, myObj);
-
-	result = rand() % test_connect.at(COLOR_WHITE).size();
-	cout << result << endl;
-
-	splite(test_connect, result);
-
-	compute_energy(test_connect, myObj);*/
 
 	zomedir t;
 	GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
