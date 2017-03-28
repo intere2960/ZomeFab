@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <string>
+#include <fstream>
 #include <omp.h>
 #include "voxel.h"
 #include "zomedir.h"
@@ -814,57 +815,268 @@ void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
 void output_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id)
 {
 	if (zome_queue.at(3).size() != 0){
-		zomedir t;
-		GLMmodel *zome = glmReadOBJ("test_model/zometool/zomeball.obj");
+		std::string s = "voxel_zome_" + std::to_string(piece_id) + ".obj";
+		std::ofstream os(s);
+		GLMmodel *z_b, *b_s, *b_m, *b_l, *r_s, *r_m, *r_l, *y_s, *y_m, *y_l;
+		z_b = glmReadOBJ("test_model/zometool/zomeball.obj");
+		b_s = glmReadOBJ("test_model/zometool/BlueS.obj");
+		b_m = glmReadOBJ("test_model/zometool/BlueM.obj");
+		b_l = glmReadOBJ("test_model/zometool/BlueL.obj");
+		r_s = glmReadOBJ("test_model/zometool/RedS.obj");
+		r_m = glmReadOBJ("test_model/zometool/RedM.obj");
+		r_l = glmReadOBJ("test_model/zometool/RedL.obj");
+		y_s = glmReadOBJ("test_model/zometool/YellowS.obj");
+		y_m = glmReadOBJ("test_model/zometool/YellowM.obj");
+		y_l = glmReadOBJ("test_model/zometool/YellowL.obj");
 
-		for (unsigned int i = 0; i < zome_queue.at(3).size(); i += 1){
-			if (i == 0){
-				glmR(zome, all_voxel.at(0).rotation);
-				glmRT(zome, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
+		os << "mtllib color.mtl" << std::endl;
+
+		for (unsigned int i = 0; i < zome_queue.size(); i += 1){
+			for (unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
+				GLMmodel *temp_model = NULL;
+				if (i == COLOR_WHITE){
+					temp_model = glmCopy(z_b);
+					glmR(temp_model, all_voxel.at(0).rotation);
+					glmRT(temp_model, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
+				}
+				else{
+					zomedir t;
+					if (i == COLOR_BLUE){
+						if (zome_queue.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(b_s);
+						}
+						else if (zome_queue.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(b_m);
+						}
+						else{
+							temp_model = glmCopy(b_l);
+						}
+					}
+					else if (i == COLOR_RED){
+						if (zome_queue.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(r_s);
+						}
+						else if (zome_queue.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(r_m);
+						}
+						else{
+							temp_model = glmCopy(r_l);
+						}
+					}
+					else {
+						if (zome_queue.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(y_s);
+						}
+						else if (zome_queue.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(y_m);
+						}
+						else{
+							temp_model = glmCopy(y_l);
+						}
+					}
+
+					glmRT(temp_model, vec3(0.0, t.roll(zome_queue.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, t.phi(zome_queue.at(i).at(j).fromface), t.theta(zome_queue.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+					glmR(temp_model, all_voxel.at(0).rotation);
+					glmRT(temp_model, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
+				}
+
+				for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
+					os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
+				}
+			}
+		}
+
+		os << std::endl;
+
+		int num_v = 0;
+		for (unsigned int i = 0; i < zome_queue.size(); i += 1){
+			for (unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
+				GLMmodel *temp_model = NULL;
+				if (i == COLOR_WHITE){
+					temp_model = glmCopy(z_b);
+					os << "usemtl white" << std::endl;
+				}
+				else{
+					if (i == COLOR_BLUE){
+						if (zome_queue.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(b_s);
+						}
+						else if (zome_queue.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(b_m);
+						}
+						else{
+							temp_model = glmCopy(b_l);
+						}
+						os << "usemtl blue" << std::endl;
+					}
+					else if (i == COLOR_RED){
+						if (zome_queue.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(r_s);
+						}
+						else if (zome_queue.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(r_m);
+						}
+						else{
+							temp_model = glmCopy(r_l);
+						}
+						os << "usemtl red" << std::endl;
+					}
+					else {
+						if (zome_queue.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(y_s);
+						}
+						else if (zome_queue.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(y_m);
+						}
+						else{
+							temp_model = glmCopy(y_l);
+						}
+						os << "usemtl yellow" << std::endl;
+					}
+				}
+
+				for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
+					os << "f " << temp_model->triangles->at(k).vindices[0] + num_v << " " << temp_model->triangles->at(k).vindices[1] + num_v << " " << temp_model->triangles->at(k).vindices[2] + num_v << std::endl;
+				}
+
+				num_v += temp_model->numvertices;
+			}
+		}
+
+		os.close();
+	}
+}
+
+void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename)
+{
+	std::ofstream os(filename);
+	GLMmodel *z_b, *b_s, *b_m, *b_l, *r_s, *r_m, *r_l, *y_s, *y_m, *y_l;
+	z_b = glmReadOBJ("test_model/zometool/zomeball.obj");
+	b_s = glmReadOBJ("test_model/zometool/BlueS.obj");
+	b_m = glmReadOBJ("test_model/zometool/BlueM.obj");
+	b_l = glmReadOBJ("test_model/zometool/BlueL.obj");
+	r_s = glmReadOBJ("test_model/zometool/RedS.obj");
+	r_m = glmReadOBJ("test_model/zometool/RedM.obj");
+	r_l = glmReadOBJ("test_model/zometool/RedL.obj");
+	y_s = glmReadOBJ("test_model/zometool/YellowS.obj");
+	y_m = glmReadOBJ("test_model/zometool/YellowM.obj");
+	y_l = glmReadOBJ("test_model/zometool/YellowL.obj");
+
+	os << "mtllib color.mtl" << std::endl;
+
+	for (unsigned int i = 0; i < output_connect.size(); i += 1){
+		for (unsigned int j = 0; j < output_connect.at(i).size(); j += 1){
+			GLMmodel *temp_model = NULL;
+			if (i == COLOR_WHITE){
+				temp_model = glmCopy(z_b);
+				glmR(temp_model, vec3(0.0, 0.0, 0.0));
+				glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
 			}
 			else{
-				GLMmodel *new_ball = glmReadOBJ("test_model/zometool/zomeball.obj");
-				glmR(new_ball, all_voxel.at(0).rotation);
-				glmRT(new_ball, vec3(0.0, 0.0, 0.0), zome_queue.at(3).at(i).position);
-				glmCombine(zome, new_ball);
-			}
-		}
-
-		for (unsigned int i = 0; i < zome_queue.size() - 1; i += 1){
-			for (unsigned int j = 0; j < zome_queue.at(i).size(); j += 1){
-				GLMmodel *new_stick = NULL;
+				zomedir t;
 				if (i == COLOR_BLUE){
-					if (zome_queue.at(i).at(j).size == SIZE_S)
-						new_stick = glmReadOBJ("test_model/zometool/BlueS.obj");
-					if (zome_queue.at(i).at(j).size == SIZE_M)
-						new_stick = glmReadOBJ("test_model/zometool/BlueM.obj");
-					if (zome_queue.at(i).at(j).size == SIZE_L)
-						new_stick = glmReadOBJ("test_model/zometool/BlueL.obj");
+					if (output_connect.at(i).at(j).size == SIZE_S){
+						temp_model = glmCopy(b_s);
+					}
+					else if (output_connect.at(i).at(j).size == SIZE_M){
+						temp_model = glmCopy(b_m);
+					}
+					else{
+						temp_model = glmCopy(b_l);
+					}
 				}
 				else if (i == COLOR_RED){
-					if (zome_queue.at(i).at(j).size == SIZE_S)
-						new_stick = glmReadOBJ("test_model/zometool/RedS.obj");
-					if (zome_queue.at(i).at(j).size == SIZE_M)
-						new_stick = glmReadOBJ("test_model/zometool/RedM.obj");
-					if (zome_queue.at(i).at(j).size == SIZE_L)
-						new_stick = glmReadOBJ("test_model/zometool/RedL.obj");
+					if (output_connect.at(i).at(j).size == SIZE_S){
+						temp_model = glmCopy(r_s);
+					}
+					else if (output_connect.at(i).at(j).size == SIZE_M){
+						temp_model = glmCopy(r_m);
+					}
+					else{
+						temp_model = glmCopy(r_l);
+					}
 				}
-				else if (i == COLOR_YELLOW){
-					if (zome_queue.at(i).at(j).size == SIZE_S)
-						new_stick = glmReadOBJ("test_model/zometool/YellowS.obj");
-					if (zome_queue.at(i).at(j).size == SIZE_M)
-						new_stick = glmReadOBJ("test_model/zometool/YellowM.obj");
-					if (zome_queue.at(i).at(j).size == SIZE_L)
-						new_stick = glmReadOBJ("test_model/zometool/YellowL.obj");
+				else {
+					if (output_connect.at(i).at(j).size == SIZE_S){
+						temp_model = glmCopy(y_s);
+					}
+					else if (output_connect.at(i).at(j).size == SIZE_M){
+						temp_model = glmCopy(y_m);
+					}
+					else{
+						temp_model = glmCopy(y_l);
+					}
 				}
-				glmRT(new_stick, vec3(0.0, t.roll(zome_queue.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
-				glmRT(new_stick, vec3(0.0, t.phi(zome_queue.at(i).at(j).fromface), t.theta(zome_queue.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
-				glmR(new_stick, all_voxel.at(0).rotation);
-				glmRT(new_stick, vec3(0.0, 0.0, 0.0), zome_queue.at(i).at(j).position);
-				glmCombine(zome, new_stick);
+
+				glmRT(temp_model, vec3(0.0, t.roll(output_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+				glmRT(temp_model, vec3(0.0, t.phi(output_connect.at(i).at(j).fromface), t.theta(output_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+				glmR(temp_model, vec3(0.0, 0.0, 0.0));
+				glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
+			}
+
+			for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
+				os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
 			}
 		}
-		std::string s = "voxel_zome_" + std::to_string(piece_id) + ".obj";
-		glmWriteOBJ(zome, my_strdup(s.c_str()), GLM_NONE);
 	}
+
+	os << std::endl;
+
+	int num_v = 0;
+	for (unsigned int i = 0; i < output_connect.size(); i += 1){
+		for (unsigned int j = 0; j < output_connect.at(i).size(); j += 1){
+			GLMmodel *temp_model = NULL;
+			if (i == COLOR_WHITE){
+				temp_model = glmCopy(z_b);
+				os << "usemtl white" << std::endl;
+			}
+			else{
+				if (i == COLOR_BLUE){
+					if (output_connect.at(i).at(j).size == SIZE_S){
+						temp_model = glmCopy(b_s);
+					}
+					else if (output_connect.at(i).at(j).size == SIZE_M){
+						temp_model = glmCopy(b_m);
+					}
+					else{
+						temp_model = glmCopy(b_l);
+					}
+					os << "usemtl blue" << std::endl;
+				}
+				else if (i == COLOR_RED){
+					if (output_connect.at(i).at(j).size == SIZE_S){
+						temp_model = glmCopy(r_s);
+					}
+					else if (output_connect.at(i).at(j).size == SIZE_M){
+						temp_model = glmCopy(r_m);
+					}
+					else{
+						temp_model = glmCopy(r_l);
+					}
+					os << "usemtl red" << std::endl;
+				}
+				else {
+					if (output_connect.at(i).at(j).size == SIZE_S){
+						temp_model = glmCopy(y_s);
+					}
+					else if (output_connect.at(i).at(j).size == SIZE_M){
+						temp_model = glmCopy(y_m);
+					}
+					else{
+						temp_model = glmCopy(y_l);
+					}
+					os << "usemtl yellow" << std::endl;
+				}
+			}
+
+			for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
+				os << "f " << temp_model->triangles->at(k).vindices[0] + num_v << " " << temp_model->triangles->at(k).vindices[1] + num_v << " " << temp_model->triangles->at(k).vindices[2] + num_v << std::endl;
+			}
+
+			num_v += temp_model->numvertices;
+		}
+	}
+
+	os.close();
 }
