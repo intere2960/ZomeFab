@@ -41,7 +41,5 @@ void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, i
 void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region, vec3 &angle);
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, int v_size);
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id);
-void output_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
-void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
 
 #endif // VOXEL_H_INCLUDED

@@ -175,7 +175,7 @@ void test()
 		//voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), bound_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
 		cout << "output piece " << i + 1 << endl;
 		output_voxel(all_voxel.at(i), i);
-		output_zometool(all_voxel.at(i), zome_queue.at(i), i);
+		output_zometool(all_voxel.at(i).at(0).rotation, zome_queue.at(i), i);
 
 		//for (int j = 0; j < 4; j += 1){
 		//	cout << j << " : " << endl;
