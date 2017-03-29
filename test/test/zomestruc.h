@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "algebra3.h"
+#include "glm.h"
 
 class zomeconn
 {
@@ -25,7 +26,7 @@ public:
 	int towardface;
 	int size; // S M L
 //	ModelObject* thisModel;
-	std::vector<vec2> connect_stick;
+	vec2 connect_stick[62];
 
 	bool isAnalyzed; //analyze force
 	float force;
@@ -75,5 +76,6 @@ void output_struc(std::vector<std::vector<zomeconn>> &target);
 void struc_parser(std::vector<std::vector<zomeconn>> &target);
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
+float point_surface_dist(GLMmodel *model, vec3 &p);
 
 #endif // ZOMESTRUC_H_INCLUDED

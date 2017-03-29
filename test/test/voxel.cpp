@@ -548,8 +548,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 											new_edge.fromface = t.dir_face(v);
 											new_edge.towardface = t.opposite_face(new_edge.fromface);
 
-											zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
-											zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
+											zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick[new_edge.fromface] = vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size());
+											zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick[new_edge.towardface] = vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size());
 											zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
 											e[a] = true;
 										}
@@ -624,8 +624,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 										new_edge.fromface = t.dir_face(v);
 										new_edge.towardface = t.opposite_face(new_edge.fromface);
 
-										zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
-										zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick.push_back(vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size()));
+										zome_queue.at(COLOR_WHITE).at(index[0]).connect_stick[new_edge.fromface] = vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size());
+										zome_queue.at(COLOR_WHITE).at(index[1]).connect_stick[new_edge.towardface] = vec2((float)all_voxel.at(region.at(i).at(j)).color, (float)zome_queue.at(all_voxel.at(region.at(i).at(j)).color).size());
 										zome_queue.at(all_voxel.at(region.at(i).at(j)).color).push_back(new_edge);
 										e[a] = true;
 									}

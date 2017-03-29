@@ -3,7 +3,6 @@
 #include "zomestruc.h"
 #include "zomedir.h"
 #include "global.h"
-#include "glm.h"
 
 zomeconn::zomeconn()
 {
@@ -17,6 +16,10 @@ zomeconn::zomeconn()
 	towardface = -1;
 	surface_d = 100000000000000.0;
 	near_dir = -1;
+
+	for (int i = 0; i < 62; i += 1){
+		connect_stick[i] = vec2(-1.0f, -1.0f);
+	}
 }
 
 zomeconn::~zomeconn()
@@ -85,8 +88,9 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 	for (unsigned int i = 0; i < source.at(COLOR_WHITE).size(); i += 1){
 		zomeconn temp = source.at(COLOR_WHITE).at(i);
 
-		for (unsigned int j = 0; j < source.at(COLOR_WHITE).at(i).connect_stick.size(); j += 1){
-			temp.connect_stick.at(j)[1] += target.at(temp.connect_stick.at(j)[0]).size();
+		for (unsigned int j = 0; j < 62; j += 1){
+			if (temp.connect_stick[j] != vec2(-1.0f, -1.0f))
+				temp.connect_stick[j][1] += target.at(temp.connect_stick[j][0]).size();
 		}
 		target.at(COLOR_WHITE).push_back(temp);
 	}
@@ -145,9 +149,15 @@ void output_struc(std::vector<std::vector<zomeconn>> &target)
 				os << target.at(i).at(j).towardindex[0] << " " << target.at(i).at(j).towardindex[1] << " ";
 			}
 			else{
-				os << target.at(i).at(j).connect_stick.size() << " ";
-				for (unsigned int k = 0; k < target.at(i).at(j).connect_stick.size(); k += 1){
-					os << target.at(i).at(j).connect_stick.at(k)[0] << " " << target.at(i).at(j).connect_stick.at(k)[1] << " ";
+				int num = 0;
+				for (unsigned int k = 0; k < 62; k += 1){
+					if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
+						num += 1;
+				}
+				os << num << " ";
+				for (unsigned int k = 0; k < 62; k += 1){
+					if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
+						os << k << " " << target.at(i).at(j).connect_stick[k][0] << " " << target.at(i).at(j).connect_stick[k][1] << " ";
 				}
 			}
 			os << std::endl;
@@ -187,16 +197,16 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target)
 			temp_ball.position = temp_pos;
 
 			int temp_size;
+			int temp_index;
 			vec2 temp_connect;
 			is >> temp_size;
 			for (int i = 0; i < temp_size; i += 1){
-				is >> temp_connect[0] >> temp_connect[1];
-				temp_ball.connect_stick.push_back(temp_connect);
+				is >> temp_index >> temp_connect[0] >> temp_connect[1];
+				temp_ball.connect_stick[temp_index] = temp_connect;
 			}
 			target.at(COLOR_WHITE).push_back(temp_ball);
 		}
 	}
-
 	is.close();
 }
 
@@ -413,4 +423,49 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	}
 
 	os.close();
+}
+
+float point_surface_dist(GLMmodel *model, vec3 &p)
+{
+	zomedir t;
+	vec3 dir;
+	float surface_d = 100000000000000.0f;
+	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
+		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 v1 = p1 - p2;
+		vec3 v2 = p3 - p2;
+		vec3 n = v2 ^ v1;
+		float d = n * p1;
+
+		for (unsigned int k = 0; k < t.dir->size(); k += 1){
+			
+			dir = t.dir->at(k);
+			vec3 edge1 = p2 - p1;
+			vec3 edge2 = p3 - p2;
+			vec3 edge3 = p1 - p3;
+			vec3 insect_p;
+			vec3 judge1;
+			vec3 judge2;
+			vec3 judge3;
+
+			float t = (d - (p * n)) / (n * dir);
+			if (t > 0){
+				insect_p = p + dir * t;
+
+				judge1 = insect_p - p1;
+				judge2 = insect_p - p2;
+				judge3 = insect_p - p3;
+
+				if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+					if ((insect_p - p).length() < surface_d){
+						surface_d = (insect_p - p).length();
+					}
+				}
+			}	
+		}
+	}
+
+	return surface_d;
 }
