@@ -109,6 +109,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 						break;
 					}
 				}
+				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.towardface] = vec2(i, j);
 			}
 			else{
 				temp.fromindex[1] += ball_size;
@@ -124,6 +125,8 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 						break;
 					}
 				}
+
+				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.fromface] = vec2(i, j);
 			}
 			else{
 				temp.towardindex[1] += ball_size;
@@ -425,47 +428,63 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	os.close();
 }
 
-float point_surface_dist(GLMmodel *model, vec3 &p)
+float point_surface_dist(GLMmodel *model, vec3 &p, int from_index, vec3 &origin_p)
 {
 	zomedir t;
-	vec3 dir;
+	vec3 from_vector = t.dir->at(from_index);
 	float surface_d = 100000000000000.0f;
+
 	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
 		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
 		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
 		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
 		vec3 v1 = p1 - p2;
 		vec3 v2 = p3 - p2;
-		vec3 n = v2 ^ v1;
+		vec3 n = (v2 ^ v1).normalize();
 		float d = n * p1;
-
-		for (unsigned int k = 0; k < t.dir->size(); k += 1){
 			
-			dir = t.dir->at(k);
-			vec3 edge1 = p2 - p1;
-			vec3 edge2 = p3 - p2;
-			vec3 edge3 = p1 - p3;
-			vec3 insect_p;
-			vec3 judge1;
-			vec3 judge2;
-			vec3 judge3;
+		vec3 edge1 = p2 - p1;
+		vec3 edge2 = p3 - p2;
+		vec3 edge3 = p1 - p3;
 
-			float t = (d - (p * n)) / (n * dir);
-			if (t > 0){
-				insect_p = p + dir * t;
+		float times = (p * n) - d;
+		vec3 insect_p = p + n * times;
 
-				judge1 = insect_p - p1;
-				judge2 = insect_p - p2;
-				judge3 = insect_p - p3;
+		vec3 judge1 = insect_p - p1;
+		vec3 judge2 = insect_p - p2;
+		vec3 judge3 = insect_p - p3;
 
-				if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-					if ((insect_p - p).length() < surface_d){
-						surface_d = (insect_p - p).length();
-					}
+		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+			if ((insect_p - p).length() < surface_d){
+				vec2 test_through;
+
+				test_through[0] = n[0] * origin_p[0] + n[1] * origin_p[1] + n[2] * origin_p[2] - d;
+
+				if (test_through[0] > 0.0001)
+					test_through[0] = 1;
+				else if (test_through[0] < -0.0001)
+					test_through[0] = -1;
+				else
+					test_through[0] = 0;
+
+				test_through[1] = n[0] * p[0] + n[1] * p[1] + n[2] * p[2] - d;
+
+				if (test_through[1] > 0.0001)
+					test_through[1] = 1;
+				else if (test_through[1] < -0.0001)
+					test_through[1] = -1;
+				else
+					test_through[1] = 0;
+
+				if ((test_through[0] == -1) && (test_through[0] == test_through[1])){
+					surface_d = (insect_p - p).length();
 				}
-			}	
+			}			
 		}
 	}
+
+	if(surface_d < NODE_DIAMETER)
+		surface_d = 100000000000000.0f;
 
 	return surface_d;
 }
