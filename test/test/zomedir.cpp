@@ -578,6 +578,6 @@ void zometable::vector_parser(int type, std::ifstream &is)
         if(type == SPLITE)
 			table.at((int)temp_r.origin[0]).at((int)temp_r.travel_1[0]).push_back(temp_r);
         else if(type == MERGE)
-			table.at((int)temp_r.origin[0]).at((int)temp_r.origin[0]).push_back(temp_r);
+			table.at((int)temp_r.origin[0]).at((int)temp_r.travel_1[0]).push_back(temp_r);
     }
 }

@@ -465,7 +465,7 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 				bool e[12] = { false };
 
 				for (int k = 0; k < 6; k += 1){
-					if (all_voxel.at(all_voxel.at(region.at(i).at(j)).face_toward[k]).show){
+					if ((all_voxel.at(region.at(i).at(j)).face_toward[k] != -1) && (all_voxel.at(all_voxel.at(region.at(i).at(j)).face_toward[k]).show)){
 						if ((unsigned)(find(done.begin(), done.end(), all_voxel.at(region.at(i).at(j)).face_toward[k]) - done.begin()) < done.size()){
 							for (int a = 0; a < 8; a += 1){
 								if (!p[a]){

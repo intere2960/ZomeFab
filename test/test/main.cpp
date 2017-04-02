@@ -252,15 +252,12 @@ void fake()
 
 	test_connect.at(COLOR_WHITE).at(0).connect_stick[t.opposite_face(best_i)] = vec2(t.face_color(best_i), test_connect.at(t.face_color(best_i)).size() - 1);
 
-	cout << "connect_stick: " << best_i << " " << t.face_color(best_i) << " " << test_connect.at(t.face_color(best_i)).size() - 1 << endl;
-	
 	for (int i = 0; i < 62; i += 1){
 		if (test_connect.at(COLOR_WHITE).at(0).connect_stick[i] != vec2(-1.0f, -1.0f)){
 			cout << test_connect.at(COLOR_WHITE).at(0).connect_stick[i][0] << " " << test_connect.at(COLOR_WHITE).at(0).connect_stick[i][1] << endl;
 		}
 	}
-	
-	cout << "hahahaha" << endl;
+
 	test_connect.at(t.face_color(best_i)).at(0).fromindex = vec2(COLOR_WHITE, 0);
 
 
@@ -567,7 +564,6 @@ void fake_case()
 	zomedir t;
 
 	vec2 test = test_connect.at(COLOR_WHITE).at(0).connect_stick[5];
-	//cout << test[0] << " " << test[1] << endl;
 		
 	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
 	int from_size = test_connect.at(test[0]).at(test[1]).size;
@@ -581,9 +577,8 @@ void fake_case()
 	vec3 judge = use_stick_p + 0.5f * t.dir->at(from_face) * t.color_length(test[0], from_size) - use_ball_p;
 
 	int toward_ball_index = test_connect.at(test[0]).at(test[1]).towardindex[1];
-
+	
 	if (judge.length() < 0.001){
-		//cout << "in" << endl;
 		from_face = t.opposite_face(from_face);
 		toward_ball_index = test_connect.at(test[0]).at(test[1]).fromindex[1];
 	}
@@ -596,13 +591,6 @@ void fake_case()
 			}
 		}
 	}
-
-	/*for (unsigned int i = 0; i < temp.size(); i += 1){
-	cout << temp.at(i).origin[0] << " " << temp.at(i).origin[1] << " " << temp.at(i).origin[2] << endl;
-	cout << temp.at(i).travel_1[0] << " " << temp.at(i).travel_1[1] << " " << temp.at(i).travel_1[2] << endl;
-	cout << temp.at(i).travel_2[0] << " " << temp.at(i).travel_2[1] << " " << temp.at(i).travel_2[2] << endl;
-	cout << endl;
-	}*/
 
 	new_ball.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at(temp.at(2).travel_1[0]) * t.face_length(temp.at(2).travel_1[0], temp.at(2).travel_1[1]);
 	new_ball.color = COLOR_WHITE;
@@ -623,12 +611,11 @@ void fake_case()
 	test_connect.at(COLOR_WHITE).push_back(new_ball);
 }
 
-void check_merge()
+void check_merge(vector<vec4> &can_merge)
 {
-	vector<vec4> can_merage;
+	zomedir t;
 
-	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-	for (unsigned int i = 0; i < 1; i += 1){
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		vector<int> use_slot;
 		for (int j = 0; j < 62; j += 1){
 			if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
@@ -636,58 +623,58 @@ void check_merge()
 			}
 		}
 
-		cout << use_slot.size() << endl;
 		for (int j = 0; j < use_slot.size() - 1; j += 1){
+			
+			int use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).towardindex[1];
+			if (use_index == i)
+				use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).fromindex[1];
+			
 			for (int k = j + 1; k < use_slot.size(); k += 1){
-				cout << use_slot.at(j) << " => " << use_slot.at(k) << " ";
+				int opp_face = t.opposite_face(use_slot.at(j));
+		
+				for (unsigned int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
+					bool judge1 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).origin[1] == test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).size);
+					bool judge2 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_1[1] == test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).size);
+					if (judge1 && judge2){
+						
+						int toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).towardindex[1];
+						if (toward_index == i)
+							toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
+
+						vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
+						can_merge.push_back(connect);
+					}
+				}
 			}
-			cout << endl;
 		}
 	}
 }
 
-void merge()
+void merge(vector<vector<zomeconn>> &test_connect, vec4 &merge_vector)
 {
-	/*zomedir t;
+	zomedir t;
 
-	vec2 test = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).connect_stick.at(0);
-	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
-	int from_size = test_connect.at(test[0]).at(test[1]).size;
-	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).position;
-	vec3 use_stick_p = test_connect.at(test[0]).at(test[1]).position;
-	vec3 judge = use_stick_p + t.dir->at(from_face) * t.color_length(test[0], from_size) / 2 - use_ball_p;
-	if (judge.length() < 0.001){
-		from_face = t.opposite_face(from_face);
-	}
+	vec3 p1 = test_connect.at(COLOR_WHITE).at(merge_vector[0]).position;
+	vec3 p2 = test_connect.at(COLOR_WHITE).at(merge_vector[1]).position;
+	vec3 v = (p2 - p1).normalize();
 
-	vector<zomerecord> temp;
-	for (unsigned int i = 0; i < merge_table.table.at(from_face).size(); i += 1){
-		for (unsigned int j = 0; j < merge_table.table.at(from_face).at(i).size(); j += 1){
-			if (merge_table.table.at(from_face).at(i).at(j).origin[1] == from_size){
-				temp.push_back(merge_table.table.at(from_face).at(i).at(j));
-			}
-		}
-	}
+	vec3 stick_p = (p1 + p2) / 2.0f;
+	int from_face = t.dir_face(v);
+	int toward_face = t.opposite_face(from_face);
 
 	zomeconn new_stick;
-	new_stick.position = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).position + t.dir->at(temp.at(3).travel_2[0]) * t.face_length(temp.at(3).travel_2[0], temp.at(3).travel_2[1]) / 2;
-	new_stick.color = t.face_color(temp.at(3).travel_2[0]);
-	new_stick.size = temp.at(3).travel_2[1];
-	new_stick.fromface = temp.at(3).travel_2[0];
-	new_stick.towardface = temp.at(3).travel_2[2];
+	new_stick.position = stick_p;
+	new_stick.color = merge_vector[2];
+	new_stick.size = merge_vector[3];
+	new_stick.fromface = from_face;
+	new_stick.fromindex = vec2(COLOR_WHITE, merge_vector[0]);
+	new_stick.towardface = toward_face;
+	new_stick.towardindex = vec2(COLOR_WHITE, merge_vector[1]);
 
-	new_stick.fromindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size() - 1);
-	vec3 toward_position = test_connect.at(COLOR_WHITE).at(test_connect.at(COLOR_WHITE).size() - 1).position + t.dir->at(temp.at(3).travel_2[0]) * t.face_length(temp.at(3).travel_2[0], temp.at(3).travel_2[1]);
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		if ((test_connect.at(COLOR_WHITE).at(i).position - toward_position).length() < 0.0001f){
-			new_stick.towardindex = vec2(COLOR_WHITE, i);
-			break;
-		}
-	}
-	
+	test_connect.at(COLOR_WHITE).at(merge_vector[0]).connect_stick[from_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
+	test_connect.at(COLOR_WHITE).at(merge_vector[1]).connect_stick[toward_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
+
 	test_connect.at(new_stick.color).push_back(new_stick);
-
-	cout << new_stick.fromindex[1] << " " << new_stick.towardindex[1] << endl;*/
 }
 
 int main(int argc, char **argv)
@@ -699,42 +686,42 @@ int main(int argc, char **argv)
 
 	init();
 
-	//test();
+	/*test();
 
-	//fake();
-	//	
-	//for (int j = 0; j < 4; j += 1){
-	//	for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
-	//		zome_queue.at(2).at(j).at(k).position += delta;
-	//	}
-	//}
+	fake();
+		
+	for (int j = 0; j < 4; j += 1){
+		for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
+			zome_queue.at(2).at(j).at(k).position += delta;
+		}
+	}
 
-	//combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
-	//combine_zome_ztruc(zome_queue.at(1), test_connect);
+	combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
+	combine_zome_ztruc(zome_queue.at(1), test_connect);*/
 
-	//////for (int j = 0; j < 4; j += 1){
-	//////	cout << j << " : " << endl;
-	//////	if (j != 3){
-	//////		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
-	//////		cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
-	//////		<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
-	//////		}*/
-	//////	}
-	//////	else{
-	//////		for (int k = 0; k < zome_queue.at(1).at(3).size(); k += 1){
-	//////			cout << "\t " << k << " : ";
-	//////			for (int a = 0; a < 62; a += 1){
-	//////				if (zome_queue.at(1).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-	//////					cout << " (" << zome_queue.at(1).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(1).at(3).at(k).connect_stick[a][1] << ")";
-	//////			}
-	//////			cout << endl;
-	//////			cout << "\t " << zome_queue.at(1).at(3).at(k).position[0] << " " << zome_queue.at(1).at(3).at(k).position[1] << " " << zome_queue.at(1).at(3).at(k).position[2] << endl;
-	//////		}
-	//////	}
-	//////}
+	////for (int j = 0; j < 4; j += 1){
+	////	cout << j << " : " << endl;
+	////	if (j != 3){
+	////		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
+	////		cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
+	////		<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
+	////		}*/
+	////	}
+	////	else{
+	////		for (int k = 0; k < zome_queue.at(1).at(3).size(); k += 1){
+	////			cout << "\t " << k << " : ";
+	////			for (int a = 0; a < 62; a += 1){
+	////				if (zome_queue.at(1).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
+	////					cout << " (" << zome_queue.at(1).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(1).at(3).at(k).connect_stick[a][1] << ")";
+	////			}
+	////			cout << endl;
+	////			cout << "\t " << zome_queue.at(1).at(3).at(k).position[0] << " " << zome_queue.at(1).at(3).at(k).position[1] << " " << zome_queue.at(1).at(3).at(k).position[2] << endl;
+	////		}
+	////	}
+	////}
 
-	//output_zometool(zome_queue.at(1), string("test.obj"));
-	//output_struc(zome_queue.at(1));
+	/*output_zometool(zome_queue.at(1), string("test.obj"));
+	output_struc(zome_queue.at(1));*/
 	
 	//srand((unsigned)time(NULL));
 
@@ -788,8 +775,12 @@ int main(int argc, char **argv)
 	//	}*/
 	//}
 
-	fake_case();
-	check_merge();
+	fake_case();	
+	vector<vec4> can_merge;
+	check_merge(can_merge);
+	if (can_merge.size() > 0)
+		merge(test_connect, can_merge.at(0));
+
 	//output_zometool(test_connect, string("fake123.obj"));
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);

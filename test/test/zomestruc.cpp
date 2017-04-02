@@ -95,6 +95,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 		target.at(COLOR_WHITE).push_back(temp);
 	}
 
+	int origin_size[3] = { target.at(0).size(), target.at(1).size(), target.at(2).size()};
 	for (int i = 0; i < 3; i += 1){
 		for (unsigned int j = 0; j < source.at(i).size(); j += 1){
 			zomeconn temp = source.at(i).at(j);
@@ -109,7 +110,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 						break;
 					}
 				}
-				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.towardface] = vec2(i, j);
+				target.at(COLOR_WHITE).at(temp.fromindex[1]).connect_stick[temp.towardface] = vec2(i, j + origin_size[i]);
 			}
 			else{
 				temp.fromindex[1] += ball_size;
@@ -126,7 +127,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 					}
 				}
 
-				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.fromface] = vec2(i, j);
+				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.fromface] = vec2(i, j + origin_size[i]);
 			}
 			else{
 				temp.towardindex[1] += ball_size;
