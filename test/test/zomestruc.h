@@ -72,8 +72,8 @@ public:
 //};
 
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source);
-void output_struc(std::vector<std::vector<zomeconn>> &target);
-void struc_parser(std::vector<std::vector<zomeconn>> &target);
+void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filename);
+void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filename);
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
 float point_surface_dist(GLMmodel *model, vec3 &p, int from_index, vec3 &origin_p);

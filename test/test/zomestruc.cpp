@@ -110,7 +110,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 						break;
 					}
 				}
-				target.at(COLOR_WHITE).at(temp.fromindex[1]).connect_stick[temp.towardface] = vec2(i, j + origin_size[i]);
+				target.at(COLOR_WHITE).at(temp.fromindex[1]).connect_stick[temp.fromface] = vec2(i, j + origin_size[i]);
 			}
 			else{
 				temp.fromindex[1] += ball_size;
@@ -127,7 +127,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 					}
 				}
 
-				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.fromface] = vec2(i, j + origin_size[i]);
+				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.towardface] = vec2(i, j + origin_size[i]);
 			}
 			else{
 				temp.towardindex[1] += ball_size;
@@ -138,10 +138,10 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 	}
 }
 
-void output_struc(std::vector<std::vector<zomeconn>> &target)
+void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filename)
 {
 	std::ofstream os;
-	os.open("fake.txt");
+	os.open(filename);
 	for (int i = 0; i < 4; i += 1){
 		for (unsigned int j = 0; j < target.at(i).size(); j += 1){
 			os << target.at(i).at(j).color << " ";
@@ -170,10 +170,10 @@ void output_struc(std::vector<std::vector<zomeconn>> &target)
 	os.close();
 }
 
-void struc_parser(std::vector<std::vector<zomeconn>> &target)
+void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filename)
 {
 	std::ifstream is;
-	is.open("fake.txt");
+	is.open(filename);
 	int temp_color;
 	vec3 temp_pos;
 	while (is >> temp_color >> temp_pos[0] >> temp_pos[1] >> temp_pos[2]){
