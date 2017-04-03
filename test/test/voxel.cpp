@@ -534,8 +534,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 													}
 												}
 											}
-											new_edge.fromindex = vec2(COLOR_WHITE, (float)index[1]);
-											new_edge.towardindex = vec2(COLOR_WHITE, (float)index[0]);
+											new_edge.fromindex = vec2(COLOR_WHITE, (float)index[0]);
+											new_edge.towardindex = vec2(COLOR_WHITE, (float)index[1]);
 
 											vec3 v = (new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize();
 											mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), angle[2]).inverse();
@@ -610,8 +610,8 @@ void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomec
 											}
 										}
 
-										new_edge.fromindex = vec2(COLOR_WHITE, (float)index[1]);
-										new_edge.towardindex = vec2(COLOR_WHITE, (float)index[0]);
+										new_edge.fromindex = vec2(COLOR_WHITE, (float)index[0]);
+										new_edge.towardindex = vec2(COLOR_WHITE, (float)index[1]);
 
 										vec3 v = (new_edge.position - zome_queue.at(COLOR_WHITE).at(index[0]).position).normalize();										
 										mat4 R = rotation3D(vec3(0.0, 0.0, 1.0), angle[2]).inverse();

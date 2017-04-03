@@ -812,7 +812,7 @@ int main(int argc, char **argv)
 		merge(test_connect, can_merge.at(2));*/
 
 	output_zometool(test_connect, string("fake123.obj"));
-	//output_struc(test_connect, string("fake123.txt"));
+	output_struc(test_connect, string("fake123.txt"));
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
