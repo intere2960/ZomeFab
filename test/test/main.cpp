@@ -568,11 +568,11 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 	test_connect.at(COLOR_WHITE).push_back(new_ball);	
 }
 
-void fake_case()
+void fake_case(int index)
 {
 	zomedir t;
 
-	vec2 test = test_connect.at(COLOR_WHITE).at(0).connect_stick[5];
+	vec2 test = test_connect.at(COLOR_WHITE).at(index).connect_stick[5];
 		
 	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
 	int from_size = test_connect.at(test[0]).at(test[1]).size;
@@ -580,7 +580,7 @@ void fake_case()
 	zomeconn new_ball;
 	zomeconn new_stick_f, new_stick_t;
 	
-	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(0).position;
+	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(index).position;
 
 	vec3 use_stick_p = test_connect.at(test[0]).at(test[1]).position;
 	vec3 judge = use_stick_p + 0.5f * t.dir->at(from_face) * t.color_length(test[0], from_size) - use_ball_p;
@@ -612,6 +612,12 @@ void fake_case()
 	new_stick_f.fromface = temp.at(2).travel_1[0];
 	new_stick_f.towardface = temp.at(2).travel_1[2];
 
+	new_stick_t.position = test_connect.at(COLOR_WHITE).at(index).position + t.dir->at(temp.at(2).travel_2[0]) * t.face_length(temp.at(2).travel_2[0], temp.at(2).travel_2[1]) / 2;
+	new_stick_t.color = t.face_color(temp.at(2).travel_2[0]);
+	new_stick_t.size = temp.at(2).travel_2[1];
+	new_stick_t.fromface = temp.at(2).travel_2[0];
+	new_stick_t.towardface = temp.at(2).travel_2[2];
+
 	test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick[new_stick_f.fromface] = vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size());
 	new_ball.connect_stick[new_stick_f.towardface] = vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size());
 
@@ -619,10 +625,17 @@ void fake_case()
 	new_stick_f.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
 	test_connect.at(new_stick_f.color).push_back(new_stick_f);
 
+	test_connect.at(COLOR_WHITE).at(index).connect_stick[new_stick_t.fromface] = vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size());
+	new_ball.connect_stick[new_stick_t.towardface] = vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size());
+
+	new_stick_t.fromindex = vec2(COLOR_WHITE, index);
+	new_stick_t.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
+	test_connect.at(new_stick_t.color).push_back(new_stick_t);
+
 	test_connect.at(COLOR_WHITE).push_back(new_ball);
 }
 
-void check_merge(vector<vec4> &can_merge)
+void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 {
 	zomedir t;
 
@@ -634,13 +647,13 @@ void check_merge(vector<vec4> &can_merge)
 			}
 		}
 
-		for (int j = 0; j < use_slot.size() - 1; j += 1){
+		for (unsigned int j = 0; j < use_slot.size() - 1; j += 1){
 			
 			int use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).towardindex[1];
 			if (use_index == i)
 				use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).fromindex[1];
 			
-			for (int k = j + 1; k < use_slot.size(); k += 1){
+			for (unsigned int k = j + 1; k < use_slot.size(); k += 1){
 				int opp_face = t.opposite_face(use_slot.at(j));
 		
 				for (unsigned int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
@@ -651,10 +664,14 @@ void check_merge(vector<vec4> &can_merge)
 						int toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).towardindex[1];
 						if (toward_index == i)
 							toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
+												
+						vec3 test_p = (test_connect.at(COLOR_WHITE).at(use_index).position + test_connect.at(COLOR_WHITE).at(toward_index).position) / 2.0f;
+						bool judge = (point_surface_dist(model, test_p, test_connect.at(COLOR_WHITE).at(use_index).position) < 100000000000000.0f) && (point_surface_dist(model, test_p, test_connect.at(COLOR_WHITE).at(toward_index).position) < 100000000000000.0f);
 
-						vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
-						//point_surface_dist();
-						can_merge.push_back(connect);
+						if (judge){
+							vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
+							can_merge.push_back(connect);
+						}
 					}
 				}
 			}
@@ -685,6 +702,69 @@ void merge(vector<vector<zomeconn>> &test_connect, vec4 &merge_vector)
 
 	test_connect.at(COLOR_WHITE).at(merge_vector[0]).connect_stick[from_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
 	test_connect.at(COLOR_WHITE).at(merge_vector[1]).connect_stick[toward_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
+
+	test_connect.at(new_stick.color).push_back(new_stick);
+}
+
+void check_bridge(vector<vec4> &can_bridge)
+{
+	zomedir t;
+
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+			if (i != j){
+				vec3 test_l = test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position;
+				vec3 test_n = (test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position).normalize();
+				int test_index = t.dir_face(test_n);
+				if (test_index != -1){
+					if (test_connect.at(COLOR_WHITE).at(i).connect_stick[test_index] == vec2(-1.0f, -1.0f)){
+						float l = test_l.length();
+						for (int size = 0; size < 3; size += 1){
+							if (fabs(t.face_length(test_index, size) - l) < 0.001f){
+								bool add = true;
+								for (unsigned int k = 0; k < can_bridge.size(); k += 1){
+									if ((can_bridge.at(k)[0] == j) && (can_bridge.at(k)[1] == i)){
+										add = false;
+									}
+								}
+
+								if (add){
+									vec4 connect(i, j, t.face_color(test_index), size);
+									can_bridge.push_back(connect);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void bridge(vector<vector<zomeconn>> &test_connect, vec4 &bridge_vector)
+{
+	zomedir t;
+
+	vec3 p1 = test_connect.at(COLOR_WHITE).at(bridge_vector[0]).position;
+	vec3 p2 = test_connect.at(COLOR_WHITE).at(bridge_vector[1]).position;
+	vec3 v = (p2 - p1).normalize();
+
+	vec3 stick_p = (p1 + p2) / 2.0f;
+	int from_face = t.dir_face(v);
+	int toward_face = t.opposite_face(from_face);
+
+	zomeconn new_stick;
+	new_stick.position = stick_p;
+	new_stick.color = bridge_vector[2];
+	new_stick.size = bridge_vector[3];
+	new_stick.fromface = from_face;
+	new_stick.fromindex = vec2(COLOR_WHITE, bridge_vector[0]);
+	new_stick.towardface = toward_face;
+	new_stick.towardindex = vec2(COLOR_WHITE, bridge_vector[1]);
+
+	test_connect.at(COLOR_WHITE).at(bridge_vector[0]).connect_stick[from_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
+	test_connect.at(COLOR_WHITE).at(bridge_vector[1]).connect_stick[toward_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
 
 	test_connect.at(new_stick.color).push_back(new_stick);
 }
@@ -733,9 +813,7 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 
 	int stick_stick_count = 0;
 	for (int i = 0; i < 3; i += 1){
-	//for (int i = 0; i < 1; i += 1){
 		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
-		//for (unsigned int j = 3; j < 4; j += 1){
 			vec3 p1 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
 			vec3 p2 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
 			int fromindex1 = test_connect.at(i).at(j).fromindex[1];
@@ -743,7 +821,6 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 			
 			
 			for (int a = 0; a < 3; a += 1){
-			//for (int a = 0; a < 1; a += 1){
 				for (unsigned int b = 0; b < test_connect.at(a).size(); b += 1){
 					if (!((a == i) && (b == j))){
 						int fromindex2 = test_connect.at(a).at(b).fromindex[1];
@@ -754,7 +831,6 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 						if (!(judge1 || judge2)){
 							vec3 p3 = test_connect.at(COLOR_WHITE).at(test_connect.at(a).at(b).fromindex[1]).position;
 							vec3 p4 = test_connect.at(COLOR_WHITE).at(test_connect.at(a).at(b).towardindex[1]).position;
-							//cout << fromindex1 << " " << towardindex1 << " " << fromindex2 << " " << towardindex2 << endl;
 
 							vec3 v1 = p2 - p1;
 							vec3 n1 = (p2 - p1).normalize();
@@ -765,24 +841,9 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 							float bp = v1 * v2; //u*v
 							float cp = v2 * v2; //v*v
 
-							/*if ((v1 ^ v2) != vec3(0.0f, 0.0f, 0.0f)){
-								vec3 v3 = p4 - p2;
-								if (v3 * (v1 ^ v2) != 0.0f){
-									cout << fromindex1 << " " << towardindex1 << " " << fromindex2 << " " << towardindex2 << endl;
-									cout << v3 * (v1 ^ v2) / (v1 ^ v2).length() << endl;
-								}
-							}*/
-							//if ((v1.normalize() - v2.normalize()).length() < 0.001f){
 							if (!((n1 ^ n2).length() < 0.001f) && !(fabs(n1 * n2) < 0.001f)){
-								//vec3 normal = v2 ^ v1;
 								vec3 v3 = p1 - p3;
-								//cout << a << " " << b << endl;
-								//cout << test_connect.at(a).at(b).position[0] << " " << test_connect.at(a).at(b).position[1] << " " << test_connect.at(a).at(b).position[2] << endl;
-								/*cout << a << " " << b << endl;
-								cout << "v1 : " << v1[0] << " " << v1[1] << " " << v1[2] << endl;
-								cout << "v2 : " << v2[0] << " " << v2[1] << " " << v2[2] << endl;
-								cout << endl;*/
-
+							
 								float dp = v1 * v3; //u*w 
 								float ep = v2 * v3; //v*w
 
@@ -792,8 +853,6 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 
 								float sn = bp * ep - cp * dp;
 								float tn = ap * ep - bp * dp;
-
-								//cout << dt << " " << sn << " " << tn << endl;
 
 								if (sn < 0.0001f){
 									sn = 0.0f;
@@ -833,34 +892,26 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 									}
 								}
 
-								//cout << "s : " << sn << " " << sd << endl;
-								//cout << "t : " << tn << " " << td << endl;
-
 								float sc = 0.0f;
 								float tc = 0.0f;
 
-								if (fabs(sn) < 0.0001f)
+								if (fabs(sn) < 0.0001f){
 									sc = 0.0f;
-								else
+								}
+								else{
 									sc = sn / sd;
+								}
 
-								if (fabs(tn) < 0.0001f)
+								if (fabs(tn) < 0.0001f){
 									tc = 0.0f;
-								else
+								}
+								else{
 									tc = tn / td;
-								//cout << "sc : " << sc << endl;
-								//cout << "tc : " << tc << endl;
+								}
 
 								vec3 dist = v3 + (sc * v1) - (tc * v2);
-								//cout << "dist : " << dist.length() << endl;
-								//cout << endl;
 
 								if (dist.length() < ERROR_THICKNESS){
-									/*cout << i << " " << j << endl;
-									cout << test_connect.at(i).at(j).position[0] << " " << test_connect.at(i).at(j).position[1] << " " << test_connect.at(i).at(j).position[2] << endl;
-									cout << a << " " << b << endl;
-									cout << test_connect.at(a).at(b).position[0] << " " << test_connect.at(a).at(b).position[1] << " " << test_connect.at(a).at(b).position[2] << endl;
-									cout << endl;*/
 									stick_stick_count += 1;
 								}
 							}
@@ -873,9 +924,6 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 	}
 	stick_stick_count /= 2.0f;
 
-	/*cout << ball_ball_count << endl;
-	cout << stick_ball_count << endl;
-	cout << stick_stick_count << endl;*/
 	cout << "error : " << ball_ball_count << " " << stick_ball_count << " " << stick_stick_count << endl;
 
 	if (ball_ball_count != 0 || stick_ball_count != 0 || stick_stick_count != 0){
@@ -937,12 +985,12 @@ int main(int argc, char **argv)
 	//output_zometool(zome_queue.at(1), string("test.obj"));
 	//output_struc(zome_queue.at(1), string("fake.txt"));
 	
-	srand((unsigned)time(NULL));
+	//srand((unsigned)time(NULL));
 
-	struc_parser(test_connect, string("fake.txt"));
-	//struc_parser(test_connect, string("fake123.txt"));
+	//struc_parser(test_connect, string("fake.txt"));
+	struc_parser(test_connect, string("fake123.txt"));
 
-	float origin_e = compute_energy(test_connect, myObj);
+	//float origin_e = compute_energy(test_connect, myObj);
 
 	/*for (int j = 0; j < 4; j += 1){
 		cout << j << " : " << endl;
@@ -970,89 +1018,69 @@ int main(int argc, char **argv)
 	////	cout << result << endl;
 	////}*/
 
-	cout << "start" << endl;
-	int collision = 0;
+	//cout << "start" << endl;
+	//int collision = 0;
 
-	vec3 give_up;
-	int num_split = 0, num_merge = 0;
+	//vec3 give_up;
+	//int num_split = 0, num_merge = 0;
 
-	for (int i = 0; i < 500; i += 1){
-		cout << i << " :" << endl;
-		int choose_op = rand() % 2;
-				
-		vector<vector<zomeconn>> temp_connect(4);
-		temp_connect = test_connect;
+	//for (int i = 0; i < 500; i += 1){
+	//	cout << i << " :" << endl;
+	//	int choose_op = rand() % 2;
+	//			
+	//	vector<vector<zomeconn>> temp_connect(4);
+	//	temp_connect = test_connect;
 
-		if (choose_op == 1){
-			cout << "split" << endl;
-			int result = rand() % test_connect.at(COLOR_WHITE).size();
-			cout << result << endl;
-			split(temp_connect, result, myObj);
-			num_split += 1;
-		}
-		else{
-			cout << "merge" << endl;
-			vector<vec4> can_merge;
-			check_merge(can_merge);
-			if (can_merge.size() > 0){
-				int merge_index = rand() % can_merge.size();
-				merge(temp_connect, can_merge.at(merge_index));
-			}
-			num_merge += 1;
-		}
+	//	if (choose_op == 1){
+	//		cout << "split" << endl;
+	//		int result = rand() % test_connect.at(COLOR_WHITE).size();
+	//		cout << result << endl;
+	//		split(temp_connect, result, myObj);
+	//		num_split += 1;
+	//	}
+	//	else{
+	//		cout << "merge" << endl;
+	//		vector<vec4> can_merge;
+	//		check_merge(can_merge, myObj);
+	//		if (can_merge.size() > 0){
+	//			int merge_index = rand() % can_merge.size();
+	//			merge(temp_connect, can_merge.at(merge_index));
+	//		}
+	//		num_merge += 1;
+	//	}
 
-		float temp_e = compute_energy(temp_connect, myObj);
+	//	float temp_e = compute_energy(temp_connect, myObj);
 
-		if (temp_e < origin_e){
-			if (collision_test(temp_connect, give_up)){
-				test_connect = temp_connect;
-				origin_e = temp_e;
-				//cout << "\t i : " << i << endl;
-			}
-			else{
-				collision += 1;
-			}
-		}
-		cout << endl;
-		
-		//collision_test(test_connect);
+	//	if (temp_e < origin_e){
+	//		if (collision_test(temp_connect, give_up)){
+	//			test_connect = temp_connect;
+	//			origin_e = temp_e;
+	//			//cout << "\t i : " << i << endl;
+	//		}
+	//		else{
+	//			collision += 1;
+	//		}
+	//	}
+	//	cout << endl;
+	//}
 
-		//	/*int result;
-		//	float surface_d = 100000000000000.0f;
-		//	for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
-		//		if (test_connect.at(COLOR_WHITE).at(j).surface_d < surface_d){
-		//			surface_d = test_connect.at(COLOR_WHITE).at(j).surface_d;
-		//			result = j;
-		//		}
-		//	}
+	//cout << collision << " " << 1000 << endl;
+	//cout << num_split << " " << num_merge << endl;
+	//cout << give_up[0] << " " << give_up[1] << " " << give_up[2] << endl;
 
-		//	vector<vector<zomeconn>> temp_connect(4);
-		//	temp_connect = test_connect;
+	vector<vec4> can_bridge;
+	check_bridge(can_bridge);
+	bridge(test_connect, can_bridge.at(can_bridge.size() - 1));
 
-		//	split(temp_connect, result, myObj);
+	/*cout << can_bridge.size() << endl;
 
-		//	float temp_e = compute_energy(temp_connect, myObj);
-
-		//	if (temp_e < origin_e){
-		//		test_connect = temp_connect;
-		//		origin_e = temp_e;
-		//	}*/
-	}
-
-	cout << collision << " " << 500 << endl;
-	cout << num_split << " " << num_merge << endl;
-	cout << give_up[0] << " " << give_up[1] << " " << give_up[2] << endl;
-
-	/*fake_case();	
-	vector<vec4> can_merge;
-	check_merge(can_merge);
-	if (can_merge.size() > 0)
-		merge(test_connect, can_merge.at(2));*/
-
-	//collision_test(test_connect);
+	for (unsigned int i = 0; i < can_bridge.size(); i += 1){
+		cout << can_bridge.at(i)[0] << " " << can_bridge.at(i)[1] << " " << can_bridge.at(i)[2] << " " << can_bridge.at(i)[3] << endl;
+	}*/
+	
 	
 	output_zometool(test_connect, string("fake123.obj"));
-	//output_struc(test_connect, string("fake123.txt"));
+	output_struc(test_connect, string("fake123.txt"));
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);

@@ -429,6 +429,9 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	os.close();
 }
 
+#include <iostream>
+using namespace std;
+
 float point_surface_dist(GLMmodel *model, vec3 &p, vec3 &origin_p)
 {
 	float surface_d = 100000000000000.0f;
@@ -475,6 +478,7 @@ float point_surface_dist(GLMmodel *model, vec3 &p, vec3 &origin_p)
 				else
 					test_through[1] = 0.0f;
 
+				//cout << test_through[0] << " " << test_through[1] << endl;
 				if ((test_through[0] == -1) && (test_through[0] == test_through[1])){
 					surface_d = (insect_p - p).length();
 				}
@@ -482,8 +486,10 @@ float point_surface_dist(GLMmodel *model, vec3 &p, vec3 &origin_p)
 		}
 	}
 
-	if(surface_d < NODE_DIAMETER)
+	//cout << surface_d << endl;
+	if (surface_d < NODE_DIAMETER){
 		surface_d = 100000000000000.0f;
+	}
 
 	return surface_d;
 }
