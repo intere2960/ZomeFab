@@ -505,13 +505,13 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 	float split_dist = 10000000000000000.0f;
 	for (unsigned int i = 0; i < temp.size(); i += 1){
 		vec3 test_d = use_ball_p + t.dir->at(temp.at(i).travel_1[0]) * t.face_length(temp.at(i).travel_1[0], temp.at(i).travel_1[1]);
-		float judge_d = point_surface_dist(myObj, test_d, temp.at(i).travel_1[0], use_ball_p);
+		float judge_d = point_surface_dist(myObj, test_d, use_ball_p);
 		if (judge_d < split_dist){
 			choose_split = i;
 			split_dist = judge_d;
 		}
 	}
-	cout << "choose_split : " << choose_split << endl;
+	//cout << "choose_split : " << choose_split << endl;
 	
 	//cout << "o : " << temp.at(choose_split).origin[0] << " " << temp.at(choose_split).origin[1] << " " << temp.at(choose_split).origin[2] << endl;
 	//cout << "t1 : " << temp.at(choose_split).travel_1[0] << " " << temp.at(choose_split).travel_1[1] << " " << temp.at(choose_split).travel_1[2] << endl;
@@ -653,6 +653,7 @@ void check_merge(vector<vec4> &can_merge)
 							toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
 
 						vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
+						//point_surface_dist();
 						can_merge.push_back(connect);
 					}
 				}
@@ -686,6 +687,208 @@ void merge(vector<vector<zomeconn>> &test_connect, vec4 &merge_vector)
 	test_connect.at(COLOR_WHITE).at(merge_vector[1]).connect_stick[toward_face] = vec2(new_stick.color, test_connect.at(new_stick.color).size());
 
 	test_connect.at(new_stick.color).push_back(new_stick);
+}
+
+bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
+{
+	zomedir t;
+	int ball_ball_count = 0;
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+			if (i != j){
+				float judge = (test_connect.at(COLOR_WHITE).at(i).position - test_connect.at(COLOR_WHITE).at(j).position).length();
+				if (fabs(judge - NODE_DIAMETER) < 0.5f){
+					//cout << fabs(judge - NODE_DIAMETER) << endl;
+					ball_ball_count += 1;
+				}
+			}
+		}
+	}
+
+	ball_ball_count /= 2.0f;
+	
+	int stick_ball_count = 0;
+	for (int i = 0; i < 3; i += 1){
+		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+			vec3 p1 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
+			vec3 p2 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
+			float times = t.color_length(test_connect.at(i).at(j).color, test_connect.at(i).at(j).size);
+			for (unsigned int k = 0; k < test_connect.at(COLOR_WHITE).size(); k += 1){
+				if (k != test_connect.at(i).at(j).fromindex[1] && k != test_connect.at(i).at(j).towardindex[1]){
+					vec3 o = test_connect.at(COLOR_WHITE).at(k).position;
+					vec3 v1 = p2 - p1;
+					vec3 v2 = o - p1;
+					float o_times = (v2 * v1) / v1.length();
+					if ((o_times < times) && (o_times > 0.0f)){
+						vec3 check_p = p1 + t.dir->at(test_connect.at(i).at(j).fromface) * o_times;
+						float judge = (o - check_p).length() - NODE_DIAMETER / 2.0f;
+						if (judge < ERROR_THICKNESS){
+							stick_ball_count += 1;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	int stick_stick_count = 0;
+	for (int i = 0; i < 3; i += 1){
+	//for (int i = 0; i < 1; i += 1){
+		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+		//for (unsigned int j = 3; j < 4; j += 1){
+			vec3 p1 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
+			vec3 p2 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
+			int fromindex1 = test_connect.at(i).at(j).fromindex[1];
+			int towardindex1 = test_connect.at(i).at(j).towardindex[1];
+			
+			
+			for (int a = 0; a < 3; a += 1){
+			//for (int a = 0; a < 1; a += 1){
+				for (unsigned int b = 0; b < test_connect.at(a).size(); b += 1){
+					if (!((a == i) && (b == j))){
+						int fromindex2 = test_connect.at(a).at(b).fromindex[1];
+						int towardindex2 = test_connect.at(a).at(b).towardindex[1];
+						bool judge1 = (fromindex1 == fromindex2) || (fromindex1 == towardindex2);
+						bool judge2 = (towardindex1 == fromindex2) || (towardindex1 == towardindex2);
+
+						if (!(judge1 || judge2)){
+							vec3 p3 = test_connect.at(COLOR_WHITE).at(test_connect.at(a).at(b).fromindex[1]).position;
+							vec3 p4 = test_connect.at(COLOR_WHITE).at(test_connect.at(a).at(b).towardindex[1]).position;
+							//cout << fromindex1 << " " << towardindex1 << " " << fromindex2 << " " << towardindex2 << endl;
+
+							vec3 v1 = p2 - p1;
+							vec3 n1 = (p2 - p1).normalize();
+							vec3 v2 = p4 - p3;
+							vec3 n2 = (p4 - p3).normalize();
+							
+							float ap = v1 * v1; //u*u
+							float bp = v1 * v2; //u*v
+							float cp = v2 * v2; //v*v
+
+							/*if ((v1 ^ v2) != vec3(0.0f, 0.0f, 0.0f)){
+								vec3 v3 = p4 - p2;
+								if (v3 * (v1 ^ v2) != 0.0f){
+									cout << fromindex1 << " " << towardindex1 << " " << fromindex2 << " " << towardindex2 << endl;
+									cout << v3 * (v1 ^ v2) / (v1 ^ v2).length() << endl;
+								}
+							}*/
+							//if ((v1.normalize() - v2.normalize()).length() < 0.001f){
+							if (!((n1 ^ n2).length() < 0.001f) && !(fabs(n1 * n2) < 0.001f)){
+								//vec3 normal = v2 ^ v1;
+								vec3 v3 = p1 - p3;
+								//cout << a << " " << b << endl;
+								//cout << test_connect.at(a).at(b).position[0] << " " << test_connect.at(a).at(b).position[1] << " " << test_connect.at(a).at(b).position[2] << endl;
+								/*cout << a << " " << b << endl;
+								cout << "v1 : " << v1[0] << " " << v1[1] << " " << v1[2] << endl;
+								cout << "v2 : " << v2[0] << " " << v2[1] << " " << v2[2] << endl;
+								cout << endl;*/
+
+								float dp = v1 * v3; //u*w 
+								float ep = v2 * v3; //v*w
+
+								float dt = ap * cp - bp * bp;
+								float sd = dt;
+								float td = dt;
+
+								float sn = bp * ep - cp * dp;
+								float tn = ap * ep - bp * dp;
+
+								//cout << dt << " " << sn << " " << tn << endl;
+
+								if (sn < 0.0001f){
+									sn = 0.0f;
+									tn = ep;
+									td = cp;
+								}
+								else if (sn > sd){
+									sn = sd;
+									tn = ep + bp;
+									td = cp;
+								}
+
+								if (tn < 0.0001f){
+									tn = 0.0f;
+									if (-dp < 0.0001f){
+										sn = 0.0f;
+									}
+									else if (-dp > ap){
+										sn = sd;
+									}
+									else{
+										sn = -dp;
+										sd = -ap;
+									}
+								}
+								else if (tn > td){
+									tn = td;
+									if ((-dp + bp) < 0.0001f){
+										sn = 0.0f;
+									}
+									else if ((-dp + bp) > ap){
+										sn = sd;
+									}
+									else{
+										sn = (-dp + bp);
+										sd = ap;
+									}
+								}
+
+								//cout << "s : " << sn << " " << sd << endl;
+								//cout << "t : " << tn << " " << td << endl;
+
+								float sc = 0.0f;
+								float tc = 0.0f;
+
+								if (fabs(sn) < 0.0001f)
+									sc = 0.0f;
+								else
+									sc = sn / sd;
+
+								if (fabs(tn) < 0.0001f)
+									tc = 0.0f;
+								else
+									tc = tn / td;
+								//cout << "sc : " << sc << endl;
+								//cout << "tc : " << tc << endl;
+
+								vec3 dist = v3 + (sc * v1) - (tc * v2);
+								//cout << "dist : " << dist.length() << endl;
+								//cout << endl;
+
+								if (dist.length() < ERROR_THICKNESS){
+									/*cout << i << " " << j << endl;
+									cout << test_connect.at(i).at(j).position[0] << " " << test_connect.at(i).at(j).position[1] << " " << test_connect.at(i).at(j).position[2] << endl;
+									cout << a << " " << b << endl;
+									cout << test_connect.at(a).at(b).position[0] << " " << test_connect.at(a).at(b).position[1] << " " << test_connect.at(a).at(b).position[2] << endl;
+									cout << endl;*/
+									stick_stick_count += 1;
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+	}
+	stick_stick_count /= 2.0f;
+
+	/*cout << ball_ball_count << endl;
+	cout << stick_ball_count << endl;
+	cout << stick_stick_count << endl;*/
+	cout << "error : " << ball_ball_count << " " << stick_ball_count << " " << stick_stick_count << endl;
+
+	if (ball_ball_count != 0 || stick_ball_count != 0 || stick_stick_count != 0){
+		if (ball_ball_count != 0)
+			give_up[0] += 1.0f;
+		if (stick_ball_count != 0)
+			give_up[1] += 1.0f;
+		if (stick_stick_count != 0)
+			give_up[2] += 1.0f;
+		return false;
+	}
+
+	return true;
 }
 
 int main(int argc, char **argv)
@@ -734,11 +937,12 @@ int main(int argc, char **argv)
 	//output_zometool(zome_queue.at(1), string("test.obj"));
 	//output_struc(zome_queue.at(1), string("fake.txt"));
 	
-	//srand((unsigned)time(NULL));
+	srand((unsigned)time(NULL));
 
-	struc_parser(test_connect, string("fake123.txt"));
+	struc_parser(test_connect, string("fake.txt"));
+	//struc_parser(test_connect, string("fake123.txt"));
 
-	//float origin_e = compute_energy(test_connect, myObj);
+	float origin_e = compute_energy(test_connect, myObj);
 
 	/*for (int j = 0; j < 4; j += 1){
 		cout << j << " : " << endl;
@@ -766,44 +970,78 @@ int main(int argc, char **argv)
 	////	cout << result << endl;
 	////}*/
 
-	//cout << "start" << endl;
-	//for (int i = 0; i < 20; i += 1){
-	//	int result = rand() % test_connect.at(COLOR_WHITE).size();
-	//	cout << result << endl;
-	//	
-	//	vector<vector<zomeconn>> temp_connect(4);
-	//	temp_connect = test_connect;
+	cout << "start" << endl;
+	int collision = 0;
 
-	//	split(temp_connect, result, myObj);
+	vec3 give_up;
+	int num_split = 0, num_merge = 0;
 
-	//	float temp_e = compute_energy(temp_connect, myObj);
+	for (int i = 0; i < 500; i += 1){
+		cout << i << " :" << endl;
+		int choose_op = rand() % 2;
+				
+		vector<vector<zomeconn>> temp_connect(4);
+		temp_connect = test_connect;
 
-	//	if (temp_e < origin_e){
-	//		test_connect = temp_connect;
-	//		origin_e = temp_e;
-	//	}
+		if (choose_op == 1){
+			cout << "split" << endl;
+			int result = rand() % test_connect.at(COLOR_WHITE).size();
+			cout << result << endl;
+			split(temp_connect, result, myObj);
+			num_split += 1;
+		}
+		else{
+			cout << "merge" << endl;
+			vector<vec4> can_merge;
+			check_merge(can_merge);
+			if (can_merge.size() > 0){
+				int merge_index = rand() % can_merge.size();
+				merge(temp_connect, can_merge.at(merge_index));
+			}
+			num_merge += 1;
+		}
 
-	//	//	/*int result;
-	//	//	float surface_d = 100000000000000.0f;
-	//	//	for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
-	//	//		if (test_connect.at(COLOR_WHITE).at(j).surface_d < surface_d){
-	//	//			surface_d = test_connect.at(COLOR_WHITE).at(j).surface_d;
-	//	//			result = j;
-	//	//		}
-	//	//	}
+		float temp_e = compute_energy(temp_connect, myObj);
 
-	//	//	vector<vector<zomeconn>> temp_connect(4);
-	//	//	temp_connect = test_connect;
+		if (temp_e < origin_e){
+			if (collision_test(temp_connect, give_up)){
+				test_connect = temp_connect;
+				origin_e = temp_e;
+				//cout << "\t i : " << i << endl;
+			}
+			else{
+				collision += 1;
+			}
+		}
+		cout << endl;
+		
+		//collision_test(test_connect);
 
-	//	//	split(temp_connect, result, myObj);
+		//	/*int result;
+		//	float surface_d = 100000000000000.0f;
+		//	for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+		//		if (test_connect.at(COLOR_WHITE).at(j).surface_d < surface_d){
+		//			surface_d = test_connect.at(COLOR_WHITE).at(j).surface_d;
+		//			result = j;
+		//		}
+		//	}
 
-	//	//	float temp_e = compute_energy(temp_connect, myObj);
+		//	vector<vector<zomeconn>> temp_connect(4);
+		//	temp_connect = test_connect;
 
-	//	//	if (temp_e < origin_e){
-	//	//		test_connect = temp_connect;
-	//	//		origin_e = temp_e;
-	//	//	}*/
-	//}
+		//	split(temp_connect, result, myObj);
+
+		//	float temp_e = compute_energy(temp_connect, myObj);
+
+		//	if (temp_e < origin_e){
+		//		test_connect = temp_connect;
+		//		origin_e = temp_e;
+		//	}*/
+	}
+
+	cout << collision << " " << 500 << endl;
+	cout << num_split << " " << num_merge << endl;
+	cout << give_up[0] << " " << give_up[1] << " " << give_up[2] << endl;
 
 	/*fake_case();	
 	vector<vec4> can_merge;
@@ -811,8 +1049,10 @@ int main(int argc, char **argv)
 	if (can_merge.size() > 0)
 		merge(test_connect, can_merge.at(2));*/
 
+	//collision_test(test_connect);
+	
 	output_zometool(test_connect, string("fake123.obj"));
-	output_struc(test_connect, string("fake123.txt"));
+	//output_struc(test_connect, string("fake123.txt"));
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);

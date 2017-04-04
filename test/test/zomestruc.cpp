@@ -429,10 +429,8 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	os.close();
 }
 
-float point_surface_dist(GLMmodel *model, vec3 &p, int from_index, vec3 &origin_p)
+float point_surface_dist(GLMmodel *model, vec3 &p, vec3 &origin_p)
 {
-	zomedir t;
-	vec3 from_vector = t.dir->at(from_index);
 	float surface_d = 100000000000000.0f;
 
 	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
@@ -461,21 +459,21 @@ float point_surface_dist(GLMmodel *model, vec3 &p, int from_index, vec3 &origin_
 
 				test_through[0] = n[0] * origin_p[0] + n[1] * origin_p[1] + n[2] * origin_p[2] - d;
 
-				if (test_through[0] > 0.0001)
-					test_through[0] = 1;
-				else if (test_through[0] < -0.0001)
-					test_through[0] = -1;
+				if (test_through[0] > 0.0001f)
+					test_through[0] = 1.0f;
+				else if (test_through[0] < -0.0001f)
+					test_through[0] = -1.0f;
 				else
-					test_through[0] = 0;
+					test_through[0] = 0.0f;
 
 				test_through[1] = n[0] * p[0] + n[1] * p[1] + n[2] * p[2] - d;
 
-				if (test_through[1] > 0.0001)
-					test_through[1] = 1;
-				else if (test_through[1] < -0.0001)
-					test_through[1] = -1;
+				if (test_through[1] > 0.0001f)
+					test_through[1] = 1.0f;
+				else if (test_through[1] < -0.0001f)
+					test_through[1] = -1.0f;
 				else
-					test_through[1] = 0;
+					test_through[1] = 0.0f;
 
 				if ((test_through[0] == -1) && (test_through[0] == test_through[1])){
 					surface_d = (insect_p - p).length();

@@ -26,6 +26,8 @@
 #define WEIGHT_YELLOW_L 4.8f
 #define WEIGHT_WHITE 3.0f
 
+#define ERROR_THICKNESS 2.0f
+
 #define SPLITE 0
 #define MERGE 1
 
