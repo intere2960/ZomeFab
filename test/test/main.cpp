@@ -318,7 +318,7 @@ float forbidden_energy(float dist)
 {
 	zomedir t;
 	vec2 p1(t.color_length(COLOR_BLUE, SIZE_S) / 3.0f, 0.0f);
-	vec2 p2(t.color_length(COLOR_BLUE, SIZE_S) * 1.0f, 35.0f);
+	vec2 p2(t.color_length(COLOR_BLUE, SIZE_S) * 1.0f, 70.0f);
 	float a = p2[0] / pow((p2[0] - p1[0]), 2);
 
 	if (dist > p2[0]){
@@ -338,59 +338,9 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
 
 	for (unsigned int a = 0; a < test_connect.size(); a += 1){
 		for (unsigned int i = 0; i < test_connect.at(a).size(); i += 1){
-			vec3 ball_n;
-			bool use[62] = { false };
-			if (a == 3){
-				for (unsigned int k = 0; k < 62; k += 1){
-					if (test_connect.at(a).at(i).connect_stick[k] != vec2(-1.0f, -1.0f))
-						use[k] = true;
-				}
-			}			
-
-			if (test_connect.at(a).at(i).near_dir == -1 || use[test_connect.at(a).at(i).near_dir]){
-
-				for (unsigned int j = 0; j < model->triangles->size(); j += 1){
-					vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
-					vec3 p2(model->vertices->at(3 * model->triangles->at(j).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 2));
-					vec3 p3(model->vertices->at(3 * model->triangles->at(j).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 2));
-					vec3 v1 = p1 - p2;
-					vec3 v2 = p3 - p2;
-					vec3 n = (v2 ^ v1).normalize();
-					float d = n * p1;
-
-					int near_index = -1;
-					for (unsigned int k = 0; k < t.dir->size(); k += 1){
-						if (!use[k]){
-							ball_n = t.dir->at(k);
-							vec3 edge1 = p2 - p1;
-							vec3 edge2 = p3 - p2;
-							vec3 edge3 = p1 - p3;
-							vec3 insect_p;
-							vec3 judge1;
-							vec3 judge2;
-							vec3 judge3;
-
-							float t = (d - (test_connect.at(a).at(i).position * n)) / (n * ball_n);
-							if (t > 0){
-								insect_p = test_connect.at(a).at(i).position + ball_n * t;
-
-								judge1 = insect_p - p1;
-								judge2 = insect_p - p2;
-								judge3 = insect_p - p3;
-
-								if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-									if ((insect_p - test_connect.at(a).at(i).position).length() < test_connect.at(a).at(i).surface_d){
-										test_connect.at(a).at(i).surface_d = (insect_p - test_connect.at(a).at(i).position).length();
-										near_index = k;
-									}
-								}
-							}
-						}
-					}
-					if (near_index != -1)
-						test_connect.at(a).at(i).near_dir = near_index;
-				}
-			}
+			//cout << a << " " << i << endl;
+			//cout << test_connect.at(a).at(i).position[0] << " " << test_connect.at(a).at(i).position[1] << " " << test_connect.at(a).at(i).position[2] << endl;
+			test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
 		}
 	}
 
@@ -402,24 +352,25 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
 	}
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
 
-	float energy_fair = 0.0f;
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		vec3 temp_ring_p;
-		int use_stick = 0;
-		for (unsigned int j = 0; j < 62; j += 1){
-			if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
-				//cout << "abcd : " << test_connect.at(COLOR_WHITE).at(i).connect_stick[j][0] << " " << test_connect.at(COLOR_WHITE).at(i).connect_stick[j][1] << endl;
-				temp_ring_p += test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[j][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[j][1]).position;
-				use_stick += 1;
-			}
-		}
-		temp_ring_p /= use_stick;
-		energy_fair += (test_connect.at(COLOR_WHITE).at(i).position - temp_ring_p).length2();
-	}
-	energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
+	//float energy_fair = 0.0f;
+	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+	//	vec3 temp_ring_p;
+	//	int use_stick = 0;
+	//	for (unsigned int j = 0; j < 62; j += 1){
+	//		if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
+	//			//cout << "abcd : " << test_connect.at(COLOR_WHITE).at(i).connect_stick[j][0] << " " << test_connect.at(COLOR_WHITE).at(i).connect_stick[j][1] << endl;
+	//			temp_ring_p += test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[j][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[j][1]).position;
+	//			use_stick += 1;
+	//		}
+	//	}
+	//	temp_ring_p /= use_stick;
+	//	energy_fair += (test_connect.at(COLOR_WHITE).at(i).position - temp_ring_p).length2();
+	//}
+	//energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
 
-	energy = energy_dist + energy_fair;
-	cout << energy << endl;
+	//energy = energy_dist + energy_fair;
+	energy = energy_dist;
+	cout << "energy : " << energy << endl;
 
 	return energy;
 }
@@ -470,6 +421,8 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 		toward_ball_index = test_connect.at(test[0]).at(test[1]).fromindex[1];
 	}
 
+	vec3 toward_p = test_connect.at(COLOR_WHITE).at(test_connect.at(test[0]).at(test[1]).towardindex[1]).position;
+
 	//cout << "fuck you : " << s_index << " " << toward_ball_index << endl;
 
 	//cout << "from_face : " << from_face << endl;
@@ -505,67 +458,73 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 	float split_dist = 10000000000000000.0f;
 	for (unsigned int i = 0; i < temp.size(); i += 1){
 		vec3 test_d = use_ball_p + t.dir->at(temp.at(i).travel_1[0]) * t.face_length(temp.at(i).travel_1[0], temp.at(i).travel_1[1]);
-		float judge_d = point_surface_dist(myObj, test_d, use_ball_p);
-		if (judge_d < split_dist){
-			choose_split = i;
-			split_dist = judge_d;
+		bool dist = (ball_surface_dist(model, test_d) < 100000000000000.0f);
+		bool insect = !check_stick_intersect(model, test_d, use_ball_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, use_ball_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f) && !check_stick_intersect(model, test_d, toward_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, toward_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f);
+		bool not_near = (ball_surface_dist(model, (test_d + use_ball_p) / 2.0f) < 100000000000000.0f) && (ball_surface_dist(model, (test_d + toward_p) / 2.0f) < 100000000000000.0f);
+		if (!(dist && insect && not_near)){
+			temp.erase(temp.begin() + i);
+			i -= 1;
 		}
 	}
-	//cout << "choose_split : " << choose_split << endl;
-	
-	//cout << "o : " << temp.at(choose_split).origin[0] << " " << temp.at(choose_split).origin[1] << " " << temp.at(choose_split).origin[2] << endl;
-	//cout << "t1 : " << temp.at(choose_split).travel_1[0] << " " << temp.at(choose_split).travel_1[1] << " " << temp.at(choose_split).travel_1[2] << endl;
-	//cout << "t2 : " << temp.at(choose_split).travel_2[0] << " " << temp.at(choose_split).travel_2[1] << " " << temp.at(choose_split).travel_2[2] << endl;
 
-	zomeconn new_ball;
-	zomeconn new_stick_f, new_stick_t;
+	if (temp.size() > 0){
+		choose_split = rand() % temp.size();
+		cout << "choose_split : " << choose_split << endl;
 
-	new_ball.position = test_connect.at(COLOR_WHITE).at(s_index).position + t.dir->at(temp.at(choose_split).travel_1[0]) * t.face_length(temp.at(choose_split).travel_1[0], temp.at(choose_split).travel_1[1]);
-	new_ball.color = COLOR_WHITE;
+		//cout << "o : " << temp.at(choose_split).origin[0] << " " << temp.at(choose_split).origin[1] << " " << temp.at(choose_split).origin[2] << endl;
+		//cout << "t1 : " << temp.at(choose_split).travel_1[0] << " " << temp.at(choose_split).travel_1[1] << " " << temp.at(choose_split).travel_1[2] << endl;
+		//cout << "t2 : " << temp.at(choose_split).travel_2[0] << " " << temp.at(choose_split).travel_2[1] << " " << temp.at(choose_split).travel_2[2] << endl;
 
-	new_stick_f.position = test_connect.at(COLOR_WHITE).at(s_index).position + t.dir->at(temp.at(choose_split).travel_1[0]) * t.face_length(temp.at(choose_split).travel_1[0], temp.at(choose_split).travel_1[1]) / 2;
-	new_stick_f.color = t.face_color(temp.at(choose_split).travel_1[0]);
-	new_stick_f.size = temp.at(choose_split).travel_1[1];
-	new_stick_f.fromface = temp.at(choose_split).travel_1[0];
-	new_stick_f.towardface = temp.at(choose_split).travel_1[2];
+		zomeconn new_ball;
+		zomeconn new_stick_f, new_stick_t;
 
-	//cout << "f:" << endl;
-	//cout << new_stick_f.color << endl;
-	//cout << new_stick_f.size << endl;
-	//cout << new_stick_f.fromface << endl;
-	//cout << new_stick_f.towardface << endl;
+		new_ball.position = test_connect.at(COLOR_WHITE).at(s_index).position + t.dir->at(temp.at(choose_split).travel_1[0]) * t.face_length(temp.at(choose_split).travel_1[0], temp.at(choose_split).travel_1[1]);
+		new_ball.color = COLOR_WHITE;
 
-	new_stick_t.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at(temp.at(choose_split).travel_2[0]) * t.face_length(temp.at(choose_split).travel_2[0], temp.at(choose_split).travel_2[1]) / 2;
-	new_stick_t.color = t.face_color(temp.at(choose_split).travel_2[0]);
-	new_stick_t.size = temp.at(choose_split).travel_2[1];
-	new_stick_t.fromface = temp.at(choose_split).travel_2[0];
-	new_stick_t.towardface = temp.at(choose_split).travel_2[2];
+		new_stick_f.position = test_connect.at(COLOR_WHITE).at(s_index).position + t.dir->at(temp.at(choose_split).travel_1[0]) * t.face_length(temp.at(choose_split).travel_1[0], temp.at(choose_split).travel_1[1]) / 2;
+		new_stick_f.color = t.face_color(temp.at(choose_split).travel_1[0]);
+		new_stick_f.size = temp.at(choose_split).travel_1[1];
+		new_stick_f.fromface = temp.at(choose_split).travel_1[0];
+		new_stick_f.towardface = temp.at(choose_split).travel_1[2];
 
-	//cout << "t:" << endl;
-	//cout << new_stick_t.color << endl;
-	//cout << new_stick_t.size << endl;
-	//cout << new_stick_t.fromface << endl;
-	//cout << new_stick_t.towardface << endl;
-	
-	//cout << toward_ball_index << endl;
-	//cout << new_stick_t.fromface << endl;
-	//cout << new_stick_t.towardface << endl;
+		//cout << "f:" << endl;
+		//cout << new_stick_f.color << endl;
+		//cout << new_stick_f.size << endl;
+		//cout << new_stick_f.fromface << endl;
+		//cout << new_stick_f.towardface << endl;
 
-	test_connect.at(COLOR_WHITE).at(s_index).connect_stick[new_stick_f.fromface] = vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size());
-	new_ball.connect_stick[new_stick_f.towardface] = vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size());
-	
-	new_stick_f.fromindex = vec2(COLOR_WHITE, s_index);
-	new_stick_f.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
-	test_connect.at(new_stick_f.color).push_back(new_stick_f);
+		new_stick_t.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at(temp.at(choose_split).travel_2[0]) * t.face_length(temp.at(choose_split).travel_2[0], temp.at(choose_split).travel_2[1]) / 2;
+		new_stick_t.color = t.face_color(temp.at(choose_split).travel_2[0]);
+		new_stick_t.size = temp.at(choose_split).travel_2[1];
+		new_stick_t.fromface = temp.at(choose_split).travel_2[0];
+		new_stick_t.towardface = temp.at(choose_split).travel_2[2];
 
-	test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick[new_stick_t.fromface] = vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size());
-	new_ball.connect_stick[new_stick_t.towardface] = vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size());
-	
-	new_stick_t.fromindex = vec2(COLOR_WHITE, toward_ball_index);
-	new_stick_t.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
-	test_connect.at(new_stick_t.color).push_back(new_stick_t);
-	
-	test_connect.at(COLOR_WHITE).push_back(new_ball);	
+		//cout << "t:" << endl;
+		//cout << new_stick_t.color << endl;
+		//cout << new_stick_t.size << endl;
+		//cout << new_stick_t.fromface << endl;
+		//cout << new_stick_t.towardface << endl;
+
+		//cout << toward_ball_index << endl;
+		//cout << new_stick_t.fromface << endl;
+		//cout << new_stick_t.towardface << endl;
+
+		test_connect.at(COLOR_WHITE).at(s_index).connect_stick[new_stick_f.fromface] = vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size());
+		new_ball.connect_stick[new_stick_f.towardface] = vec2(new_stick_f.color, test_connect.at(new_stick_f.color).size());
+
+		new_stick_f.fromindex = vec2(COLOR_WHITE, s_index);
+		new_stick_f.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
+		test_connect.at(new_stick_f.color).push_back(new_stick_f);
+
+		test_connect.at(COLOR_WHITE).at(toward_ball_index).connect_stick[new_stick_t.fromface] = vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size());
+		new_ball.connect_stick[new_stick_t.towardface] = vec2(new_stick_t.color, test_connect.at(new_stick_t.color).size());
+
+		new_stick_t.fromindex = vec2(COLOR_WHITE, toward_ball_index);
+		new_stick_t.towardindex = vec2(COLOR_WHITE, test_connect.at(COLOR_WHITE).size());
+		test_connect.at(new_stick_t.color).push_back(new_stick_t);
+
+		test_connect.at(COLOR_WHITE).push_back(new_ball);
+	}
 }
 
 void fake_case(int index)
@@ -652,6 +611,7 @@ void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 			int use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).towardindex[1];
 			if (use_index == i)
 				use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).fromindex[1];
+			vec3 use_p = test_connect.at(COLOR_WHITE).at(use_index).position;
 			
 			for (unsigned int k = j + 1; k < use_slot.size(); k += 1){
 				int opp_face = t.opposite_face(use_slot.at(j));
@@ -664,10 +624,11 @@ void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 						int toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).towardindex[1];
 						if (toward_index == i)
 							toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
+						vec3 toward_p = test_connect.at(COLOR_WHITE).at(toward_index).position;
 												
 						vec3 test_p = (test_connect.at(COLOR_WHITE).at(use_index).position + test_connect.at(COLOR_WHITE).at(toward_index).position) / 2.0f;
-						bool judge = (point_surface_dist(model, test_p, test_connect.at(COLOR_WHITE).at(use_index).position) < 100000000000000.0f) && (point_surface_dist(model, test_p, test_connect.at(COLOR_WHITE).at(toward_index).position) < 100000000000000.0f);
-
+						
+						bool judge = !check_stick_intersect(model, use_p, toward_p) && !check_stick_intersect(model, test_p, use_p) && !check_stick_intersect(model, test_p, toward_p);
 						if (judge){
 							vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
 							can_merge.push_back(connect);
@@ -706,7 +667,7 @@ void merge(vector<vector<zomeconn>> &test_connect, vec4 &merge_vector)
 	test_connect.at(new_stick.color).push_back(new_stick);
 }
 
-void check_bridge(vector<vec4> &can_bridge)
+void check_bridge(vector<vec4> &can_bridge, GLMmodel *model)
 {
 	zomedir t;
 
@@ -729,9 +690,14 @@ void check_bridge(vector<vec4> &can_bridge)
 								}
 
 								if (add){
-									vec4 connect(i, j, t.face_color(test_index), size);
-									can_bridge.push_back(connect);
-									break;
+									vec3 test_p = (test_connect.at(COLOR_WHITE).at(i).position + test_connect.at(COLOR_WHITE).at(j).position) / 2.0f;
+									vec3 from_p = test_connect.at(COLOR_WHITE).at(i).position;
+									vec3 toward_p = test_connect.at(COLOR_WHITE).at(j).position;
+									bool judge = !check_stick_intersect(model, from_p, toward_p) && !check_stick_intersect(model, test_p, from_p) && !check_stick_intersect(model, test_p, toward_p);
+									if (judge){
+										vec4 connect(i, j, t.face_color(test_index), size);
+										can_bridge.push_back(connect);
+									}
 								}
 							}
 						}
@@ -924,7 +890,7 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 	}
 	stick_stick_count /= 2.0f;
 
-	cout << "error : " << ball_ball_count << " " << stick_ball_count << " " << stick_stick_count << endl;
+	cout << "error => ball-to-ball : " << ball_ball_count << " ball-to-rod :  " << stick_ball_count << " rod-to-rod :  " << stick_stick_count << endl;
 
 	if (ball_ball_count != 0 || stick_ball_count != 0 || stick_stick_count != 0){
 		if (ball_ball_count != 0)
@@ -946,7 +912,21 @@ int main(int argc, char **argv)
 	myObj = glmReadOBJ(model_source);
 	//myObj_inner = glmCopy(myObj);
 
+	//cout << "size : " << myObj->numtriangles << endl;
 	init();
+
+	/////*vec3 p1(174.059, 312.327, 107.917);
+	////vec3 p2(112.142, 288.677, 69.6504);*/
+	/////*vec3 p1(-77.0575, 430.577, 69.6504);
+	////vec3 p2(-177.241, 392.31, 7.7339);*/
+	/////*vec3 p1(-138.974, 321.361, -57.633);
+	////vec3 p2(-138.974, 359.627, -33.983);*/
+	///*vec3 p1(17.5425, 241.377, -24.9497);
+	//vec3 p2(-44.374, 141.194, 13.3168);*/
+	//vec3 p1(-138.974, 359.627, 13.317);
+	//vec3 p2(-100.7075, 359.627, 75.233);
+	//bool test = check_stick_intersect(myObj, p1, p2);
+	//cout << "test : " << test << endl;
 
 	//test();
 
@@ -985,92 +965,96 @@ int main(int argc, char **argv)
 	//output_zometool(zome_queue.at(1), string("test.obj"));
 	//output_struc(zome_queue.at(1), string("fake.txt"));
 	
-	//srand((unsigned)time(NULL));
+	srand((unsigned)time(NULL));
+	struc_parser(test_connect, string("fake.txt"));
+	//struc_parser(test_connect, string("fake123.txt"));
+	
+	float origin_e = compute_energy(test_connect, myObj);
 
-	//struc_parser(test_connect, string("fake.txt"));
-	struc_parser(test_connect, string("fake123.txt"));
-
-	//float origin_e = compute_energy(test_connect, myObj);
-
-	/*for (int j = 0; j < 4; j += 1){
-		cout << j << " : " << endl;
-		if (j != 3){
-			for (int k = 0; k < test_connect.at(j).size(); k += 1){
-				cout << "\t " << k << " : (" << test_connect.at(j).at(k).fromindex[0] << " , " << test_connect.at(j).at(k).fromindex[1]
-					<< ") (" << test_connect.at(j).at(k).towardindex[0] << " , " << test_connect.at(j).at(k).towardindex[1] << ")" << endl;
-			}
-		}
-		else{
-			for (int k = 0; k < test_connect.at(3).size(); k += 1){
-				cout << "\t " << k << " : ";
-				for (int a = 0; a < 62; a += 1){
-					if (test_connect.at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-						cout << a << ": (" << test_connect.at(3).at(k).connect_stick[a][0] << " , " << test_connect.at(3).at(k).connect_stick[a][1] << ") ";
-				}
-				cout << endl;
-				cout << "\t " << test_connect.at(3).at(k).position[0] << " " << test_connect.at(3).at(k).position[1] << " " << test_connect.at(3).at(k).position[2] << endl;
-			}
-		}
-	}*/
-		
-	/////*for (unsigned int i = 0; i < 6; i += 1){
-	////	int result = rand() % test_connect.at(COLOR_WHITE).size();
-	////	cout << result << endl;
-	////}*/
-
-	//cout << "start" << endl;
-	//int collision = 0;
-
-	//vec3 give_up;
-	//int num_split = 0, num_merge = 0;
-
-	//for (int i = 0; i < 500; i += 1){
-	//	cout << i << " :" << endl;
-	//	int choose_op = rand() % 2;
-	//			
-	//	vector<vector<zomeconn>> temp_connect(4);
-	//	temp_connect = test_connect;
-
-	//	if (choose_op == 1){
-	//		cout << "split" << endl;
-	//		int result = rand() % test_connect.at(COLOR_WHITE).size();
-	//		cout << result << endl;
-	//		split(temp_connect, result, myObj);
-	//		num_split += 1;
+	///*for (int j = 0; j < 4; j += 1){
+	//	cout << j << " : " << endl;
+	//	if (j != 3){
+	//		for (int k = 0; k < test_connect.at(j).size(); k += 1){
+	//			cout << "\t " << k << " : (" << test_connect.at(j).at(k).fromindex[0] << " , " << test_connect.at(j).at(k).fromindex[1]
+	//				<< ") (" << test_connect.at(j).at(k).towardindex[0] << " , " << test_connect.at(j).at(k).towardindex[1] << ")" << endl;
+	//		}
 	//	}
 	//	else{
-	//		cout << "merge" << endl;
-	//		vector<vec4> can_merge;
-	//		check_merge(can_merge, myObj);
-	//		if (can_merge.size() > 0){
-	//			int merge_index = rand() % can_merge.size();
-	//			merge(temp_connect, can_merge.at(merge_index));
-	//		}
-	//		num_merge += 1;
-	//	}
-
-	//	float temp_e = compute_energy(temp_connect, myObj);
-
-	//	if (temp_e < origin_e){
-	//		if (collision_test(temp_connect, give_up)){
-	//			test_connect = temp_connect;
-	//			origin_e = temp_e;
-	//			//cout << "\t i : " << i << endl;
-	//		}
-	//		else{
-	//			collision += 1;
+	//		for (int k = 0; k < test_connect.at(3).size(); k += 1){
+	//			cout << "\t " << k << " : ";
+	//			for (int a = 0; a < 62; a += 1){
+	//				if (test_connect.at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
+	//					cout << a << ": (" << test_connect.at(3).at(k).connect_stick[a][0] << " , " << test_connect.at(3).at(k).connect_stick[a][1] << ") ";
+	//			}
+	//			cout << endl;
+	//			cout << "\t " << test_connect.at(3).at(k).position[0] << " " << test_connect.at(3).at(k).position[1] << " " << test_connect.at(3).at(k).position[2] << endl;
 	//		}
 	//	}
-	//	cout << endl;
-	//}
+	//}*/
 
-	//cout << collision << " " << 1000 << endl;
-	//cout << num_split << " " << num_merge << endl;
-	//cout << give_up[0] << " " << give_up[1] << " " << give_up[2] << endl;
+	cout << "start" << endl;
+	int collision = 0;
 
-	vector<vec4> can_bridge;
+	vec3 give_up;
+	int num_split = 0, num_merge = 0, num_bridge = 0;
+
+	for (int i = 0; i < 1000; i += 1){
+		cout << i << " :" << endl;
+		int choose_op = rand() % 3;
+				
+		vector<vector<zomeconn>> temp_connect(4);
+		temp_connect = test_connect;
+
+		if (choose_op == 0){
+			cout << "split" << endl;
+			int result = rand() % test_connect.at(COLOR_WHITE).size();
+			cout << result << endl;
+			split(temp_connect, result, myObj);
+			num_split += 1;
+		}
+		else if(choose_op == 1){
+			cout << "merge" << endl;
+			vector<vec4> can_merge;
+			check_merge(can_merge, myObj);
+			if (can_merge.size() > 0){
+				int merge_index = rand() % can_merge.size();
+				merge(temp_connect, can_merge.at(merge_index));
+			}
+			num_merge += 1;
+		}
+		else{
+			cout << "bridge" << endl;
+			vector<vec4> can_bridge;
+			check_bridge(can_bridge, myObj);
+			if (can_bridge.size() > 0){
+				int bridge_index = rand() % can_bridge.size();
+				bridge(temp_connect, can_bridge.at(bridge_index));
+			}
+			num_bridge += 1;
+		}
+
+		float temp_e = compute_energy(temp_connect, myObj);
+
+		if (temp_e < origin_e){
+			if (collision_test(temp_connect, give_up)){
+				test_connect = temp_connect;
+				origin_e = temp_e;
+				cout << "commit" << endl;
+			}
+			else{
+				collision += 1;
+			}
+		}
+		cout << endl;
+	}
+
+	cout << "collision : " << collision << " " << 1000 << endl;
+	cout << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << endl;
+	cout << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
+
+	/*vector<vec4> can_bridge;
 	check_bridge(can_bridge);
-	bridge(test_connect, can_bridge.at(can_bridge.size() - 1));
+	bridge(test_connect, can_bridge.at(can_bridge.size() - 1));*/
 
 	/*cout << can_bridge.size() << endl;
 
@@ -1080,7 +1064,7 @@ int main(int argc, char **argv)
 	
 	
 	output_zometool(test_connect, string("fake123.obj"));
-	output_struc(test_connect, string("fake123.txt"));
+	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);

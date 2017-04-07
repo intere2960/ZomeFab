@@ -31,7 +31,6 @@ public:
 	bool isAnalyzed; //analyze force
 	float force;
 
-	int near_dir;
 	float surface_d;
 
 //	zomeconn* link;
@@ -76,6 +75,8 @@ void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filen
 void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filename);
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
-float point_surface_dist(GLMmodel *model, vec3 &p, vec3 &origin_p);
+float point_surface_dist(GLMmodel *model, vec3 &p);
+float ball_surface_dist(GLMmodel *model, vec3 &p);
+bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p);
 
 #endif // ZOMESTRUC_H_INCLUDED

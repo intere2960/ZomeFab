@@ -15,7 +15,6 @@ zomeconn::zomeconn()
 	towardindex = vec2(-1, -1);
 	towardface = -1;
 	surface_d = 100000000000000.0;
-	near_dir = -1;
 
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
@@ -432,64 +431,165 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 #include <iostream>
 using namespace std;
 
-float point_surface_dist(GLMmodel *model, vec3 &p, vec3 &origin_p)
+float point_surface_dist(GLMmodel *model, vec3 &p)
 {
 	float surface_d = 100000000000000.0f;
 
+	int index_tri = -1;
 	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
-		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
-		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
-		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
-		vec3 v1 = p1 - p2;
-		vec3 v2 = p3 - p2;
+
+		vec3 test[4];
+		test[0] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		test[1] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		test[2] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		test[3] = (test[0] + test[1] + test[2]) / 3.0f;
+
+		vec3 v1 = test[0] - test[1];
+		vec3 v2 = test[2] - test[1];
 		vec3 n = (v2 ^ v1).normalize();
-		float d = n * p1;
-			
-		vec3 edge1 = p2 - p1;
-		vec3 edge2 = p3 - p2;
-		vec3 edge3 = p1 - p3;
+		float d = n * test[0];
 
-		float times = (p * n) - d;
-		vec3 insect_p = p + n * times;
-
-		vec3 judge1 = insect_p - p1;
-		vec3 judge2 = insect_p - p2;
-		vec3 judge3 = insect_p - p3;
-
-		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-			if ((insect_p - p).length() < surface_d){
-				vec2 test_through;
-
-				test_through[0] = n[0] * origin_p[0] + n[1] * origin_p[1] + n[2] * origin_p[2] - d;
-
-				if (test_through[0] > 0.0001f)
-					test_through[0] = 1.0f;
-				else if (test_through[0] < -0.0001f)
-					test_through[0] = -1.0f;
-				else
-					test_through[0] = 0.0f;
-
-				test_through[1] = n[0] * p[0] + n[1] * p[1] + n[2] * p[2] - d;
-
-				if (test_through[1] > 0.0001f)
-					test_through[1] = 1.0f;
-				else if (test_through[1] < -0.0001f)
-					test_through[1] = -1.0f;
-				else
-					test_through[1] = 0.0f;
-
-				//cout << test_through[0] << " " << test_through[1] << endl;
-				if ((test_through[0] == -1) && (test_through[0] == test_through[1])){
-					surface_d = (insect_p - p).length();
+		float judge = p * n - d;
+		if ((judge < -(NODE_DIAMETER / 2.0f + ERROR_THICKNESS))){
+			for (int j = 0; j < 4; j += 1){
+				if ((p - test[j]).length() < surface_d){
+					index_tri = i;
+					surface_d = (p - test[j]).length();
 				}
-			}			
+			}
 		}
-	}
+	}		
 
-	//cout << surface_d << endl;
-	if (surface_d < NODE_DIAMETER){
+	if (surface_d < NODE_DIAMETER / 2.0f + ERROR_THICKNESS){
+		index_tri = -1;
 		surface_d = 100000000000000.0f;
 	}
 
 	return surface_d;
+}
+
+float ball_surface_dist(GLMmodel *model, vec3 &p)
+{
+	float surface_d = 100000000000000.0f;
+
+	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
+		
+		vec3 test[4];
+		test[0] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		test[1] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		test[2] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		test[3] = (test[0] + test[1] + test[2]) / 3.0f;
+
+		vec3 v1 = test[0] - test[1];
+		vec3 v2 = test[2] - test[1];
+		vec3 n = (v2 ^ v1).normalize();
+		float d = n * test[0];
+
+		for (int j = 0; j < 4; j += 1){
+			if (((p - test[j]).length() < surface_d) && ((p - test[j]).length() > NODE_DIAMETER)){
+				surface_d = (p - test[j]).length();
+			}
+			if ((p - test[j]).length() < NODE_DIAMETER){
+				return 100000000000000.0f;
+			}
+		}
+
+		float times = p * n - d;
+
+		vec3 insect_p = p + times * n;
+
+		vec3 edge1 = test[1] - test[0];
+		vec3 edge2 = test[2] - test[1];
+		vec3 edge3 = test[0] - test[2];
+		vec3 judge1 = insect_p - test[0];
+		vec3 judge2 = insect_p - test[1];
+		vec3 judge3 = insect_p - test[2];
+
+		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+			if ((p - insect_p).length() < NODE_DIAMETER){
+				return 100000000000000.0f;
+			}
+			else{
+				if ((p - insect_p).length() < surface_d){
+					surface_d = (p - insect_p).length();
+				}
+			}
+		}
+	}
+	return surface_d;
+}
+
+bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p)
+{
+	vec3 dir = (p - origin_p).normalize();
+	bool ans = false;
+	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
+
+		vec3 test[3];
+		test[0] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		test[1] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		test[2] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		
+		vec3 v1 = test[0] - test[1];
+		vec3 v2 = test[2] - test[1];
+		vec3 n = (v2 ^ v1).normalize();
+		float d = n * test[0];
+
+		float dist1 = p * n - d;
+		float dist2 = origin_p * n - d;
+		
+		int judge_p1;
+		if (dist1 > 0.001f)
+			judge_p1 = 1;
+		else if (dist1 < -0.001f)
+			judge_p1 = -1;
+		else
+			judge_p1 = 0;
+
+		int judge_p2;
+		if (dist2 > 0.001f)
+			judge_p2 = 1;
+		else if (dist2 < -0.001f)
+			judge_p2 = -1;
+		else
+			judge_p2 = 0;
+
+		if (judge_p1 != judge_p2){
+
+			float times = (d - (p * n)) / (dir * n);
+
+			//cout << i << " : " << endl;
+			//cout << "tri : " << model->triangles->at(i).vindices[0] << " " << model->triangles->at(i).vindices[1] << " " << model->triangles->at(i).vindices[2] << endl;
+			//vec3 insect_p = (dist2 * p + dist1 * origin_p) / (dist1 + dist2);
+			vec3 insect_p = p + times * dir;
+			//cout << "insect_p : " << insect_p[0] << " " << insect_p[1] << " " << insect_p[2] << endl;
+
+			vec3 edge1 = test[1] - test[0];
+			vec3 edge2 = test[2] - test[1];
+			vec3 edge3 = test[0] - test[2];
+			vec3 judge1 = insect_p - test[0];
+			vec3 judge2 = insect_p - test[1];
+			vec3 judge3 = insect_p - test[2];
+
+			//cout << "judge : " << (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)) << endl;
+			//cout << endl;
+
+			if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+				return true;
+			}
+		}
+		//cout << "i : " << i << endl;
+		for (int j = 0; j < 3; j += 1){
+			float dist_times = -(p - test[j]) * dir / (dir * dir);
+			//cout << dist_times << endl;
+			//if (dist_times > 0.0f){
+				float line_d = (test[j] - (p + dist_times * dir)).length();
+				if (line_d < ERROR_THICKNESS){
+					return true;
+				}
+			//}
+		}
+	}
+
+	return false;
 }
