@@ -1,5 +1,6 @@
 #include <string>
 #include <fstream>
+#include <omp.h>
 #include "zomestruc.h"
 #include "zomedir.h"
 #include "global.h"
@@ -14,7 +15,7 @@ zomeconn::zomeconn()
 	fromface = -1;
 	towardindex = vec2(-1, -1);
 	towardface = -1;
-	surface_d = 100000000000000.0;
+	surface_d = 100000000000000.0f;
 
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
@@ -436,7 +437,8 @@ float point_surface_dist(GLMmodel *model, vec3 &p)
 	float surface_d = 100000000000000.0f;
 
 	int index_tri = -1;
-	for (unsigned int i = 0; i < model->triangles->size(); i += 1){
+	#pragma omp parallel for
+	for (int i = 0; i < model->triangles->size(); i += 1){
 
 		vec3 test[4];
 		test[0] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));

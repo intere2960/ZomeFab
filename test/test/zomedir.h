@@ -17,6 +17,7 @@ public:
 
 	std::vector<vec3> *dir;
 	std::vector<std::vector<std::vector<int>>> near_dir;
+	std::vector<std::vector<float>> near_angle;
 
 	float face_length(int index, int size);
 	float color_length(int color, int size);

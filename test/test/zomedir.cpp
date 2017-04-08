@@ -151,6 +151,31 @@ zomedir::zomedir()
 		near_dir.push_back(dirs_of_dir);
 		dirs_of_dir.clear();
 	}
+
+	for (int i = 0; i < 62; i += 1)
+	{
+		std::vector<float> angle;
+		for (int j = 0; j < 62; j += 1)
+		{
+			vec3 from = dir->at(i);
+			vec3 toward = dir->at(j);
+
+			float dot = from * toward;
+			float new_angle;
+			if (j == i){
+				new_angle = 0.0f;
+			}
+			else if (j == opposite_face(i)){
+				new_angle = 180.0f;
+
+			}
+			else{
+				new_angle = acosf(dot) / M_PI * 180.0f;
+			}
+			angle.push_back(new_angle);
+		}
+		near_angle.push_back(angle);
+	}
 }
 
 zomedir::~zomedir()

@@ -1,6 +1,8 @@
 #include "main.h"
 #include <omp.h>
 
+using namespace std;
+
 void drawObj(GLMmodel *myObj)
 {
 	glBegin(GL_TRIANGLES);
@@ -331,27 +333,53 @@ float forbidden_energy(float dist)
 	return a * pow((dist - p1[0]), 2);
 }
 
-float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
+float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model, float *term)
 {
 	float energy = 0.0f;
 	zomedir t;
 
-	for (unsigned int a = 0; a < test_connect.size(); a += 1){
-		for (unsigned int i = 0; i < test_connect.at(a).size(); i += 1){
+	#pragma omp parallel for
+	for (int a = 0; a < test_connect.size(); a += 1){
+		#pragma omp parallel for
+		for (int i = 0; i < test_connect.at(a).size(); i += 1){
 			//cout << a << " " << i << endl;
 			//cout << test_connect.at(a).at(i).position[0] << " " << test_connect.at(a).at(i).position[1] << " " << test_connect.at(a).at(i).position[2] << endl;
-			test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
+			if (test_connect.at(a).at(i).surface_d == 100000000000000.0f)
+				test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
 		}
 	}
 
 	float energy_dist = 0.0f;
-	for (unsigned int a = 0; a < test_connect.size(); a += 1){
-		for (unsigned int i = 0; i < test_connect.at(a).size(); i += 1){
+	#pragma omp parallel for
+	for (int a = 0; a < test_connect.size(); a += 1){
+		#pragma omp parallel for
+		for (int i = 0; i < test_connect.at(a).size(); i += 1){
 			energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
 		}
 	}
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
 
+	float energy_angle = 0.0f;
+	#pragma omp parallel for
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		vector<int> use_stick;
+		for (int j = 0; j < 62; j += 1){
+			if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
+				use_stick.push_back(j);
+			}
+		}
+
+		float sum_angle = 0.0f;
+		#pragma omp parallel for
+		for (int j = 0; j < use_stick.size() - 1; j += 1){
+			#pragma omp parallel for
+			for (int k = j; k < use_stick.size(); k += 1){
+				sum_angle += t.near_angle.at(use_stick.at(j)).at(use_stick.at(k));
+			}
+		}
+
+		energy_angle += 1 / sum_angle;
+	}
 	//float energy_fair = 0.0f;
 	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 	//	vec3 temp_ring_p;
@@ -369,8 +397,12 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model)
 	//energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
 
 	//energy = energy_dist + energy_fair;
-	energy = energy_dist;
-	cout << "energy : " << energy << endl;
+	energy = energy_dist + 10 * energy_angle;
+	/*cout << "energy : " << energy << endl;
+	cout << "energy_dist : " << energy_dist << endl;
+	cout << "energy_angle : " << energy_angle << endl;*/
+	term[0] = energy_dist;
+	term[1] = energy_angle;
 
 	return energy;
 }
@@ -382,16 +414,20 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 	int c_index;
 	float dist = 100000000000000000.0f;
 	
+	vector<int> use_index;
 	for (unsigned int i = 0; i < 62; i += 1){
 		if (test_connect.at(COLOR_WHITE).at(s_index).connect_stick[i] != vec2(-1.0f, -1.0f)){
-			vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick[i];
-			//cout << i << " : " << test[0] << " " << test[1] << endl;
-			if (test_connect.at(test[0]).at(test[1]).surface_d < dist){
-				dist = test_connect.at(test[0]).at(test[1]).surface_d;
-				c_index = i;
-			}
+			//vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick[i];
+			////cout << i << " : " << test[0] << " " << test[1] << endl;
+			//if (test_connect.at(test[0]).at(test[1]).surface_d < dist){
+			//	dist = test_connect.at(test[0]).at(test[1]).surface_d;
+			//	c_index = i;
+			//}
+			use_index.push_back(i);
 		}
 	}
+	int vector_index = rand() % use_index.size();
+	c_index = use_index.at(vector_index);
 
 	vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick[c_index];
 	//cout << "test : " << test[0] << " " << test[1] << endl;
@@ -428,6 +464,7 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 	//cout << "from_face : " << from_face << endl;
 
 	vector<zomerecord> temp;
+
 	for (unsigned int i = 0; i < splite_table.table.at(from_face).size(); i += 1){
 		for (unsigned int j = 0; j < splite_table.table.at(from_face).at(i).size(); j += 1){
 			if (splite_table.table.at(from_face).at(i).at(j).origin[1] == from_size){
@@ -469,7 +506,7 @@ void split(vector<vector<zomeconn>> &test_connect, int s_index, GLMmodel *model)
 
 	if (temp.size() > 0){
 		choose_split = rand() % temp.size();
-		cout << "choose_split : " << choose_split << endl;
+		//cout << "choose_split : " << choose_split << endl;
 
 		//cout << "o : " << temp.at(choose_split).origin[0] << " " << temp.at(choose_split).origin[1] << " " << temp.at(choose_split).origin[2] << endl;
 		//cout << "t1 : " << temp.at(choose_split).travel_1[0] << " " << temp.at(choose_split).travel_1[1] << " " << temp.at(choose_split).travel_1[2] << endl;
@@ -598,7 +635,8 @@ void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 {
 	zomedir t;
 
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+	//#pragma omp parallel for
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		vector<int> use_slot;
 		for (int j = 0; j < 62; j += 1){
 			if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
@@ -606,17 +644,20 @@ void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 			}
 		}
 
-		for (unsigned int j = 0; j < use_slot.size() - 1; j += 1){
+		//#pragma omp parallel for
+		for (int j = 0; j < use_slot.size() - 1; j += 1){
 			
 			int use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).towardindex[1];
 			if (use_index == i)
 				use_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).fromindex[1];
 			vec3 use_p = test_connect.at(COLOR_WHITE).at(use_index).position;
 			
-			for (unsigned int k = j + 1; k < use_slot.size(); k += 1){
+			//#pragma omp parallel for
+			for (int k = j + 1; k < use_slot.size(); k += 1){
 				int opp_face = t.opposite_face(use_slot.at(j));
-		
-				for (unsigned int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
+				
+				//#pragma omp parallel for
+				for (int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
 					bool judge1 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).origin[1] == test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).size);
 					bool judge2 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_1[1] == test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).size);
 					if (judge1 && judge2){
@@ -625,13 +666,23 @@ void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 						if (toward_index == i)
 							toward_index = test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
 						vec3 toward_p = test_connect.at(COLOR_WHITE).at(toward_index).position;
-												
-						vec3 test_p = (test_connect.at(COLOR_WHITE).at(use_index).position + test_connect.at(COLOR_WHITE).at(toward_index).position) / 2.0f;
 						
-						bool judge = !check_stick_intersect(model, use_p, toward_p) && !check_stick_intersect(model, test_p, use_p) && !check_stick_intersect(model, test_p, toward_p);
-						if (judge){
-							vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
-							can_merge.push_back(connect);
+
+						bool add = true;
+						for (unsigned int b = 0; b < can_merge.size(); b += 1){
+							if ((can_merge.at(b)[0] == toward_index) && (can_merge.at(b)[1] == use_index)){
+								add = false;
+							}
+						}
+
+						if (add){
+							vec3 test_p = (test_connect.at(COLOR_WHITE).at(use_index).position + test_connect.at(COLOR_WHITE).at(toward_index).position) / 2.0f;
+
+							bool judge = !check_stick_intersect(model, use_p, toward_p) && !check_stick_intersect(model, test_p, use_p) && !check_stick_intersect(model, test_p, toward_p);
+							if (judge){
+								vec4 connect(use_index, toward_index, t.face_color(merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
+								can_merge.push_back(connect);
+							}
 						}
 					}
 				}
@@ -671,8 +722,10 @@ void check_bridge(vector<vec4> &can_bridge, GLMmodel *model)
 {
 	zomedir t;
 
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+	//#pragma omp parallel for
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		//#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
 			if (i != j){
 				vec3 test_l = test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position;
 				vec3 test_n = (test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position).normalize();
@@ -680,6 +733,8 @@ void check_bridge(vector<vec4> &can_bridge, GLMmodel *model)
 				if (test_index != -1){
 					if (test_connect.at(COLOR_WHITE).at(i).connect_stick[test_index] == vec2(-1.0f, -1.0f)){
 						float l = test_l.length();
+
+						//#pragma omp parallel for
 						for (int size = 0; size < 3; size += 1){
 							if (fabs(t.face_length(test_index, size) - l) < 0.001f){
 								bool add = true;
@@ -739,8 +794,10 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 {
 	zomedir t;
 	int ball_ball_count = 0;
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		for (unsigned int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+	#pragma omp parallel for
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
 			if (i != j){
 				float judge = (test_connect.at(COLOR_WHITE).at(i).position - test_connect.at(COLOR_WHITE).at(j).position).length();
 				if (fabs(judge - NODE_DIAMETER) < 0.5f){
@@ -754,12 +811,17 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 	ball_ball_count /= 2.0f;
 	
 	int stick_ball_count = 0;
+	
+	#pragma omp parallel for
 	for (int i = 0; i < 3; i += 1){
-		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(i).size(); j += 1){
 			vec3 p1 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
 			vec3 p2 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
 			float times = t.color_length(test_connect.at(i).at(j).color, test_connect.at(i).at(j).size);
-			for (unsigned int k = 0; k < test_connect.at(COLOR_WHITE).size(); k += 1){
+			
+			#pragma omp parallel for
+			for (int k = 0; k < test_connect.at(COLOR_WHITE).size(); k += 1){
 				if (k != test_connect.at(i).at(j).fromindex[1] && k != test_connect.at(i).at(j).towardindex[1]){
 					vec3 o = test_connect.at(COLOR_WHITE).at(k).position;
 					vec3 v1 = p2 - p1;
@@ -778,16 +840,20 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 	}
 
 	int stick_stick_count = 0;
+
+	#pragma omp parallel for
 	for (int i = 0; i < 3; i += 1){
-		for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(i).size(); j += 1){
 			vec3 p1 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
 			vec3 p2 = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
 			int fromindex1 = test_connect.at(i).at(j).fromindex[1];
 			int towardindex1 = test_connect.at(i).at(j).towardindex[1];
 			
-			
+			#pragma omp parallel for
 			for (int a = 0; a < 3; a += 1){
-				for (unsigned int b = 0; b < test_connect.at(a).size(); b += 1){
+				#pragma omp parallel for
+				for (int b = 0; b < test_connect.at(a).size(); b += 1){
 					if (!((a == i) && (b == j))){
 						int fromindex2 = test_connect.at(a).at(b).fromindex[1];
 						int towardindex2 = test_connect.at(a).at(b).towardindex[1];
@@ -890,7 +956,7 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 	}
 	stick_stick_count /= 2.0f;
 
-	cout << "error => ball-to-ball : " << ball_ball_count << " ball-to-rod :  " << stick_ball_count << " rod-to-rod :  " << stick_stick_count << endl;
+	//cout << "error => ball-to-ball : " << ball_ball_count << " ball-to-rod :  " << stick_ball_count << " rod-to-rod :  " << stick_stick_count << endl;
 
 	if (ball_ball_count != 0 || stick_ball_count != 0 || stick_stick_count != 0){
 		if (ball_ball_count != 0)
@@ -905,6 +971,12 @@ bool collision_test(vector<vector<zomeconn>> &test_connect, vec3 & give_up)
 	return true;
 }
 
+float decrease_t(int iteration)
+{
+	int num = (iteration + 1) / 100;
+	return pow(0.99f, (float)num);
+}
+
 int main(int argc, char **argv)
 {
 	//    findzoom();
@@ -915,61 +987,66 @@ int main(int argc, char **argv)
 	//cout << "size : " << myObj->numtriangles << endl;
 	init();
 
-	/////*vec3 p1(174.059, 312.327, 107.917);
-	////vec3 p2(112.142, 288.677, 69.6504);*/
-	/////*vec3 p1(-77.0575, 430.577, 69.6504);
-	////vec3 p2(-177.241, 392.31, 7.7339);*/
-	/////*vec3 p1(-138.974, 321.361, -57.633);
-	////vec3 p2(-138.974, 359.627, -33.983);*/
-	///*vec3 p1(17.5425, 241.377, -24.9497);
-	//vec3 p2(-44.374, 141.194, 13.3168);*/
-	//vec3 p1(-138.974, 359.627, 13.317);
-	//vec3 p2(-100.7075, 359.627, 75.233);
-	//bool test = check_stick_intersect(myObj, p1, p2);
-	//cout << "test : " << test << endl;
+	///////*vec3 p1(174.059, 312.327, 107.917);
+	//////vec3 p2(112.142, 288.677, 69.6504);*/
+	///////*vec3 p1(-77.0575, 430.577, 69.6504);
+	//////vec3 p2(-177.241, 392.31, 7.7339);*/
+	///////*vec3 p1(-138.974, 321.361, -57.633);
+	//////vec3 p2(-138.974, 359.627, -33.983);*/
+	/////*vec3 p1(17.5425, 241.377, -24.9497);
+	////vec3 p2(-44.374, 141.194, 13.3168);*/
+	////vec3 p1(-138.974, 359.627, 13.317);
+	////vec3 p2(-100.7075, 359.627, 75.233);
+	////bool test = check_stick_intersect(myObj, p1, p2);
+	////cout << "test : " << test << endl;
 
-	//test();
+	////test();
 
-	//fake();
-	//	
-	//for (int j = 0; j < 4; j += 1){
-	//	for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
-	//		zome_queue.at(2).at(j).at(k).position += delta;
-	//	}
-	//}
-
-	//combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
-	//combine_zome_ztruc(zome_queue.at(1), test_connect);
-
+	////fake();
+	////	
 	////for (int j = 0; j < 4; j += 1){
-	////	cout << j << " : " << endl;
-	////	if (j != 3){
-	////		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
-	////		cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
-	////		<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
-	////		}*/
-	////	}
-	////	else{
-	////		for (int k = 0; k < zome_queue.at(1).at(3).size(); k += 1){
-	////			cout << "\t " << k << " : ";
-	////			for (int a = 0; a < 62; a += 1){
-	////				if (zome_queue.at(1).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-	////					cout << " (" << zome_queue.at(1).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(1).at(3).at(k).connect_stick[a][1] << ")";
-	////			}
-	////			cout << endl;
-	////			cout << "\t " << zome_queue.at(1).at(3).at(k).position[0] << " " << zome_queue.at(1).at(3).at(k).position[1] << " " << zome_queue.at(1).at(3).at(k).position[2] << endl;
-	////		}
+	////	for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
+	////		zome_queue.at(2).at(j).at(k).position += delta;
 	////	}
 	////}
 
-	//output_zometool(zome_queue.at(1), string("test.obj"));
-	//output_struc(zome_queue.at(1), string("fake.txt"));
+	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
+	////combine_zome_ztruc(zome_queue.at(1), test_connect);
+
+	//////for (int j = 0; j < 4; j += 1){
+	//////	cout << j << " : " << endl;
+	//////	if (j != 3){
+	//////		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
+	//////		cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
+	//////		<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
+	//////		}*/
+	//////	}
+	//////	else{
+	//////		for (int k = 0; k < zome_queue.at(1).at(3).size(); k += 1){
+	//////			cout << "\t " << k << " : ";
+	//////			for (int a = 0; a < 62; a += 1){
+	//////				if (zome_queue.at(1).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
+	//////					cout << " (" << zome_queue.at(1).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(1).at(3).at(k).connect_stick[a][1] << ")";
+	//////			}
+	//////			cout << endl;
+	//////			cout << "\t " << zome_queue.at(1).at(3).at(k).position[0] << " " << zome_queue.at(1).at(3).at(k).position[1] << " " << zome_queue.at(1).at(3).at(k).position[2] << endl;
+	//////		}
+	//////	}
+	//////}
+
+	////output_zometool(zome_queue.at(1), string("test.obj"));
+	////output_struc(zome_queue.at(1), string("fake.txt"));
 	
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 	//struc_parser(test_connect, string("fake123.txt"));
 	
-	float origin_e = compute_energy(test_connect, myObj);
+	float origin_term[2];
+	float origin_e = compute_energy(test_connect, myObj, origin_term);
+	cout << "origin energy : " << origin_e << endl;
+	cout << "origin energy(dist) : " << origin_term[0] << endl;
+	cout << "origin energy(angle) : " << origin_term[1] << endl;
+	cout << endl;
 
 	///*for (int j = 0; j < 4; j += 1){
 	//	cout << j << " : " << endl;
@@ -998,7 +1075,16 @@ int main(int argc, char **argv)
 	vec3 give_up;
 	int num_split = 0, num_merge = 0, num_bridge = 0;
 
+	float inital_t = 1.0f;
+
+	int energy_bigger_accept = 0;
+	int energy_smaller_accept = 0;
+	int energy_bigger_reject = 0;
+	int energy_smaller_reject = 0;
+
 	for (int i = 0; i < 1000; i += 1){
+		float now_t = inital_t * decrease_t(i);
+
 		cout << i << " :" << endl;
 		int choose_op = rand() % 3;
 				
@@ -1033,24 +1119,66 @@ int main(int argc, char **argv)
 			num_bridge += 1;
 		}
 
-		float temp_e = compute_energy(temp_connect, myObj);
+		float term[2];
+		float temp_e = compute_energy(temp_connect, myObj, term);
 
-		if (temp_e < origin_e){
+		float p = (float)rand() / (float)RAND_MAX;
+		//cout << p << " " << exp((origin_e - temp_e) / now_t) << endl;
+		
+		//if (temp_e < origin_e){
+		if (p < exp((origin_e - temp_e) / now_t)){
 			if (collision_test(temp_connect, give_up)){
 				test_connect = temp_connect;
 				origin_e = temp_e;
-				cout << "commit" << endl;
+				cout << "accept energy : " << temp_e << endl;
+				cout << "energy(dist) : " << term[0] << endl;
+				cout << "energy(angle) : " << term[1] << endl;
+
+				if (temp_e < origin_e){
+					energy_smaller_accept += 1;
+				}
+				else{
+					energy_bigger_accept += 1;
+				}
 			}
 			else{
 				collision += 1;
+				cout << "reject energy : " << temp_e << endl;
+				cout << "energy(dist) : " << term[0] << endl;
+				cout << "energy(angle) : " << term[1] << endl;
+
+				if (temp_e < origin_e){
+					energy_smaller_reject += 1;
+				}
+				else{
+					energy_bigger_reject += 1;
+				}
 			}
 		}
+		else{
+			cout << "reject energy : " << temp_e << endl;
+			cout << "energy(dist) : " << term[0] << endl;
+			cout << "energy(angle) : " << term[1] << endl;
+
+			if (temp_e < origin_e){
+				energy_smaller_reject += 1;
+			}
+			else{
+				energy_bigger_reject += 1;
+			}
+		}
+		cout << "T : " << now_t << endl;;
 		cout << endl;
 	}
 
 	cout << "collision : " << collision << " " << 1000 << endl;
 	cout << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << endl;
 	cout << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
+
+	cout << "Z' < Z and accept : " << energy_smaller_accept << endl;
+	cout << "Z' > Z and accept : " << energy_bigger_accept << endl;
+	cout << "Z' < Z and reject : " << energy_smaller_reject << endl;
+	cout << "Z' > Z and reject : " << energy_bigger_reject << endl;
 
 	/*vector<vec4> can_bridge;
 	check_bridge(can_bridge);
