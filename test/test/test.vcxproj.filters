@@ -59,75 +59,78 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="algebra3.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="bisect.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="fill.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="glm.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="glui_internal.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="main.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="shell.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="textfile.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="voxel.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="zomedir.h">
-      <Filter>原始程式檔</Filter>
+    <ClInclude Include="nanoflann.hpp">
+      <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="zomestruc.h">
-      <Filter>原始程式檔</Filter>
+      <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="ImportOBJ.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="segment.h">
-      <Filter>原始程式檔</Filter>
+    <ClInclude Include="algebra3.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="bestfitobb.h">
-      <Filter>原始程式檔</Filter>
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="bisect.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="fill.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="float_math.h">
-      <Filter>原始程式檔</Filter>
-    </ClInclude>
-    <ClInclude Include="pathdata.h">
-      <Filter>原始程式檔</Filter>
+      <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="global.h">
-      <Filter>原始程式檔</Filter>
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="glm.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportOBJ.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="glui_internal.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="pathdata.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="segment.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="shell.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="textfile.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="voxel.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="zomedir.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="myshader.frag">
-      <Filter>原始程式檔</Filter>
-    </None>
     <None Include="myshader.vert">
-      <Filter>原始程式檔</Filter>
+      <Filter>資源檔</Filter>
+    </None>
+    <None Include="myshader.frag">
+      <Filter>資源檔</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="to do list.txt">
-      <Filter>原始程式檔</Filter>
+      <Filter>資源檔</Filter>
     </Text>
     <Text Include="zome_merge.txt">
-      <Filter>原始程式檔</Filter>
+      <Filter>資源檔</Filter>
     </Text>
     <Text Include="zome_splite.txt">
-      <Filter>原始程式檔</Filter>
+      <Filter>資源檔</Filter>
     </Text>
   </ItemGroup>
 </Project>

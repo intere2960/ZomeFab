@@ -32,6 +32,7 @@ public:
 	float force;
 
 	float surface_d;
+	float energy_d;
 
 //	zomeconn* link;
 };

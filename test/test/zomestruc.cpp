@@ -16,6 +16,7 @@ zomeconn::zomeconn()
 	towardindex = vec2(-1, -1);
 	towardface = -1;
 	surface_d = 100000000000000.0f;
+	energy_d = 100000000000000.0f;
 
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
@@ -436,7 +437,6 @@ float point_surface_dist(GLMmodel *model, vec3 &p)
 {
 	float surface_d = 100000000000000.0f;
 
-	int index_tri = -1;
 	#pragma omp parallel for
 	for (int i = 0; i < model->triangles->size(); i += 1){
 
@@ -455,7 +455,6 @@ float point_surface_dist(GLMmodel *model, vec3 &p)
 		if ((judge < -(NODE_DIAMETER / 2.0f + ERROR_THICKNESS))){
 			for (int j = 0; j < 4; j += 1){
 				if ((p - test[j]).length() < surface_d){
-					index_tri = i;
 					surface_d = (p - test[j]).length();
 				}
 			}
@@ -463,7 +462,6 @@ float point_surface_dist(GLMmodel *model, vec3 &p)
 	}		
 
 	if (surface_d < NODE_DIAMETER / 2.0f + ERROR_THICKNESS){
-		index_tri = -1;
 		surface_d = 100000000000000.0f;
 	}
 

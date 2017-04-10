@@ -1,5 +1,8 @@
 #include "main.h"
+#include <time.h>
+#include <fstream>
 #include <omp.h>
+#include "nanoflann.hpp"
 
 using namespace std;
 
@@ -338,25 +341,38 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model, fl
 	float energy = 0.0f;
 	zomedir t;
 
-	#pragma omp parallel for
+	float energy_dist = 0.0f;
+
+	time_t start, finish;
+	float duration;
+	
+	//#pragma omp parallel for
 	for (int a = 0; a < test_connect.size(); a += 1){
-		#pragma omp parallel for
+		//#pragma omp parallel for
 		for (int i = 0; i < test_connect.at(a).size(); i += 1){
 			//cout << a << " " << i << endl;
 			//cout << test_connect.at(a).at(i).position[0] << " " << test_connect.at(a).at(i).position[1] << " " << test_connect.at(a).at(i).position[2] << endl;
-			if (test_connect.at(a).at(i).surface_d == 100000000000000.0f)
+			if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
+				//start = clock();
 				test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
+				test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
+				//finish = clock();
+				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+				//cout << "point_surface_dist : " << duration << " s" << endl;
+			}
+			
+			//start = clock();
+			
+			//energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
+			energy_dist += test_connect.at(a).at(i).energy_d;
+			
+			//finish = clock();
+			//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+			//cout << "point_surface_dist : " << duration << " s" << endl;
 		}
-	}
-
-	float energy_dist = 0.0f;
-	#pragma omp parallel for
-	for (int a = 0; a < test_connect.size(); a += 1){
-		#pragma omp parallel for
-		for (int i = 0; i < test_connect.at(a).size(); i += 1){
-			energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
-		}
-	}
+	}	
+	//cout << "reuse : " << reuse << endl;
+	
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
 
 	float energy_angle = 0.0f;
@@ -374,12 +390,15 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model, fl
 		for (int j = 0; j < use_stick.size() - 1; j += 1){
 			#pragma omp parallel for
 			for (int k = j; k < use_stick.size(); k += 1){
-				sum_angle += t.near_angle.at(use_stick.at(j)).at(use_stick.at(k));
+				sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - 90.0f);
 			}
 		}
 
 		energy_angle += 1 / sum_angle;
 	}
+
+	energy_angle /= test_connect.at(COLOR_WHITE).size();
+
 	//float energy_fair = 0.0f;
 	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 	//	vec3 temp_ring_p;
@@ -397,7 +416,7 @@ float compute_energy(vector<vector<zomeconn>> &test_connect, GLMmodel *model, fl
 	//energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
 
 	//energy = energy_dist + energy_fair;
-	energy = energy_dist + 10 * energy_angle;
+	energy = energy_dist + 100 * energy_angle;
 	/*cout << "energy : " << energy << endl;
 	cout << "energy_dist : " << energy_dist << endl;
 	cout << "energy_angle : " << energy_angle << endl;*/
@@ -656,7 +675,7 @@ void check_merge(vector<vec4> &can_merge, GLMmodel *model)
 			for (int k = j + 1; k < use_slot.size(); k += 1){
 				int opp_face = t.opposite_face(use_slot.at(j));
 				
-				//#pragma omp parallel for
+				#pragma omp parallel for
 				for (int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
 					bool judge1 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).origin[1] == test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).size);
 					bool judge2 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_1[1] == test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).size);
@@ -734,7 +753,7 @@ void check_bridge(vector<vec4> &can_bridge, GLMmodel *model)
 					if (test_connect.at(COLOR_WHITE).at(i).connect_stick[test_index] == vec2(-1.0f, -1.0f)){
 						float l = test_l.length();
 
-						//#pragma omp parallel for
+						#pragma omp parallel for
 						for (int size = 0; size < 3; size += 1){
 							if (fabs(t.face_length(test_index, size) - l) < 0.001f){
 								bool add = true;
@@ -1036,17 +1055,32 @@ int main(int argc, char **argv)
 
 	////output_zometool(zome_queue.at(1), string("test.obj"));
 	////output_struc(zome_queue.at(1), string("fake.txt"));
+	clock_t total_start, total_finish;
+	total_start = clock();
+
+	clock_t start, finish;
+	float duration;
 	
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
+		
 	//struc_parser(test_connect, string("fake123.txt"));
+	//start = clock();
 	
 	float origin_term[2];
 	float origin_e = compute_energy(test_connect, myObj, origin_term);
-	cout << "origin energy : " << origin_e << endl;
-	cout << "origin energy(dist) : " << origin_term[0] << endl;
-	cout << "origin energy(angle) : " << origin_term[1] << endl;
-	cout << endl;
+
+	//finish = clock();
+	//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+
+	//cout << duration << " s" << endl;
+
+	ofstream os("test.txt");
+
+	os << "origin energy : " << origin_e << endl;
+	os << "origin energy(dist) : " << origin_term[0] << endl;
+	os << "origin energy(angle) : " << origin_term[1] << endl;
+	os << endl;
 
 	///*for (int j = 0; j < 4; j += 1){
 	//	cout << j << " : " << endl;
@@ -1069,7 +1103,7 @@ int main(int argc, char **argv)
 	//	}
 	//}*/
 
-	cout << "start" << endl;
+	os << "start" << endl;
 	int collision = 0;
 
 	vec3 give_up;
@@ -1082,24 +1116,25 @@ int main(int argc, char **argv)
 	int energy_bigger_reject = 0;
 	int energy_smaller_reject = 0;
 
-	for (int i = 0; i < 1000; i += 1){
+	for (int i = 0; i < 10000; i += 1){
 		float now_t = inital_t * decrease_t(i);
 
-		cout << i << " :" << endl;
+		os << i << " :" << endl;
 		int choose_op = rand() % 3;
 				
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
 
+		start = clock();
 		if (choose_op == 0){
-			cout << "split" << endl;
+			os << "split" << endl;
 			int result = rand() % test_connect.at(COLOR_WHITE).size();
-			cout << result << endl;
+			os << result << endl;
 			split(temp_connect, result, myObj);
 			num_split += 1;
 		}
 		else if(choose_op == 1){
-			cout << "merge" << endl;
+			os << "merge" << endl;
 			vector<vec4> can_merge;
 			check_merge(can_merge, myObj);
 			if (can_merge.size() > 0){
@@ -1109,7 +1144,7 @@ int main(int argc, char **argv)
 			num_merge += 1;
 		}
 		else{
-			cout << "bridge" << endl;
+			os << "bridge" << endl;
 			vector<vec4> can_bridge;
 			check_bridge(can_bridge, myObj);
 			if (can_bridge.size() > 0){
@@ -1118,9 +1153,16 @@ int main(int argc, char **argv)
 			}
 			num_bridge += 1;
 		}
+		finish = clock();
+		duration = (float)(finish - start) / CLOCKS_PER_SEC;
+		os << "op : " << duration << " s" << endl;
 
+		start = clock();
 		float term[2];
 		float temp_e = compute_energy(temp_connect, myObj, term);
+		finish = clock();
+		duration = (float)(finish - start) / CLOCKS_PER_SEC;
+		os << "energy : " << duration << " s" << endl;
 
 		float p = (float)rand() / (float)RAND_MAX;
 		//cout << p << " " << exp((origin_e - temp_e) / now_t) << endl;
@@ -1128,11 +1170,16 @@ int main(int argc, char **argv)
 		//if (temp_e < origin_e){
 		if (p < exp((origin_e - temp_e) / now_t)){
 			if (collision_test(temp_connect, give_up)){
-				test_connect = temp_connect;
-				origin_e = temp_e;
-				cout << "accept energy : " << temp_e << endl;
-				cout << "energy(dist) : " << term[0] << endl;
-				cout << "energy(angle) : " << term[1] << endl;
+				
+				//start = clock();
+				test_connect = temp_connect;				
+				//finish = clock();
+				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+				//cout << "copy : " << duration << " s" << endl;
+
+				os << "accept energy : " << temp_e << endl;
+				os << "energy(dist) : " << term[0] << endl;
+				os << "energy(angle) : " << term[1] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_accept += 1;
@@ -1140,12 +1187,14 @@ int main(int argc, char **argv)
 				else{
 					energy_bigger_accept += 1;
 				}
+
+				origin_e = temp_e;
 			}
 			else{
 				collision += 1;
-				cout << "reject energy : " << temp_e << endl;
-				cout << "energy(dist) : " << term[0] << endl;
-				cout << "energy(angle) : " << term[1] << endl;
+				os << "reject energy : " << temp_e << endl;
+				os << "energy(dist) : " << term[0] << endl;
+				os << "energy(angle) : " << term[1] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_reject += 1;
@@ -1156,9 +1205,9 @@ int main(int argc, char **argv)
 			}
 		}
 		else{
-			cout << "reject energy : " << temp_e << endl;
-			cout << "energy(dist) : " << term[0] << endl;
-			cout << "energy(angle) : " << term[1] << endl;
+			os << "reject energy : " << temp_e << endl;
+			os << "energy(dist) : " << term[0] << endl;
+			os << "energy(angle) : " << term[1] << endl;
 
 			if (temp_e < origin_e){
 				energy_smaller_reject += 1;
@@ -1167,30 +1216,36 @@ int main(int argc, char **argv)
 				energy_bigger_reject += 1;
 			}
 		}
-		cout << "T : " << now_t << endl;;
-		cout << endl;
+		os << "T : " << now_t << endl;;
+		os << endl;
 	}
 
-	cout << "collision : " << collision << " " << 1000 << endl;
-	cout << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << endl;
-	cout << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
+	os << "collision : " << collision << " " << 10000 << endl;
+	os << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << endl;
+	os << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
 
-	cout << "Z' < Z and accept : " << energy_smaller_accept << endl;
-	cout << "Z' > Z and accept : " << energy_bigger_accept << endl;
-	cout << "Z' < Z and reject : " << energy_smaller_reject << endl;
-	cout << "Z' > Z and reject : " << energy_bigger_reject << endl;
+	os << "Z' < Z and accept : " << energy_smaller_accept << endl;
+	os << "Z' > Z and accept : " << energy_bigger_accept << endl;
+	os << "Z' < Z and reject : " << energy_smaller_reject << endl;
+	os << "Z' > Z and reject : " << energy_bigger_reject << endl;
 
-	/*vector<vec4> can_bridge;
-	check_bridge(can_bridge);
-	bridge(test_connect, can_bridge.at(can_bridge.size() - 1));*/
+	/////*vector<vec4> can_bridge;
+	////check_bridge(can_bridge);
+	////bridge(test_connect, can_bridge.at(can_bridge.size() - 1));*/
 
-	/*cout << can_bridge.size() << endl;
+	/////*cout << can_bridge.size() << endl;
 
-	for (unsigned int i = 0; i < can_bridge.size(); i += 1){
-		cout << can_bridge.at(i)[0] << " " << can_bridge.at(i)[1] << " " << can_bridge.at(i)[2] << " " << can_bridge.at(i)[3] << endl;
-	}*/
-	
-	
+	////for (unsigned int i = 0; i < can_bridge.size(); i += 1){
+	////	cout << can_bridge.at(i)[0] << " " << can_bridge.at(i)[1] << " " << can_bridge.at(i)[2] << " " << can_bridge.at(i)[3] << endl;
+	////}*/
+	////
+	////
+
+	total_finish = clock();
+	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
+	os << endl << "totoal time : " << duration << " s" << endl;
+
+	os.close();
 	output_zometool(test_connect, string("fake123.obj"));
 	///*output_struc(test_connect, string("fake123.txt"));*/
 		
@@ -1212,6 +1267,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	system("pause");
+	//system("pause");
 	return 0;
 }

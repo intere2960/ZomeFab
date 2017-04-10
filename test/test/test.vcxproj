@@ -128,6 +128,7 @@
     <ClInclude Include="glui_internal.h" />
     <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="nanoflann.hpp" />
     <ClInclude Include="pathdata.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="shell.h" />
