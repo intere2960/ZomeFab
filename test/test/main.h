@@ -22,6 +22,7 @@
 #include "segment.h"
 #include "bestfitobb.h"
 #include "pathdata.h"
+#include "operation.h"
 
 using namespace std;
 
@@ -139,7 +140,6 @@ vector<int> face_inner_split_by_plane;
 vector<vector<voxel>> all_voxel;
 vector<vector<vector<zomeconn>>> zome_queue;
 vector<GLMmodel> seg;
-
 
 zometable splite_table(SPLITE);
 zometable merge_table(MERGE);

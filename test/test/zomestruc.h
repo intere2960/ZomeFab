@@ -79,5 +79,6 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 float point_surface_dist(GLMmodel *model, vec3 &p);
 float ball_surface_dist(GLMmodel *model, vec3 &p);
 bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p);
+bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & give_up);
 
 #endif // ZOMESTRUC_H_INCLUDED

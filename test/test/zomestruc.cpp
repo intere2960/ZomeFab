@@ -91,7 +91,7 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 
 		for (unsigned int j = 0; j < 62; j += 1){
 			if (temp.connect_stick[j] != vec2(-1.0f, -1.0f))
-				temp.connect_stick[j][1] += target.at(temp.connect_stick[j][0]).size();
+				temp.connect_stick[j][1] += target.at((int)temp.connect_stick[j][0]).size();
 		}
 		target.at(COLOR_WHITE).push_back(temp);
 	}
@@ -102,33 +102,33 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 			zomeconn temp = source.at(i).at(j);
 
 			if (temp.fromindex == vec2(-1, -1)){
-				vec3 temp_pos = 2 * temp.position - source.at(COLOR_WHITE).at(temp.towardindex[1]).position;
+				vec3 temp_pos = 2 * temp.position - source.at(COLOR_WHITE).at((int)temp.towardindex[1]).position;
 
 				for (unsigned int k = 0; k < target.at(COLOR_WHITE).size(); k += 1){
 					if ((target.at(COLOR_WHITE).at(k).position - temp_pos).length() < 0.001){
-						temp.fromindex[0] = COLOR_WHITE;
-						temp.fromindex[1] = k;
+						temp.fromindex[0] = (float)COLOR_WHITE;
+						temp.fromindex[1] = (float)k;
 						break;
 					}
 				}
-				target.at(COLOR_WHITE).at(temp.fromindex[1]).connect_stick[temp.fromface] = vec2(i, j + origin_size[i]);
+				target.at(COLOR_WHITE).at((int)temp.fromindex[1]).connect_stick[temp.fromface] = vec2((float)i, (float)j + origin_size[i]);
 			}
 			else{
 				temp.fromindex[1] += ball_size;
 			}			
 
 			if (temp.towardindex == vec2(-1, -1)){
-				vec3 temp_pos = 2 * temp.position - source.at(COLOR_WHITE).at(temp.fromindex[1] - ball_size).position;
+				vec3 temp_pos = 2 * temp.position - source.at(COLOR_WHITE).at((int)temp.fromindex[1] - ball_size).position;
 
 				for (unsigned int k = 0; k < target.at(COLOR_WHITE).size(); k += 1){
 					if ((target.at(COLOR_WHITE).at(k).position - temp_pos).length() < 0.001){
 						temp.towardindex[0] = COLOR_WHITE;
-						temp.towardindex[1] = k;
+						temp.towardindex[1] = (float)k;
 						break;
 					}
 				}
 
-				target.at(COLOR_WHITE).at(temp.towardindex[1]).connect_stick[temp.towardface] = vec2(i, j + origin_size[i]);
+				target.at(COLOR_WHITE).at((int)temp.towardindex[1]).connect_stick[temp.towardface] = vec2((float)i, (float)j + origin_size[i]);
 			}
 			else{
 				temp.towardindex[1] += ball_size;
@@ -292,7 +292,7 @@ void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_qu
 				}
 
 				for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
-					vec3 temp_t(temp_model->triangles->at(k).vindices[0] + num_v, temp_model->triangles->at(k).vindices[1] + num_v, temp_model->triangles->at(k).vindices[2] + num_v);
+					vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
 					face_index.at(i).push_back(temp_t);
 				}
 				num_v += temp_model->numvertices;
@@ -399,7 +399,7 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 			}
 
 			for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
-				vec3 temp_t(temp_model->triangles->at(k).vindices[0] + num_v, temp_model->triangles->at(k).vindices[1] + num_v, temp_model->triangles->at(k).vindices[2] + num_v);
+				vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
 				face_index.at(i).push_back(temp_t);
 			}
 			num_v += temp_model->numvertices;
@@ -592,4 +592,185 @@ bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p)
 	}
 
 	return false;
+}
+ 
+bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & give_up)
+{
+	zomedir t;
+	int ball_ball_count = 0;
+	#pragma omp parallel for
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+			if (i != j){
+				float judge = (test_connect.at(COLOR_WHITE).at(i).position - test_connect.at(COLOR_WHITE).at(j).position).length();
+				if (fabs(judge - NODE_DIAMETER) < 0.5f){
+					//cout << fabs(judge - NODE_DIAMETER) << endl;
+					ball_ball_count += 1;
+				}
+			}
+		}
+	}
+
+	ball_ball_count /= 2;
+
+	int stick_ball_count = 0;
+
+	#pragma omp parallel for
+	for (int i = 0; i < 3; i += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(i).size(); j += 1){
+			vec3 p1 = test_connect.at(COLOR_WHITE).at((int)test_connect.at(i).at(j).fromindex[1]).position;
+			vec3 p2 = test_connect.at(COLOR_WHITE).at((int)test_connect.at(i).at(j).towardindex[1]).position;
+			float times = t.color_length(test_connect.at(i).at(j).color, test_connect.at(i).at(j).size);
+
+			#pragma omp parallel for
+			for (int k = 0; k < test_connect.at(COLOR_WHITE).size(); k += 1){
+				if (k != test_connect.at(i).at(j).fromindex[1] && k != test_connect.at(i).at(j).towardindex[1]){
+					vec3 o = test_connect.at(COLOR_WHITE).at(k).position;
+					vec3 v1 = p2 - p1;
+					vec3 v2 = o - p1;
+					float o_times = (v2 * v1) / v1.length();
+					if ((o_times < times) && (o_times > 0.0f)){
+						vec3 check_p = p1 + t.dir->at(test_connect.at(i).at(j).fromface) * o_times;
+						float judge = (o - check_p).length() - NODE_DIAMETER / 2.0f;
+						if (judge < ERROR_THICKNESS){
+							stick_ball_count += 1;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	int stick_stick_count = 0;
+
+	#pragma omp parallel for
+	for (int i = 0; i < 3; i += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(i).size(); j += 1){
+			vec3 p1 = test_connect.at(COLOR_WHITE).at((int)test_connect.at(i).at(j).fromindex[1]).position;
+			vec3 p2 = test_connect.at(COLOR_WHITE).at((int)test_connect.at(i).at(j).towardindex[1]).position;
+			int fromindex1 = (int)test_connect.at(i).at(j).fromindex[1];
+			int towardindex1 = (int)test_connect.at(i).at(j).towardindex[1];
+
+			#pragma omp parallel for
+			for (int a = 0; a < 3; a += 1){
+			#pragma omp parallel for
+				for (int b = 0; b < test_connect.at(a).size(); b += 1){
+					if (!((a == i) && (b == j))){
+						int fromindex2 = (int)test_connect.at(a).at(b).fromindex[1];
+						int towardindex2 = (int)test_connect.at(a).at(b).towardindex[1];
+						bool judge1 = (fromindex1 == fromindex2) || (fromindex1 == towardindex2);
+						bool judge2 = (towardindex1 == fromindex2) || (towardindex1 == towardindex2);
+
+						if (!(judge1 || judge2)){
+							vec3 p3 = test_connect.at(COLOR_WHITE).at((int)test_connect.at(a).at(b).fromindex[1]).position;
+							vec3 p4 = test_connect.at(COLOR_WHITE).at((int)test_connect.at(a).at(b).towardindex[1]).position;
+
+							vec3 v1 = p2 - p1;
+							vec3 n1 = (p2 - p1).normalize();
+							vec3 v2 = p4 - p3;
+							vec3 n2 = (p4 - p3).normalize();
+
+							float ap = v1 * v1; //u*u
+							float bp = v1 * v2; //u*v
+							float cp = v2 * v2; //v*v
+
+							if (!((n1 ^ n2).length() < 0.001f) && !(fabs(n1 * n2) < 0.001f)){
+								vec3 v3 = p1 - p3;
+
+								float dp = v1 * v3; //u*w 
+								float ep = v2 * v3; //v*w
+
+								float dt = ap * cp - bp * bp;
+								float sd = dt;
+								float td = dt;
+
+								float sn = bp * ep - cp * dp;
+								float tn = ap * ep - bp * dp;
+
+								if (sn < 0.0001f){
+									sn = 0.0f;
+									tn = ep;
+									td = cp;
+								}
+								else if (sn > sd){
+									sn = sd;
+									tn = ep + bp;
+									td = cp;
+								}
+
+								if (tn < 0.0001f){
+									tn = 0.0f;
+									if (-dp < 0.0001f){
+										sn = 0.0f;
+									}
+									else if (-dp > ap){
+										sn = sd;
+									}
+									else{
+										sn = -dp;
+										sd = -ap;
+									}
+								}
+								else if (tn > td){
+									tn = td;
+									if ((-dp + bp) < 0.0001f){
+										sn = 0.0f;
+									}
+									else if ((-dp + bp) > ap){
+										sn = sd;
+									}
+									else{
+										sn = (-dp + bp);
+										sd = ap;
+									}
+								}
+
+								float sc = 0.0f;
+								float tc = 0.0f;
+
+								if (fabs(sn) < 0.0001f){
+									sc = 0.0f;
+								}
+								else{
+									sc = sn / sd;
+								}
+
+								if (fabs(tn) < 0.0001f){
+									tc = 0.0f;
+								}
+								else{
+									tc = tn / td;
+								}
+
+								vec3 dist = v3 + (sc * v1) - (tc * v2);
+
+								if (dist.length() < ERROR_THICKNESS){
+									stick_stick_count += 1;
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+	}
+	stick_stick_count /= 2;
+
+	//cout << "error => ball-to-ball : " << ball_ball_count << " ball-to-rod :  " << stick_ball_count << " rod-to-rod :  " << stick_stick_count << endl;
+
+	if (ball_ball_count != 0 || stick_ball_count != 0 || stick_stick_count != 0){
+		if (ball_ball_count != 0)
+			give_up[0] += 1.0f;
+		if (stick_ball_count != 0)
+			give_up[1] += 1.0f;
+		if (stick_stick_count != 0)
+			give_up[2] += 1.0f;
+		return false;
+	}
+
+	return true;
 }

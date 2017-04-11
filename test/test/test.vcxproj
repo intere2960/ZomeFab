@@ -109,6 +109,7 @@
     <ClCompile Include="float_math.cpp" />
     <ClCompile Include="glm.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="operation.cpp" />
     <ClCompile Include="pathdata.cpp" />
     <ClCompile Include="segment.cpp" />
     <ClCompile Include="shell.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="nanoflann.hpp" />
+    <ClInclude Include="operation.h" />
     <ClInclude Include="pathdata.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="shell.h" />

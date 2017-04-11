@@ -57,6 +57,9 @@
     <ClCompile Include="pathdata.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="operation.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="nanoflann.hpp">
@@ -111,6 +114,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="zomedir.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="operation.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
