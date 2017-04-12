@@ -170,7 +170,7 @@ zomedir::zomedir()
 
 			}
 			else{
-				new_angle = acosf(dot) / M_PI * 180.0f;
+				new_angle = acosf(dot);
 			}
 			angle.push_back(new_angle);
 		}

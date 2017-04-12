@@ -391,6 +391,52 @@ float decrease_t(int iteration)
 	int num = (iteration + 1) / 100;
 	return pow(0.99f, (float)num);
 }
+//
+//using namespace nanoflann;
+////template <typename T>
+//class pointcloud
+//{
+//public:
+//	std::vector<vec3> pts;
+//
+//	pointcloud(GLMmodel *model);
+//
+//	float kdtree_distance(vec3 &p1, int idx_p2);
+//	int kdtree_get_pt(const int idx, int dim);
+//};
+//
+////template <typename num_t>
+//pointcloud::pointcloud(GLMmodel *model)
+//{
+//	for (unsigned int i = 0; i < model->numtriangles; i += 1){
+//		vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+//		vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+//		vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+//		vec3 center = (p1 + p2 + p3) / 3.0f;
+//		pts.push_back(center);
+//	}
+//
+//	typedef KDTreeSingleIndexAdaptor<
+//		L2_Simple_Adaptor<int, pointcloud<num_t> >,
+//		pointcloud<num_t>,
+//		3 /* dim */
+//	> my_kd_tree_t;
+//
+//	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+//	index.buildIndex();
+//}
+//
+//float pointcloud::kdtree_distance(vec3 &p1, int idx_p2)
+//{
+//	return (p1 - pts.at(idx_p2)).length();
+//}
+//
+//int pointcloud::kdtree_get_pt(const int idx, int dim)
+//{
+//	if (dim == 0) return pts.at(idx)[0];
+//	else if (dim == 1) return pts.at(idx)[1];
+//	else return pts.at(idx)[2];
+//}
 
 int main(int argc, char **argv)
 {
@@ -451,6 +497,7 @@ int main(int argc, char **argv)
 
 	////output_zometool(zome_queue.at(1), string("test.obj"));
 	////output_struc(zome_queue.at(1), string("fake.txt"));
+			
 	clock_t total_start, total_finish;
 	total_start = clock();
 
@@ -461,49 +508,57 @@ int main(int argc, char **argv)
 	struc_parser(test_connect, string("fake.txt"));
 		
 	//struc_parser(test_connect, string("fake123.txt"));
-	//start = clock();
+
+	//fake_case(0);
+
+	//output_zometool(test_connect, string("fake123 before.obj"));
+	//output_struc(test_connect, string("fake123 before.txt"));
 	
-	float origin_term[2];
+	start = clock();
+	
+	float origin_term[3];
 	float origin_e = compute_energy(test_connect, myObj, origin_term);
 
-	//finish = clock();
-	//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	int num_iteration = 1000;
 
+	finish = clock();
+	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	//cout << duration << " s" << endl;
 
-	ofstream os("test.txt");
+	ofstream os("test-3.txt");
 
-	os << "origin energy : " << origin_e << endl;
-	os << "origin energy(dist) : " << origin_term[0] << endl;
-	os << "origin energy(angle) : " << origin_term[1] << endl;
-	os << endl;
+	cout << "origin energy : " << origin_e << endl;
+	cout << "origin energy(dist) : " << origin_term[0] << endl;
+	cout << "origin energy(angle) : " << origin_term[1] << endl;
+	cout << "origin energy(number) : " << origin_term[1] << endl;
+	cout << endl;
 
-	///*for (int j = 0; j < 4; j += 1){
-	//	cout << j << " : " << endl;
-	//	if (j != 3){
-	//		for (int k = 0; k < test_connect.at(j).size(); k += 1){
-	//			cout << "\t " << k << " : (" << test_connect.at(j).at(k).fromindex[0] << " , " << test_connect.at(j).at(k).fromindex[1]
-	//				<< ") (" << test_connect.at(j).at(k).towardindex[0] << " , " << test_connect.at(j).at(k).towardindex[1] << ")" << endl;
-	//		}
-	//	}
-	//	else{
-	//		for (int k = 0; k < test_connect.at(3).size(); k += 1){
-	//			cout << "\t " << k << " : ";
-	//			for (int a = 0; a < 62; a += 1){
-	//				if (test_connect.at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-	//					cout << a << ": (" << test_connect.at(3).at(k).connect_stick[a][0] << " , " << test_connect.at(3).at(k).connect_stick[a][1] << ") ";
-	//			}
-	//			cout << endl;
-	//			cout << "\t " << test_connect.at(3).at(k).position[0] << " " << test_connect.at(3).at(k).position[1] << " " << test_connect.at(3).at(k).position[2] << endl;
-	//		}
-	//	}
-	//}*/
+	/////*for (int j = 0; j < 4; j += 1){
+	////	cout << j << " : " << endl;
+	////	if (j != 3){
+	////		for (int k = 0; k < test_connect.at(j).size(); k += 1){
+	////			cout << "\t " << k << " : (" << test_connect.at(j).at(k).fromindex[0] << " , " << test_connect.at(j).at(k).fromindex[1]
+	////				<< ") (" << test_connect.at(j).at(k).towardindex[0] << " , " << test_connect.at(j).at(k).towardindex[1] << ")" << endl;
+	////		}
+	////	}
+	////	else{
+	////		for (int k = 0; k < test_connect.at(3).size(); k += 1){
+	////			cout << "\t " << k << " : ";
+	////			for (int a = 0; a < 62; a += 1){
+	////				if (test_connect.at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
+	////					cout << a << ": (" << test_connect.at(3).at(k).connect_stick[a][0] << " , " << test_connect.at(3).at(k).connect_stick[a][1] << ") ";
+	////			}
+	////			cout << endl;
+	////			cout << "\t " << test_connect.at(3).at(k).position[0] << " " << test_connect.at(3).at(k).position[1] << " " << test_connect.at(3).at(k).position[2] << endl;
+	////		}
+	////	}
+	////}*/
 
-	os << "start" << endl;
+	cout << "start" << endl;
 	int collision = 0;
 
 	vec3 give_up;
-	int num_split = 0, num_merge = 0, num_bridge = 0;
+	int num_split = 0, num_merge = 0, num_bridge = 0, num_kill = 0;
 
 	float inital_t = 1.0f;
 
@@ -512,35 +567,39 @@ int main(int argc, char **argv)
 	int energy_bigger_reject = 0;
 	int energy_smaller_reject = 0;
 
-	for (int i = 0; i < 1000; i += 1){
+	for (int i = 0; i < num_iteration; i += 1){
 		float now_t = inital_t * decrease_t(i);
 
-		os << i << " :" << endl;
-		int choose_op = rand() % 3;
+		cout << i << " :" << endl;
+		int choose_op = rand() % 4;
 				
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
 
 		start = clock();
 		if (choose_op == 0){
-			os << "split" << endl;
-			int result = rand() % test_connect.at(COLOR_WHITE).size();
-			os << result << endl;
+			cout << "split" << endl;
+			int result;
+			do{
+				result = rand() % test_connect.at(COLOR_WHITE).size();
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+			cout << result << endl;
 			split(temp_connect, result, myObj, splite_table);
 			num_split += 1;
 		}
 		else if(choose_op == 1){
-			os << "merge" << endl;
+			cout << "merge" << endl;
 			vector<vec4> can_merge;
-			check_merge(temp_connect, can_merge, myObj, merge_table);
+		    check_merge(temp_connect, can_merge, myObj, merge_table);
 			if (can_merge.size() > 0){
 				int merge_index = rand() % can_merge.size();
+				cout << merge_index << endl;
 				merge(temp_connect, can_merge.at(merge_index));
 			}
 			num_merge += 1;
 		}
-		else{
-			os << "bridge" << endl;
+		else if(choose_op == 2){
+			cout << "bridge" << endl;
 			vector<vec4> can_bridge;
 			check_bridge(temp_connect, can_bridge, myObj, merge_table);
 			if (can_bridge.size() > 0){
@@ -549,16 +608,26 @@ int main(int argc, char **argv)
 			}
 			num_bridge += 1;
 		}
+		else{
+			cout << "kill" << endl;
+			int result;
+			do{
+				result = rand() % test_connect.at(COLOR_WHITE).size();
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+			cout << result << endl;
+			kill(temp_connect, result);
+			num_kill += 1;
+		}
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
-		os << "op : " << duration << " s" << endl;
-
+		cout << "op : " << duration << " s" << endl;
+		
 		start = clock();
-		float term[2];
+		float term[3];
 		float temp_e = compute_energy(temp_connect, myObj, term);
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
-		os << "energy : " << duration << " s" << endl;
+		cout << "energy : " << duration << " s" << endl;
 
 		float p = (float)rand() / (float)RAND_MAX;
 		//cout << p << " " << exp((origin_e - temp_e) / now_t) << endl;
@@ -566,16 +635,17 @@ int main(int argc, char **argv)
 		//if (temp_e < origin_e){
 		if (p < exp((origin_e - temp_e) / now_t)){
 			if (collision_test(temp_connect, give_up)){
-				
-				//start = clock();
+		
+	//			//start = clock();
 				test_connect = temp_connect;				
 				//finish = clock();
-				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
-				//cout << "copy : " << duration << " s" << endl;
+	//			//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	//			//cout << "copy : " << duration << " s" << endl;
 
-				os << "accept energy : " << temp_e << endl;
-				os << "energy(dist) : " << term[0] << endl;
-				os << "energy(angle) : " << term[1] << endl;
+				cout << "accept energy : " << temp_e << endl;
+				cout << "energy(dist) : " << term[0] << endl;
+				cout << "energy(angle) : " << term[1] << endl;
+				cout << "energy(number) : " << term[2] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_accept += 1;
@@ -588,10 +658,11 @@ int main(int argc, char **argv)
 			}
 			else{
 				collision += 1;
-				os << "reject energy : " << temp_e << endl;
-				os << "energy(dist) : " << term[0] << endl;
-				os << "energy(angle) : " << term[1] << endl;
-
+				cout << "reject energy : " << temp_e << endl;
+				cout << "energy(dist) : " << term[0] << endl;
+				cout << "energy(angle) : " << term[1] << endl;
+				cout << "energy(number) : " << term[2] << endl;
+				
 				if (temp_e < origin_e){
 					energy_smaller_reject += 1;
 				}
@@ -601,9 +672,10 @@ int main(int argc, char **argv)
 			}
 		}
 		else{
-			os << "reject energy : " << temp_e << endl;
-			os << "energy(dist) : " << term[0] << endl;
-			os << "energy(angle) : " << term[1] << endl;
+			cout << "reject energy : " << temp_e << endl;
+			cout << "energy(dist) : " << term[0] << endl;
+			cout << "energy(angle) : " << term[1] << endl;
+			cout << "energy(number) : " << term[2] << endl;
 
 			if (temp_e < origin_e){
 				energy_smaller_reject += 1;
@@ -612,37 +684,46 @@ int main(int argc, char **argv)
 				energy_bigger_reject += 1;
 			}
 		}
-		os << "T : " << now_t << endl;;
-		os << endl;
+		cout << "T : " << now_t << endl;;
+		cout << endl;
 	}
 
-	os << "collision : " << collision << " " << 10000 << endl;
-	os << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << endl;
-	os << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
+	cout << "collision : " << collision << " " << num_iteration << endl;
+	cout << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << endl;
+	cout << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
 
-	os << "Z' < Z and accept : " << energy_smaller_accept << endl;
-	os << "Z' > Z and accept : " << energy_bigger_accept << endl;
-	os << "Z' < Z and reject : " << energy_smaller_reject << endl;
-	os << "Z' > Z and reject : " << energy_bigger_reject << endl;
+	cout << "Z' < Z and accept : " << energy_smaller_accept << endl;
+	cout << "Z' > Z and accept : " << energy_bigger_accept << endl;
+	cout << "Z' < Z and reject : " << energy_smaller_reject << endl;
+	cout << "Z' > Z and reject : " << energy_bigger_reject << endl;
+	cout << endl;
 
-	/////*vector<vec4> can_bridge;
-	////check_bridge(can_bridge);
-	////bridge(test_connect, can_bridge.at(can_bridge.size() - 1));*/
+	//vec3 count[4];
+	//count_struct(test_connect, count);
+	//cout << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
+	//cout << "Rec : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
+	//cout << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
+	//cout << "Ball : " << count[3][0] << endl;
 
-	/////*cout << can_bridge.size() << endl;
+	/////////*vector<vec4> can_bridge;
+	////////check_bridge(can_bridge);
+	////////bridge(test_connect, can_bridge.at(can_bridge.size() - 1));*/
 
-	////for (unsigned int i = 0; i < can_bridge.size(); i += 1){
-	////	cout << can_bridge.at(i)[0] << " " << can_bridge.at(i)[1] << " " << can_bridge.at(i)[2] << " " << can_bridge.at(i)[3] << endl;
-	////}*/
-	////
-	////
+	/////////*cout << can_bridge.size() << endl;
 
-	total_finish = clock();
-	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
-	os << endl << "totoal time : " << duration << " s" << endl;
+	////////for (unsigned int i = 0; i < can_bridge.size(); i += 1){
+	////////	cout << can_bridge.at(i)[0] << " " << can_bridge.at(i)[1] << " " << can_bridge.at(i)[2] << " " << can_bridge.at(i)[3] << endl;
+	////////}*/
+	////////
+	////////
 
-	os.close();
-	output_zometool(test_connect, string("fake123aaa.obj"));
+	////total_finish = clock();
+	////duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
+	////os << endl << "totoal time : " << duration << " s" << endl;
+
+	//os.close();
+	output_zometool(test_connect, string("fake123 kill.obj"));
+	output_struc(test_connect, string("fake123 kill.txt"));
 	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -663,6 +744,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	//system("pause");
+	system("pause");
 	return 0;
 }

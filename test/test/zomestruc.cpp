@@ -18,6 +18,8 @@ zomeconn::zomeconn()
 	surface_d = 100000000000000.0f;
 	energy_d = 100000000000000.0f;
 
+	exist = true;
+
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
 	}
@@ -145,27 +147,29 @@ void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filen
 	os.open(filename);
 	for (int i = 0; i < 4; i += 1){
 		for (unsigned int j = 0; j < target.at(i).size(); j += 1){
-			os << target.at(i).at(j).color << " ";
-			os << target.at(i).at(j).position[0] << " " << target.at(i).at(j).position[1] << " " << target.at(i).at(j).position[2] << " ";
-			if (i < 3){
-				os << target.at(i).at(j).size << " ";
-				os << target.at(i).at(j).fromface << " " << target.at(i).at(j).towardface << " ";
-				os << target.at(i).at(j).fromindex[0] << " " << target.at(i).at(j).fromindex[1] << " ";
-				os << target.at(i).at(j).towardindex[0] << " " << target.at(i).at(j).towardindex[1] << " ";
-			}
-			else{
-				int num = 0;
-				for (unsigned int k = 0; k < 62; k += 1){
-					if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
-						num += 1;
+			if (target.at(i).at(j).exist){
+				os << target.at(i).at(j).color << " ";
+				os << target.at(i).at(j).position[0] << " " << target.at(i).at(j).position[1] << " " << target.at(i).at(j).position[2] << " ";
+				if (i < 3){
+					os << target.at(i).at(j).size << " ";
+					os << target.at(i).at(j).fromface << " " << target.at(i).at(j).towardface << " ";
+					os << target.at(i).at(j).fromindex[0] << " " << target.at(i).at(j).fromindex[1] << " ";
+					os << target.at(i).at(j).towardindex[0] << " " << target.at(i).at(j).towardindex[1] << " ";
 				}
-				os << num << " ";
-				for (unsigned int k = 0; k < 62; k += 1){
-					if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
-						os << k << " " << target.at(i).at(j).connect_stick[k][0] << " " << target.at(i).at(j).connect_stick[k][1] << " ";
+				else{
+					int num = 0;
+					for (unsigned int k = 0; k < 62; k += 1){
+						if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
+							num += 1;
+					}
+					os << num << " ";
+					for (unsigned int k = 0; k < 62; k += 1){
+						if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
+							os << k << " " << target.at(i).at(j).connect_stick[k][0] << " " << target.at(i).at(j).connect_stick[k][1] << " ";
+					}
 				}
+				os << std::endl;
 			}
-			os << std::endl;
 		}
 	}
 	os.close();
@@ -346,63 +350,65 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	int num_v = 0;
 	for (unsigned int i = 0; i < output_connect.size(); i += 1){
 		for (unsigned int j = 0; j < output_connect.at(i).size(); j += 1){
-			GLMmodel *temp_model = NULL;
-			if (i == COLOR_WHITE){
-				temp_model = glmCopy(z_b);
-				glmR(temp_model, vec3(0.0, 0.0, 0.0));
-				glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
-			}
-			else{
-				zomedir t;
-				if (i == COLOR_BLUE){
-					if (output_connect.at(i).at(j).size == SIZE_S){
-						temp_model = glmCopy(b_s);
-					}
-					else if (output_connect.at(i).at(j).size == SIZE_M){
-						temp_model = glmCopy(b_m);
-					}
-					else{
-						temp_model = glmCopy(b_l);
-					}
+			if (output_connect.at(i).at(j).exist){
+				GLMmodel *temp_model = NULL;
+				if (i == COLOR_WHITE){
+					temp_model = glmCopy(z_b);
+					glmR(temp_model, vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
 				}
-				else if (i == COLOR_RED){
-					if (output_connect.at(i).at(j).size == SIZE_S){
-						temp_model = glmCopy(r_s);
+				else{
+					zomedir t;
+					if (i == COLOR_BLUE){
+						if (output_connect.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(b_s);
+						}
+						else if (output_connect.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(b_m);
+						}
+						else{
+							temp_model = glmCopy(b_l);
+						}
 					}
-					else if (output_connect.at(i).at(j).size == SIZE_M){
-						temp_model = glmCopy(r_m);
+					else if (i == COLOR_RED){
+						if (output_connect.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(r_s);
+						}
+						else if (output_connect.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(r_m);
+						}
+						else{
+							temp_model = glmCopy(r_l);
+						}
 					}
-					else{
-						temp_model = glmCopy(r_l);
+					else {
+						if (output_connect.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(y_s);
+						}
+						else if (output_connect.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(y_m);
+						}
+						else{
+							temp_model = glmCopy(y_l);
+						}
 					}
-				}
-				else {
-					if (output_connect.at(i).at(j).size == SIZE_S){
-						temp_model = glmCopy(y_s);
-					}
-					else if (output_connect.at(i).at(j).size == SIZE_M){
-						temp_model = glmCopy(y_m);
-					}
-					else{
-						temp_model = glmCopy(y_l);
-					}
+
+					glmRT(temp_model, vec3(0.0, t.roll(output_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, t.phi(output_connect.at(i).at(j).fromface), t.theta(output_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+					glmR(temp_model, vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
 				}
 
-				glmRT(temp_model, vec3(0.0, t.roll(output_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
-				glmRT(temp_model, vec3(0.0, t.phi(output_connect.at(i).at(j).fromface), t.theta(output_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
-				glmR(temp_model, vec3(0.0, 0.0, 0.0));
-				glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
-			}
+				for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
+					os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
+				}
 
-			for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
-				os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
+				for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
+					vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
+					face_index.at(i).push_back(temp_t);
+				}
+				num_v += temp_model->numvertices;
 			}
-
-			for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
-				vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
-				face_index.at(i).push_back(temp_t);
-			}
-			num_v += temp_model->numvertices;
 		}
 	}
 
@@ -773,4 +779,32 @@ bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & giv
 	}
 
 	return true;
+}
+
+void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count)
+{
+	for (unsigned int i = 0; i < 4; i += 1){
+		if (i != 3){
+			for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+				if (test_connect.at(i).at(j).exist){
+					if (test_connect.at(i).at(j).size == SIZE_S){
+						count[i][SIZE_S] += 1;
+					}
+					else if (test_connect.at(i).at(j).size == SIZE_M){
+						count[i][SIZE_M] += 1;
+					}
+					else{
+						count[i][SIZE_L] += 1;
+					}
+				}
+			}
+		}
+		else{
+			for (unsigned int j = 0; j < test_connect.at(i).size(); j += 1){
+				if (test_connect.at(i).at(j).exist){
+					count[i][SIZE_S] += 1;
+				}
+			}
+		}
+	}	
 }

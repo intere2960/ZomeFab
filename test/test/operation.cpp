@@ -165,51 +165,60 @@ void check_merge(std::vector<std::vector<zomeconn>> &test_connect, std::vector<v
 
 	//#pragma omp parallel for
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		std::vector<int> use_slot;
-		for (int j = 0; j < 62; j += 1){
-			if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
-				use_slot.push_back(j);
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			std::vector<int> use_slot;
+			for (int j = 0; j < 62; j += 1){
+				if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
+					use_slot.push_back(j);
+				}
 			}
-		}
-
-		//#pragma omp parallel for
-		for (int j = 0; j < use_slot.size() - 1; j += 1){
-
-			int use_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).towardindex[1];
-			if (use_index == i)
-				use_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).fromindex[1];
-			vec3 use_p = test_connect.at(COLOR_WHITE).at(use_index).position;
 
 			//#pragma omp parallel for
-			for (int k = j + 1; k < use_slot.size(); k += 1){
-				int opp_face = t.opposite_face(use_slot.at(j));
+			for (int j = 0; j < use_slot.size() - 1; j += 1){
 
-				#pragma omp parallel for
-				for (int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
-					bool judge1 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).origin[1] == test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).size);
-					bool judge2 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_1[1] == test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).size);
-					if (judge1 && judge2){
+				int use_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).towardindex[1];
+				if (use_index == i)
+					use_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).fromindex[1];
+				vec3 use_p = test_connect.at(COLOR_WHITE).at(use_index).position;
 
-						int toward_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).towardindex[1];
-						if (toward_index == i)
-							toward_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
-						vec3 toward_p = test_connect.at(COLOR_WHITE).at(toward_index).position;
+				//#pragma omp parallel for
+				for (int k = j + 1; k < use_slot.size(); k += 1){
+					int opp_face = t.opposite_face(use_slot.at(j));
+
+					#pragma omp parallel for
+					for (int a = 0; a < merge_table.table.at(opp_face).at(use_slot.at(k)).size(); a += 1){
+						bool judge1 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).origin[1] == test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(j)][1]).size);
+						bool judge2 = (merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_1[1] == test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).size);
+						if (judge1 && judge2){
+
+							int toward_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).towardindex[1];
+							if (toward_index == i)
+								toward_index = (int)test_connect.at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][0]).at((int)test_connect.at(COLOR_WHITE).at(i).connect_stick[use_slot.at(k)][1]).fromindex[1];
+							vec3 toward_p = test_connect.at(COLOR_WHITE).at(toward_index).position;
 
 
-						bool add = true;
-						for (unsigned int b = 0; b < can_merge.size(); b += 1){
-							if ((can_merge.at(b)[0] == toward_index) && (can_merge.at(b)[1] == use_index)){
+							bool add = true;
+							for (unsigned int b = 0; b < can_merge.size(); b += 1){
+								if ((can_merge.at(b)[0] == toward_index) && (can_merge.at(b)[1] == use_index)){
+									add = false;
+								}
+							}
+
+							vec3 test_dir = (test_connect.at(COLOR_WHITE).at(toward_index).position - test_connect.at(COLOR_WHITE).at(use_index).position).normalize();
+							int test_index = t.dir_face(test_dir);
+
+							if (test_connect.at(COLOR_WHITE).at(use_index).connect_stick[test_index] != vec2(-1.0f, -1.0f)){
 								add = false;
 							}
-						}
 
-						if (add){
-							vec3 test_p = (test_connect.at(COLOR_WHITE).at(use_index).position + test_connect.at(COLOR_WHITE).at(toward_index).position) / 2.0f;
+							if (add){
+								vec3 test_p = (test_connect.at(COLOR_WHITE).at(use_index).position + test_connect.at(COLOR_WHITE).at(toward_index).position) / 2.0f;
 
-							bool judge = !check_stick_intersect(model, use_p, toward_p) && !check_stick_intersect(model, test_p, use_p) && !check_stick_intersect(model, test_p, toward_p);
-							if (judge){
-								vec4 connect((float)use_index, (float)toward_index, (float)t.face_color((int)merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), (float)merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
-								can_merge.push_back(connect);
+								bool judge = !check_stick_intersect(model, use_p, toward_p) && !check_stick_intersect(model, test_p, use_p) && !check_stick_intersect(model, test_p, toward_p);
+								if (judge){
+									vec4 connect((float)use_index, (float)toward_index, (float)t.face_color((int)merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[0]), (float)merge_table.table.at(opp_face).at(use_slot.at(k)).at(a).travel_2[1]);
+									can_merge.push_back(connect);
+								}
 							}
 						}
 					}
@@ -252,34 +261,36 @@ void check_bridge(std::vector<std::vector<zomeconn>> &test_connect, std::vector<
 
 	//#pragma omp parallel for
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		//#pragma omp parallel for
-		for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
-			if (i != j){
-				vec3 test_l = test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position;
-				vec3 test_n = (test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position).normalize();
-				int test_index = t.dir_face(test_n);
-				if (test_index != -1){
-					if (test_connect.at(COLOR_WHITE).at(i).connect_stick[test_index] == vec2(-1.0f, -1.0f)){
-						float l = test_l.length();
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			//#pragma omp parallel for
+			for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+				if (i != j && test_connect.at(COLOR_WHITE).at(j).exist){
+					vec3 test_l = test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position;
+					vec3 test_n = (test_connect.at(COLOR_WHITE).at(j).position - test_connect.at(COLOR_WHITE).at(i).position).normalize();
+					int test_index = t.dir_face(test_n);
+					if (test_index != -1){
+						if (test_connect.at(COLOR_WHITE).at(i).connect_stick[test_index] == vec2(-1.0f, -1.0f)){
+							float l = test_l.length();
 
-						#pragma omp parallel for
-						for (int size = 0; size < 3; size += 1){
-							if (fabs(t.face_length(test_index, size) - l) < 0.001f){
-								bool add = true;
-								for (unsigned int k = 0; k < can_bridge.size(); k += 1){
-									if ((can_bridge.at(k)[0] == j) && (can_bridge.at(k)[1] == i)){
-										add = false;
+							#pragma omp parallel for
+							for (int size = 0; size < 3; size += 1){
+								if (fabs(t.face_length(test_index, size) - l) < 0.001f){
+									bool add = true;
+									for (unsigned int k = 0; k < can_bridge.size(); k += 1){
+										if ((can_bridge.at(k)[0] == j) && (can_bridge.at(k)[1] == i)){
+											add = false;
+										}
 									}
-								}
 
-								if (add){
-									vec3 test_p = (test_connect.at(COLOR_WHITE).at(i).position + test_connect.at(COLOR_WHITE).at(j).position) / 2.0f;
-									vec3 from_p = test_connect.at(COLOR_WHITE).at(i).position;
-									vec3 toward_p = test_connect.at(COLOR_WHITE).at(j).position;
-									bool judge = !check_stick_intersect(model, from_p, toward_p) && !check_stick_intersect(model, test_p, from_p) && !check_stick_intersect(model, test_p, toward_p);
-									if (judge){
-										vec4 connect((float)i, (float)j, (float)t.face_color(test_index), (float)size);
-										can_bridge.push_back(connect);
+									if (add){
+										vec3 test_p = (test_connect.at(COLOR_WHITE).at(i).position + test_connect.at(COLOR_WHITE).at(j).position) / 2.0f;
+										vec3 from_p = test_connect.at(COLOR_WHITE).at(i).position;
+										vec3 toward_p = test_connect.at(COLOR_WHITE).at(j).position;
+										bool judge = !check_stick_intersect(model, from_p, toward_p) && !check_stick_intersect(model, test_p, from_p) && !check_stick_intersect(model, test_p, toward_p);
+										if (judge){
+											vec4 connect((float)i, (float)j, (float)t.face_color(test_index), (float)size);
+											can_bridge.push_back(connect);
+										}
 									}
 								}
 							}
@@ -318,6 +329,49 @@ void bridge(std::vector<std::vector<zomeconn>> &test_connect, vec4 &bridge_vecto
 	test_connect.at(new_stick.color).push_back(new_stick);
 }
 
+void kill(std::vector<std::vector<zomeconn>> &test_connect, int index)
+{
+	std::vector<vec2> use_stick;
+	for (int i = 0; i < 62; i += 1){
+		if (test_connect.at(COLOR_WHITE).at(index).connect_stick[i] != vec2(-1.0f, -1.0f))
+			use_stick.push_back(test_connect.at(COLOR_WHITE).at(index).connect_stick[i]);
+	}
+
+	test_connect.at(COLOR_WHITE).at(index).exist = false;
+
+	for (unsigned int i = 0; i < use_stick.size(); i += 1){
+		int fromface = test_connect.at(use_stick.at(i)[0]).at(use_stick.at(i)[1]).fromface;
+		vec2 fromindex = test_connect.at(use_stick.at(i)[0]).at(use_stick.at(i)[1]).fromindex;
+		int towardface = test_connect.at(use_stick.at(i)[0]).at(use_stick.at(i)[1]).towardface;
+		vec2 towardindex = test_connect.at(use_stick.at(i)[0]).at(use_stick.at(i)[1]).towardindex;
+
+		test_connect.at(fromindex[0]).at(fromindex[1]).connect_stick[fromface] = vec2(-1.0f, -1.0f);
+		bool vanish = true;
+		for (int j = 0; j < 62; j += 1){
+			if (test_connect.at(fromindex[0]).at(fromindex[1]).connect_stick[j] != vec2(-1.0f, -1.0f)){
+				vanish = false;
+				break;
+			}
+		}
+		if (vanish)
+			test_connect.at(fromindex[0]).at(fromindex[1]).exist = false;
+
+		test_connect.at(towardindex[0]).at(towardindex[1]).connect_stick[towardface] = vec2(-1.0f, -1.0f);
+		vanish = true;
+		for (int j = 0; j < 62; j += 1){
+			if (test_connect.at(towardindex[0]).at(towardindex[1]).connect_stick[j] != vec2(-1.0f, -1.0f)){
+				vanish = false;
+				break;
+			}
+		}
+		if (vanish)
+			test_connect.at(towardindex[0]).at(towardindex[1]).exist = false;
+
+		test_connect.at(use_stick.at(i)[0]).at(use_stick.at(i)[1]).exist = false;
+	}
+
+}
+
 float forbidden_energy(float dist)
 {
 	zomedir t;
@@ -349,25 +403,27 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	for (int a = 0; a < test_connect.size(); a += 1){
 		//#pragma omp parallel for
 		for (int i = 0; i < test_connect.at(a).size(); i += 1){
-			//cout << a << " " << i << endl;
-			//cout << test_connect.at(a).at(i).position[0] << " " << test_connect.at(a).at(i).position[1] << " " << test_connect.at(a).at(i).position[2] << endl;
-			if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
+			if (test_connect.at(a).at(i).exist){
+				//cout << a << " " << i << endl;
+				//cout << test_connect.at(a).at(i).position[0] << " " << test_connect.at(a).at(i).position[1] << " " << test_connect.at(a).at(i).position[2] << endl;
+				if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
+					//start = clock();
+					test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
+					test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(a).at(i).surface_d));
+					//finish = clock();
+					//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+					//cout << "point_surface_dist : " << duration << " s" << endl;
+				}
+
 				//start = clock();
-				test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
-				test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(a).at(i).surface_d));
+
+				//energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
+				energy_dist += test_connect.at(a).at(i).energy_d;
+
 				//finish = clock();
 				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
 				//cout << "point_surface_dist : " << duration << " s" << endl;
 			}
-
-			//start = clock();
-
-			//energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
-			energy_dist += test_connect.at(a).at(i).energy_d;
-
-			//finish = clock();
-			//duration = (float)(finish - start) / CLOCKS_PER_SEC;
-			//cout << "point_surface_dist : " << duration << " s" << endl;
 		}
 	}
 	//cout << "reuse : " << reuse << endl;
@@ -377,26 +433,40 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	float energy_angle = 0.0f;
 	#pragma omp parallel for
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		std::vector<int> use_stick;
-		for (int j = 0; j < 62; j += 1){
-			if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
-				use_stick.push_back(j);
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			std::vector<int> use_stick;
+			for (int j = 0; j < 62; j += 1){
+				if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
+					use_stick.push_back(j);
+				}
 			}
-		}
 
-		float sum_angle = 0.0f;
-		#pragma omp parallel for
-		for (int j = 0; j < use_stick.size() - 1; j += 1){
+			float sum_angle = 0.0f;
 			#pragma omp parallel for
-			for (int k = j; k < use_stick.size(); k += 1){
-				sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - 90.0f);
+			for (int j = 0; j < use_stick.size() - 1; j += 1){
+				#pragma omp parallel for
+				for (int k = j; k < use_stick.size(); k += 1){
+					sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f);
+				}
 			}
-		}
 
-		energy_angle += 1 / sum_angle;
+			energy_angle += sum_angle;
+		}
 	}
 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
+
+	float energy_number = 0.0f;
+	float target_number = 1000.0f;
+
+	int number = 0;
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			number += 1;
+		}
+	}
+
+	energy_number = pow((number - target_number), 2.0f) / target_number;
 
 	//float energy_fair = 0.0f;
 	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -415,12 +485,14 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	//energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
 
 	//energy = energy_dist + energy_fair;
-	energy = energy_dist + 100 * energy_angle;
+	//energy = energy_dist + 0.1 * energy_angle;
+	energy = energy_dist + 0.1 * energy_angle + energy_number;
 	/*cout << "energy : " << energy << endl;
 	cout << "energy_dist : " << energy_dist << endl;
 	cout << "energy_angle : " << energy_angle << endl;*/
 	term[0] = energy_dist;
 	term[1] = energy_angle;
+	term[2] = energy_number;
 
 	return energy;
 }
