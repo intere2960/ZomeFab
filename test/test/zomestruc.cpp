@@ -146,8 +146,11 @@ void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filen
 	std::ofstream os;
 	os.open(filename);
 	for (int i = 0; i < 4; i += 1){
+		int number = 0;
 		for (unsigned int j = 0; j < target.at(i).size(); j += 1){
 			if (target.at(i).at(j).exist){
+				os << number << " ";
+				number += 1;
 				os << target.at(i).at(j).color << " ";
 				os << target.at(i).at(j).position[0] << " " << target.at(i).at(j).position[1] << " " << target.at(i).at(j).position[2] << " ";
 				if (i < 3){
@@ -179,9 +182,10 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filen
 {
 	std::ifstream is;
 	is.open(filename);
+	int number;
 	int temp_color;
 	vec3 temp_pos;
-	while (is >> temp_color >> temp_pos[0] >> temp_pos[1] >> temp_pos[2]){
+	while (is >> number >> temp_color >> temp_pos[0] >> temp_pos[1] >> temp_pos[2]){
 		if (temp_color != 3){
 			int temp_size, temp_fromface, temp_towardface;
 			vec2  temp_fromindex, temp_towardindex;

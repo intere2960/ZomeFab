@@ -496,3 +496,43 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	return energy;
 }
+
+void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now)
+{
+	check_index.push_back(now);
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		if (i != now){
+			if ((test_connect.at(COLOR_WHITE).at(now).position - test_connect.at(COLOR_WHITE).at(i).position).length() < SCALE * 1.5f){
+				check_index.push_back(i);
+			}
+		}
+	}
+}
+
+bool pointInside(Polyhedron_3 &polyhedron, Point &query) 
+{
+	Tree tree(faces(polyhedron).first, faces(polyhedron).second, polyhedron);
+	tree.accelerate_distance_queries();
+	Point_inside inside_tester(tree);
+	return inside_tester(query) == CGAL::ON_BOUNDED_SIDE;
+}
+
+bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
+{
+	vector<int> check_index;
+	search_near_point(test_connect, check_index, now);
+	std::vector<Point> points;
+
+	cout << check_index.size() << endl;
+	for (unsigned int i = 0; i < check_index.size(); i += 1){
+		Point temp(test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[0], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[1], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[2]);
+		points.push_back(temp);
+	}
+
+	Polyhedron_3 poly;
+	CGAL::convex_hull_3(points.begin(), points.end(), poly);
+
+	std::cout << "The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
+
+	return pointInside(poly, points.at(0));
+}

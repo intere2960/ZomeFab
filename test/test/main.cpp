@@ -1,5 +1,5 @@
 #include "main.h"
-#include <time.h>
+#include <ctime>
 #include <fstream>
 #include <omp.h>
 #include "nanoflann.hpp"
@@ -391,51 +391,129 @@ float decrease_t(int iteration)
 	int num = (iteration + 1) / 100;
 	return pow(0.99f, (float)num);
 }
-//
+
 //using namespace nanoflann;
-////template <typename T>
-//class pointcloud
+//
+//// This is an example of a custom data set class
+//template <typename T>
+//struct PointCloud
 //{
-//public:
-//	std::vector<vec3> pts;
+//	struct Point
+//	{
+//		T  x, y, z;
+//	};
 //
-//	pointcloud(GLMmodel *model);
+//	std::vector<Point>  pts;
 //
-//	float kdtree_distance(vec3 &p1, int idx_p2);
-//	int kdtree_get_pt(const int idx, int dim);
-//};
+//	// Must return the number of data points
+//	inline size_t kdtree_get_point_count() const { return pts.size(); }
 //
-////template <typename num_t>
-//pointcloud::pointcloud(GLMmodel *model)
-//{
-//	for (unsigned int i = 0; i < model->numtriangles; i += 1){
-//		vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
-//		vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
-//		vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
-//		vec3 center = (p1 + p2 + p3) / 3.0f;
-//		pts.push_back(center);
+//	// Returns the distance between the vector "p1[0:size-1]" and the data point with index "idx_p2" stored in the class:
+//	inline T kdtree_distance(const T *p1, const size_t idx_p2, size_t /*size*/) const
+//	{
+//		const T d0 = p1[0] - pts[idx_p2].x;
+//		const T d1 = p1[1] - pts[idx_p2].y;
+//		const T d2 = p1[2] - pts[idx_p2].z;
+//		return d0*d0 + d1*d1 + d2*d2;
 //	}
 //
+//	// Returns the dim'th component of the idx'th point in the class:
+//	// Since this is inlined and the "dim" argument is typically an immediate value, the
+//	//  "if/else's" are actually solved at compile time.
+//	inline T kdtree_get_pt(const size_t idx, int dim) const
+//	{
+//		if (dim == 0) return pts[idx].x;
+//		else if (dim == 1) return pts[idx].y;
+//		else return pts[idx].z;
+//	}
+//
+//	// Optional bounding-box computation: return false to default to a standard bbox computation loop.
+//	//   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
+//	//   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
+//	template <class BBOX>
+//	bool kdtree_get_bbox(BBOX& /*bb*/) const { return false; }
+//
+//};
+//
+//template <typename T>
+//void generateRandomPointCloud(PointCloud<T> &point, const size_t N, const T max_range = 10)
+//{
+//	std::cout << "Generating " << N << " point cloud...";
+//	point.pts.resize(N);
+//	for (size_t i = 0; i<N; i++)
+//	{
+//		point.pts[i].x = max_range * (rand() % 1000) / T(1000);
+//		point.pts[i].y = max_range * (rand() % 1000) / T(1000);
+//		point.pts[i].z = max_range * (rand() % 1000) / T(1000);
+//	}
+//
+//	std::cout << "done\n";
+//}
+//
+//template <typename num_t>
+//void kdtree_demo(const size_t N)
+//{
+//	PointCloud<num_t> cloud;
+//
+//	// Generate points:
+//	generateRandomPointCloud(cloud, N);
+//
+//	// construct a kd-tree index:
 //	typedef KDTreeSingleIndexAdaptor<
-//		L2_Simple_Adaptor<int, pointcloud<num_t> >,
-//		pointcloud<num_t>,
+//		L2_Simple_Adaptor<num_t, PointCloud<num_t> >,
+//		PointCloud<num_t>,
 //		3 /* dim */
 //	> my_kd_tree_t;
 //
 //	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 //	index.buildIndex();
-//}
 //
-//float pointcloud::kdtree_distance(vec3 &p1, int idx_p2)
-//{
-//	return (p1 - pts.at(idx_p2)).length();
-//}
+//#if 0
+//	// Test resize of dataset and rebuild of index:
+//	cloud.pts.resize(cloud.pts.size()*0.5);
+//	index.buildIndex();
+//#endif
 //
-//int pointcloud::kdtree_get_pt(const int idx, int dim)
-//{
-//	if (dim == 0) return pts.at(idx)[0];
-//	else if (dim == 1) return pts.at(idx)[1];
-//	else return pts.at(idx)[2];
+//	const num_t query_pt[3] = { 0.5, 0.5, 0.5 };
+//
+//	// ----------------------------------------------------------------
+//	// knnSearch():  Perform a search for the N closest points
+//	// ----------------------------------------------------------------
+//	{
+//		size_t num_results = 5;
+//		std::vector<size_t>   ret_index(num_results);
+//		std::vector<num_t> out_dist_sqr(num_results);
+//
+//		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
+//
+//		// In case of less points in the tree than requested:
+//		ret_index.resize(num_results);
+//		out_dist_sqr.resize(num_results);
+//
+//		cout << "knnSearch(): num_results=" << num_results << "\n";
+//		for (size_t i = 0; i<num_results; i++)
+//			cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i << "]=" << out_dist_sqr[i] << endl;
+//		cout << "\n";
+//	}
+//
+//	// ----------------------------------------------------------------
+//	// radiusSearch():  Perform a search for the N closest points
+//	// ----------------------------------------------------------------
+//	{
+//		const num_t search_radius = static_cast<num_t>(0.1);
+//		std::vector<std::pair<size_t, num_t> >   ret_matches;
+//
+//		nanoflann::SearchParams params;
+//		//params.sorted = false;
+//
+//		const size_t nMatches = index.radiusSearch(&query_pt[0], search_radius, ret_matches, params);
+//
+//		cout << "radiusSearch(): radius=" << search_radius << " -> " << nMatches << " matches\n";
+//		for (size_t i = 0; i<nMatches; i++)
+//			cout << "idx[" << i << "]=" << ret_matches[i].first << " dist[" << i << "]=" << ret_matches[i].second << endl;
+//		cout << "\n";
+//	}
+//
 //}
 
 int main(int argc, char **argv)
@@ -448,18 +526,34 @@ int main(int argc, char **argv)
 	//cout << "size : " << myObj->numtriangles << endl;
 	init();
 
-	///////*vec3 p1(174.059, 312.327, 107.917);
-	//////vec3 p2(112.142, 288.677, 69.6504);*/
-	///////*vec3 p1(-77.0575, 430.577, 69.6504);
-	//////vec3 p2(-177.241, 392.31, 7.7339);*/
-	///////*vec3 p1(-138.974, 321.361, -57.633);
-	//////vec3 p2(-138.974, 359.627, -33.983);*/
-	/////*vec3 p1(17.5425, 241.377, -24.9497);
-	////vec3 p2(-44.374, 141.194, 13.3168);*/
-	////vec3 p1(-138.974, 359.627, 13.317);
-	////vec3 p2(-100.7075, 359.627, 75.233);
-	////bool test = check_stick_intersect(myObj, p1, p2);
-	////cout << "test : " << test << endl;
+	//pointcloud<float> test_kd(myObj);
+
+	//typedef KDTreeSingleIndexAdaptor<
+	//	L2_Simple_Adaptor<int, pointcloud<float>>,
+	//	pointcloud<float>,
+	//	3 /* dim */
+	//> my_kd_tree_t;
+
+	//my_kd_tree_t   index(3 /*dim*/, test_kd, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+	//index.buildIndex();
+
+	//const num_t query_pt[3] = { 0.5, 0.5, 0.5 };
+	//
+	//int num_results = 5;
+	//std::vector<num_t>   ret_index(num_results);
+	//std::vector<float> out_dist_sqr(num_results);
+
+	//num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
+
+	//// In case of less points in the tree than requested:
+	//ret_index.resize(num_results);
+	//out_dist_sqr.resize(num_results);
+
+	//cout << "knnSearch(): num_results=" << num_results << "\n";
+	//for (num_t i = 0; i<num_results; i++)
+	//	cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i << "]=" << out_dist_sqr[i] << endl;
+	//cout << "\n";
+
 
 	////test();
 
@@ -498,21 +592,24 @@ int main(int argc, char **argv)
 	////output_zometool(zome_queue.at(1), string("test.obj"));
 	////output_struc(zome_queue.at(1), string("fake.txt"));
 			
-	clock_t total_start, total_finish;
-	total_start = clock();
+	//clock_t total_start, total_finish;
+	//total_start = clock();
 
 	clock_t start, finish;
 	float duration;
 	
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
-		
-	//struc_parser(test_connect, string("fake123.txt"));
 
-	//fake_case(0);
+	/*bool aaa = check_inside(test_connect, 29);
+	cout << aaa << endl;*/
+	
+	////struc_parser(test_connect, string("fake123.txt"));
+	
+	////fake_case(0);
 
-	//output_zometool(test_connect, string("fake123 before.obj"));
-	//output_struc(test_connect, string("fake123 before.txt"));
+	////output_zometool(test_connect, string("fake123 before.obj"));
+	////output_struc(test_connect, string("fake123 before.txt"));
 	
 	start = clock();
 	
@@ -533,27 +630,6 @@ int main(int argc, char **argv)
 	cout << "origin energy(number) : " << origin_term[1] << endl;
 	cout << endl;
 
-	/////*for (int j = 0; j < 4; j += 1){
-	////	cout << j << " : " << endl;
-	////	if (j != 3){
-	////		for (int k = 0; k < test_connect.at(j).size(); k += 1){
-	////			cout << "\t " << k << " : (" << test_connect.at(j).at(k).fromindex[0] << " , " << test_connect.at(j).at(k).fromindex[1]
-	////				<< ") (" << test_connect.at(j).at(k).towardindex[0] << " , " << test_connect.at(j).at(k).towardindex[1] << ")" << endl;
-	////		}
-	////	}
-	////	else{
-	////		for (int k = 0; k < test_connect.at(3).size(); k += 1){
-	////			cout << "\t " << k << " : ";
-	////			for (int a = 0; a < 62; a += 1){
-	////				if (test_connect.at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-	////					cout << a << ": (" << test_connect.at(3).at(k).connect_stick[a][0] << " , " << test_connect.at(3).at(k).connect_stick[a][1] << ") ";
-	////			}
-	////			cout << endl;
-	////			cout << "\t " << test_connect.at(3).at(k).position[0] << " " << test_connect.at(3).at(k).position[1] << " " << test_connect.at(3).at(k).position[2] << endl;
-	////		}
-	////	}
-	////}*/
-
 	cout << "start" << endl;
 	int collision = 0;
 
@@ -571,7 +647,7 @@ int main(int argc, char **argv)
 		float now_t = inital_t * decrease_t(i);
 
 		cout << i << " :" << endl;
-		int choose_op = rand() % 4;
+		int choose_op = rand() % 3;
 				
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
@@ -608,7 +684,7 @@ int main(int argc, char **argv)
 			}
 			num_bridge += 1;
 		}
-		else{
+		/*else{
 			cout << "kill" << endl;
 			int result;
 			do{
@@ -617,7 +693,7 @@ int main(int argc, char **argv)
 			cout << result << endl;
 			kill(temp_connect, result);
 			num_kill += 1;
-		}
+		}*/
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
 		cout << "op : " << duration << " s" << endl;
@@ -705,26 +781,14 @@ int main(int argc, char **argv)
 	//cout << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
 	//cout << "Ball : " << count[3][0] << endl;
 
-	/////////*vector<vec4> can_bridge;
-	////////check_bridge(can_bridge);
-	////////bridge(test_connect, can_bridge.at(can_bridge.size() - 1));*/
+	///*total_finish = clock();
+	//duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
+	//cout << endl << "totoal time : " << duration << " s" << endl;*/
 
-	/////////*cout << can_bridge.size() << endl;
-
-	////////for (unsigned int i = 0; i < can_bridge.size(); i += 1){
-	////////	cout << can_bridge.at(i)[0] << " " << can_bridge.at(i)[1] << " " << can_bridge.at(i)[2] << " " << can_bridge.at(i)[3] << endl;
-	////////}*/
-	////////
-	////////
-
-	////total_finish = clock();
-	////duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
-	////os << endl << "totoal time : " << duration << " s" << endl;
-
-	//os.close();
-	output_zometool(test_connect, string("fake123 kill.obj"));
-	output_struc(test_connect, string("fake123 kill.txt"));
-	///*output_struc(test_connect, string("fake123.txt"));*/
+	//////os.close();
+	output_zometool(test_connect, string("fake123.obj"));
+	output_struc(test_connect, string("fake123.txt"));
+	/////*output_struc(test_connect, string("fake123.txt"));*/
 		
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
