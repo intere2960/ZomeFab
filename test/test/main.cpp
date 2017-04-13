@@ -2,7 +2,6 @@
 #include <ctime>
 #include <fstream>
 #include <omp.h>
-#include "nanoflann.hpp"
 
 using namespace std;
 
@@ -392,130 +391,6 @@ float decrease_t(int iteration)
 	return pow(0.99f, (float)num);
 }
 
-//using namespace nanoflann;
-//
-//// This is an example of a custom data set class
-//template <typename T>
-//struct PointCloud
-//{
-//	struct Point
-//	{
-//		T  x, y, z;
-//	};
-//
-//	std::vector<Point>  pts;
-//
-//	// Must return the number of data points
-//	inline size_t kdtree_get_point_count() const { return pts.size(); }
-//
-//	// Returns the distance between the vector "p1[0:size-1]" and the data point with index "idx_p2" stored in the class:
-//	inline T kdtree_distance(const T *p1, const size_t idx_p2, size_t /*size*/) const
-//	{
-//		const T d0 = p1[0] - pts[idx_p2].x;
-//		const T d1 = p1[1] - pts[idx_p2].y;
-//		const T d2 = p1[2] - pts[idx_p2].z;
-//		return d0*d0 + d1*d1 + d2*d2;
-//	}
-//
-//	// Returns the dim'th component of the idx'th point in the class:
-//	// Since this is inlined and the "dim" argument is typically an immediate value, the
-//	//  "if/else's" are actually solved at compile time.
-//	inline T kdtree_get_pt(const size_t idx, int dim) const
-//	{
-//		if (dim == 0) return pts[idx].x;
-//		else if (dim == 1) return pts[idx].y;
-//		else return pts[idx].z;
-//	}
-//
-//	// Optional bounding-box computation: return false to default to a standard bbox computation loop.
-//	//   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
-//	//   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
-//	template <class BBOX>
-//	bool kdtree_get_bbox(BBOX& /*bb*/) const { return false; }
-//
-//};
-//
-//template <typename T>
-//void generateRandomPointCloud(PointCloud<T> &point, const size_t N, const T max_range = 10)
-//{
-//	std::cout << "Generating " << N << " point cloud...";
-//	point.pts.resize(N);
-//	for (size_t i = 0; i<N; i++)
-//	{
-//		point.pts[i].x = max_range * (rand() % 1000) / T(1000);
-//		point.pts[i].y = max_range * (rand() % 1000) / T(1000);
-//		point.pts[i].z = max_range * (rand() % 1000) / T(1000);
-//	}
-//
-//	std::cout << "done\n";
-//}
-//
-//template <typename num_t>
-//void kdtree_demo(const size_t N)
-//{
-//	PointCloud<num_t> cloud;
-//
-//	// Generate points:
-//	generateRandomPointCloud(cloud, N);
-//
-//	// construct a kd-tree index:
-//	typedef KDTreeSingleIndexAdaptor<
-//		L2_Simple_Adaptor<num_t, PointCloud<num_t> >,
-//		PointCloud<num_t>,
-//		3 /* dim */
-//	> my_kd_tree_t;
-//
-//	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
-//	index.buildIndex();
-//
-//#if 0
-//	// Test resize of dataset and rebuild of index:
-//	cloud.pts.resize(cloud.pts.size()*0.5);
-//	index.buildIndex();
-//#endif
-//
-//	const num_t query_pt[3] = { 0.5, 0.5, 0.5 };
-//
-//	// ----------------------------------------------------------------
-//	// knnSearch():  Perform a search for the N closest points
-//	// ----------------------------------------------------------------
-//	{
-//		size_t num_results = 5;
-//		std::vector<size_t>   ret_index(num_results);
-//		std::vector<num_t> out_dist_sqr(num_results);
-//
-//		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
-//
-//		// In case of less points in the tree than requested:
-//		ret_index.resize(num_results);
-//		out_dist_sqr.resize(num_results);
-//
-//		cout << "knnSearch(): num_results=" << num_results << "\n";
-//		for (size_t i = 0; i<num_results; i++)
-//			cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i << "]=" << out_dist_sqr[i] << endl;
-//		cout << "\n";
-//	}
-//
-//	// ----------------------------------------------------------------
-//	// radiusSearch():  Perform a search for the N closest points
-//	// ----------------------------------------------------------------
-//	{
-//		const num_t search_radius = static_cast<num_t>(0.1);
-//		std::vector<std::pair<size_t, num_t> >   ret_matches;
-//
-//		nanoflann::SearchParams params;
-//		//params.sorted = false;
-//
-//		const size_t nMatches = index.radiusSearch(&query_pt[0], search_radius, ret_matches, params);
-//
-//		cout << "radiusSearch(): radius=" << search_radius << " -> " << nMatches << " matches\n";
-//		for (size_t i = 0; i<nMatches; i++)
-//			cout << "idx[" << i << "]=" << ret_matches[i].first << " dist[" << i << "]=" << ret_matches[i].second << endl;
-//		cout << "\n";
-//	}
-//
-//}
-
 int main(int argc, char **argv)
 {
 	//    findzoom();
@@ -523,37 +398,7 @@ int main(int argc, char **argv)
 	myObj = glmReadOBJ(model_source);
 	//myObj_inner = glmCopy(myObj);
 
-	//cout << "size : " << myObj->numtriangles << endl;
 	init();
-
-	//pointcloud<float> test_kd(myObj);
-
-	//typedef KDTreeSingleIndexAdaptor<
-	//	L2_Simple_Adaptor<int, pointcloud<float>>,
-	//	pointcloud<float>,
-	//	3 /* dim */
-	//> my_kd_tree_t;
-
-	//my_kd_tree_t   index(3 /*dim*/, test_kd, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
-	//index.buildIndex();
-
-	//const num_t query_pt[3] = { 0.5, 0.5, 0.5 };
-	//
-	//int num_results = 5;
-	//std::vector<num_t>   ret_index(num_results);
-	//std::vector<float> out_dist_sqr(num_results);
-
-	//num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
-
-	//// In case of less points in the tree than requested:
-	//ret_index.resize(num_results);
-	//out_dist_sqr.resize(num_results);
-
-	//cout << "knnSearch(): num_results=" << num_results << "\n";
-	//for (num_t i = 0; i<num_results; i++)
-	//	cout << "idx[" << i << "]=" << ret_index[i] << " dist[" << i << "]=" << out_dist_sqr[i] << endl;
-	//cout << "\n";
-
 
 	////test();
 
@@ -568,32 +413,11 @@ int main(int argc, char **argv)
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	//////for (int j = 0; j < 4; j += 1){
-	//////	cout << j << " : " << endl;
-	//////	if (j != 3){
-	//////		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
-	//////		cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
-	//////		<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
-	//////		}*/
-	//////	}
-	//////	else{
-	//////		for (int k = 0; k < zome_queue.at(1).at(3).size(); k += 1){
-	//////			cout << "\t " << k << " : ";
-	//////			for (int a = 0; a < 62; a += 1){
-	//////				if (zome_queue.at(1).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-	//////					cout << " (" << zome_queue.at(1).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(1).at(3).at(k).connect_stick[a][1] << ")";
-	//////			}
-	//////			cout << endl;
-	//////			cout << "\t " << zome_queue.at(1).at(3).at(k).position[0] << " " << zome_queue.at(1).at(3).at(k).position[1] << " " << zome_queue.at(1).at(3).at(k).position[2] << endl;
-	//////		}
-	//////	}
-	//////}
-
 	////output_zometool(zome_queue.at(1), string("test.obj"));
 	////output_struc(zome_queue.at(1), string("fake.txt"));
 			
-	//clock_t total_start, total_finish;
-	//total_start = clock();
+	clock_t total_start, total_finish;
+	total_start = clock();
 
 	clock_t start, finish;
 	float duration;
@@ -601,7 +425,7 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 
-	/*bool aaa = check_inside(test_connect, 29);
+	/*bool aaa = check_inside(test_connect, 66);
 	cout << aaa << endl;*/
 	
 	////struc_parser(test_connect, string("fake123.txt"));
@@ -612,22 +436,28 @@ int main(int argc, char **argv)
 	////output_struc(test_connect, string("fake123 before.txt"));
 	
 	start = clock();
+
+	PointCloud<float> cloud;
+	// Generate points:
+	generatePointCloud(cloud, myObj);
+
+	cout << myObj->numtriangles << endl;
 	
 	float origin_term[3];
-	float origin_e = compute_energy(test_connect, myObj, origin_term);
+	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
 	int num_iteration = 1000;
 
 	finish = clock();
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
-	//cout << duration << " s" << endl;
+	cout << duration << " s" << endl;
 
-	ofstream os("test-3.txt");
+	//ofstream os("test-3.txt");
 
 	cout << "origin energy : " << origin_e << endl;
 	cout << "origin energy(dist) : " << origin_term[0] << endl;
 	cout << "origin energy(angle) : " << origin_term[1] << endl;
-	cout << "origin energy(number) : " << origin_term[1] << endl;
+	cout << "origin energy(number) : " << origin_term[2] << endl;
 	cout << endl;
 
 	cout << "start" << endl;
@@ -648,7 +478,7 @@ int main(int argc, char **argv)
 
 		cout << i << " :" << endl;
 		int choose_op = rand() % 3;
-				
+
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
 
@@ -658,15 +488,15 @@ int main(int argc, char **argv)
 			int result;
 			do{
 				result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist && !check_inside(test_connect, result));
 			cout << result << endl;
-			split(temp_connect, result, myObj, splite_table);
+			split(temp_connect, result, myObj, cloud, splite_table);
 			num_split += 1;
 		}
-		else if(choose_op == 1){
+		else if (choose_op == 1){
 			cout << "merge" << endl;
 			vector<vec4> can_merge;
-		    check_merge(temp_connect, can_merge, myObj, merge_table);
+			check_merge(temp_connect, can_merge, myObj, merge_table);
 			if (can_merge.size() > 0){
 				int merge_index = rand() % can_merge.size();
 				cout << merge_index << endl;
@@ -674,7 +504,7 @@ int main(int argc, char **argv)
 			}
 			num_merge += 1;
 		}
-		else if(choose_op == 2){
+		else if (choose_op == 2){
 			cout << "bridge" << endl;
 			vector<vec4> can_bridge;
 			check_bridge(temp_connect, can_bridge, myObj, merge_table);
@@ -688,35 +518,34 @@ int main(int argc, char **argv)
 			cout << "kill" << endl;
 			int result;
 			do{
-				result = rand() % test_connect.at(COLOR_WHITE).size();
+			result = rand() % test_connect.at(COLOR_WHITE).size();
 			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
 			cout << result << endl;
 			kill(temp_connect, result);
 			num_kill += 1;
-		}*/
+			}*/
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
 		cout << "op : " << duration << " s" << endl;
-		
+
 		start = clock();
 		float term[3];
-		float temp_e = compute_energy(temp_connect, myObj, term);
+		float temp_e = compute_energy(temp_connect, myObj, cloud, term);
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
 		cout << "energy : " << duration << " s" << endl;
 
 		float p = (float)rand() / (float)RAND_MAX;
-		//cout << p << " " << exp((origin_e - temp_e) / now_t) << endl;
-		
-		//if (temp_e < origin_e){
+		cout << p << " " << exp((origin_e - temp_e) / now_t) << endl;
+
 		if (p < exp((origin_e - temp_e) / now_t)){
 			if (collision_test(temp_connect, give_up)){
-		
-	//			//start = clock();
-				test_connect = temp_connect;				
-				//finish = clock();
-	//			//duration = (float)(finish - start) / CLOCKS_PER_SEC;
-	//			//cout << "copy : " << duration << " s" << endl;
+
+				//start = clock();
+				test_connect = temp_connect;
+				finish = clock();
+				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+				//cout << "copy : " << duration << " s" << endl;
 
 				cout << "accept energy : " << temp_e << endl;
 				cout << "energy(dist) : " << term[0] << endl;
@@ -738,7 +567,7 @@ int main(int argc, char **argv)
 				cout << "energy(dist) : " << term[0] << endl;
 				cout << "energy(angle) : " << term[1] << endl;
 				cout << "energy(number) : " << term[2] << endl;
-				
+
 				if (temp_e < origin_e){
 					energy_smaller_reject += 1;
 				}
@@ -763,6 +592,15 @@ int main(int argc, char **argv)
 		cout << "T : " << now_t << endl;;
 		cout << endl;
 	}
+	
+	float final_term[3];
+	float final_e = compute_energy(test_connect, myObj, cloud, final_term);
+
+	cout << "final energy : " << final_e << endl;
+	cout << "final energy(dist) : " << final_term[0] << endl;
+	cout << "final energy(angle) : " << final_term[1] << endl;
+	cout << "final energy(number) : " << final_term[2] << endl;
+	cout << endl;
 
 	cout << "collision : " << collision << " " << num_iteration << endl;
 	cout << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << endl;
@@ -774,22 +612,24 @@ int main(int argc, char **argv)
 	cout << "Z' > Z and reject : " << energy_bigger_reject << endl;
 	cout << endl;
 
-	//vec3 count[4];
-	//count_struct(test_connect, count);
-	//cout << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
-	//cout << "Rec : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
-	//cout << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
-	//cout << "Ball : " << count[3][0] << endl;
+	vec3 count[4];
+	count_struct(test_connect, count);
+	cout << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
+	cout << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
+	cout << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
+	cout << "Ball : " << count[3][0] << endl;
 
-	///*total_finish = clock();
-	//duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
-	//cout << endl << "totoal time : " << duration << " s" << endl;*/
+	total_finish = clock();
+	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
+	cout << endl << "totoal time : " << duration << " s" << endl;
 
-	//////os.close();
-	output_zometool(test_connect, string("fake123.obj"));
-	output_struc(test_connect, string("fake123.txt"));
+	////////os.close();
+	output_zometool(test_connect, string("1000.obj"));
+	output_struc(test_connect, string("1000.txt"));
 	/////*output_struc(test_connect, string("fake123.txt"));*/
 		
+
+
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	//glutInitWindowSize(1000,1000);
 

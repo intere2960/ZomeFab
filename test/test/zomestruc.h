@@ -78,7 +78,9 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filen
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
 float point_surface_dist(GLMmodel *model, vec3 &p);
+float point_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri);
 float ball_surface_dist(GLMmodel *model, vec3 &p);
+float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri);
 bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p);
 bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & give_up);
 void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count);

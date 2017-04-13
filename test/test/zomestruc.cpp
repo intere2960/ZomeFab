@@ -440,9 +440,6 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	os.close();
 }
 
-#include <iostream>
-using namespace std;
-
 float point_surface_dist(GLMmodel *model, vec3 &p)
 {
 	float surface_d = 100000000000000.0f;
@@ -478,6 +475,40 @@ float point_surface_dist(GLMmodel *model, vec3 &p)
 	return surface_d;
 }
 
+float point_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri)
+{
+	float surface_d = 100000000000000.0f;
+
+	for (int i = 0; i < near_tri.size(); i += 1){
+
+		vec3 test[4];
+		test[0] = vec3(model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[0] + 2));
+		test[1] = vec3(model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[1] + 2));
+		test[2] = vec3(model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[2] + 2));
+		test[3] = (test[0] + test[1] + test[2]) / 3.0f;
+
+		vec3 v1 = test[0] - test[1];
+		vec3 v2 = test[2] - test[1];
+		vec3 n = (v2 ^ v1).normalize();
+		float d = n * test[0];
+
+		float judge = p * n - d;
+		if ((judge < -(NODE_DIAMETER / 2.0f + ERROR_THICKNESS))){
+			for (int j = 0; j < 4; j += 1){
+				if ((p - test[j]).length() < surface_d){
+					surface_d = (p - test[j]).length();
+				}
+			}
+		}
+	}
+
+	if (surface_d < NODE_DIAMETER / 2.0f + ERROR_THICKNESS){
+		surface_d = 100000000000000.0f;
+	}
+
+	return surface_d;
+}
+
 float ball_surface_dist(GLMmodel *model, vec3 &p)
 {
 	float surface_d = 100000000000000.0f;
@@ -488,6 +519,57 @@ float ball_surface_dist(GLMmodel *model, vec3 &p)
 		test[0] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
 		test[1] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
 		test[2] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		test[3] = (test[0] + test[1] + test[2]) / 3.0f;
+
+		vec3 v1 = test[0] - test[1];
+		vec3 v2 = test[2] - test[1];
+		vec3 n = (v2 ^ v1).normalize();
+		float d = n * test[0];
+
+		for (int j = 0; j < 4; j += 1){
+			if (((p - test[j]).length() < surface_d) && ((p - test[j]).length() > NODE_DIAMETER)){
+				surface_d = (p - test[j]).length();
+			}
+			if ((p - test[j]).length() < NODE_DIAMETER){
+				return 100000000000000.0f;
+			}
+		}
+
+		float times = p * n - d;
+
+		vec3 insect_p = p + times * n;
+
+		vec3 edge1 = test[1] - test[0];
+		vec3 edge2 = test[2] - test[1];
+		vec3 edge3 = test[0] - test[2];
+		vec3 judge1 = insect_p - test[0];
+		vec3 judge2 = insect_p - test[1];
+		vec3 judge3 = insect_p - test[2];
+
+		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+			if ((p - insect_p).length() < NODE_DIAMETER){
+				return 100000000000000.0f;
+			}
+			else{
+				if ((p - insect_p).length() < surface_d){
+					surface_d = (p - insect_p).length();
+				}
+			}
+		}
+	}
+	return surface_d;
+}
+
+float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri)
+{
+	float surface_d = 100000000000000.0f;
+
+	for (int i = 0; i < near_tri.size(); i += 1){
+
+		vec3 test[4];
+		test[0] = vec3(model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[0] + 2));
+		test[1] = vec3(model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[1] + 2));
+		test[2] = vec3(model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(near_tri.at(i)).vindices[2] + 2));
 		test[3] = (test[0] + test[1] + test[2]) / 3.0f;
 
 		vec3 v1 = test[0] - test[1];

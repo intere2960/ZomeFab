@@ -2,7 +2,7 @@
 #include "global.h"
 #include <omp.h>
 
-void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmodel *model, zometable &splite_table)
+void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmodel *model, PointCloud<float> &cloud, zometable &splite_table)
 {
 	zomedir t;
 
@@ -12,12 +12,6 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 	std::vector<int> use_index;
 	for (unsigned int i = 0; i < 62; i += 1){
 		if (test_connect.at(COLOR_WHITE).at(s_index).connect_stick[i] != vec2(-1.0f, -1.0f)){
-			//vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick[i];
-			////cout << i << " : " << test[0] << " " << test[1] << endl;
-			//if (test_connect.at(test[0]).at(test[1]).surface_d < dist){
-			//	dist = test_connect.at(test[0]).at(test[1]).surface_d;
-			//	c_index = i;
-			//}
 			use_index.push_back(i);
 		}
 	}
@@ -25,38 +19,24 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 	c_index = use_index.at(vector_index);
 
 	vec2 test = test_connect.at(COLOR_WHITE).at(s_index).connect_stick[c_index];
-	//cout << "test : " << test[0] << " " << test[1] << endl;
 	int from_face = test_connect.at((int)test[0]).at((int)test[1]).fromface;
 	int from_size = test_connect.at((int)test[0]).at((int)test[1]).size;
 
-	//cout << "from_face : " << from_face << endl;
-	//cout << "from_size : " << from_size << endl;
-
 	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(s_index).position;
-
-	//cout << "use_ball_p : " << use_ball_p[0] << " " << use_ball_p[1] << " " << use_ball_p[2] << endl;
 
 	vec3 use_stick_p = test_connect.at((int)test[0]).at((int)test[1]).position;
 	vec3 judge = use_stick_p + 0.5f * t.dir->at(from_face) * t.color_length((int)test[0], from_size) - use_ball_p;
 
 	int toward_ball_index = (int)test_connect.at((int)test[0]).at((int)test[1]).towardindex[1];
 
-	//cout << "judge.length() : " << judge.length() << endl;
-
 	if (from_face != c_index)
 		from_face = c_index;
 
-	//if (judge.length() < 0.001){
 	if (toward_ball_index == s_index){
-		//cout << "in" << endl;
 		toward_ball_index = (int)test_connect.at((int)test[0]).at((int)test[1]).fromindex[1];
 	}
 
 	vec3 toward_p = test_connect.at(COLOR_WHITE).at((int)test_connect.at((int)test[0]).at((int)test[1]).towardindex[1]).position;
-
-	//cout << "fuck you : " << s_index << " " << toward_ball_index << endl;
-
-	//cout << "from_face : " << from_face << endl;
 
 	std::vector<zomerecord> temp;
 
@@ -67,8 +47,6 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 			}
 		}
 	}
-
-	//cout << temp.size() << endl;
 
 	for (unsigned int i = 0; i < temp.size(); i += 1){
 		if (test_connect.at(COLOR_WHITE).at(s_index).connect_stick[(int)temp.at(i).travel_1[0]] != vec2(-1.0f, -1.0f)){
@@ -84,15 +62,16 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 		}
 	}
 
-	//cout << temp.size() << endl;
+	std::vector<int> near_tri;
 
 	int choose_split = 0;
 	float split_dist = 10000000000000000.0f;
 	for (unsigned int i = 0; i < temp.size(); i += 1){
 		vec3 test_d = use_ball_p + t.dir->at((int)temp.at(i).travel_1[0]) * t.face_length((int)temp.at(i).travel_1[0], (int)temp.at(i).travel_1[1]);
-		bool dist = (ball_surface_dist(model, test_d) < 100000000000000.0f);
+		kdtree_search(model, cloud, test_d, near_tri);
+		bool dist = (ball_surface_dist_fast(model, test_d, near_tri) < 100000000000000.0f);
 		bool insect = !check_stick_intersect(model, test_d, use_ball_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, use_ball_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f) && !check_stick_intersect(model, test_d, toward_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, toward_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f);
-		bool not_near = (ball_surface_dist(model, (test_d + use_ball_p) / 2.0f) < 100000000000000.0f) && (ball_surface_dist(model, (test_d + toward_p) / 2.0f) < 100000000000000.0f);
+		bool not_near = (ball_surface_dist_fast(model, (test_d + use_ball_p) / 2.0f, near_tri) < 100000000000000.0f) && (ball_surface_dist_fast(model, (test_d + toward_p) / 2.0f, near_tri) < 100000000000000.0f);
 		if (!(dist && insect && not_near)){
 			temp.erase(temp.begin() + i);
 			i -= 1;
@@ -101,11 +80,6 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 
 	if (temp.size() > 0){
 		choose_split = rand() % temp.size();
-		//cout << "choose_split : " << choose_split << endl;
-
-		//cout << "o : " << temp.at(choose_split).origin[0] << " " << temp.at(choose_split).origin[1] << " " << temp.at(choose_split).origin[2] << endl;
-		//cout << "t1 : " << temp.at(choose_split).travel_1[0] << " " << temp.at(choose_split).travel_1[1] << " " << temp.at(choose_split).travel_1[2] << endl;
-		//cout << "t2 : " << temp.at(choose_split).travel_2[0] << " " << temp.at(choose_split).travel_2[1] << " " << temp.at(choose_split).travel_2[2] << endl;
 
 		zomeconn new_ball;
 		zomeconn new_stick_f, new_stick_t;
@@ -119,27 +93,12 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 		new_stick_f.fromface = (int)temp.at(choose_split).travel_1[0];
 		new_stick_f.towardface = (int)temp.at(choose_split).travel_1[2];
 
-		//cout << "f:" << endl;
-		//cout << new_stick_f.color << endl;
-		//cout << new_stick_f.size << endl;
-		//cout << new_stick_f.fromface << endl;
-		//cout << new_stick_f.towardface << endl;
-
 		new_stick_t.position = test_connect.at(COLOR_WHITE).at(toward_ball_index).position + t.dir->at((int)temp.at(choose_split).travel_2[0]) * t.face_length((int)temp.at(choose_split).travel_2[0], (int)temp.at(choose_split).travel_2[1]) / 2;
 		new_stick_t.color = t.face_color((int)temp.at(choose_split).travel_2[0]);
 		new_stick_t.size = (int)temp.at(choose_split).travel_2[1];
 		new_stick_t.fromface = (int)temp.at(choose_split).travel_2[0];
 		new_stick_t.towardface = (int)temp.at(choose_split).travel_2[2];
 
-		//cout << "t:" << endl;
-		//cout << new_stick_t.color << endl;
-		//cout << new_stick_t.size << endl;
-		//cout << new_stick_t.fromface << endl;
-		//cout << new_stick_t.towardface << endl;
-
-		//cout << toward_ball_index << endl;
-		//cout << new_stick_t.fromface << endl;
-		//cout << new_stick_t.towardface << endl;
 
 		test_connect.at(COLOR_WHITE).at(s_index).connect_stick[new_stick_f.fromface] = vec2((float)new_stick_f.color, (float)test_connect.at(new_stick_f.color).size());
 		new_ball.connect_stick[new_stick_f.towardface] = vec2((float)new_stick_f.color, (float)test_connect.at(new_stick_f.color).size());
@@ -389,7 +348,7 @@ float forbidden_energy(float dist)
 	return a * pow((dist - p1[0]), 2);
 }
 
-float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, float *term)
+float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, PointCloud<float> &cloud, float *term)
 {
 	float energy = 0.0f;
 	zomedir t;
@@ -399,34 +358,24 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	time_t start, finish;
 	float duration;
 
+	std::vector<int> near_tri;
+
 	//#pragma omp parallel for
 	for (int a = 0; a < test_connect.size(); a += 1){
 		//#pragma omp parallel for
 		for (int i = 0; i < test_connect.at(a).size(); i += 1){
 			if (test_connect.at(a).at(i).exist){
-				//cout << a << " " << i << endl;
-				//cout << test_connect.at(a).at(i).position[0] << " " << test_connect.at(a).at(i).position[1] << " " << test_connect.at(a).at(i).position[2] << endl;
 				if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
-					//start = clock();
-					test_connect.at(a).at(i).surface_d = point_surface_dist(model, test_connect.at(a).at(i).position);
+					kdtree_search(model, cloud, test_connect.at(a).at(i).position, near_tri);
+					test_connect.at(a).at(i).surface_d = point_surface_dist_fast(model, test_connect.at(a).at(i).position, near_tri);
 					test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(a).at(i).surface_d));
-					//finish = clock();
-					//duration = (float)(finish - start) / CLOCKS_PER_SEC;
-					//cout << "point_surface_dist : " << duration << " s" << endl;
+					
 				}
 
-				//start = clock();
-
-				//energy_dist += pow(test_connect.at(a).at(i).surface_d, 2) * (1.0 + forbidden_energy(test_connect.at(a).at(i).surface_d));
 				energy_dist += test_connect.at(a).at(i).energy_d;
-
-				//finish = clock();
-				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
-				//cout << "point_surface_dist : " << duration << " s" << endl;
 			}
 		}
 	}
-	//cout << "reuse : " << reuse << endl;
 
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
 
@@ -457,7 +406,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
 
 	float energy_number = 0.0f;
-	float target_number = 1000.0f;
+	float target_number = 400.0f;
 
 	int number = 0;
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -487,9 +436,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	//energy = energy_dist + energy_fair;
 	//energy = energy_dist + 0.1 * energy_angle;
 	energy = energy_dist + 0.1 * energy_angle + energy_number;
-	/*cout << "energy : " << energy << endl;
-	cout << "energy_dist : " << energy_dist << endl;
-	cout << "energy_angle : " << energy_angle << endl;*/
+
 	term[0] = energy_dist;
 	term[1] = energy_angle;
 	term[2] = energy_number;
@@ -519,11 +466,11 @@ bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 
 bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 {
-	vector<int> check_index;
+	std::vector<int> check_index;
 	search_near_point(test_connect, check_index, now);
 	std::vector<Point> points;
 
-	cout << check_index.size() << endl;
+	//cout << check_index.size() << endl;
 	for (unsigned int i = 0; i < check_index.size(); i += 1){
 		Point temp(test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[0], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[1], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[2]);
 		points.push_back(temp);
@@ -535,4 +482,37 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	std::cout << "The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
 
 	return pointInside(poly, points.at(0));
+}
+
+template <typename num_t>
+void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, std::vector<int> &near_tri)
+{
+	// construct a kd-tree index:
+	typedef KDTreeSingleIndexAdaptor<
+		L2_Simple_Adaptor<num_t, PointCloud<num_t> >,
+		PointCloud<num_t>,
+		3 /* dim */
+	> my_kd_tree_t;
+
+	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+	index.buildIndex();
+
+	const num_t query_pt[3] = { test_point[0], test_point[1], test_point[2] };
+	
+	size_t num_results = 10;
+	std::vector<size_t>   ret_index(num_results);
+	std::vector<num_t> out_dist_sqr(num_results);
+
+	num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
+
+	// In case of less points in the tree than requested:
+	ret_index.resize(num_results);
+	out_dist_sqr.resize(num_results);
+
+	if (near_tri.size() != 0)
+		near_tri.clear();
+
+	for (int i = 0; i < ret_index.size(); i += 1){
+		near_tri.push_back((int)ret_index.at(i));
+	}
 }

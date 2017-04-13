@@ -2124,19 +2124,19 @@ GLMmodel* glmCopy(GLMmodel* m1){
 GLvoid
 glmCombine(GLMmodel *model, GLMmodel *source)
 {
-    model->numtriangles += source->numtriangles;
-    for(unsigned int i = 0; i < source->numtriangles; i += 1){
-        GLMtriangle temp = source->triangles->at(i);
-        temp.vindices[0] += model->numvertices;
-        temp.vindices[1] += model->numvertices;
-        temp.vindices[2] += model->numvertices;
-        model->triangles->push_back(temp);
-    }
+	model->numtriangles += source->numtriangles;
+	for (unsigned int i = 0; i < source->numtriangles; i += 1){
+		GLMtriangle temp = source->triangles->at(i);
+		temp.vindices[0] += model->numvertices;
+		temp.vindices[1] += model->numvertices;
+		temp.vindices[2] += model->numvertices;
+		model->triangles->push_back(temp);
+	}
 
-    model->numvertices += source->numvertices;
-    for(unsigned int i = 1; i <= source->numvertices; i += 1){
-        model->vertices->push_back(source->vertices->at(3 * i + 0));
-        model->vertices->push_back(source->vertices->at(3 * i + 1));
-        model->vertices->push_back(source->vertices->at(3 * i + 2));
-    }
+	model->numvertices += source->numvertices;
+	for (unsigned int i = 1; i <= source->numvertices; i += 1){
+		model->vertices->push_back(source->vertices->at(3 * i + 0));
+		model->vertices->push_back(source->vertices->at(3 * i + 1));
+		model->vertices->push_back(source->vertices->at(3 * i + 2));
+	}
 }
