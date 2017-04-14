@@ -440,12 +440,12 @@ int main(int argc, char **argv)
 	// Generate points:
 	generatePointCloud(cloud, myObj);
 
-	cout << myObj->numtriangles << endl;
+	//cout << myObj->numtriangles << endl;
 	
-	float origin_term[3];
+	float origin_term[4];
 	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	int num_iteration = 1000;
+	int num_iteration = 10000;
 
 	finish = clock();
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
@@ -457,6 +457,7 @@ int main(int argc, char **argv)
 	cout << "origin energy(dist) : " << origin_term[0] << endl;
 	cout << "origin energy(angle) : " << origin_term[1] << endl;
 	cout << "origin energy(number) : " << origin_term[2] << endl;
+	cout << "origin energy(total_number) : " << origin_term[3] << endl;
 	cout << endl;
 
 	cout << "start" << endl;
@@ -475,60 +476,63 @@ int main(int argc, char **argv)
 	for (int i = 0; i < num_iteration; i += 1){
 		float now_t = inital_t * decrease_t(i);
 
-		cout << i << " :" << endl;
-		int choose_op = rand() % 3;
+		cout << i << " :" << endl;		
 
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
 
 		start = clock();
-		if (choose_op == 0){
-			cout << "split" << endl;
-			int result;
-			do{
-				result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist && !check_inside(test_connect, result));
-			cout << result << endl;
-			split(temp_connect, result, myObj, cloud, splite_table);
-			num_split += 1;
-		}
-		else if (choose_op == 1){
-			cout << "merge" << endl;
-			vector<vec4> can_merge;
-			check_merge(temp_connect, can_merge, myObj, merge_table);
-			if (can_merge.size() > 0){
-				int merge_index = rand() % can_merge.size();
-				cout << merge_index << endl;
-				merge(temp_connect, can_merge.at(merge_index));
+
+		//if (i % 100 != 0){
+			int choose_op = rand() % 3;
+			if (choose_op == 0){
+				cout << "split" << endl;
+				int result;
+				do{
+					result = rand() % test_connect.at(COLOR_WHITE).size();
+				} while (!test_connect.at(COLOR_WHITE).at(result).exist || !check_inside(test_connect, result));
+				cout << result << endl;
+				split(temp_connect, result, myObj, cloud, splite_table);
+				num_split += 1;
 			}
-			num_merge += 1;
-		}
-		else if (choose_op == 2){
-			cout << "bridge" << endl;
-			vector<vec4> can_bridge;
-			check_bridge(temp_connect, can_bridge, myObj, merge_table);
-			if (can_bridge.size() > 0){
-				int bridge_index = rand() % can_bridge.size();
-				bridge(temp_connect, can_bridge.at(bridge_index));
+			else if (choose_op == 1){
+				cout << "merge" << endl;
+				vector<vec4> can_merge;
+				check_merge(temp_connect, can_merge, myObj, merge_table);
+				if (can_merge.size() > 0){
+					int merge_index = rand() % can_merge.size();
+					cout << merge_index << endl;
+					merge(temp_connect, can_merge.at(merge_index));
+				}
+				num_merge += 1;
 			}
-			num_bridge += 1;
-		}
-		/*else{
+			else if (choose_op == 2){
+				cout << "bridge" << endl;
+				vector<vec4> can_bridge;
+				check_bridge(temp_connect, can_bridge, myObj, merge_table);
+				if (can_bridge.size() > 0){
+					int bridge_index = rand() % can_bridge.size();
+					bridge(temp_connect, can_bridge.at(bridge_index));
+				}
+				num_bridge += 1;
+			}
+		/*}
+		else{
 			cout << "kill" << endl;
 			int result;
 			do{
-			result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+				result = rand() % test_connect.at(COLOR_WHITE).size();
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist || check_inside(test_connect, result));
 			cout << result << endl;
 			kill(temp_connect, result);
 			num_kill += 1;
-			}*/
+		}*/
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
 		cout << "op : " << duration << " s" << endl;
 
 		start = clock();
-		float term[3];
+		float term[4];
 		float temp_e = compute_energy(temp_connect, myObj, cloud, term);
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
@@ -550,6 +554,7 @@ int main(int argc, char **argv)
 				cout << "energy(dist) : " << term[0] << endl;
 				cout << "energy(angle) : " << term[1] << endl;
 				cout << "energy(number) : " << term[2] << endl;
+				cout << "energy(total_number) : " << term[3] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_accept += 1;
@@ -566,6 +571,7 @@ int main(int argc, char **argv)
 				cout << "energy(dist) : " << term[0] << endl;
 				cout << "energy(angle) : " << term[1] << endl;
 				cout << "energy(number) : " << term[2] << endl;
+				cout << "energy(total_number) : " << term[3] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_reject += 1;
@@ -580,6 +586,7 @@ int main(int argc, char **argv)
 			cout << "energy(dist) : " << term[0] << endl;
 			cout << "energy(angle) : " << term[1] << endl;
 			cout << "energy(number) : " << term[2] << endl;
+			cout << "energy(total_number) : " << term[3] << endl;
 
 			if (temp_e < origin_e){
 				energy_smaller_reject += 1;
@@ -592,13 +599,14 @@ int main(int argc, char **argv)
 		cout << endl;
 	}
 	
-	float final_term[3];
+	float final_term[4];
 	float final_e = compute_energy(test_connect, myObj, cloud, final_term);
 
 	cout << "final energy : " << final_e << endl;
 	cout << "final energy(dist) : " << final_term[0] << endl;
 	cout << "final energy(angle) : " << final_term[1] << endl;
 	cout << "final energy(number) : " << final_term[2] << endl;
+	cout << "final energy(total_number) : " << final_term[3] << endl;
 	cout << endl;
 
 	cout << "collision : " << collision << " " << num_iteration << endl;
