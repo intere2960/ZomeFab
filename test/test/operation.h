@@ -6,24 +6,10 @@
 #include "glm.h"
 #include "zomedir.h"
 #include "zomestruc.h"
+#include "global.h"
 #include "nanoflann.hpp"
 
 using namespace nanoflann;
-
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/point_generators_3.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/convex_hull_3.h>
-
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/AABB_tree.h>
-#include <CGAL/AABB_traits.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
-#include <CGAL/AABB_face_graph_triangle_primitive.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/Side_of_triangle_mesh.h>
 
 // This is an example of a custom data set class
 template <typename T>
@@ -66,14 +52,6 @@ struct PointCloud
 
 };
 
-typedef CGAL::Simple_cartesian<double> K;
-typedef K::Point_3 Point;
-typedef CGAL::Polyhedron_3<K> Polyhedron_3;
-typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron_3> Primitive;
-typedef CGAL::AABB_traits<K, Primitive> Traits;
-typedef CGAL::AABB_tree<Traits> Tree;
-typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
-
 void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmodel *model, PointCloud<float> &cloud, zometable &splite_table);
 void check_merge(std::vector<std::vector<zomeconn>> &test_connect, std::vector<vec4> &can_merge, GLMmodel *model, zometable &merge_table);
 void merge(std::vector<std::vector<zomeconn>> &test_connect, vec4 &merge_vector);
@@ -82,10 +60,6 @@ void bridge(std::vector<std::vector<zomeconn>> &test_connect, vec4 &bridge_vecto
 void kill(std::vector<std::vector<zomeconn>> &test_connect, int index);
 float forbidden_energy(float dist);
 float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, PointCloud<float> &cloud, float *term);
-
-void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now);
-bool pointInside(Polyhedron_3 &polyhedron, Point &query);
-bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now);
 
 template <typename T>
 void generatePointCloud(PointCloud<T> &point, GLMmodel *model)
@@ -107,7 +81,26 @@ void generatePointCloud(PointCloud<T> &point, GLMmodel *model)
 	//std::cout << "done\n";
 }
 
+template <typename T>
+void generatePointCloud(PointCloud<T> &point, std::vector<std::vector<zomeconn>> &test_connect)
+{
+	//std::cout << "Generating " << model->numtriangles << " point cloud...";
+	point.pts.resize(test_connect.at(COLOR_WHITE).size());
+	for (size_t i = 0; i < test_connect.at(COLOR_WHITE).size(); i++)
+	{
+		vec3 test = test_connect.at(COLOR_WHITE).at(i).position;
+
+		point.pts[i].x = test[0];
+		point.pts[i].y = test[1];
+		point.pts[i].z = test[2];
+	}
+
+	//std::cout << "done\n";
+}
+
 template <typename num_t>
 void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, std::vector<int> &near_tri);
+
+void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect);
 
 #endif // OPERATION_H_INCLUDED

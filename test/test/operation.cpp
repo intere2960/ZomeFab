@@ -1,5 +1,4 @@
 #include "operation.h"
-#include "global.h"
 #include <omp.h>
 
 void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmodel *model, PointCloud<float> &cloud, zometable &splite_table)
@@ -444,46 +443,6 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	return energy;
 }
 
-void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now)
-{
-	check_index.push_back(now);
-	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		if (i != now){
-			if ((test_connect.at(COLOR_WHITE).at(now).position - test_connect.at(COLOR_WHITE).at(i).position).length() < SCALE * 1.5f){
-				check_index.push_back(i);
-			}
-		}
-	}
-}
-
-bool pointInside(Polyhedron_3 &polyhedron, Point &query) 
-{
-	Tree tree(faces(polyhedron).first, faces(polyhedron).second, polyhedron);
-	tree.accelerate_distance_queries();
-	Point_inside inside_tester(tree);
-	return inside_tester(query) == CGAL::ON_BOUNDED_SIDE;
-}
-
-bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
-{
-	std::vector<int> check_index;
-	search_near_point(test_connect, check_index, now);
-	std::vector<Point> points;
-
-	//cout << check_index.size() << endl;
-	for (unsigned int i = 0; i < check_index.size(); i += 1){
-		Point temp(test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[0], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[1], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[2]);
-		points.push_back(temp);
-	}
-
-	Polyhedron_3 poly;
-	CGAL::convex_hull_3(points.begin(), points.end(), poly);
-
-	std::cout << "The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
-
-	return pointInside(poly, points.at(0));
-}
-
 template <typename num_t>
 void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, std::vector<int> &near_tri)
 {
@@ -514,5 +473,61 @@ void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, 
 
 	for (int i = 0; i < ret_index.size(); i += 1){
 		near_tri.push_back((int)ret_index.at(i));
+	}
+}
+
+#include <iostream>
+using namespace std;
+
+void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
+{
+	PointCloud<float> cloud;
+	generatePointCloud(cloud, test_connect);
+
+	// construct a kd-tree index:
+	typedef KDTreeSingleIndexAdaptor<
+		L2_Simple_Adaptor<float, PointCloud<float> >,
+		PointCloud<float>,
+		3 /* dim */
+	> my_kd_tree_t;
+
+	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+	index.buildIndex();
+
+	for (int i = 0; i < model->numtriangles; i++)
+	{
+		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 test = (p1 + p2 + p3) / 3.0;
+
+		const float query_pt[3] = { test[0], test[1], test[2] };
+
+		size_t num_results = 10;
+		std::vector<size_t>   ret_index(num_results);
+		std::vector<float> out_dist_sqr(num_results);
+
+		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
+
+		// In case of less points in the tree than requested:
+		ret_index.resize(num_results);
+		out_dist_sqr.resize(num_results);
+
+		//cout << out_dist_sqr.size() << endl;
+
+		int temp_index = -1;
+		float temp_dist = 100000000000000000.0f;
+		for (int j = 0; j < out_dist_sqr.size(); j += 1){
+			if (out_dist_sqr.at(j) < temp_dist){
+				temp_index = j;
+				temp_dist = out_dist_sqr.at(j);
+			}
+		}
+
+		if (temp_index != -1){
+			//cout << i << " : " << temp_index << endl;
+			test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
+		}
+		//cout << endl;
 	}
 }

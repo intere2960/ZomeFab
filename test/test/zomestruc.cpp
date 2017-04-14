@@ -19,6 +19,7 @@ zomeconn::zomeconn()
 	energy_d = 100000000000000.0f;
 
 	exist = true;
+	outter = false;
 
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
@@ -332,6 +333,9 @@ void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_qu
 	}
 }
 
+#include <iostream>
+using namespace std;
+
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename)
 {
 	std::ofstream os(filename);
@@ -418,22 +422,34 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 
 	os << std::endl;
 
+	//cout << z_b->numtriangles << endl;
 	for (unsigned int i = 0; i < output_connect.size(); i += 1){
 		if (i == COLOR_WHITE){
-			os << "usemtl white" << std::endl;
+			//cout << face_index.at(i).size() << endl;
+			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+				if ((j % z_b->numtriangles) == 0){
+					if (!output_connect.at(i).at(j / z_b->numtriangles).outter)
+						os << "usemtl white" << std::endl;
+					else if (output_connect.at(i).at(j / z_b->numtriangles).outter)
+						os << "usemtl black" << std::endl;
+				}
+				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+			}
 		}		
-		else if (i == COLOR_BLUE){
-			os << "usemtl blue" << std::endl;
-		}
-		else if (i == COLOR_RED){
-			os << "usemtl red" << std::endl;
-		}
-		else {
-			os << "usemtl yellow" << std::endl;
-		}
-		
-		for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
-			os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+		else{
+			if (i == COLOR_BLUE){
+				os << "usemtl blue" << std::endl;
+			}
+			else if (i == COLOR_RED){
+				os << "usemtl red" << std::endl;
+			}
+			else {
+				os << "usemtl yellow" << std::endl;
+			}
+
+			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+			}
 		}
 	}
 
@@ -893,4 +909,83 @@ void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count)
 			}
 		}
 	}	
+}
+
+void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now)
+{
+	check_index.push_back(now);
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		if (i != now){
+			if ((test_connect.at(COLOR_WHITE).at(now).position - test_connect.at(COLOR_WHITE).at(i).position).length() < SCALE * 1.5f){
+				check_index.push_back(i);
+			}
+		}
+	}
+}
+
+bool pointInside(Polyhedron_3 &polyhedron, Point &query)
+{
+	Vertex_iterator v = polyhedron.vertices_begin();
+	for (int i = 0; i < polyhedron.size_of_vertices(); i += 1){
+		if (v->point() == query)
+			return false;
+		v++;
+	}
+
+	Point_inside inside_tester(polyhedron);
+	CGAL::Bounded_side res = inside_tester(query);
+	return res == CGAL::ON_BOUNDED_SIDE;
+}
+
+bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
+{
+	std::vector<int> check_index;
+	search_near_point(test_connect, check_index, now);
+	std::vector<Point> points;
+
+	for (unsigned int i = 0; i < check_index.size(); i += 1){
+		Point temp(test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[0], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[1], test_connect.at(COLOR_WHITE).at(check_index.at(i)).position[2]);
+		points.push_back(temp);
+	}
+
+	Polyhedron_3 poly;
+	CGAL::convex_hull_3(points.begin(), points.end(), poly);
+
+	//ofstream os;
+	//os.open("sphere.obj");
+
+	////os << mesh;
+	//Vertex_iterator v = poly.vertices_begin();
+	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
+	//	os << "v " << v->point() << endl;
+	//	if (v->point() == points.at(0))
+	//	v++;
+	//}
+
+	//os << endl;
+	//Face_iterator f = poly.facets_begin();
+	//for (int i = 0; i < poly.size_of_facets(); i += 1){
+	//	Halfedge_facet_circulator edge = f->facet_begin();
+	//	os << "f ";
+	//	for (int j = 0; j < CGAL::circulator_size(edge); j += 1){
+	//		os << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
+	//		edge++;
+	//	}
+	//	os << endl;
+	//	f++;
+	//}
+	//os.close();
+
+	//std::cout << now  << " : The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
+
+	return pointInside(poly, points.at(0));
+}
+
+void judge_outter(std::vector<std::vector<zomeconn>> &test_connect)
+{
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		bool judge = check_inside(test_connect, i);
+		if (!judge)
+			test_connect.at(COLOR_WHITE).at(i).outter = true;
+	}
 }

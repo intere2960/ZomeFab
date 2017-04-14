@@ -425,9 +425,8 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 
-	/*bool aaa = check_inside(test_connect, 66);
-	cout << aaa << endl;*/
-	
+	//output_zometool(test_connect, string("fake.obj"));
+
 	////struc_parser(test_connect, string("fake123.txt"));
 	
 	////fake_case(0);
@@ -623,7 +622,11 @@ int main(int argc, char **argv)
 	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
 	cout << endl << "totoal time : " << duration << " s" << endl;
 
-	////////os.close();
+	//judge_outter(test_connect);
+
+	kdtree_near_node(myObj, test_connect);
+
+	//////os.close();
 	output_zometool(test_connect, string("1000.obj"));
 	output_struc(test_connect, string("1000.txt"));
 	/////*output_struc(test_connect, string("fake123.txt"));*/

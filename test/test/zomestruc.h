@@ -5,6 +5,21 @@
 #include "algebra3.h"
 #include "glm.h"
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/point_generators_3.h>
+#include <CGAL/algorithm.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/convex_hull_3.h>
+
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+#include <CGAL/algorithm.h>
+#include <CGAL/Side_of_triangle_mesh.h>
+
 class zomeconn
 {
 public:
@@ -35,6 +50,7 @@ public:
 	float energy_d;
 
 	bool exist;
+	bool outter;
 //	zomeconn* link;
 };
 
@@ -72,6 +88,18 @@ public:
 //	void AddConn( ZomeConnection* c);
 //};
 
+typedef CGAL::Simple_cartesian<double> K;
+typedef K::Point_3 Point;
+typedef CGAL::Polyhedron_3<K> Polyhedron_3;
+typedef Polyhedron_3::Vertex_iterator Vertex_iterator;
+//typedef Polyhedron_3::Face_iterator Face_iterator;
+//typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
+typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
+
+void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now);
+bool pointInside(Polyhedron_3 &polyhedron, Point &query);
+bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now);
+
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source);
 void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filename);
 void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filename);
@@ -84,5 +112,6 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p);
 bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & give_up);
 void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count);
+void judge_outter(std::vector<std::vector<zomeconn>> &test_connect);
 
 #endif // ZOMESTRUC_H_INCLUDED
