@@ -48,6 +48,14 @@ typedef struct _GLMmaterial
   GLfloat shininess;            /* specular exponent */
 } GLMmaterial;
 
+class simple_material{
+public:
+	std::string name;
+	float diffuse[3];
+};
+
+void output_material(std::vector<simple_material> materials, std::string &filename);
+
 /* GLMtriangle: Structure that defines a triangle in a model.
  */
 class GLMtriangle {
@@ -60,6 +68,7 @@ public:
   int edge_index[3];
   std::vector<unsigned int> split_plane_id;
   bool split_by_process;
+  int material_id;
 };
 
 /* GLMgroup: Structure that defines a group in a model.
@@ -261,6 +270,9 @@ glmReadOBJ(char* filename);
  */
 GLvoid
 glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
+
+GLvoid
+glmWriteOBJ_colorful(GLMmodel* model, char* filename, std::vector<simple_material> materials, std::string &materials_filename);
 
 /* glmDraw: Renders the model to the current OpenGL context using the
  * mode specified.

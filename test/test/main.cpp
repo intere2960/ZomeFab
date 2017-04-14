@@ -425,6 +425,11 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 
+	/*for (unsigned int i = 0; i < materials.size(); i += 1){
+		cout << materials.at(i).name << endl;
+		cout << materials.at(i).diffuse[0] << " " << materials.at(i).diffuse[1] << " " << materials.at(i).diffuse[2] << endl;
+	}*/
+
 	//output_zometool(test_connect, string("fake.obj"));
 
 	////struc_parser(test_connect, string("fake123.txt"));
@@ -445,7 +450,7 @@ int main(int argc, char **argv)
 	float origin_term[4];
 	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	int num_iteration = 10000;
+	int num_iteration = 5000;
 
 	finish = clock();
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
@@ -632,11 +637,17 @@ int main(int argc, char **argv)
 
 	//judge_outter(test_connect);
 
-	kdtree_near_node(myObj, test_connect);
+	//kdtree_near_node(myObj, test_connect);
 
-	//////os.close();
-	output_zometool(test_connect, string("1000.obj"));
-	output_struc(test_connect, string("1000.txt"));
+	vector<simple_material> materials;
+	kdtree_near_node_colorful(myObj, test_connect, materials);
+
+	////////os.close();
+	output_zometool(test_connect, string("200_5000.obj"));
+	output_struc(test_connect, string("200_5000.txt"));
+	output_material(materials, std::string("colorful_200_5000.mtl"));
+	output_zometool_colorful(test_connect, string("fake_200_5000.obj"), materials, std::string("colorful_200_5000.mtl"));
+	glmWriteOBJ_colorful(myObj, "fake_model_200_5000.obj", materials, std::string("colorful_200_5000.mtl"));
 	/////*output_struc(test_connect, string("fake123.txt"));*/
 		
 

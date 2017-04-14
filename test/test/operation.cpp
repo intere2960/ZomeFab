@@ -405,7 +405,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
 
 	float energy_number = 0.0f;
-	float target_number = 400.0f;
+	float target_number = 200.0f;
 
 	int number = 0;
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -448,7 +448,8 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	//energy = energy_dist + energy_fair;
 	//energy = energy_dist + 0.1 * energy_angle;
-	energy = energy_dist + 0.1 * energy_angle + energy_number + energy_total_number;
+	energy = energy_dist + 0.1 * energy_angle + energy_number;
+	//energy = energy_dist + 0.1 * energy_angle + energy_number + energy_total_number;
 
 	term[0] = energy_dist;
 	term[1] = energy_angle;
@@ -542,6 +543,74 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 		if (temp_index != -1){
 			//cout << i << " : " << temp_index << endl;
 			test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
+		}
+		//cout << endl;
+	}
+}
+
+void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials)
+{
+	PointCloud<float> cloud;
+	generatePointCloud(cloud, test_connect);
+
+	// construct a kd-tree index:
+	typedef KDTreeSingleIndexAdaptor<
+		L2_Simple_Adaptor<float, PointCloud<float> >,
+		PointCloud<float>,
+		3 /* dim */
+	> my_kd_tree_t;
+
+	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+	index.buildIndex();
+
+	for (int i = 0; i < model->numtriangles; i++)
+	{
+		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 test = (p1 + p2 + p3) / 3.0;
+
+		const float query_pt[3] = { test[0], test[1], test[2] };
+
+		size_t num_results = 10;
+		std::vector<size_t>   ret_index(num_results);
+		std::vector<float> out_dist_sqr(num_results);
+
+		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
+
+		// In case of less points in the tree than requested:
+		ret_index.resize(num_results);
+		out_dist_sqr.resize(num_results);
+
+		//cout << out_dist_sqr.size() << endl;
+
+		int temp_index = -1;
+		float temp_dist = 100000000000000000.0f;
+		for (int j = 0; j < out_dist_sqr.size(); j += 1){
+			if (out_dist_sqr.at(j) < temp_dist){
+				temp_index = j;
+				temp_dist = out_dist_sqr.at(j);
+			}
+		}
+
+		if (temp_index != -1){
+			//cout << i << " : " << temp_index << endl;
+			//test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
+			if (test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id == -1){
+				simple_material temp_m;
+				temp_m.name = std::to_string(materials.size());
+				temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
+				temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
+				temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;
+
+				test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id = materials.size();
+				model->triangles->at(i).material_id = materials.size();
+
+				materials.push_back(temp_m);
+			}
+			else{
+				model->triangles->at(i).material_id = test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id;
+			}
 		}
 		//cout << endl;
 	}

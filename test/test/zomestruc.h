@@ -51,6 +51,8 @@ public:
 
 	bool exist;
 	bool outter;
+
+	int material_id;
 //	zomeconn* link;
 };
 
@@ -105,6 +107,7 @@ void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filen
 void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filename);
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
+void output_zometool_colorful(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename);
 float point_surface_dist(GLMmodel *model, vec3 &p);
 float point_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri);
 float ball_surface_dist(GLMmodel *model, vec3 &p);
