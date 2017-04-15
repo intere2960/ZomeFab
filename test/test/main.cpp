@@ -425,8 +425,6 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 
-	//check_inside(test_connect, 9);
-
 	//output_zometool(test_connect, string("ttt.obj"));
 	
 	////struc_parser(test_connect, string("fake123.txt"));
@@ -450,18 +448,18 @@ int main(int argc, char **argv)
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	ofstream os("energy_1000_5000.txt");
+	ofstream os("energy_1500_5000.txt");
 
-	cout << "origin energy : " << origin_e << endl;
-	cout << "origin energy(dist) : " << origin_term[0] << endl;
-	cout << "origin energy(angle) : " << origin_term[1] << endl;
-	cout << "origin energy(number) : " << origin_term[2] << endl;
-	cout << "origin energy(total_number) : " << origin_term[3] << endl;
-	cout << endl;
+	os << "origin energy : " << origin_e << endl;
+	os << "origin energy(dist) : " << origin_term[0] << endl;
+	os << "origin energy(angle) : " << origin_term[1] << endl;
+	os << "origin energy(number) : " << origin_term[2] << endl;
+	os << "origin energy(total_number) : " << origin_term[3] << endl;
+	os << endl;
 
 	judge_outter(test_connect);
 
-	cout << "start" << endl;
+	os << "start" << endl;
 	int collision = 0;
 
 	vec3 give_up;
@@ -477,7 +475,7 @@ int main(int argc, char **argv)
 	for (int i = 0; i < num_iteration; i += 1){
 		float now_t = inital_t * decrease_t(i);
 
-		cout << i << " :" << endl;
+		os << i << " :" << endl;
 
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
@@ -487,28 +485,28 @@ int main(int argc, char **argv)
 		//if (i % 100 != 0){
 			int choose_op = rand() % 3;
 			if (choose_op == 0){
-				cout << "split" << endl;
+				os << "split" << endl;
 				int result;
 				do{
 					result = rand() % test_connect.at(COLOR_WHITE).size();
 				} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
-				cout << result << endl;
+				os << result << endl;
 				split(temp_connect, result, myObj, cloud, splite_table);
 				num_split += 1;
 			}
 			else if (choose_op == 1){
-				cout << "merge" << endl;
+				os << "merge" << endl;
 				vector<vec4> can_merge;
 				check_merge(temp_connect, can_merge, myObj, merge_table);
 				if (can_merge.size() > 0){
 					int merge_index = rand() % can_merge.size();
-					cout << merge_index << endl;
+					os << merge_index << endl;
 					merge(temp_connect, can_merge.at(merge_index));
 				}
 				num_merge += 1;
 			}
 			else if (choose_op == 2){
-				cout << "bridge" << endl;
+				os << "bridge" << endl;
 				vector<vec4> can_bridge;
 				check_bridge(temp_connect, can_bridge, myObj, merge_table);
 				if (can_bridge.size() > 0){
@@ -530,17 +528,17 @@ int main(int argc, char **argv)
 		}*/
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
-		cout << "op : " << duration << " s" << endl;
+		os << "op : " << duration << " s" << endl;
 
 		start = clock();
 		float term[4];
 		float temp_e = compute_energy(temp_connect, myObj, cloud, term);
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
-		cout << "energy : " << duration << " s" << endl;
+		os << "energy : " << duration << " s" << endl;
 
 		float p = (float)rand() / (float)RAND_MAX;
-		cout << p << " " << exp((origin_e - temp_e) / now_t) << endl;
+		os << p << " " << exp((origin_e - temp_e) / now_t) << endl;
 
 		if (p < exp((origin_e - temp_e) / now_t)){
 			if (collision_test(temp_connect, give_up)){
@@ -551,11 +549,11 @@ int main(int argc, char **argv)
 				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
 				//cout << "copy : " << duration << " s" << endl;
 
-				cout << "accept energy : " << temp_e << endl;
-				cout << "energy(dist) : " << term[0] << endl;
-				cout << "energy(angle) : " << term[1] << endl;
-				cout << "energy(number) : " << term[2] << endl;
-				cout << "energy(total_number) : " << term[3] << endl;
+				os << "accept energy : " << temp_e << endl;
+				os << "energy(dist) : " << term[0] << endl;
+				os << "energy(angle) : " << term[1] << endl;
+				os << "energy(number) : " << term[2] << endl;
+				os << "energy(total_number) : " << term[3] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_accept += 1;
@@ -570,11 +568,11 @@ int main(int argc, char **argv)
 			}
 			else{
 				collision += 1;
-				cout << "reject energy : " << temp_e << endl;
-				cout << "energy(dist) : " << term[0] << endl;
-				cout << "energy(angle) : " << term[1] << endl;
-				cout << "energy(number) : " << term[2] << endl;
-				cout << "energy(total_number) : " << term[3] << endl;
+				os << "reject energy : " << temp_e << endl;
+				os << "energy(dist) : " << term[0] << endl;
+				os << "energy(angle) : " << term[1] << endl;
+				os << "energy(number) : " << term[2] << endl;
+				os << "energy(total_number) : " << term[3] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_reject += 1;
@@ -585,11 +583,11 @@ int main(int argc, char **argv)
 			}
 		}
 		else{
-			cout << "reject energy : " << temp_e << endl;
-			cout << "energy(dist) : " << term[0] << endl;
-			cout << "energy(angle) : " << term[1] << endl;
-			cout << "energy(number) : " << term[2] << endl;
-			cout << "energy(total_number) : " << term[3] << endl;
+			os << "reject energy : " << temp_e << endl;
+			os << "energy(dist) : " << term[0] << endl;
+			os << "energy(angle) : " << term[1] << endl;
+			os << "energy(number) : " << term[2] << endl;
+			os << "energy(total_number) : " << term[3] << endl;
 
 			if (temp_e < origin_e){
 				energy_smaller_reject += 1;
@@ -598,40 +596,40 @@ int main(int argc, char **argv)
 				energy_bigger_reject += 1;
 			}
 		}
-		cout << "T : " << now_t << endl;;
-		cout << endl;
+		os << "T : " << now_t << endl;;
+		os << endl;
 	}
 	
 	float final_term[4];
 	float final_e = compute_energy(test_connect, myObj, cloud, final_term);
 
-	cout << "final energy : " << final_e << endl;
-	cout << "final energy(dist) : " << final_term[0] << endl;
-	cout << "final energy(angle) : " << final_term[1] << endl;
-	cout << "final energy(number) : " << final_term[2] << endl;
-	cout << "final energy(total_number) : " << final_term[3] << endl;
-	cout << endl;
+	os << "final energy : " << final_e << endl;
+	os << "final energy(dist) : " << final_term[0] << endl;
+	os << "final energy(angle) : " << final_term[1] << endl;
+	os << "final energy(number) : " << final_term[2] << endl;
+	os << "final energy(total_number) : " << final_term[3] << endl;
+	os << endl;
 
-	cout << "collision : " << collision << " " << num_iteration << endl;
-	cout << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << endl;
-	cout << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
+	os << "collision : " << collision << " " << num_iteration << endl;
+	os << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << endl;
+	os << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
 
-	cout << "Z' < Z and accept : " << energy_smaller_accept << endl;
-	cout << "Z' > Z and accept : " << energy_bigger_accept << endl;
-	cout << "Z' < Z and reject : " << energy_smaller_reject << endl;
-	cout << "Z' > Z and reject : " << energy_bigger_reject << endl;
-	cout << endl;
+	os << "Z' < Z and accept : " << energy_smaller_accept << endl;
+	os << "Z' > Z and accept : " << energy_bigger_accept << endl;
+	os << "Z' < Z and reject : " << energy_smaller_reject << endl;
+	os << "Z' > Z and reject : " << energy_bigger_reject << endl;
+	os << endl;
 
 	vec3 count[4];
 	count_struct(test_connect, count);
-	cout << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
-	cout << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
-	cout << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
-	cout << "Ball : " << count[3][0] << endl;
+	os << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
+	os << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
+	os << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
+	os << "Ball : " << count[3][0] << endl;
 
 	total_finish = clock();
 	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
-	cout << endl << "totoal time : " << duration << " s" << endl;
+	os << endl << "totoal time : " << duration << " s" << endl;
 
 	//judge_outter(test_connect);
 
@@ -641,12 +639,12 @@ int main(int argc, char **argv)
 	kdtree_near_node_colorful(myObj, test_connect, materials);
 
 	os.close();
-	output_zometool(test_connect, string("1000_5000.obj"));
-	output_struc(test_connect, string("1000_5000.txt"));
-	output_material(materials, std::string("colorful_1000_5000.mtl"));
-	output_zometool_colorful(test_connect, string("fake_1000_5000.obj"), materials, std::string("colorful_1000_5000.mtl"));
-	glmWriteOBJ_colorful(myObj, "fake_model_1000_5000.obj", materials, std::string("colorful_1000_5000.mtl"));
-	/////*output_struc(test_connect, string("fake123.txt"));*/
+	output_zometool(test_connect, string("1500_5000.obj"));
+	output_struc(test_connect, string("1500_5000.txt"));
+	output_material(materials, std::string("colorful_1500_5000.mtl"));
+	output_zometool_colorful(test_connect, string("fake_1500_5000.obj"), materials, std::string("colorful_1500_5000.mtl"));
+	glmWriteOBJ_colorful(myObj, "fake_model_1500_5000.obj", materials, std::string("colorful_1500_5000.mtl"));
+	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 
 

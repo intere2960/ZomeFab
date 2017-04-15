@@ -5,7 +5,7 @@
 #include "algebra3.h"
 #include "glm.h"
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
@@ -90,7 +90,7 @@ public:
 //	void AddConn( ZomeConnection* c);
 //};
 
-typedef CGAL::Simple_cartesian<double> K;
+typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_3 Point;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
 typedef Polyhedron_3::Vertex_iterator Vertex_iterator;

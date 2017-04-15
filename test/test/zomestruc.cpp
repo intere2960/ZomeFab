@@ -432,7 +432,7 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 					if (!output_connect.at(i).at(j / z_b->numtriangles).outter)
 						os << "usemtl white" << std::endl;
 					else if (output_connect.at(i).at(j / z_b->numtriangles).outter)
-						os << "usemtl black" << std::endl;
+						os << "usemtl white" << std::endl;
 				}
 				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 			}
@@ -1040,7 +1040,7 @@ void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::ve
 
 bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 {
-	//cout << "aaa : " << query << endl;
+	//cout << "aaa : " << query[0] << endl;
 	Vertex_iterator v = polyhedron.vertices_begin();
 	for (int i = 0; i < polyhedron.size_of_vertices(); i += 1){
 		//cout << i << " : " << v->point() << endl;
@@ -1068,7 +1068,7 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	Polyhedron_3 poly;
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
 
-	//cout << poly << endl;
+	////cout << poly << endl;
 
 	//ofstream os;
 	//os.open("sphere.obj");
@@ -1078,8 +1078,6 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
 	//	os << "v " << v->point() << endl;
 	//	cout << "v " << v->point() << endl;
-	//	if (v->point() == points.at(0))
-	//		return false;
 	//	v++;
 	//}
 
