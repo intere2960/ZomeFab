@@ -405,7 +405,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
 
 	float energy_number = 0.0f;
-	float target_number = 200.0f;
+	float target_number = 500.0f;
 
 	int number = 0;
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -428,7 +428,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 		}
 	}
 
-	energy_total_number = pow((total_number - target_number), 2.0f) / target_total_number;
+	energy_total_number = pow((total_number - target_total_number), 2.0f) / target_total_number;
 
 	//float energy_fair = 0.0f;
 	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -448,7 +448,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	//energy = energy_dist + energy_fair;
 	//energy = energy_dist + 0.1 * energy_angle;
-	energy = energy_dist + 0.1 * energy_angle + energy_number;
+	energy = energy_dist + 0.1 * energy_angle + energy_total_number;
 	//energy = energy_dist + 0.1 * energy_angle + energy_number + energy_total_number;
 
 	term[0] = energy_dist;

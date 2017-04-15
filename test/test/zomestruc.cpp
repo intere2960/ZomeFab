@@ -1040,8 +1040,10 @@ void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::ve
 
 bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 {
+	//cout << "aaa : " << query << endl;
 	Vertex_iterator v = polyhedron.vertices_begin();
 	for (int i = 0; i < polyhedron.size_of_vertices(); i += 1){
+		//cout << i << " : " << v->point() << endl;
 		if (v->point() == query)
 			return false;
 		v++;
@@ -1066,6 +1068,8 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	Polyhedron_3 poly;
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
 
+	//cout << poly << endl;
+
 	//ofstream os;
 	//os.open("sphere.obj");
 
@@ -1073,7 +1077,9 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	//Vertex_iterator v = poly.vertices_begin();
 	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
 	//	os << "v " << v->point() << endl;
+	//	cout << "v " << v->point() << endl;
 	//	if (v->point() == points.at(0))
+	//		return false;
 	//	v++;
 	//}
 
@@ -1099,8 +1105,11 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 void judge_outter(std::vector<std::vector<zomeconn>> &test_connect)
 {
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		//cout << i << endl;
 		bool judge = check_inside(test_connect, i);
 		if (!judge)
 			test_connect.at(COLOR_WHITE).at(i).outter = true;
+		else
+			test_connect.at(COLOR_WHITE).at(i).outter = false;
 	}
 }

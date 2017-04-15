@@ -425,20 +425,14 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 
-	/*for (unsigned int i = 0; i < materials.size(); i += 1){
-		cout << materials.at(i).name << endl;
-		cout << materials.at(i).diffuse[0] << " " << materials.at(i).diffuse[1] << " " << materials.at(i).diffuse[2] << endl;
-	}*/
+	//check_inside(test_connect, 9);
 
-	//output_zometool(test_connect, string("fake.obj"));
-
+	//output_zometool(test_connect, string("ttt.obj"));
+	
 	////struc_parser(test_connect, string("fake123.txt"));
 	
 	////fake_case(0);
 
-	////output_zometool(test_connect, string("fake123 before.obj"));
-	////output_struc(test_connect, string("fake123 before.txt"));
-	
 	start = clock();
 
 	PointCloud<float> cloud;
@@ -456,7 +450,7 @@ int main(int argc, char **argv)
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	//ofstream os("test-3.txt");
+	ofstream os("energy_1000_5000.txt");
 
 	cout << "origin energy : " << origin_e << endl;
 	cout << "origin energy(dist) : " << origin_term[0] << endl;
@@ -464,6 +458,8 @@ int main(int argc, char **argv)
 	cout << "origin energy(number) : " << origin_term[2] << endl;
 	cout << "origin energy(total_number) : " << origin_term[3] << endl;
 	cout << endl;
+
+	judge_outter(test_connect);
 
 	cout << "start" << endl;
 	int collision = 0;
@@ -481,7 +477,7 @@ int main(int argc, char **argv)
 	for (int i = 0; i < num_iteration; i += 1){
 		float now_t = inital_t * decrease_t(i);
 
-		cout << i << " :" << endl;		
+		cout << i << " :" << endl;
 
 		vector<vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
@@ -495,7 +491,7 @@ int main(int argc, char **argv)
 				int result;
 				do{
 					result = rand() % test_connect.at(COLOR_WHITE).size();
-				} while (!test_connect.at(COLOR_WHITE).at(result).exist || !check_inside(test_connect, result));
+				} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
 				cout << result << endl;
 				split(temp_connect, result, myObj, cloud, splite_table);
 				num_split += 1;
@@ -527,7 +523,7 @@ int main(int argc, char **argv)
 			int result;
 			do{
 				result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist || check_inside(test_connect, result));
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
 			cout << result << endl;
 			kill(temp_connect, result);
 			num_kill += 1;
@@ -569,6 +565,8 @@ int main(int argc, char **argv)
 				}
 
 				origin_e = temp_e;
+
+				judge_outter(test_connect);
 			}
 			else{
 				collision += 1;
@@ -642,12 +640,12 @@ int main(int argc, char **argv)
 	vector<simple_material> materials;
 	kdtree_near_node_colorful(myObj, test_connect, materials);
 
-	////////os.close();
-	output_zometool(test_connect, string("200_5000.obj"));
-	output_struc(test_connect, string("200_5000.txt"));
-	output_material(materials, std::string("colorful_200_5000.mtl"));
-	output_zometool_colorful(test_connect, string("fake_200_5000.obj"), materials, std::string("colorful_200_5000.mtl"));
-	glmWriteOBJ_colorful(myObj, "fake_model_200_5000.obj", materials, std::string("colorful_200_5000.mtl"));
+	os.close();
+	output_zometool(test_connect, string("1000_5000.obj"));
+	output_struc(test_connect, string("1000_5000.txt"));
+	output_material(materials, std::string("colorful_1000_5000.mtl"));
+	output_zometool_colorful(test_connect, string("fake_1000_5000.obj"), materials, std::string("colorful_1000_5000.mtl"));
+	glmWriteOBJ_colorful(myObj, "fake_model_1000_5000.obj", materials, std::string("colorful_1000_5000.mtl"));
 	/////*output_struc(test_connect, string("fake123.txt"));*/
 		
 

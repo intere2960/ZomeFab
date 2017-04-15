@@ -94,8 +94,8 @@ typedef CGAL::Simple_cartesian<double> K;
 typedef K::Point_3 Point;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
 typedef Polyhedron_3::Vertex_iterator Vertex_iterator;
-//typedef Polyhedron_3::Face_iterator Face_iterator;
-//typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
+typedef Polyhedron_3::Face_iterator Face_iterator;
+typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
 typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
 
 void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now);
