@@ -69,6 +69,7 @@ public:
   std::vector<unsigned int> split_plane_id;
   bool split_by_process;
   int material_id;
+  int material_id_energy;
 
   int near_node;
   float near_dist;
@@ -277,6 +278,9 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
 
 GLvoid
 glmWriteOBJ_colorful(GLMmodel* model, char* filename, std::vector<simple_material> materials, std::string &materials_filename);
+
+GLvoid
+glmWriteOBJ_energy_dist(GLMmodel* model, char* filename, std::vector<simple_material> materials, std::string &materials_filename);
 
 /* glmDraw: Renders the model to the current OpenGL context using the
  * mode specified.

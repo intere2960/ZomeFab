@@ -17,10 +17,12 @@ zomeconn::zomeconn()
 	towardface = -1;
 	surface_d = 100000000000000.0f;
 	energy_d = 100000000000000.0f;
+	energy_angle = 100000000000000.0f;
 
 	exist = true;
 	outter = false;
 	material_id = -1;
+	material_id_energy_angle = -1;
 
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
@@ -571,6 +573,120 @@ void output_zometool_colorful(std::vector<std::vector<zomeconn>> &output_connect
 	os.close();
 }
 
+void output_zometool_energy_angle(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename)
+{
+	std::ofstream os(filename);
+	GLMmodel *z_b, *b_s, *b_m, *b_l, *r_s, *r_m, *r_l, *y_s, *y_m, *y_l;
+	z_b = glmReadOBJ("test_model/zometool/zomeball.obj");
+	b_s = glmReadOBJ("test_model/zometool/BlueS.obj");
+	b_m = glmReadOBJ("test_model/zometool/BlueM.obj");
+	b_l = glmReadOBJ("test_model/zometool/BlueL.obj");
+	r_s = glmReadOBJ("test_model/zometool/RedS.obj");
+	r_m = glmReadOBJ("test_model/zometool/RedM.obj");
+	r_l = glmReadOBJ("test_model/zometool/RedL.obj");
+	y_s = glmReadOBJ("test_model/zometool/YellowS.obj");
+	y_m = glmReadOBJ("test_model/zometool/YellowM.obj");
+	y_l = glmReadOBJ("test_model/zometool/YellowL.obj");
+
+	std::vector<std::vector<vec3>> face_index(4);
+
+	os << "mtllib " << materials_filename << std::endl;
+
+	int num_v = 0;
+	for (unsigned int i = 0; i < output_connect.size(); i += 1){
+		for (unsigned int j = 0; j < output_connect.at(i).size(); j += 1){
+			if (output_connect.at(i).at(j).exist){
+				GLMmodel *temp_model = NULL;
+				if (i == COLOR_WHITE){
+					temp_model = glmCopy(z_b);
+					glmR(temp_model, vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
+				}
+				else{
+					zomedir t;
+					if (i == COLOR_BLUE){
+						if (output_connect.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(b_s);
+						}
+						else if (output_connect.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(b_m);
+						}
+						else{
+							temp_model = glmCopy(b_l);
+						}
+					}
+					else if (i == COLOR_RED){
+						if (output_connect.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(r_s);
+						}
+						else if (output_connect.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(r_m);
+						}
+						else{
+							temp_model = glmCopy(r_l);
+						}
+					}
+					else {
+						if (output_connect.at(i).at(j).size == SIZE_S){
+							temp_model = glmCopy(y_s);
+						}
+						else if (output_connect.at(i).at(j).size == SIZE_M){
+							temp_model = glmCopy(y_m);
+						}
+						else{
+							temp_model = glmCopy(y_l);
+						}
+					}
+
+					glmRT(temp_model, vec3(0.0, t.roll(output_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, t.phi(output_connect.at(i).at(j).fromface), t.theta(output_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+					glmR(temp_model, vec3(0.0, 0.0, 0.0));
+					glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
+				}
+
+				for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
+					os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
+				}
+
+				for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
+					vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
+					face_index.at(i).push_back(temp_t);
+				}
+				num_v += temp_model->numvertices;
+			}
+		}
+	}
+
+	os << std::endl;
+
+	//cout << z_b->numtriangles << endl;
+	for (unsigned int i = 0; i < output_connect.size(); i += 1){
+		if (i == COLOR_WHITE){
+			//cout << face_index.at(i).size() << endl;
+			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+				if ((j % z_b->numtriangles) == 0){
+					//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
+					if (output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle == -1)
+						os << "usemtl initialShadingGroup" << std::endl;
+					else
+						os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle).name << std::endl;
+				}
+				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+			}
+		}
+		else{
+
+			os << "usemtl initialShadingGroup" << std::endl;
+
+			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+			}
+		}
+	}
+
+	os.close();
+}
+
 float point_surface_dist(GLMmodel *model, vec3 &p)
 {
 	float surface_d = 100000000000000.0f;
@@ -1050,31 +1166,21 @@ struct Plane_from_facet {
 bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 {
 	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(), polyhedron.planes_begin(), Plane_from_facet());
-	//cout << polyhedron << endl;
 
 	Plane_iterator p = polyhedron.planes_begin();
 	Face_iterator f = polyhedron.facets_begin();
-	//cout << polyhedron.size_of_facets() << endl;
 	for (int i = 0; i < polyhedron.size_of_facets(); i += 1){
-		//cout << p->a() << " " << p->b() << " " << p->c() << " " << p->d() << endl;
-		//vec4 temp(p->a(), p->b(), p->c(), 0.0f);
 		if (query[0] * p->a() + query[1] * p->b() + query[2] * p->c() + p->d() == 0)
 			return false;
 		p++;
 	}
 
-	//cout << "aaa : " << query[0] << endl;
 	Vertex_iterator v = polyhedron.vertices_begin();
 	for (int i = 0; i < polyhedron.size_of_vertices(); i += 1){
-		//cout << i << " : " << v->point() << endl;
 		if (v->point() == query)
 			return false;
 		v++;
 	}
-
-	/*Point_inside inside_tester(polyhedron);
-	CGAL::Bounded_side res = inside_tester(query);
-	return res == CGAL::ON_BOUNDED_SIDE;*/
 	return true;
 }
 
@@ -1120,36 +1226,6 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	//os.close();
 
 	//std::cout << now  << " : The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
-	
-	//Plane_iterator p = poly.planes_begin(); 
-	//Face_iterator f = poly.facets_begin();
-	//for (int i = 0; i < poly.size_of_facets(); i += 1){
-	//	cout << p->a() << " " << p->b() << " " << p->c() << " " << p->d() << endl;
-	//	p++;
-	//}	
-
-	//Point test_point = points.at(0);
-
-	//std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(), Plane_from_facet());
-	//cout << poly << endl;
-
-	//Plane_iterator p = poly.planes_begin();
-	//Face_iterator f = poly.facets_begin();
-	//cout << poly.size_of_facets() << endl;
-	//for (int i = 0; i < poly.size_of_facets(); i += 1){
-	//	cout << p->a() << " " << p->b() << " " << p->c() << " " << p->d() << endl;
-	//	//vec4 temp(p->a(), p->b(), p->c(), 0.0f);
-	//	cout << "aaa" << test_point[0] * p->a() + test_point[1] * p->b() + test_point[2] * p->c() + p->d() << endl;
-	//	p++;
-	//}
-
-	//Vertex_iterator v = poly.vertices_begin();
-	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
-	//	cout << i << " : " << v->point() << endl;
-	//	if (v->point() == test_point)
-	//		return false;
-	//	v++;
-	//}
 
 	return pointInside(poly, points.at(0));
 }
@@ -1164,5 +1240,49 @@ void judge_outter(std::vector<std::vector<zomeconn>> &test_connect)
 			test_connect.at(COLOR_WHITE).at(i).outter = true;
 		else
 			test_connect.at(COLOR_WHITE).at(i).outter = false;
+	}
+}
+
+void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials)
+{
+	std::vector<vec2> material_queue;
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		vec2 temp(i, test_connect.at(COLOR_WHITE).at(i).energy_angle);
+		material_queue.push_back(temp);
+	}
+
+	std::sort(material_queue.begin(),
+		material_queue.end(),
+		[](vec2 a, vec2 b){
+		return b[1] > a[1];
+	});
+
+	int num_class = 0;
+	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		if (i == 0){
+			test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+			num_class += 1;
+		}
+		else{
+			if (material_queue.at(i)[1] == material_queue.at(i - 1)[1]){
+				num_class -= 1;
+				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+				num_class += 1;
+			}
+			else{
+				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+				num_class += 1;
+			}
+		}
+	}
+
+	vec3 deleta = vec3(1.0f, 0.0f, -1.0f) / num_class;
+	for (int i = 0; i < num_class; i += 1){
+		simple_material temp_m;
+		temp_m.name = std::to_string(materials.size());
+		temp_m.diffuse[0] = 0.0f + deleta[0] * i;
+		temp_m.diffuse[1] = 0.0f + deleta[1] * i;
+		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
+		materials.push_back(temp_m);
 	}
 }

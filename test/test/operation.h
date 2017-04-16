@@ -104,5 +104,6 @@ void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, 
 void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect);
 void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect);
 void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials);
+void kdtree_near_node_energy_dist(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials);
 
 #endif // OPERATION_H_INCLUDED

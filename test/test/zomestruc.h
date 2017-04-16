@@ -25,26 +25,22 @@ public:
 	vec3 rotation;
 	vec3 endposition;
 
-	int type; //0 none 1 single 2 double
 	vec2 fromindex;
 	vec2 towardindex;
 	int fromface;
 	int towardface;
 	int size; // S M L
-//	ModelObject* thisModel;
 	vec2 connect_stick[62];
-
-	bool isAnalyzed; //analyze force
-	float force;
 
 	float surface_d;
 	float energy_d;
+	float energy_angle;
 
 	bool exist;
 	bool outter;
 
 	int material_id;
-//	zomeconn* link;
+	int material_id_energy_angle;
 };
 
 class zomestruc
@@ -65,22 +61,6 @@ public:
 //	bool CheckBallExist( int faceIndex );
 };
 
-//class VirtualBall
-//{
-//public:
-//	VirtualBall( int i , ZomeConnection* c );
-//	int index;
-//	GLfloat position[3];
-//	bool isBottom;
-//	int bottomForceIndex;
-//	int connectionAmount;
-//	int connIndex[3];
-//	int connectFace[3];
-//	ZomeConnection* conn[3];
-//
-//	void AddConn( ZomeConnection* c);
-//};
-
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_3 Point;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
@@ -97,16 +77,22 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now);
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source);
 void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filename);
 void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filename);
+
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
 void output_zometool_colorful(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename);
+void output_zometool_energy_angle(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename);
+
 float point_surface_dist(GLMmodel *model, vec3 &p);
 float point_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri);
 float ball_surface_dist(GLMmodel *model, vec3 &p);
 float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri);
+
 bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p);
 bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & give_up);
 void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count);
 void judge_outter(std::vector<std::vector<zomeconn>> &test_connect);
+
+void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials);
 
 #endif // ZOMESTRUC_H_INCLUDED

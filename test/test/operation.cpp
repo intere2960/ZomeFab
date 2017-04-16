@@ -1,5 +1,9 @@
 #include "operation.h"
+#include <algorithm>
 #include <omp.h>
+
+#include <iostream>
+using namespace std;
 
 void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmodel *model, PointCloud<float> &cloud, zometable &splite_table)
 {
@@ -420,8 +424,10 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 					sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f);
 				}
 			}
+			test_connect.at(COLOR_WHITE).at(i).energy_angle = sum_angle;
 
 			energy_angle += sum_angle;
+			//cout << i << " " << sum_angle << endl;
 		}
 	}
 
@@ -514,9 +520,6 @@ void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, 
 		near_tri.push_back((int)ret_index.at(i));
 	}
 }
-
-#include <iostream>
-using namespace std;
 
 void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
 {
@@ -694,5 +697,52 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 			}
 		}
 		//cout << endl;
+	}
+}
+
+void kdtree_near_node_energy_dist(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials)
+{
+	kdtree_near_node(model, test_connect);
+
+	std::vector<vec3> material_queue;
+
+	for (int i = 0; i < model->numtriangles; i += 1){
+		vec2 test(i, model->triangles->at(i).near_dist);
+		material_queue.push_back(test);
+	}
+
+	std::sort(material_queue.begin(),
+		material_queue.end(),
+		[](vec2 a, vec2 b){
+		return b[1] > a[1];
+	});
+	
+	int num_class = 0;
+	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		if (i == 0){
+			model->triangles->at(material_queue.at(i)[0]).material_id_energy = num_class;
+			num_class += 1;
+		}
+		else{
+			if (material_queue.at(i)[1] == material_queue.at(i - 1)[1]){
+				num_class -= 1;
+				model->triangles->at(material_queue.at(i)[0]).material_id_energy = num_class;
+				num_class += 1;
+			}
+			else{
+				model->triangles->at(material_queue.at(i)[0]).material_id_energy = num_class;
+				num_class += 1;
+			}
+		}
+	}
+
+	vec3 deleta = vec3(1.0f, 0.0f, -1.0f) / num_class;
+	for (int i = 0; i < num_class; i += 1){
+		simple_material temp_m;
+		temp_m.name = std::to_string(materials.size());
+		temp_m.diffuse[0] = 0.0f + deleta[0] * i;
+		temp_m.diffuse[1] = 0.0f + deleta[1] * i;
+		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
+		materials.push_back(temp_m);
 	}
 }
