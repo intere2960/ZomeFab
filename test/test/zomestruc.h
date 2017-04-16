@@ -11,15 +11,6 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
 
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/AABB_tree.h>
-#include <CGAL/AABB_traits.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
-#include <CGAL/AABB_face_graph_triangle_primitive.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/Side_of_triangle_mesh.h>
-
 class zomeconn
 {
 public:
@@ -93,10 +84,11 @@ public:
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_3 Point;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
+typedef K::Plane_3 Plane_3;
 typedef Polyhedron_3::Vertex_iterator Vertex_iterator;
 typedef Polyhedron_3::Face_iterator Face_iterator;
+typedef Polyhedron_3::Plane_iterator Plane_iterator;
 typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
-typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
 
 void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now);
 bool pointInside(Polyhedron_3 &polyhedron, Point &query);

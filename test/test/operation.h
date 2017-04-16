@@ -102,6 +102,7 @@ template <typename num_t>
 void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, std::vector<int> &near_tri);
 
 void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect);
+void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect);
 void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials);
 
 #endif // OPERATION_H_INCLUDED

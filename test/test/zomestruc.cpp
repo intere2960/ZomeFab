@@ -1038,8 +1038,31 @@ void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::ve
 	}
 }
 
+struct Plane_from_facet {
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f) {
+		Polyhedron_3::Halfedge_handle h = f.halfedge();
+		return Polyhedron_3::Plane_3(h->vertex()->point(),
+			h->next()->vertex()->point(),
+			h->opposite()->vertex()->point());
+	}
+};
+
 bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 {
+	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(), polyhedron.planes_begin(), Plane_from_facet());
+	//cout << polyhedron << endl;
+
+	Plane_iterator p = polyhedron.planes_begin();
+	Face_iterator f = polyhedron.facets_begin();
+	//cout << polyhedron.size_of_facets() << endl;
+	for (int i = 0; i < polyhedron.size_of_facets(); i += 1){
+		//cout << p->a() << " " << p->b() << " " << p->c() << " " << p->d() << endl;
+		//vec4 temp(p->a(), p->b(), p->c(), 0.0f);
+		if (query[0] * p->a() + query[1] * p->b() + query[2] * p->c() + p->d() == 0)
+			return false;
+		p++;
+	}
+
 	//cout << "aaa : " << query[0] << endl;
 	Vertex_iterator v = polyhedron.vertices_begin();
 	for (int i = 0; i < polyhedron.size_of_vertices(); i += 1){
@@ -1049,9 +1072,10 @@ bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 		v++;
 	}
 
-	Point_inside inside_tester(polyhedron);
+	/*Point_inside inside_tester(polyhedron);
 	CGAL::Bounded_side res = inside_tester(query);
-	return res == CGAL::ON_BOUNDED_SIDE;
+	return res == CGAL::ON_BOUNDED_SIDE;*/
+	return true;
 }
 
 bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
@@ -1096,6 +1120,36 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	//os.close();
 
 	//std::cout << now  << " : The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
+	
+	//Plane_iterator p = poly.planes_begin(); 
+	//Face_iterator f = poly.facets_begin();
+	//for (int i = 0; i < poly.size_of_facets(); i += 1){
+	//	cout << p->a() << " " << p->b() << " " << p->c() << " " << p->d() << endl;
+	//	p++;
+	//}	
+
+	//Point test_point = points.at(0);
+
+	//std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(), Plane_from_facet());
+	//cout << poly << endl;
+
+	//Plane_iterator p = poly.planes_begin();
+	//Face_iterator f = poly.facets_begin();
+	//cout << poly.size_of_facets() << endl;
+	//for (int i = 0; i < poly.size_of_facets(); i += 1){
+	//	cout << p->a() << " " << p->b() << " " << p->c() << " " << p->d() << endl;
+	//	//vec4 temp(p->a(), p->b(), p->c(), 0.0f);
+	//	cout << "aaa" << test_point[0] * p->a() + test_point[1] * p->b() + test_point[2] * p->c() + p->d() << endl;
+	//	p++;
+	//}
+
+	//Vertex_iterator v = poly.vertices_begin();
+	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
+	//	cout << i << " : " << v->point() << endl;
+	//	if (v->point() == test_point)
+	//		return false;
+	//	v++;
+	//}
 
 	return pointInside(poly, points.at(0));
 }
@@ -1105,6 +1159,7 @@ void judge_outter(std::vector<std::vector<zomeconn>> &test_connect)
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		//cout << i << endl;
 		bool judge = check_inside(test_connect, i);
+		//cout << judge << endl;
 		if (!judge)
 			test_connect.at(COLOR_WHITE).at(i).outter = true;
 		else

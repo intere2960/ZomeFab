@@ -425,6 +425,8 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("fake.txt"));
 
+	//cout << check_inside(test_connect, 0) << endl;
+
 	//output_zometool(test_connect, string("ttt.obj"));
 	
 	////struc_parser(test_connect, string("fake123.txt"));
@@ -437,6 +439,8 @@ int main(int argc, char **argv)
 	// Generate points:
 	generatePointCloud(cloud, myObj);
 
+	judge_outter(test_connect);
+
 	//cout << myObj->numtriangles << endl;
 	
 	float origin_term[4];
@@ -448,7 +452,7 @@ int main(int argc, char **argv)
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	ofstream os("energy_1500_5000.txt");
+	ofstream os("energy_1500_5000_Outter_tri_dist.txt");
 
 	os << "origin energy : " << origin_e << endl;
 	os << "origin energy(dist) : " << origin_term[0] << endl;
@@ -456,8 +460,6 @@ int main(int argc, char **argv)
 	os << "origin energy(number) : " << origin_term[2] << endl;
 	os << "origin energy(total_number) : " << origin_term[3] << endl;
 	os << endl;
-
-	judge_outter(test_connect);
 
 	os << "start" << endl;
 	int collision = 0;
@@ -515,6 +517,17 @@ int main(int argc, char **argv)
 				}
 				num_bridge += 1;
 			}
+//			else {
+//				os << "kill" << endl;
+//				int result;
+//				do{
+//					result = rand() % test_connect.at(COLOR_WHITE).size();
+//				} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+////				} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
+//				os << result << endl;
+//				kill(temp_connect, result);
+//				num_kill += 1;
+//			}
 		/*}
 		else{
 			cout << "kill" << endl;
@@ -529,6 +542,8 @@ int main(int argc, char **argv)
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
 		os << "op : " << duration << " s" << endl;
+
+		judge_outter(temp_connect);
 
 		start = clock();
 		float term[4];
@@ -563,8 +578,6 @@ int main(int argc, char **argv)
 				}
 
 				origin_e = temp_e;
-
-				judge_outter(test_connect);
 			}
 			else{
 				collision += 1;
@@ -633,17 +646,17 @@ int main(int argc, char **argv)
 
 	//judge_outter(test_connect);
 
-	//kdtree_near_node(myObj, test_connect);
+	//kdtree_near_node_outter(myObj, test_connect);
 
 	vector<simple_material> materials;
 	kdtree_near_node_colorful(myObj, test_connect, materials);
 
 	os.close();
-	output_zometool(test_connect, string("1500_5000.obj"));
-	output_struc(test_connect, string("1500_5000.txt"));
-	output_material(materials, std::string("colorful_1500_5000.mtl"));
-	output_zometool_colorful(test_connect, string("fake_1500_5000.obj"), materials, std::string("colorful_1500_5000.mtl"));
-	glmWriteOBJ_colorful(myObj, "fake_model_1500_5000.obj", materials, std::string("colorful_1500_5000.mtl"));
+	output_zometool(test_connect, string("1500_5000_Outter_tri_dist.obj"));
+	output_struc(test_connect, string("1500_5000_Outter_tri_dist.txt"));
+	output_material(materials, std::string("colorful_1500_5000_Outter_tri_dist.mtl"));
+	output_zometool_colorful(test_connect, string("fake_1500_5000_Outter_tri_dist.obj"), materials, std::string("colorful_1500_5000_Outter_tri_dist.mtl"));
+	glmWriteOBJ_colorful(myObj, "fake_model_1500_5000_Outter_tri_dist.obj", materials, std::string("colorful_1500_5000_Outter_tri_dist.mtl"));
 	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 

@@ -359,24 +359,47 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	std::vector<int> near_tri;
 
-	//#pragma omp parallel for
-	for (int a = 0; a < test_connect.size(); a += 1){
-		//#pragma omp parallel for
-		for (int i = 0; i < test_connect.at(a).size(); i += 1){
-			if (test_connect.at(a).at(i).exist){
-				if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
-					kdtree_search(model, cloud, test_connect.at(a).at(i).position, near_tri);
-					test_connect.at(a).at(i).surface_d = point_surface_dist_fast(model, test_connect.at(a).at(i).position, near_tri);
-					test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(a).at(i).surface_d));
-					
-				}
+	////#pragma omp parallel for
+	//for (int a = 0; a < test_connect.size(); a += 1){
+	//	//#pragma omp parallel for
+	//	for (int i = 0; i < test_connect.at(a).size(); i += 1){
+	//		if (test_connect.at(a).at(i).exist){
+	//			if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
+	//				kdtree_search(model, cloud, test_connect.at(a).at(i).position, near_tri);
+	//				test_connect.at(a).at(i).surface_d = point_surface_dist_fast(model, test_connect.at(a).at(i).position, near_tri);
+	//				test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(a).at(i).surface_d));
+	//				
+	//			}
 
-				energy_dist += test_connect.at(a).at(i).energy_d;
-			}
-		}
+	//			energy_dist += test_connect.at(a).at(i).energy_d;
+	//		}
+	//	}
+	//}
+
+	//energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
+	
+	//int num_outter = 0;
+	////#pragma omp parallel for
+	//for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+	//	if (test_connect.at(COLOR_WHITE).at(i).exist && test_connect.at(COLOR_WHITE).at(i).outter){
+	//		if (test_connect.at(COLOR_WHITE).at(i).surface_d == 100000000000000.0f){
+	//			kdtree_search(model, cloud, test_connect.at(COLOR_WHITE).at(i).position, near_tri);
+	//			test_connect.at(COLOR_WHITE).at(i).surface_d = point_surface_dist_fast(model, test_connect.at(COLOR_WHITE).at(i).position, near_tri);
+	//			test_connect.at(COLOR_WHITE).at(i).energy_d = pow(test_connect.at(COLOR_WHITE).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(COLOR_WHITE).at(i).surface_d));
+	//		}
+
+	//		energy_dist += test_connect.at(COLOR_WHITE).at(i).energy_d;
+	//		num_outter += 1;
+	//	}
+	//}
+
+	//energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * num_outter);
+
+	kdtree_near_node(model, test_connect);
+	for (unsigned int i = 0; i < model->numtriangles; i += 1){
+		energy_dist += model->triangles->at(i).energy_d;
 	}
-
-	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
+	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * model->numtriangles);
 
 	float energy_angle = 0.0f;
 	#pragma omp parallel for
@@ -496,6 +519,64 @@ void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, 
 using namespace std;
 
 void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
+{
+	PointCloud<float> cloud;
+	generatePointCloud(cloud, test_connect);
+
+	// construct a kd-tree index:
+	typedef KDTreeSingleIndexAdaptor<
+		L2_Simple_Adaptor<float, PointCloud<float> >,
+		PointCloud<float>,
+		3 /* dim */
+	> my_kd_tree_t;
+
+	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
+	index.buildIndex();
+
+	for (int i = 0; i < model->numtriangles; i++)
+	{
+		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 test = (p1 + p2 + p3) / 3.0;
+
+		const float query_pt[3] = { test[0], test[1], test[2] };
+
+		size_t num_results = 10;
+		std::vector<size_t>   ret_index(num_results);
+		std::vector<float> out_dist_sqr(num_results);
+
+		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
+
+		// In case of less points in the tree than requested:
+		ret_index.resize(num_results);
+		out_dist_sqr.resize(num_results);
+
+		//cout << out_dist_sqr.size() << endl;
+
+		int temp_index = -1;
+		float temp_dist = 100000000000000000.0f;
+		for (int j = 0; j < out_dist_sqr.size(); j += 1){
+			if (out_dist_sqr.at(j) < temp_dist){
+				temp_index = j;
+				temp_dist = out_dist_sqr.at(j);
+			}
+		}
+
+		if (temp_index != -1){
+			if (model->triangles->at(i).near_node != ret_index.at(temp_index)){
+				//cout << i << " : " << temp_index << endl;
+				//test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
+				model->triangles->at(i).near_dist = sqrt(temp_dist);
+				model->triangles->at(i).near_node = ret_index.at(temp_index);
+				model->triangles->at(i).energy_d = pow(model->triangles->at(i).near_dist, 2) * (1.0f + forbidden_energy(model->triangles->at(i).near_dist));
+			}
+		}
+		//cout << endl;
+	}
+}
+
+void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
 {
 	PointCloud<float> cloud;
 	generatePointCloud(cloud, test_connect);

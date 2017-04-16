@@ -69,6 +69,10 @@ public:
   std::vector<unsigned int> split_plane_id;
   bool split_by_process;
   int material_id;
+
+  int near_node;
+  float near_dist;
+  float energy_d;
 };
 
 /* GLMgroup: Structure that defines a group in a model.
