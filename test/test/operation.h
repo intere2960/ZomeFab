@@ -88,11 +88,13 @@ void generatePointCloud(PointCloud<T> &point, std::vector<std::vector<zomeconn>>
 	point.pts.resize(test_connect.at(COLOR_WHITE).size());
 	for (size_t i = 0; i < test_connect.at(COLOR_WHITE).size(); i++)
 	{
-		vec3 test = test_connect.at(COLOR_WHITE).at(i).position;
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			vec3 test = test_connect.at(COLOR_WHITE).at(i).position;
 
-		point.pts[i].x = test[0];
-		point.pts[i].y = test[1];
-		point.pts[i].z = test[2];
+			point.pts[i].x = test[0];
+			point.pts[i].y = test[1];
+			point.pts[i].z = test[2];
+		}
 	}
 
 	//std::cout << "done\n";

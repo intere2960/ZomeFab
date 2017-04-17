@@ -91,6 +91,9 @@ zomestruc::~zomestruc()
 
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source)
 {
+	if (source.size() == 0)
+		return;
+
 	int ball_size = target.at(COLOR_WHITE).size();
 	for (unsigned int i = 0; i < source.at(COLOR_WHITE).size(); i += 1){
 		zomeconn temp = source.at(COLOR_WHITE).at(i);
@@ -1252,8 +1255,10 @@ void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std
 {
 	std::vector<vec2> material_queue;
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		vec2 temp(i, test_connect.at(COLOR_WHITE).at(i).energy_angle);
-		material_queue.push_back(temp);
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			vec2 temp(i, test_connect.at(COLOR_WHITE).at(i).energy_angle);
+			material_queue.push_back(temp);
+		}
 	}
 
 	std::sort(material_queue.begin(),

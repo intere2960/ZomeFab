@@ -400,21 +400,25 @@ int main(int argc, char **argv)
 
 	init();
 
-	////test();
+	//test();
 
 	////fake();
-	////	
-	////for (int j = 0; j < 4; j += 1){
-	////	for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
-	////		zome_queue.at(2).at(j).at(k).position += delta;
-	////	}
-	////}
+	//	
+	///*for (int j = 0; j < 4; j += 1){
+	//	for (int k = 0; k < zome_queue.at(2).at(j).size(); k += 1){
+	//		zome_queue.at(2).at(j).at(k).position += delta;
+	//	}
+	//}*/
 
+	//vector<vector<zomeconn>> output_ans(4);
+	//for (unsigned int i = 0; i < zome_queue.size(); i += 1){
+	//	combine_zome_ztruc(output_ans, zome_queue.at(i));
+	//}
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	////output_zometool(zome_queue.at(1), string("test.obj"));
-	////output_struc(zome_queue.at(1), string("fake.txt"));
+	//output_zometool(output_ans, string("mrhumpty5Std_out.obj"));
+	//output_struc(output_ans, string("mrhumpty5Std_out.txt"));
 			
 	clock_t total_start, total_finish;
 	total_start = clock();
@@ -446,13 +450,13 @@ int main(int argc, char **argv)
 	float origin_term[4];
 	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	int num_iteration = 1000;
+	int num_iteration = 10000;
 
 	finish = clock();
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	ofstream os("energy_1500_1000_new_angle.txt");
+	ofstream os("energy_2000_10000_new_angle.txt");
 
 	os << "origin energy : " << origin_e << endl;
 	os << "origin energy(dist) : " << origin_term[0] << endl;
@@ -488,7 +492,7 @@ int main(int argc, char **argv)
 		start = clock();
 
 		//if (i % 100 != 0){
-			int choose_op = rand() % 3;
+			int choose_op = rand() % 4;
 			if (choose_op == 0){
 				os << "split" << endl;
 				int result;
@@ -520,17 +524,17 @@ int main(int argc, char **argv)
 				}
 				num_bridge += 1;
 			}
-//			else {
-//				os << "kill" << endl;
-//				int result;
-//				do{
-//					result = rand() % test_connect.at(COLOR_WHITE).size();
-//				} while (!test_connect.at(COLOR_WHITE).at(result).exist);
-////				} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
-//				os << result << endl;
-//				kill(temp_connect, result);
-//				num_kill += 1;
-//			}
+			else {
+				os << "kill" << endl;
+				int result;
+				do{
+					result = rand() % test_connect.at(COLOR_WHITE).size();
+				} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+//				} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
+				os << result << endl;
+				kill(temp_connect, result);
+				num_kill += 1;
+			}
 		/*}
 		else{
 			cout << "kill" << endl;
@@ -657,18 +661,18 @@ int main(int argc, char **argv)
 	vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
 	kdtree_near_node_colorful(myObj, test_connect, materials_color);	
 
-	output_zometool(test_connect, string("1500_1000_new_angle.obj"));
-	output_struc(test_connect, string("1500_1000_new_angle.txt"));
-	output_material(materials_color, std::string("colorful_1500_1000_new_angle.mtl"));
-	output_zometool_colorful(test_connect, string("fake_1500_1000_new_angle.obj"), materials_color, std::string("colorful_1500_1000_new_angle.mtl"));
-	glmWriteOBJ_colorful(myObj, "fake_model_1500_1000_new_angle.obj", materials_color, std::string("colorful_1500_1000_new_angle.mtl"));
+	output_zometool(test_connect, string("2000_10000_new_angle.obj"));
+	output_struc(test_connect, string("2000_10000_new_angle.txt"));
+	output_material(materials_color, std::string("colorful_2000_10000_new_angle.mtl"));
+	output_zometool_colorful(test_connect, string("fake_2000_10000_new_angle.obj"), materials_color, std::string("colorful_2000_10000_new_angle.mtl"));
+	glmWriteOBJ_colorful(myObj, "fake_model_2000_10000_new_angle.obj", materials_color, std::string("colorful_2000_10000_new_angle.mtl"));
 
 	kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
 	energy_angle_material(test_connect, material_energy_angle);
-	output_material(material_energy_dist, std::string("1500_1000_energy_dist_new_angle.mtl"));
-	output_material(material_energy_angle, std::string("1500_1000_energy_angle_new_angle.mtl"));
-	output_zometool_energy_angle(test_connect, string("fake_energy_1500_1000_new_angle(angle).obj"), material_energy_dist, std::string("1500_1000_energy_angle_new_angle.mtl"));
-	glmWriteOBJ_energy_dist(myObj, "fake_model_1500_1000_new_angle(dist).obj", material_energy_dist, std::string("1500_1000_energy_dist_new_angle.mtl"));
+	output_material(material_energy_dist, std::string("2000_10000_energy_dist_new_angle.mtl"));
+	output_material(material_energy_angle, std::string("2000_10000_energy_angle_new_angle.mtl"));
+	output_zometool_energy_angle(test_connect, string("fake_energy_2000_10000_new_angle(angle).obj"), material_energy_dist, std::string("2000_10000_energy_angle_new_angle.mtl"));
+	glmWriteOBJ_energy_dist(myObj, "fake_model_2000_10000_new_angle(dist).obj", material_energy_dist, std::string("2000_10000_energy_dist_new_angle.mtl"));
 	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 
@@ -691,6 +695,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	system("pause");
+	//system("pause");
 	return 0;
 }

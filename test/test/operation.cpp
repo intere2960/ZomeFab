@@ -461,7 +461,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_number = pow((number - target_number), 2.0f) / target_number;
 
 	float energy_total_number = 0.0f;
-	float target_total_number = 1500.0f;
+	float target_total_number = 2000.0f;
 
 	int total_number = 0;
 	for (int i = 0; i < test_connect.size(); i += 1){
