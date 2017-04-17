@@ -166,7 +166,7 @@ zomedir::zomedir()
 				new_angle = 0.0f;
 			}
 			else if (j == opposite_face(i)){
-				new_angle = 180.0f;
+				new_angle = M_PI;
 
 			}
 			else{

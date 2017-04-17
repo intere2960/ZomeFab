@@ -1196,7 +1196,12 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	}
 
 	Polyhedron_3 poly;
-	CGAL::convex_hull_3(points.begin(), points.end(), poly);
+	if (points.size() > 2){
+		CGAL::convex_hull_3(points.begin(), points.end(), poly);
+	}
+	else{
+		return true;
+	}
 
 	////cout << poly << endl;
 
@@ -1259,6 +1264,7 @@ void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std
 
 	int num_class = 0;
 	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		//cout << material_queue.at(i)[0] << " " << material_queue.at(i)[1] << endl;
 		if (i == 0){
 			test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
 			num_class += 1;
@@ -1284,5 +1290,6 @@ void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std
 		temp_m.diffuse[1] = 0.0f + deleta[1] * i;
 		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
 		materials.push_back(temp_m);
+		//cout << "m " << i << " : " << temp_m.diffuse[0] << " " << temp_m.diffuse[1] << " " << temp_m.diffuse[2] << endl;
 	}
 }

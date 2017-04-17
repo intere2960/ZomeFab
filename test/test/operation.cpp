@@ -406,7 +406,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * model->numtriangles);
 
 	float energy_angle = 0.0f;
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		if (test_connect.at(COLOR_WHITE).at(i).exist){
 			std::vector<int> use_stick;
@@ -416,18 +416,33 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 				}
 			}
 
-			float sum_angle = 0.0f;
-			#pragma omp parallel for
+			//cout << i << " : ";
+			//float sum_angle = 0.0f;
+			float min_angle = 10000000000000.0f;
+			//#pragma omp parallel for
 			for (int j = 0; j < use_stick.size() - 1; j += 1){
-				#pragma omp parallel for
+				//#pragma omp parallel for
 				for (int k = j; k < use_stick.size(); k += 1){
-					sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f);
+					if (use_stick.at(j) != use_stick.at(k)){
+						//sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f);
+						//cout << fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f) << " + ";
+						//cout << " ( " << use_stick.at(j) << " , " << use_stick.at(k) << " ) ";
+						if (t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) < min_angle){
+							min_angle = t.near_angle.at(use_stick.at(j)).at(use_stick.at(k));
+						}
+					}
 				}
 			}
-			test_connect.at(COLOR_WHITE).at(i).energy_angle = sum_angle;
+			//cout << endl;
+			
+			//sum_angle -= M_PI;
 
-			energy_angle += sum_angle;
-			//cout << i << " " << sum_angle << endl;
+			//sum_angle = fabs(sum_angle);
+
+			test_connect.at(COLOR_WHITE).at(i).energy_angle = fabs(min_angle - M_PI / 2.0f);
+
+			energy_angle += fabs(min_angle - M_PI / 2.0f);
+			//cout << " = " << fabs(min_angle - M_PI / 2.0f) << endl;
 		}
 	}
 
@@ -457,6 +472,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 		}
 	}
 
+
 	energy_total_number = pow((total_number - target_total_number), 2.0f) / target_total_number;
 
 	//float energy_fair = 0.0f;
@@ -477,7 +493,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	//energy = energy_dist + energy_fair;
 	//energy = energy_dist + 0.1 * energy_angle;
-	energy = energy_dist + 0.1 * energy_angle + energy_total_number;
+	energy = energy_dist + 100.0f * energy_angle + energy_total_number;
 	//energy = energy_dist + 0.1 * energy_angle + energy_number + energy_total_number;
 
 	term[0] = energy_dist;

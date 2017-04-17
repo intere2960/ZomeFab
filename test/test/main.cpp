@@ -452,7 +452,7 @@ int main(int argc, char **argv)
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	ofstream os("energy_1500_3000_energy_model.txt");
+	ofstream os("energy_1500_1000_new_angle.txt");
 
 	os << "origin energy : " << origin_e << endl;
 	os << "origin energy(dist) : " << origin_term[0] << endl;
@@ -460,6 +460,9 @@ int main(int argc, char **argv)
 	os << "origin energy(number) : " << origin_term[2] << endl;
 	os << "origin energy(total_number) : " << origin_term[3] << endl;
 	os << endl;
+
+	//vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
+	//energy_angle_material(test_connect, material_energy_angle);
 
 	os << "start" << endl;
 	int collision = 0;
@@ -647,25 +650,25 @@ int main(int argc, char **argv)
 	//judge_outter(test_connect);
 
 	//kdtree_near_node_outter(myObj, test_connect);
-
+	
 	
 	os.close();
 	
 	vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
 	kdtree_near_node_colorful(myObj, test_connect, materials_color);	
 
-	output_zometool(test_connect, string("1500_1000_energy_model.obj"));
-	output_struc(test_connect, string("1500_1000_energy_model.txt"));
-	output_material(materials_color, std::string("colorful_1500_1000_energy_model.mtl"));
-	output_zometool_colorful(test_connect, string("fake_1500_1000_energy_model.obj"), materials_color, std::string("colorful_1500_1000_energy_model.mtl"));
-	glmWriteOBJ_colorful(myObj, "fake_model_1500_1000_energy_model.obj", materials_color, std::string("colorful_1500_1000_energy_model.mtl"));
+	output_zometool(test_connect, string("1500_1000_new_angle.obj"));
+	output_struc(test_connect, string("1500_1000_new_angle.txt"));
+	output_material(materials_color, std::string("colorful_1500_1000_new_angle.mtl"));
+	output_zometool_colorful(test_connect, string("fake_1500_1000_new_angle.obj"), materials_color, std::string("colorful_1500_1000_new_angle.mtl"));
+	glmWriteOBJ_colorful(myObj, "fake_model_1500_1000_new_angle.obj", materials_color, std::string("colorful_1500_1000_new_angle.mtl"));
 
 	kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
 	energy_angle_material(test_connect, material_energy_angle);
-	output_material(material_energy_dist, std::string("1500_1000_energy_dist_energy_model.mtl"));
-	output_material(material_energy_angle, std::string("1500_1000_energy_angle_energy_model.mtl"));
-	output_zometool_energy_angle(test_connect, string("fake_energy_1500_1000_energy_model(angle).obj"), material_energy_dist, std::string("1500_1000_energy_angle_energy_model.mtl"));
-	glmWriteOBJ_energy_dist(myObj, "fake_model_1500_1000_energy_model(dist).obj", material_energy_dist, std::string("1500_1000_energy_dist_energy_model.mtl"));
+	output_material(material_energy_dist, std::string("1500_1000_energy_dist_new_angle.mtl"));
+	output_material(material_energy_angle, std::string("1500_1000_energy_angle_new_angle.mtl"));
+	output_zometool_energy_angle(test_connect, string("fake_energy_1500_1000_new_angle(angle).obj"), material_energy_dist, std::string("1500_1000_energy_angle_new_angle.mtl"));
+	glmWriteOBJ_energy_dist(myObj, "fake_model_1500_1000_new_angle(dist).obj", material_energy_dist, std::string("1500_1000_energy_dist_new_angle.mtl"));
 	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 
