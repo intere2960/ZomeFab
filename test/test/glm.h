@@ -277,10 +277,7 @@ GLvoid
 glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
 
 GLvoid
-glmWriteOBJ_colorful(GLMmodel* model, char* filename, std::vector<simple_material> materials, std::string &materials_filename);
-
-GLvoid
-glmWriteOBJ_energy_dist(GLMmodel* model, char* filename, std::vector<simple_material> materials, std::string &materials_filename);
+glmWriteOBJ_EXP(GLMmodel* model, char* filename, std::vector<simple_material> materials, std::string &materials_filename, int mode);
 
 /* glmDraw: Renders the model to the current OpenGL context using the
  * mode specified.

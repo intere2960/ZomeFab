@@ -31,4 +31,11 @@
 #define SPLITE 0
 #define MERGE 1
 
+#define NORMAL 0
+#define COLORFUL 1
+#define ENERGY_DIST 2
+#define ENERGY_ANGLE 3
+#define ENERGY_USE_STICK 4
+
+
 #endif

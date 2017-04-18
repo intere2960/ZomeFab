@@ -18,11 +18,13 @@ zomeconn::zomeconn()
 	surface_d = 100000000000000.0f;
 	energy_d = 100000000000000.0f;
 	energy_angle = 100000000000000.0f;
+	energy_use_stick = 100000000000000.0f;
 
 	exist = true;
 	outter = false;
 	material_id = -1;
 	material_id_energy_angle = -1;
+	material_id_energy_use_stick = -1;
 
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
@@ -462,7 +464,7 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	os.close();
 }
 
-void output_zometool_colorful(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename)
+void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename, int mode)
 {
 	std::ofstream os(filename);
 	GLMmodel *z_b, *b_s, *b_m, *b_l, *r_s, *r_m, *r_l, *y_s, *y_m, *y_l;
@@ -548,141 +550,81 @@ void output_zometool_colorful(std::vector<std::vector<zomeconn>> &output_connect
 
 	os << std::endl;
 
-	//cout << z_b->numtriangles << endl;
-	for (unsigned int i = 0; i < output_connect.size(); i += 1){
-		if (i == COLOR_WHITE){
-			//cout << face_index.at(i).size() << endl;
-			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
-				if ((j % z_b->numtriangles) == 0){
-					//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
-					if (output_connect.at(i).at(j / z_b->numtriangles).material_id == -1)
-						os << "usemtl initialShadingGroup" << std::endl;
-					else
-						os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).material_id).name << std::endl;
+	if (mode == COLORFUL){
+		//cout << z_b->numtriangles << endl;
+		for (unsigned int i = 0; i < output_connect.size(); i += 1){
+			if (i == COLOR_WHITE){
+				//cout << face_index.at(i).size() << endl;
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					if ((j % z_b->numtriangles) == 0){
+						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
+						if (output_connect.at(i).at(j / z_b->numtriangles).material_id == -1)
+							os << "usemtl initialShadingGroup" << std::endl;
+						else
+							os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).material_id).name << std::endl;
+					}
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 				}
-				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 			}
-		}
-		else{
-			
-			os << "usemtl initialShadingGroup" << std::endl;
-			
-			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
-				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+			else{
+
+				os << "usemtl initialShadingGroup" << std::endl;
+
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+				}
 			}
 		}
 	}
-
-	os.close();
-}
-
-void output_zometool_energy_angle(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename)
-{
-	std::ofstream os(filename);
-	GLMmodel *z_b, *b_s, *b_m, *b_l, *r_s, *r_m, *r_l, *y_s, *y_m, *y_l;
-	z_b = glmReadOBJ("test_model/zometool/zomeball.obj");
-	b_s = glmReadOBJ("test_model/zometool/BlueS.obj");
-	b_m = glmReadOBJ("test_model/zometool/BlueM.obj");
-	b_l = glmReadOBJ("test_model/zometool/BlueL.obj");
-	r_s = glmReadOBJ("test_model/zometool/RedS.obj");
-	r_m = glmReadOBJ("test_model/zometool/RedM.obj");
-	r_l = glmReadOBJ("test_model/zometool/RedL.obj");
-	y_s = glmReadOBJ("test_model/zometool/YellowS.obj");
-	y_m = glmReadOBJ("test_model/zometool/YellowM.obj");
-	y_l = glmReadOBJ("test_model/zometool/YellowL.obj");
-
-	std::vector<std::vector<vec3>> face_index(4);
-
-	os << "mtllib " << materials_filename << std::endl;
-
-	int num_v = 0;
-	for (unsigned int i = 0; i < output_connect.size(); i += 1){
-		for (unsigned int j = 0; j < output_connect.at(i).size(); j += 1){
-			if (output_connect.at(i).at(j).exist){
-				GLMmodel *temp_model = NULL;
-				if (i == COLOR_WHITE){
-					temp_model = glmCopy(z_b);
-					glmR(temp_model, vec3(0.0, 0.0, 0.0));
-					glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
-				}
-				else{
-					zomedir t;
-					if (i == COLOR_BLUE){
-						if (output_connect.at(i).at(j).size == SIZE_S){
-							temp_model = glmCopy(b_s);
-						}
-						else if (output_connect.at(i).at(j).size == SIZE_M){
-							temp_model = glmCopy(b_m);
-						}
-						else{
-							temp_model = glmCopy(b_l);
-						}
+	else if (mode == ENERGY_ANGLE){
+		//cout << z_b->numtriangles << endl;
+		for (unsigned int i = 0; i < output_connect.size(); i += 1){
+			if (i == COLOR_WHITE){
+				//cout << face_index.at(i).size() << endl;
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					if ((j % z_b->numtriangles) == 0){
+						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
+						if (output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle == -1)
+							os << "usemtl initialShadingGroup" << std::endl;
+						else
+							os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle).name << std::endl;
 					}
-					else if (i == COLOR_RED){
-						if (output_connect.at(i).at(j).size == SIZE_S){
-							temp_model = glmCopy(r_s);
-						}
-						else if (output_connect.at(i).at(j).size == SIZE_M){
-							temp_model = glmCopy(r_m);
-						}
-						else{
-							temp_model = glmCopy(r_l);
-						}
-					}
-					else {
-						if (output_connect.at(i).at(j).size == SIZE_S){
-							temp_model = glmCopy(y_s);
-						}
-						else if (output_connect.at(i).at(j).size == SIZE_M){
-							temp_model = glmCopy(y_m);
-						}
-						else{
-							temp_model = glmCopy(y_l);
-						}
-					}
-
-					glmRT(temp_model, vec3(0.0, t.roll(output_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
-					glmRT(temp_model, vec3(0.0, t.phi(output_connect.at(i).at(j).fromface), t.theta(output_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
-					glmR(temp_model, vec3(0.0, 0.0, 0.0));
-					glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 				}
+			}
+			else{
 
-				for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
-					os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
-				}
+				os << "usemtl initialShadingGroup" << std::endl;
 
-				for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
-					vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
-					face_index.at(i).push_back(temp_t);
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 				}
-				num_v += temp_model->numvertices;
 			}
 		}
 	}
-
-	os << std::endl;
-
-	//cout << z_b->numtriangles << endl;
-	for (unsigned int i = 0; i < output_connect.size(); i += 1){
-		if (i == COLOR_WHITE){
-			//cout << face_index.at(i).size() << endl;
-			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
-				if ((j % z_b->numtriangles) == 0){
-					//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
-					if (output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle == -1)
-						os << "usemtl initialShadingGroup" << std::endl;
-					else
-						os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle).name << std::endl;
+	else if (mode == ENERGY_USE_STICK){
+		//cout << z_b->numtriangles << endl;
+		for (unsigned int i = 0; i < output_connect.size(); i += 1){
+			if (i == COLOR_WHITE){
+				//cout << face_index.at(i).size() << endl;
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					if ((j % z_b->numtriangles) == 0){
+						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
+						if (output_connect.at(i).at(j / z_b->numtriangles).energy_use_stick == -1)
+							os << "usemtl initialShadingGroup" << std::endl;
+						else
+							os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).energy_use_stick).name << std::endl;
+					}
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 				}
-				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 			}
-		}
-		else{
+			else{
 
-			os << "usemtl initialShadingGroup" << std::endl;
+				os << "usemtl initialShadingGroup" << std::endl;
 
-			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
-				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+				}
 			}
 		}
 	}
@@ -1251,12 +1193,18 @@ void judge_outter(std::vector<std::vector<zomeconn>> &test_connect)
 	}
 }
 
-void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials)
+void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, int mode)
 {
 	std::vector<vec2> material_queue;
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		if (test_connect.at(COLOR_WHITE).at(i).exist){
-			vec2 temp(i, test_connect.at(COLOR_WHITE).at(i).energy_angle);
+			vec2 temp;
+			if (mode == ENERGY_ANGLE){
+				temp = vec2(i, test_connect.at(COLOR_WHITE).at(i).energy_angle);
+			}
+			else if (mode == ENERGY_USE_STICK){
+				temp = vec2(i, test_connect.at(COLOR_WHITE).at(i).energy_use_stick);
+			}
 			material_queue.push_back(temp);
 		}
 	}
@@ -1271,17 +1219,32 @@ void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std
 	for (unsigned int i = 0; i < material_queue.size(); i += 1){
 		//cout << material_queue.at(i)[0] << " " << material_queue.at(i)[1] << endl;
 		if (i == 0){
-			test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+			if (mode == ENERGY_ANGLE){
+				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+			}
+			else if (mode == ENERGY_ANGLE){
+				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_use_stick= num_class;
+			}
 			num_class += 1;
 		}
 		else{
 			if (material_queue.at(i)[1] == material_queue.at(i - 1)[1]){
 				num_class -= 1;
-				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+				if (mode == ENERGY_ANGLE){
+					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+				}
+				else if (mode == ENERGY_ANGLE){
+					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_use_stick = num_class;
+				}
 				num_class += 1;
 			}
 			else{
-				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+				if (mode == ENERGY_ANGLE){
+					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
+				}
+				else if (mode == ENERGY_ANGLE){
+					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_use_stick = num_class;
+				}
 				num_class += 1;
 			}
 		}

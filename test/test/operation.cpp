@@ -361,8 +361,8 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	time_t start, finish;
 	float duration;
 
-	std::vector<int> near_tri;
-
+	//std::vector<int> near_tri;
+	//
 	////#pragma omp parallel for
 	//for (int a = 0; a < test_connect.size(); a += 1){
 	//	//#pragma omp parallel for
@@ -406,6 +406,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * model->numtriangles);
 
 	float energy_angle = 0.0f;
+	float energy_use_stick = 0.0f;
 	//#pragma omp parallel for
 	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		if (test_connect.at(COLOR_WHITE).at(i).exist){
@@ -440,15 +441,18 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 			//sum_angle = fabs(sum_angle);
 
 			test_connect.at(COLOR_WHITE).at(i).energy_angle = fabs(min_angle - M_PI / 2.0f);
-
-			energy_angle += fabs(min_angle - M_PI / 2.0f);
+			test_connect.at(COLOR_WHITE).at(i).energy_use_stick = pow((use_stick.size() - 6.0f), 2.0f) / 6.0f;
+			
+			energy_angle += test_connect.at(COLOR_WHITE).at(i).energy_angle;
 			//cout << " = " << fabs(min_angle - M_PI / 2.0f) << endl;
+
+			energy_use_stick += test_connect.at(COLOR_WHITE).at(i).energy_use_stick;
 		}
 	}
 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
 
-	float energy_number = 0.0f;
+	/*float energy_number = 0.0f;
 	float target_number = 500.0f;
 
 	int number = 0;
@@ -458,10 +462,10 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 		}
 	}
 
-	energy_number = pow((number - target_number), 2.0f) / target_number;
+	energy_number = pow((number - target_number), 2.0f) / target_number;*/
 
 	float energy_total_number = 0.0f;
-	float target_total_number = 2000.0f;
+	float target_total_number = 1500.0f;
 
 	int total_number = 0;
 	for (int i = 0; i < test_connect.size(); i += 1){
@@ -471,7 +475,6 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 			}
 		}
 	}
-
 
 	energy_total_number = pow((total_number - target_total_number), 2.0f) / target_total_number;
 
@@ -493,13 +496,15 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	//energy = energy_dist + energy_fair;
 	//energy = energy_dist + 0.1 * energy_angle;
-	energy = energy_dist + 100.0f * energy_angle + energy_total_number;
+	//energy = energy_dist + 100.0f * energy_angle + energy_total_number;
+	energy = energy_dist + 100.0f * energy_angle + energy_total_number + energy_use_stick;
 	//energy = energy_dist + 0.1 * energy_angle + energy_number + energy_total_number;
 
 	term[0] = energy_dist;
 	term[1] = energy_angle;
-	term[2] = energy_number;
-	term[3] = energy_total_number;
+	//term[2] = energy_number;
+	term[2] = energy_total_number;
+	term[3] = energy_use_stick;
 
 	return energy;
 }
@@ -552,6 +557,7 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 	index.buildIndex();
 
+	#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i++)
 	{
 		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
@@ -610,6 +616,7 @@ void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>>
 	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 	index.buildIndex();
 
+	#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i++)
 	{
 		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
@@ -663,6 +670,7 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 	index.buildIndex();
 
+	//#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i++)
 	{
 		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));

@@ -204,6 +204,31 @@ void test()
 	}
 }
 
+void simple_test()
+{
+	all_voxel.resize(1);
+	zome_queue.resize(1);
+
+	obb_center.resize(1);
+	obb_max.resize(1);
+	obb_min.resize(1);
+	obb_size.resize(1);
+	obb_angle.resize(1);
+
+	std::string s = "test";
+	std::string piece = s + std::to_string(0) + ".obj";
+	glmWriteOBJ(myObj, my_strdup(piece.c_str()), GLM_NONE);
+
+
+	cout << "piece " << 0 + 1 << " :" << endl;
+	zome_queue.at(0).resize(4);
+	computeSimpleBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0));
+	voxelization(myObj, all_voxel.at(0), zome_queue.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
+	cout << "output piece " << 0 + 1 << endl;
+	output_voxel(all_voxel.at(0), 0);
+	output_zometool(all_voxel.at(0).at(0).rotation, zome_queue.at(0), 0);
+}
+
 vector<vector<zomeconn>> test_connect(4);
 vec3 delta;
 
@@ -400,7 +425,8 @@ int main(int argc, char **argv)
 
 	init();
 
-	//test();
+	////test();
+	//simple_test();
 
 	////fake();
 	//	
@@ -417,8 +443,8 @@ int main(int argc, char **argv)
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	//output_zometool(output_ans, string("mrhumpty5Std_out.obj"));
-	//output_struc(output_ans, string("mrhumpty5Std_out.txt"));
+	//output_zometool(output_ans, string("head_out.obj"));
+	//output_struc(output_ans, string("head_out.txt"));
 			
 	clock_t total_start, total_finish;
 	total_start = clock();
@@ -427,15 +453,7 @@ int main(int argc, char **argv)
 	float duration;
 	
 	srand((unsigned)time(NULL));
-	struc_parser(test_connect, string("fake.txt"));
-
-	//cout << check_inside(test_connect, 0) << endl;
-
-	//output_zometool(test_connect, string("ttt.obj"));
-	
-	////struc_parser(test_connect, string("fake123.txt"));
-	
-	////fake_case(0);
+	struc_parser(test_connect, string("head_out.txt"));
 
 	start = clock();
 
@@ -450,19 +468,19 @@ int main(int argc, char **argv)
 	float origin_term[4];
 	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	int num_iteration = 10000;
+	int num_iteration = 5000;
 
 	finish = clock();
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	ofstream os("energy_2000_10000_new_angle.txt");
+	ofstream os("energy_1500_5000.txt");
 
 	os << "origin energy : " << origin_e << endl;
 	os << "origin energy(dist) : " << origin_term[0] << endl;
 	os << "origin energy(angle) : " << origin_term[1] << endl;
-	os << "origin energy(number) : " << origin_term[2] << endl;
-	os << "origin energy(total_number) : " << origin_term[3] << endl;
+	os << "origin energy(total_number) : " << origin_term[2] << endl;
+	os << "origin energy(use_stick) : " << origin_term[3] << endl;
 	os << endl;
 
 	//vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
@@ -491,61 +509,50 @@ int main(int argc, char **argv)
 
 		start = clock();
 
-		//if (i % 100 != 0){
-			int choose_op = rand() % 4;
-			if (choose_op == 0){
-				os << "split" << endl;
-				int result;
-				do{
-					result = rand() % test_connect.at(COLOR_WHITE).size();
-				} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
-				os << result << endl;
-				split(temp_connect, result, myObj, cloud, splite_table);
-				num_split += 1;
-			}
-			else if (choose_op == 1){
-				os << "merge" << endl;
-				vector<vec4> can_merge;
-				check_merge(temp_connect, can_merge, myObj, merge_table);
-				if (can_merge.size() > 0){
-					int merge_index = rand() % can_merge.size();
-					os << merge_index << endl;
-					merge(temp_connect, can_merge.at(merge_index));
-				}
-				num_merge += 1;
-			}
-			else if (choose_op == 2){
-				os << "bridge" << endl;
-				vector<vec4> can_bridge;
-				check_bridge(temp_connect, can_bridge, myObj, merge_table);
-				if (can_bridge.size() > 0){
-					int bridge_index = rand() % can_bridge.size();
-					bridge(temp_connect, can_bridge.at(bridge_index));
-				}
-				num_bridge += 1;
-			}
-			else {
-				os << "kill" << endl;
-				int result;
-				do{
-					result = rand() % test_connect.at(COLOR_WHITE).size();
-				} while (!test_connect.at(COLOR_WHITE).at(result).exist);
-//				} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
-				os << result << endl;
-				kill(temp_connect, result);
-				num_kill += 1;
-			}
-		/*}
-		else{
-			cout << "kill" << endl;
+		int choose_op = rand() % 4;
+		if (choose_op == 0){
+			os << "split" << endl;
 			int result;
 			do{
 				result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
-			cout << result << endl;
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
+			os << result << endl;
+			split(temp_connect, result, myObj, cloud, splite_table);
+			num_split += 1;
+		}
+		else if (choose_op == 1){
+			os << "merge" << endl;
+			vector<vec4> can_merge;
+			check_merge(temp_connect, can_merge, myObj, merge_table);
+			if (can_merge.size() > 0){
+				int merge_index = rand() % can_merge.size();
+				os << merge_index << endl;
+				merge(temp_connect, can_merge.at(merge_index));
+			}
+			num_merge += 1;
+		}
+		else if (choose_op == 2){
+			os << "bridge" << endl;
+			vector<vec4> can_bridge;
+			check_bridge(temp_connect, can_bridge, myObj, merge_table);
+			if (can_bridge.size() > 0){
+				int bridge_index = rand() % can_bridge.size();
+				bridge(temp_connect, can_bridge.at(bridge_index));
+			}
+			num_bridge += 1;
+		}
+		else {
+			os << "kill" << endl;
+			int result;
+			do{
+				result = rand() % test_connect.at(COLOR_WHITE).size();
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+//			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
+			os << result << endl;
 			kill(temp_connect, result);
 			num_kill += 1;
-		}*/
+		}
+
 		finish = clock();
 		duration = (float)(finish - start) / CLOCKS_PER_SEC;
 		os << "op : " << duration << " s" << endl;
@@ -574,8 +581,8 @@ int main(int argc, char **argv)
 				os << "accept energy : " << temp_e << endl;
 				os << "energy(dist) : " << term[0] << endl;
 				os << "energy(angle) : " << term[1] << endl;
-				os << "energy(number) : " << term[2] << endl;
-				os << "energy(total_number) : " << term[3] << endl;
+				os << "energy(total_number) : " << term[2] << endl;
+				os << "energy(use_stick) : " << term[3] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_accept += 1;
@@ -585,14 +592,16 @@ int main(int argc, char **argv)
 				}
 
 				origin_e = temp_e;
+				
+				//output_zometool(temp_connect, string(to_string(i) + ".obj"));
 			}
 			else{
 				collision += 1;
 				os << "reject energy : " << temp_e << endl;
 				os << "energy(dist) : " << term[0] << endl;
 				os << "energy(angle) : " << term[1] << endl;
-				os << "energy(number) : " << term[2] << endl;
-				os << "energy(total_number) : " << term[3] << endl;
+				os << "energy(total_number) : " << term[2] << endl;
+				os << "energy(use_stick) : " << term[3] << endl;
 
 				if (temp_e < origin_e){
 					energy_smaller_reject += 1;
@@ -606,8 +615,8 @@ int main(int argc, char **argv)
 			os << "reject energy : " << temp_e << endl;
 			os << "energy(dist) : " << term[0] << endl;
 			os << "energy(angle) : " << term[1] << endl;
-			os << "energy(number) : " << term[2] << endl;
-			os << "energy(total_number) : " << term[3] << endl;
+			os << "energy(total_number) : " << term[2] << endl;
+			os << "energy(use_stick) : " << term[3] << endl;
 
 			if (temp_e < origin_e){
 				energy_smaller_reject += 1;
@@ -626,8 +635,8 @@ int main(int argc, char **argv)
 	os << "final energy : " << final_e << endl;
 	os << "final energy(dist) : " << final_term[0] << endl;
 	os << "final energy(angle) : " << final_term[1] << endl;
-	os << "final energy(number) : " << final_term[2] << endl;
-	os << "final energy(total_number) : " << final_term[3] << endl;
+	os << "final energy(total_number) : " << final_term[2] << endl;
+	os << "final energy(use_stick) : " << final_term[3] << endl;
 	os << endl;
 
 	os << "collision : " << collision << " " << num_iteration << endl;
@@ -650,29 +659,30 @@ int main(int argc, char **argv)
 	total_finish = clock();
 	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
 	os << endl << "totoal time : " << duration << " s" << endl;
-
-	//judge_outter(test_connect);
-
-	//kdtree_near_node_outter(myObj, test_connect);
-	
 	
 	os.close();
 	
-	vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
+	vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
 	kdtree_near_node_colorful(myObj, test_connect, materials_color);	
 
-	output_zometool(test_connect, string("2000_10000_new_angle.obj"));
-	output_struc(test_connect, string("2000_10000_new_angle.txt"));
-	output_material(materials_color, std::string("colorful_2000_10000_new_angle.mtl"));
-	output_zometool_colorful(test_connect, string("fake_2000_10000_new_angle.obj"), materials_color, std::string("colorful_2000_10000_new_angle.mtl"));
-	glmWriteOBJ_colorful(myObj, "fake_model_2000_10000_new_angle.obj", materials_color, std::string("colorful_2000_10000_new_angle.mtl"));
+	output_zometool(test_connect, string("1500_5000.obj"));
+	output_struc(test_connect, string("1500_5000.txt"));
+	
+	output_material(materials_color, std::string("1500_5000_colorful.mtl"));
+	output_zometool_exp(test_connect, string("fake_1500_5000(colorful).obj"), materials_color, std::string("1500_5000_colorful.mtl"), COLORFUL);
+	glmWriteOBJ_EXP(myObj, "fake_model_1500_5000(colorful).obj", materials_color, std::string("1500_5000_colorful.mtl"), COLORFUL);
 
 	kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
-	energy_angle_material(test_connect, material_energy_angle);
-	output_material(material_energy_dist, std::string("2000_10000_energy_dist_new_angle.mtl"));
-	output_material(material_energy_angle, std::string("2000_10000_energy_angle_new_angle.mtl"));
-	output_zometool_energy_angle(test_connect, string("fake_energy_2000_10000_new_angle(angle).obj"), material_energy_dist, std::string("2000_10000_energy_angle_new_angle.mtl"));
-	glmWriteOBJ_energy_dist(myObj, "fake_model_2000_10000_new_angle(dist).obj", material_energy_dist, std::string("2000_10000_energy_dist_new_angle.mtl"));
+	output_material(material_energy_dist, std::string("1500_5000_energy_dist.mtl"));
+	glmWriteOBJ_EXP(myObj, "fake_model_1500_5000(dist).obj", material_energy_dist, std::string("1500_5000_energy_dist.mtl"), ENERGY_DIST);
+	
+	energy_material(test_connect, material_energy_angle, ENERGY_ANGLE);
+	output_material(material_energy_angle, std::string("1500_5000_energy_angle.mtl"));
+	output_zometool_exp(test_connect, string("fake_energy_1500_5000(angle).obj"), material_energy_angle, std::string("1500_5000_energy_angle.mtl"), ENERGY_ANGLE);
+
+	energy_material(test_connect, material_use_stick, ENERGY_USE_STICK);
+	output_material(material_use_stick, std::string("1500_5000_energy_use_stick.mtl"));
+	output_zometool_exp(test_connect, string("fake_energy_1500_5000(use_stick).obj"), material_use_stick, std::string("1500_5000_energy_use_stick.mtl"), ENERGY_USE_STICK);
 	///*output_struc(test_connect, string("fake123.txt"));*/
 		
 

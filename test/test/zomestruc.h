@@ -35,12 +35,14 @@ public:
 	float surface_d;
 	float energy_d;
 	float energy_angle;
+	float energy_use_stick;
 
 	bool exist;
 	bool outter;
 
 	int material_id;
 	int material_id_energy_angle;
+	int material_id_energy_use_stick;
 };
 
 class zomestruc
@@ -80,8 +82,7 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filen
 
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
-void output_zometool_colorful(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename);
-void output_zometool_energy_angle(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename);
+void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename, int mode);
 
 float point_surface_dist(GLMmodel *model, vec3 &p);
 float point_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tri);
@@ -93,6 +94,6 @@ bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & giv
 void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count);
 void judge_outter(std::vector<std::vector<zomeconn>> &test_connect);
 
-void energy_angle_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials);
+void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, int mode);
 
 #endif // ZOMESTRUC_H_INCLUDED
