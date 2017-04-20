@@ -92,6 +92,12 @@ void init()
 
 	eye_pos[2] = eye_pos[2] + 2.0f * bound_size[2];
 
+	glmFacetNormals(myObj);
+
+	collect_edge(myObj, all_edge);
+
+	find_near_tri(myObj, all_edge);
+
 	//    recount_normal(myObj);
 	//    process_inner(myObj, myObj_inner);
 	//
@@ -127,82 +133,82 @@ void init()
 //	zometable merge_table(MERGE);
 //}
 
-void test()
-{
-	cout << "sdf segment" << endl;
-	sdf_segment(seg, myObj, model_source);
-
-	all_voxel.resize(seg.size());
-	zome_queue.resize(seg.size());
-
-	obb_center.resize(seg.size());
-	obb_max.resize(seg.size());
-	obb_min.resize(seg.size());
-	obb_size.resize(seg.size());
-	obb_angle.resize(seg.size());
-
-	cout << "generate piece" << endl;
-	#pragma omp parallel for
-	for (int i = 0; i < seg.size(); i += 1){
-		if (seg.size() > 1){
-			vector<edge> fill_edge;
-			collect_edge(&seg.at(i), fill_edge);
-			inform_vertex(&seg.at(i), fill_edge);
-
-			std::vector<int> single_use;
-			for (unsigned int j = 0; j < fill_edge.size(); j += 1){
-				if (fill_edge.at(j).face_id[1] == -1){
-					if ((unsigned)(find(single_use.begin(), single_use.end(), fill_edge.at(j).index[0]) - single_use.begin()) >= single_use.size()){
-						single_use.push_back(fill_edge.at(j).index[0]);
-					}
-					if ((unsigned)(find(single_use.begin(), single_use.end(), fill_edge.at(j).index[1]) - single_use.begin()) >= single_use.size()){
-						single_use.push_back(fill_edge.at(j).index[1]);
-					}
-				}
-			}
-
-			find_easy_loop(&seg.at(i), fill_edge, single_use);
-			fill_hole(seg.at(i), false);
-		}
-
-		std::string s = "test";
-		std::string piece = s + std::to_string(i) + ".obj";
-		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);
-
-
-		cout << "piece " << i + 1 << " :" << endl;
-		zome_queue.at(i).resize(4);
-		//computeBestFitOBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), start_m);
-		computeSimpleBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i));
-		//voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), COLOR_BLUE, SIZE_S);
-		voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
-		//voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), bound_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
-		cout << "output piece " << i + 1 << endl;
-		output_voxel(all_voxel.at(i), i);
-		output_zometool(all_voxel.at(i).at(0).rotation, zome_queue.at(i), i);
-
-		//for (int j = 0; j < 4; j += 1){
-		//	cout << j << " : " << endl;
-		//	if (j != 3){
-		//		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
-		//			cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
-		//			<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
-		//			}*/
-		//	}
-		//	else{
-		//		for (int k = 0; k < zome_queue.at(i).at(3).size(); k += 1){
-		//			cout << "\t " << k << " : ";
-		//			for (int a = 0; a < 62; a += 1){
-		//				if (zome_queue.at(i).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
-		//					cout << " (" << zome_queue.at(i).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(i).at(3).at(k).connect_stick[a][1] << ")";
-		//			}
-		//			cout << endl;
-		//			cout << "\t " << zome_queue.at(i).at(3).at(k).position[0] << " " << zome_queue.at(i).at(3).at(k).position[1] << " " << zome_queue.at(i).at(3).at(k).position[2] << endl;
-		//		}
-		//	}
-		//}
-	}
-}
+//void test()
+//{
+//	cout << "sdf segment" << endl;
+//	sdf_segment(seg, myObj, model_source);
+//
+//	all_voxel.resize(seg.size());
+//	zome_queue.resize(seg.size());
+//
+//	obb_center.resize(seg.size());
+//	obb_max.resize(seg.size());
+//	obb_min.resize(seg.size());
+//	obb_size.resize(seg.size());
+//	obb_angle.resize(seg.size());
+//
+//	cout << "generate piece" << endl;
+//	#pragma omp parallel for
+//	for (int i = 0; i < seg.size(); i += 1){
+//		if (seg.size() > 1){
+//			vector<edge> fill_edge;
+//			collect_edge(&seg.at(i), fill_edge);
+//			inform_vertex(&seg.at(i), fill_edge);
+//
+//			std::vector<int> single_use;
+//			for (unsigned int j = 0; j < fill_edge.size(); j += 1){
+//				if (fill_edge.at(j).face_id[1] == -1){
+//					if ((unsigned)(find(single_use.begin(), single_use.end(), fill_edge.at(j).index[0]) - single_use.begin()) >= single_use.size()){
+//						single_use.push_back(fill_edge.at(j).index[0]);
+//					}
+//					if ((unsigned)(find(single_use.begin(), single_use.end(), fill_edge.at(j).index[1]) - single_use.begin()) >= single_use.size()){
+//						single_use.push_back(fill_edge.at(j).index[1]);
+//					}
+//				}
+//			}
+//
+//			find_easy_loop(&seg.at(i), fill_edge, single_use);
+//			fill_hole(seg.at(i), false);
+//		}
+//
+//		std::string s = "test";
+//		std::string piece = s + std::to_string(i) + ".obj";
+//		glmWriteOBJ(&seg.at(i), my_strdup(piece.c_str()), GLM_NONE);
+//
+//
+//		cout << "piece " << i + 1 << " :" << endl;
+//		zome_queue.at(i).resize(4);
+//		//computeBestFitOBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), start_m);
+//		computeSimpleBB(seg.at(i).numvertices, seg.at(i).vertices, obb_size.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i));
+//		//voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), obb_angle.at(i), COLOR_BLUE, SIZE_S);
+//		voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), obb_center.at(i), vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
+//		//voxelization(&seg.at(i), all_voxel.at(i), zome_queue.at(i), obb_max.at(i), obb_min.at(i), bound_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
+//		cout << "output piece " << i + 1 << endl;
+//		output_voxel(all_voxel.at(i), i);
+//		output_zometool(all_voxel.at(i).at(0).rotation, zome_queue.at(i), i);
+//
+//		//for (int j = 0; j < 4; j += 1){
+//		//	cout << j << " : " << endl;
+//		//	if (j != 3){
+//		//		/*for (int k = 0; k < zome_queue.at(i).at(j).size(); k += 1){
+//		//			cout << "\t " << k << " : (" << zome_queue.at(i).at(j).at(k).fromindex[0] << " , " << zome_queue.at(i).at(j).at(k).fromindex[1]
+//		//			<< ") (" << zome_queue.at(i).at(j).at(k).towardindex[0] << " , " << zome_queue.at(i).at(j).at(k).towardindex[1] << ")" << endl;
+//		//			}*/
+//		//	}
+//		//	else{
+//		//		for (int k = 0; k < zome_queue.at(i).at(3).size(); k += 1){
+//		//			cout << "\t " << k << " : ";
+//		//			for (int a = 0; a < 62; a += 1){
+//		//				if (zome_queue.at(i).at(3).at(k).connect_stick[a] != vec2(-1.0f, -1.0f))
+//		//					cout << " (" << zome_queue.at(i).at(3).at(k).connect_stick[a][0] << " , " << zome_queue.at(i).at(3).at(k).connect_stick[a][1] << ")";
+//		//			}
+//		//			cout << endl;
+//		//			cout << "\t " << zome_queue.at(i).at(3).at(k).position[0] << " " << zome_queue.at(i).at(3).at(k).position[1] << " " << zome_queue.at(i).at(3).at(k).position[2] << endl;
+//		//		}
+//		//	}
+//		//}
+//	}
+//}
 
 void simple_test()
 {
@@ -261,7 +267,7 @@ void fake()
 	connect_points_optimize(p1, p2, record);
 
 	t.find_best_zome(p1, record.at(0), near_d, best_s, best_i);
-	
+
 	cout << record.at(0)[0] << " " << record.at(0)[1] << " " << record.at(0)[2] << endl;
 	cout << best_i << " " << best_s << endl;
 
@@ -348,13 +354,13 @@ void fake_case(int index)
 	zomedir t;
 
 	vec2 test = test_connect.at(COLOR_WHITE).at(index).connect_stick[5];
-		
+
 	int from_face = test_connect.at(test[0]).at(test[1]).fromface;
 	int from_size = test_connect.at(test[0]).at(test[1]).size;
-	
+
 	zomeconn new_ball;
 	zomeconn new_stick_f, new_stick_t;
-	
+
 	vec3 use_ball_p = test_connect.at(COLOR_WHITE).at(index).position;
 
 	vec3 use_stick_p = test_connect.at(test[0]).at(test[1]).position;
@@ -364,7 +370,7 @@ void fake_case(int index)
 
 	if (from_face != 5)
 		from_face = 5;
-	
+
 	if (toward_ball_index == 0){
 		toward_ball_index = test_connect.at(test[0]).at(test[1]).fromindex[1];
 	}
@@ -416,6 +422,136 @@ float decrease_t(int iteration)
 	return pow(0.99f, (float)num);
 }
 
+#include "MRFOptimization.h"
+#include "MRFProblems.h"
+#include "MRFGraphCut.h"
+
+void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, vector<simple_material> &materials)
+{
+	int num_labels = 0;
+
+	std::vector<std::vector<int>> index(test_connect.at(COLOR_WHITE).size());
+	std::vector<int> use;
+	for (int i = 0; i < model->numtriangles; i += 1){
+		index.at(model->triangles->at(i).near_node).push_back(i);
+		int test_index = find(use.begin(), use.end(), model->triangles->at(i).near_node) - use.begin();
+		if (test_index == use.size()){
+			use.push_back(model->triangles->at(i).near_node);
+		}
+	}
+
+	std::vector<int> convert_index(test_connect.at(COLOR_WHITE).size());
+	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		if (index.at(i).size() != 0){
+			convert_index.at(i) = num_labels;
+			num_labels += 1;
+		}
+	}
+
+	VKGraph * nhd = new VKGraph(model->numtriangles);
+
+	vector<double> dataterm(model->numtriangles * num_labels);
+	for (int i = 0; i < model->numtriangles; i += 1){
+
+		vec3 now_n = vec3(model->facetnorms->at(3 * model->triangles->at(i).findex + 0), model->facetnorms->at(3 * model->triangles->at(i).findex + 1), model->facetnorms->at(3 * model->triangles->at(i).findex + 2));
+		vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 now_g = (p1 + p2 + p3) / 3.0f;
+
+		for (int j = 0; j < 3; j += 1){
+			if (!nhd->Adjacent(model->triangles->at(i).near_tri[j], i))
+			{
+				vec3 judge_n = vec3(model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 0), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 1), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 2));
+				vec3 judge_p1 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 2));
+				vec3 judge_p2 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 2));
+				vec3 judge_p3 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[2] + 2));
+				vec3 judge_g = (judge_p1 + judge_p2 + judge_p3) / 3.0f;
+
+				float dist = (now_g - judge_g).length();
+				float angle;
+				if (fabs(now_n * judge_n - 1) < 0.001f){
+					angle = 0.0f + numeric_limits<float>::epsilon();
+				}
+				else{
+					angle = acos(now_n * judge_n);
+				}
+				float smooth = -log(angle / M_PI) * dist;
+
+				//cout << i << " : " << now_n * judge_n << " " << angle << " " << dist << " " << -log(angle / M_PI) << " " << -log(angle / M_PI) * dist << endl;
+				//cout << i << " : " << model->triangles->at(i).near_tri[j] << " : " << -log(angle / M_PI) * dist << endl;
+
+				nhd->AddEdge(i, model->triangles->at(i).near_tri[j], smooth);
+			}
+		}
+
+		for (int j = 0; j < use.size(); j += 1){
+			vec3 judge_p = test_connect.at(COLOR_WHITE).at(use.at(j)).position;
+			float dist = (now_g - judge_p).length();
+			//cout << dist << endl;
+			dataterm.at(i * num_labels + convert_index.at(use.at(j))) = dist;
+		}
+
+
+	}
+	std::cout << "NEdges = " << nhd->NumEdges() << std::endl;
+	
+	MRFProblemSmoothness problem(model->numtriangles, num_labels, nhd, dataterm);
+
+	MRFGraphCut mrfSolver(&problem);
+
+	mrfSolver.Optimize();
+
+	double Edata, Esmooth, Elabel;
+	double E = mrfSolver.Energy(&Edata, &Esmooth, &Elabel);
+	std::cout << "E1 = " << E << " = " << Edata << " + " << Esmooth << " + " << Elabel << std::endl;
+
+	vector<vector<int>> mat(model->numtriangles);
+		
+	for (int i = 0; i < model->numtriangles; i += 1){
+		mat.at(mrfSolver.Label(i)).push_back(i);
+		//cout << i << " : " << mrfSolver.Label(i) << endl;
+	}
+	
+	int material_class = 0;
+	for (int i = 0; i < model->numtriangles; i += 1){
+		if (mat.at(i).size() > 0){
+			for (unsigned int j = 0; j < mat.at(i).size(); j += 1){
+				model->triangles->at(mat.at(i).at(j)).material_id_graph_cut = material_class;
+			}
+			
+			simple_material temp_m;
+			temp_m.name = std::to_string(materials.size());
+			temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
+			temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
+			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;
+			materials.push_back(temp_m);
+			
+			material_class += 1;
+		}
+	}
+
+	
+	//
+	
+	//	for (int i = 0; i < model->numtriangles; i += 1){
+	//		if (mat.at(i).size() > 0){
+	//			for (unsigned int j = 0; j < mat.at(i).size(); j += 1){
+	//				model->triangles->at(mat.at(i).at(j)).material_id_graph_cut = material_class;
+	//			}
+	//
+	//			simple_material temp_m;
+	//			temp_m.name = std::to_string(materials.size());
+	//			temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
+	//			temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
+	//			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;
+	//			materials.push_back(temp_m);
+	//
+	//			material_class += 1;
+	//		}
+	//	}
+}
+
 int main(int argc, char **argv)
 {
 	//    findzoom();
@@ -424,7 +560,7 @@ int main(int argc, char **argv)
 	//myObj_inner = glmCopy(myObj);
 
 	init();
-
+	
 	////test();
 	//simple_test();
 
@@ -445,15 +581,15 @@ int main(int argc, char **argv)
 
 	//output_zometool(output_ans, string("head_out.obj"));
 	//output_struc(output_ans, string("head_out.txt"));
-			
+
 	clock_t total_start, total_finish;
 	total_start = clock();
 
 	clock_t start, finish;
 	float duration;
-	
+
 	srand((unsigned)time(NULL));
-	struc_parser(test_connect, string("head_out.txt"));
+	struc_parser(test_connect, string("2000_20000.txt"));
 
 	start = clock();
 
@@ -464,17 +600,17 @@ int main(int argc, char **argv)
 	judge_outter(test_connect);
 
 	//cout << myObj->numtriangles << endl;
-	
+
 	float origin_term[4];
 	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
-
-	int num_iteration = 5000;
+	
+	int num_iteration = 0;
 
 	finish = clock();
 	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	cout << duration << " s" << endl;
 
-	ofstream os("energy_1500_5000.txt");
+	ofstream os("energy_2000_0.txt");
 
 	os << "origin energy : " << origin_e << endl;
 	os << "origin energy(dist) : " << origin_term[0] << endl;
@@ -547,7 +683,7 @@ int main(int argc, char **argv)
 			do{
 				result = rand() % test_connect.at(COLOR_WHITE).size();
 			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
-//			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
+			//			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
 			os << result << endl;
 			kill(temp_connect, result);
 			num_kill += 1;
@@ -592,7 +728,7 @@ int main(int argc, char **argv)
 				}
 
 				origin_e = temp_e;
-				
+
 				//output_zometool(temp_connect, string(to_string(i) + ".obj"));
 			}
 			else{
@@ -628,7 +764,7 @@ int main(int argc, char **argv)
 		os << "T : " << now_t << endl;;
 		os << endl;
 	}
-	
+
 	float final_term[4];
 	float final_e = compute_energy(test_connect, myObj, cloud, final_term);
 
@@ -659,32 +795,36 @@ int main(int argc, char **argv)
 	total_finish = clock();
 	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
 	os << endl << "totoal time : " << duration << " s" << endl;
-	
-	os.close();
-	
-	vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
-	kdtree_near_node_colorful(myObj, test_connect, materials_color);	
 
-	output_zometool(test_connect, string("1500_5000.obj"));
-	output_struc(test_connect, string("1500_5000.txt"));
-	
-	output_material(materials_color, std::string("1500_5000_colorful.mtl"));
-	output_zometool_exp(test_connect, string("fake_1500_5000(colorful).obj"), materials_color, std::string("1500_5000_colorful.mtl"), COLORFUL);
-	glmWriteOBJ_EXP(myObj, "fake_model_1500_5000(colorful).obj", materials_color, std::string("1500_5000_colorful.mtl"), COLORFUL);
+	os.close();
+
+	vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
+	kdtree_near_node_colorful(myObj, test_connect, materials_color);
+
+	output_zometool(test_connect, string("2000_0.obj"));
+	output_struc(test_connect, string("2000_0.txt"));
+
+	output_material(materials_color, std::string("2000_0_colorful.mtl"));
+	output_zometool_exp(test_connect, string("fake_2000_0(colorful).obj"), materials_color, std::string("2000_0_colorful.mtl"), COLORFUL);
+	glmWriteOBJ_EXP(myObj, "fake_model_2000_0(colorful).obj", materials_color, std::string("2000_0_colorful.mtl"), COLORFUL);
 
 	kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
-	output_material(material_energy_dist, std::string("1500_5000_energy_dist.mtl"));
-	glmWriteOBJ_EXP(myObj, "fake_model_1500_5000(dist).obj", material_energy_dist, std::string("1500_5000_energy_dist.mtl"), ENERGY_DIST);
-	
+	output_material(material_energy_dist, std::string("2000_0_energy_dist.mtl"));
+	glmWriteOBJ_EXP(myObj, "fake_model_2000_0(dist).obj", material_energy_dist, std::string("2000_0_energy_dist.mtl"), ENERGY_DIST);
+
 	energy_material(test_connect, material_energy_angle, ENERGY_ANGLE);
-	output_material(material_energy_angle, std::string("1500_5000_energy_angle.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_1500_5000(angle).obj"), material_energy_angle, std::string("1500_5000_energy_angle.mtl"), ENERGY_ANGLE);
+	output_material(material_energy_angle, std::string("2000_0_energy_angle.mtl"));
+	output_zometool_exp(test_connect, string("fake_energy_2000_0(angle).obj"), material_energy_angle, std::string("2000_0_energy_angle.mtl"), ENERGY_ANGLE);
 
 	energy_material(test_connect, material_use_stick, ENERGY_USE_STICK);
-	output_material(material_use_stick, std::string("1500_5000_energy_use_stick.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_1500_5000(use_stick).obj"), material_use_stick, std::string("1500_5000_energy_use_stick.mtl"), ENERGY_USE_STICK);
+	output_material(material_use_stick, std::string("2000_0_energy_use_stick.mtl"));
+	output_zometool_exp(test_connect, string("fake_energy_2000_0(use_stick).obj"), material_use_stick, std::string("2000_0_energy_use_stick.mtl"), ENERGY_USE_STICK);
+	
+	vector<simple_material> materials_graph_cut;
+	test_graph_cut(myObj, test_connect, materials_graph_cut);
+	output_material(materials_graph_cut, std::string("graph_cut.mtl"));
+	glmWriteOBJ_EXP(myObj, "graph_cut.obj", materials_graph_cut, std::string("graph_cut.mtl"), GRAPH_CUT);
 	///*output_struc(test_connect, string("fake123.txt"));*/
-		
 
 
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -705,6 +845,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	//system("pause");
+	system("pause");
 	return 0;
 }

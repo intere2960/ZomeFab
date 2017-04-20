@@ -465,7 +465,7 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_number = pow((number - target_number), 2.0f) / target_number;*/
 
 	float energy_total_number = 0.0f;
-	float target_total_number = 1500.0f;
+	float target_total_number = 2000.0f;
 
 	int total_number = 0;
 	for (int i = 0; i < test_connect.size(); i += 1){
@@ -524,7 +524,7 @@ void kdtree_search(GLMmodel *model, PointCloud<num_t> &cloud, vec3 &test_point, 
 
 	const num_t query_pt[3] = { test_point[0], test_point[1], test_point[2] };
 	
-	size_t num_results = 10;
+	size_t num_results = (size_t)(model->numtriangles * 0.01);
 	std::vector<size_t>   ret_index(num_results);
 	std::vector<num_t> out_dist_sqr(num_results);
 
@@ -567,7 +567,7 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 
 		const float query_pt[3] = { test[0], test[1], test[2] };
 
-		size_t num_results = 10;
+		size_t num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 
@@ -589,11 +589,27 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 		}
 
 		if (temp_index != -1){
-			if (model->triangles->at(i).near_node != ret_index.at(temp_index)){
+			
+			/*int test_index;
+			vec3 test_p(cloud.pts[ret_index.at(temp_index)].x, cloud.pts[ret_index.at(temp_index)].y, cloud.pts[ret_index.at(temp_index)].z);
+			for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1)
+			{
+				if (test_connect.at(COLOR_WHITE).at(i).exist){
+					if ((test_p - test_connect.at(COLOR_WHITE).at(i).position).length() < 0.001f){
+						test_index = i;
+						break;
+					}
+				}
+			}*/
+
+			if (model->triangles->at(i).near_node != temp_index){
 				//cout << i << " : " << temp_index << endl;
-				//test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
+				//test_connect.at(COLOR_WHITE).at(test_index).outter = true;
+				
 				model->triangles->at(i).near_dist = sqrt(temp_dist);
+				
 				model->triangles->at(i).near_node = ret_index.at(temp_index);
+				
 				model->triangles->at(i).energy_d = pow(model->triangles->at(i).near_dist, 2) * (1.0f + forbidden_energy(model->triangles->at(i).near_dist));
 			}
 		}
@@ -626,7 +642,7 @@ void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>>
 
 		const float query_pt[3] = { test[0], test[1], test[2] };
 
-		size_t num_results = 10;
+		size_t num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 
@@ -680,7 +696,7 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 
 		const float query_pt[3] = { test[0], test[1], test[2] };
 
-		size_t num_results = 10;
+		size_t num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 
@@ -702,6 +718,19 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 		}
 
 		if (temp_index != -1){
+
+			/*int test_index;
+			vec3 test_p(cloud.pts[ret_index.at(temp_index)].x, cloud.pts[ret_index.at(temp_index)].y, cloud.pts[ret_index.at(temp_index)].z);
+			for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1)
+			{
+				if (test_connect.at(COLOR_WHITE).at(i).exist){
+					if ((test_p - test_connect.at(COLOR_WHITE).at(i).position).length() < 0.001f){
+						test_index = i;
+						break;
+					}
+				}
+			}*/
+
 			//cout << i << " : " << temp_index << endl;
 			//test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
 			if (test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id == -1){
@@ -713,11 +742,13 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 
 				test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id = materials.size();
 				model->triangles->at(i).material_id = materials.size();
+				model->triangles->at(i).near_node = ret_index.at(temp_index);
 
 				materials.push_back(temp_m);
 			}
 			else{
 				model->triangles->at(i).material_id = test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id;
+				model->triangles->at(i).near_node = ret_index.at(temp_index);
 			}
 		}
 		//cout << endl;

@@ -36,6 +36,7 @@
 #define ENERGY_DIST 2
 #define ENERGY_ANGLE 3
 #define ENERGY_USE_STICK 4
+#define GRAPH_CUT 5
 
 
 #endif

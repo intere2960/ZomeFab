@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
-#include "glm.h"
+#include "shell.h"
 
 void recount_normal(GLMmodel *myObj)
 {

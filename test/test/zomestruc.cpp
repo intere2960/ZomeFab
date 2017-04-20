@@ -610,10 +610,10 @@ void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std
 				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
 					if ((j % z_b->numtriangles) == 0){
 						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
-						if (output_connect.at(i).at(j / z_b->numtriangles).energy_use_stick == -1)
+						if (output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_use_stick == -1)
 							os << "usemtl initialShadingGroup" << std::endl;
 						else
-							os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).energy_use_stick).name << std::endl;
+							os << "usemtl " << materials.at(output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_use_stick).name << std::endl;
 					}
 					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
 				}
@@ -1141,7 +1141,7 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	}
 
 	Polyhedron_3 poly;
-	if (points.size() > 2){
+	if (points.size() > 3){
 		CGAL::convex_hull_3(points.begin(), points.end(), poly);
 	}
 	else{
@@ -1222,7 +1222,7 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 			if (mode == ENERGY_ANGLE){
 				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
 			}
-			else if (mode == ENERGY_ANGLE){
+			else if (mode == ENERGY_USE_STICK){
 				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_use_stick= num_class;
 			}
 			num_class += 1;
@@ -1233,7 +1233,7 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 				if (mode == ENERGY_ANGLE){
 					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
 				}
-				else if (mode == ENERGY_ANGLE){
+				else if (mode == ENERGY_USE_STICK){
 					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_use_stick = num_class;
 				}
 				num_class += 1;
@@ -1242,7 +1242,7 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 				if (mode == ENERGY_ANGLE){
 					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
 				}
-				else if (mode == ENERGY_ANGLE){
+				else if (mode == ENERGY_USE_STICK){
 					test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_use_stick = num_class;
 				}
 				num_class += 1;

@@ -669,6 +669,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 					T(numtriangles).material_id = -1;
 					T(numtriangles).material_id_energy = -1;
+					T(numtriangles).material_id_graph_cut = -1;
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -689,6 +690,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 						T(numtriangles).material_id = -1;
 						T(numtriangles).material_id_energy = -1;
+						T(numtriangles).material_id_graph_cut = -1;
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -716,6 +718,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 					T(numtriangles).material_id = -1;
 					T(numtriangles).material_id_energy = -1;
+					T(numtriangles).material_id_graph_cut = -1;
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -739,6 +742,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 						T(numtriangles).material_id = -1;
 						T(numtriangles).material_id_energy = -1;
+						T(numtriangles).material_id_graph_cut = -1;
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -763,6 +767,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 					T(numtriangles).material_id = -1;
 					T(numtriangles).material_id_energy = -1;
+					T(numtriangles).material_id_graph_cut = -1;
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -783,6 +788,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 						T(numtriangles).material_id = -1;
 						T(numtriangles).material_id_energy = -1;
+						T(numtriangles).material_id_graph_cut = -1;
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -805,6 +811,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 					T(numtriangles).material_id = -1;
 					T(numtriangles).material_id_energy = -1;
+					T(numtriangles).material_id_graph_cut = -1;
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -823,6 +830,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 
 						T(numtriangles).material_id = -1;
 						T(numtriangles).material_id_energy = -1;
+						T(numtriangles).material_id_graph_cut = -1;
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
@@ -1836,6 +1844,16 @@ glmWriteOBJ_EXP(GLMmodel* model, char* filename, std::vector<simple_material> ma
 		else if (mode == ENERGY_DIST){
 			if (model->triangles->at(i).material_id_energy != -1)
 				fprintf(file, "usemtl %s\n", materials.at(model->triangles->at(i).material_id_energy).name.c_str());
+			else
+				fprintf(file, "usemtl initialShadingGroup\n");
+			fprintf(file, "f %d %d %d\n",
+				T(i).vindices[0],
+				T(i).vindices[1],
+				T(i).vindices[2]);
+		}
+		else if (mode == GRAPH_CUT){
+			if (model->triangles->at(i).material_id_graph_cut != -1)
+				fprintf(file, "usemtl %s\n", materials.at(model->triangles->at(i).material_id_graph_cut).name.c_str());
 			else
 				fprintf(file, "usemtl initialShadingGroup\n");
 			fprintf(file, "f %d %d %d\n",

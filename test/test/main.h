@@ -19,19 +19,17 @@
 #include "fill.h"
 #include "zomedir.h"
 #include "voxel.h"
-#include "segment.h"
+//#include "segment.h"
 #include "bestfitobb.h"
 #include "pathdata.h"
 #include "operation.h"
-
-using namespace std;
 
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/head.obj";
+char model_source[] = "test_model/head_2times.obj";
 //cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -69,11 +67,11 @@ vec3 bound_size;
 vec3 bound_center;
 
 mat4 start_m;
-vector<vec3> obb_max;
-vector<vec3> obb_min;
-vector<vec3> obb_size;
-vector<vec3> obb_center;
-vector<vec3> obb_angle;
+std::vector<vec3> obb_max;
+std::vector<vec3> obb_min;
+std::vector<vec3> obb_size;
+std::vector<vec3> obb_center;
+std::vector<vec3> obb_angle;
 
 bool show = true;
 bool show_piece = true;
@@ -131,15 +129,15 @@ plane test_plane5(-0.521073, -0.171785, -0.836046, 4.02722, -1);
 //plane test_plane7(-0.837661, -0.521881, 0.161134, 67.0868, -1);
 //plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
-vector<plane> planes;
+std::vector<plane> planes;
 
-vector<edge> all_edge;
-vector<int> face_split_by_plane;
-vector<int> face_inner_split_by_plane;
+std::vector<edge> all_edge;
+std::vector<int> face_split_by_plane;
+std::vector<int> face_inner_split_by_plane;
 
-vector<vector<voxel>> all_voxel;
-vector<vector<vector<zomeconn>>> zome_queue;
-vector<GLMmodel> seg;
+std::vector<std::vector<voxel>> all_voxel;
+std::vector<std::vector<std::vector<zomeconn>>> zome_queue;
+std::vector<GLMmodel> seg;
 
 zometable splite_table(SPLITE);
 zometable merge_table(MERGE);

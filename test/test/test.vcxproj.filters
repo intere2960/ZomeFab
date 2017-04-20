@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="原始程式檔\RNBasics">
+      <UniqueIdentifier>{6f99a106-7e2e-4759-83ba-89561b5765d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\RNBasics">
+      <UniqueIdentifier>{c415f3f3-387f-4537-bb84-4284b484f905}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="原始程式檔\Graph_Cut">
+      <UniqueIdentifier>{ae623acc-1190-4360-9b58-99fdc21f357f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Graph_Cut">
+      <UniqueIdentifier>{150d4ee3-4558-4a66-af21-41bdc0fd3a38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="algebra3.cpp">
@@ -51,14 +63,89 @@
     <ClCompile Include="bestfitobb.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
-    <ClCompile Include="float_math.cpp">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
     <ClCompile Include="pathdata.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
     <ClCompile Include="operation.cpp">
       <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\R2Pixel.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNArray.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNBase.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNBasics.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNError.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNFlags.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNGrfx.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNHeap.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNIntval.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNMem.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNQueue.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNRgb.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNScalar.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNSvd.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNTime.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="RNBasics\RNType.cpp">
+      <Filter>原始程式檔\RNBasics</Filter>
+    </ClCompile>
+    <ClCompile Include="GCoptimization.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="graph.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="LinAlg.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkedBlockList.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="maxflow.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="MRFGraphCut.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="MRFOptimization.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="MRFProblems.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="VKGraph.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
+    </ClCompile>
+    <ClCompile Include="float_math.cpp">
+      <Filter>原始程式檔\Graph_Cut</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,9 +165,6 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="fill.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="float_math.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="global.h">
@@ -118,6 +202,99 @@
     </ClInclude>
     <ClInclude Include="operation.h">
       <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="block.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="graph.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNType.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\R2Pixel.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNArray.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNBase.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNBasics.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNCompat.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNError.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNExtern.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNFlags.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNGrfx.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNHeap.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNIntval.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNMem.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNQueue.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNRgb.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNScalar.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNSvd.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="RNBasics\RNTime.h">
+      <Filter>標頭檔\RNBasics</Filter>
+    </ClInclude>
+    <ClInclude Include="float_math.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="energy.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="GCoptimization.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="LinAlg.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedBlockList.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="MRFGraphCut.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="MRFOptimization.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="MRFProblems.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="Sortable.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="VkFunctions.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="VKGraph.h">
+      <Filter>標頭檔\Graph_Cut</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

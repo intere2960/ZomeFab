@@ -70,6 +70,8 @@ public:
   bool split_by_process;
   int material_id;
   int material_id_energy;
+  int material_id_graph_cut;
+  int near_tri[3];
 
   int near_node;
   float near_dist;
