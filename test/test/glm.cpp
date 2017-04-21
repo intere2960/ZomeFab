@@ -36,6 +36,32 @@ typedef struct _GLMnode {
     struct _GLMnode* next;
 } GLMnode;
 
+vec3
+glmCentroid(GLMmodel *model)
+{
+	float area = 0.0f;
+	vec3 c;
+	for (int i = 0; i < model->numtriangles; i += 1){
+		vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 g = (p1 + p2 + p3) / 3.0f;
+
+		vec3 v1 = p1 - p2;
+		vec3 v2 = p3 - p2;
+
+		vec3 test_normal = v2 ^ v1;
+		float face_area = test_normal.length();
+		c += face_area * g;
+		area += face_area;
+	}
+
+	printf("c : %f %f %f\n", c[0] / area, c[1] / area, c[2] / area);
+
+	if (area == 0) return c;
+	else return c / area;
+}
+
 /* glmMax: returns the maximum of two floats */
 static GLfloat
 glmMax(GLfloat a, GLfloat b)
@@ -2291,6 +2317,43 @@ void output_material(std::vector<simple_material> materials, std::string &filena
 		fprintf(file, "Ka 0.00 0.00 0.00\n");
 		fprintf(file, "Tf 1.00 1.00 1.00\n");
 		fprintf(file, "Ni 1.00\n");
+	}
+
+	fclose(file);
+}
+
+void output_nearest_point(GLMmodel *model, std::string &filename)
+{
+	FILE* file;
+	file = fopen(filename.c_str(), "w");
+
+	fprintf(file, "%d\n", model->numtriangles);
+
+	for (int i = 0; i < model->numtriangles; i += 1){
+		fprintf(file, "%d\n", model->triangles->at(i).near_node);
+	}
+
+	fclose(file);
+}
+
+void nearest_point_parser(GLMmodel *model, std::string &filename)
+{
+	FILE* file;
+	file = fopen(filename.c_str(), "r");
+
+	/*fprintf(file, "%d\n", model->numtriangles);
+
+	for (int i = 0; i < model->numtriangles; i += 1){
+		fprintf(file, "%d\n", model->triangles->at(i).near_node);
+	}*/
+
+	int num_tri;
+	fscanf(file, "%d", &num_tri);
+
+	for (int i = 0; i < num_tri; i += 1){
+		int temp_node;
+		fscanf(file, "%d", &temp_node);
+		model->triangles->at(i).near_node = temp_node;
 	}
 
 	fclose(file);

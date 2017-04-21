@@ -426,7 +426,34 @@ float decrease_t(int iteration)
 #include "MRFProblems.h"
 #include "MRFGraphCut.h"
 
-void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, vector<simple_material> &materials)
+double AverageRadius(GLMmodel *model, vec3 &centroid)
+{
+	float area = 0.0f;
+	float distance = 0;
+	for (int i = 0; i < model->numtriangles; i += 1){
+	
+		vec3 p1 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
+		vec3 p2 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[1] + 2));
+		vec3 p3 = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[2] + 2));
+		vec3 g = (p1 + p2 + p3) / 3.0f;
+
+		vec3 v1 = p1 - p2;
+		vec3 v2 = p3 - p2;
+
+		vec3 test_normal = v2 ^ v1;
+		float face_area = test_normal.length();
+		distance += face_area *	(g - centroid).length();
+		area += face_area;
+
+	}
+	
+	if (area == 0) 
+		return 0;
+	else 
+		return distance / area; 
+}
+
+void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, vector<simple_material> &materials, float color_material[20][3])
 {
 	int num_labels = 0;
 
@@ -450,6 +477,11 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 
 	VKGraph * nhd = new VKGraph(model->numtriangles);
 
+	double radius = AverageRadius(model, glmCentroid(model));
+	cout << "radius : " << radius << endl;
+
+	float max_data = 0.0f;
+	float max_smooth = 0.0f;
 	vector<double> dataterm(model->numtriangles * num_labels);
 	for (int i = 0; i < model->numtriangles; i += 1){
 
@@ -469,6 +501,7 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 				vec3 judge_g = (judge_p1 + judge_p2 + judge_p3) / 3.0f;
 
 				float dist = (now_g - judge_g).length();
+				float edist = 10 * dist / radius;
 				float angle;
 				if (fabs(now_n * judge_n - 1) < 0.001f){
 					angle = 0.0f + numeric_limits<float>::epsilon();
@@ -476,12 +509,16 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 				else{
 					angle = acos(now_n * judge_n);
 				}
-				float smooth = -log(angle / M_PI) * dist;
+				float smooth = -log(angle / M_PI) * edist;
 
 				//cout << i << " : " << now_n * judge_n << " " << angle << " " << dist << " " << -log(angle / M_PI) << " " << -log(angle / M_PI) * dist << endl;
 				//cout << i << " : " << model->triangles->at(i).near_tri[j] << " : " << -log(angle / M_PI) * dist << endl;
 
 				nhd->AddEdge(i, model->triangles->at(i).near_tri[j], smooth);
+
+				if (max_smooth < smooth){
+					max_smooth = smooth;
+				}
 			}
 		}
 
@@ -490,10 +527,22 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 			float dist = (now_g - judge_p).length();
 			//cout << dist << endl;
 			dataterm.at(i * num_labels + convert_index.at(use.at(j))) = dist;
+			if (max_data < dist){
+				max_data = dist;
+			}
 		}
-
-
 	}
+
+	for (int i = 0; i < model->numtriangles; i += 1){
+		for (int j = 0; j < nhd->Node(i)->edges.size(); j += 1){
+			nhd->Node(i)->edges.at(j)->weight /= max_smooth;
+		}
+	}
+
+	for (int i = 0; i < dataterm.size(); i += 1){
+		dataterm.at(i) /= max_data;
+	}
+
 	std::cout << "NEdges = " << nhd->NumEdges() << std::endl;
 	
 	MRFProblemSmoothness problem(model->numtriangles, num_labels, nhd, dataterm);
@@ -505,6 +554,9 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	double Edata, Esmooth, Elabel;
 	double E = mrfSolver.Energy(&Edata, &Esmooth, &Elabel);
 	std::cout << "E1 = " << E << " = " << Edata << " + " << Esmooth << " + " << Elabel << std::endl;
+
+	cout << "max data : " << max_data << endl;
+	cout << "max smooth : " << max_smooth << endl;
 
 	vector<vector<int>> mat(model->numtriangles);
 		
@@ -525,11 +577,24 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 			temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
 			temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
 			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;
+			/*temp_m.diffuse[0] = color_material[i % 20][0];
+			temp_m.diffuse[1] = color_material[i % 20][1];
+			temp_m.diffuse[2] = color_material[i % 20][2];*/
 			materials.push_back(temp_m);
 			
 			material_class += 1;
 		}
 	}
+
+	/*vec3 deleta = vec3(0.0f, 1.0f, -1.0f) / material_class;
+	for (int i = 0; i < material_class; i += 1){
+		simple_material temp_m;
+		temp_m.name = std::to_string(materials.size());
+		temp_m.diffuse[0] = 0.8f + deleta[0] * i;
+		temp_m.diffuse[1] = 0.0f + deleta[1] * i;
+		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
+		materials.push_back(temp_m);
+	}*/
 
 	
 	//
@@ -579,8 +644,8 @@ int main(int argc, char **argv)
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	//output_zometool(output_ans, string("head_out.obj"));
-	//output_struc(output_ans, string("head_out.txt"));
+	//output_zometool(output_ans, string("fake_head_out.obj"));
+	//output_struc(output_ans, string("fake_head_out.txt"));
 
 	clock_t total_start, total_finish;
 	total_start = clock();
@@ -591,181 +656,185 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));
 	struc_parser(test_connect, string("2000_20000.txt"));
 
-	start = clock();
+	nearest_point_parser(myObj, string("head_2times_nearest_point.txt"));
 
-	PointCloud<float> cloud;
-	// Generate points:
-	generatePointCloud(cloud, myObj);
+	////start = clock();
 
-	judge_outter(test_connect);
+	//PointCloud<float> cloud;
+	//// Generate points:
+	//generatePointCloud(cloud, myObj);
+
+	//judge_outter(test_connect);
 
 	//cout << myObj->numtriangles << endl;
 
-	float origin_term[4];
-	float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
-	
-	int num_iteration = 0;
+	//float origin_term[4];
+	//float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	finish = clock();
-	duration = (float)(finish - start) / CLOCKS_PER_SEC;
-	cout << duration << " s" << endl;
+	//output_nearest_point(myObj, string("head_2times_nearest_point.txt"));
+	//
+	//int num_iteration = 0;
 
-	ofstream os("energy_2000_0.txt");
+	//finish = clock();
+	//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	//cout << duration << " s" << endl;
 
-	os << "origin energy : " << origin_e << endl;
-	os << "origin energy(dist) : " << origin_term[0] << endl;
-	os << "origin energy(angle) : " << origin_term[1] << endl;
-	os << "origin energy(total_number) : " << origin_term[2] << endl;
-	os << "origin energy(use_stick) : " << origin_term[3] << endl;
-	os << endl;
+	//ofstream os("energy_2000_0.txt");
 
-	//vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
-	//energy_angle_material(test_connect, material_energy_angle);
+	//os << "origin energy : " << origin_e << endl;
+	//os << "origin energy(dist) : " << origin_term[0] << endl;
+	//os << "origin energy(angle) : " << origin_term[1] << endl;
+	//os << "origin energy(total_number) : " << origin_term[2] << endl;
+	//os << "origin energy(use_stick) : " << origin_term[3] << endl;
+	//os << endl;
 
-	os << "start" << endl;
-	int collision = 0;
+	////vector<simple_material> materials_color, material_energy_dist, material_energy_angle;
+	////energy_angle_material(test_connect, material_energy_angle);
 
-	vec3 give_up;
-	int num_split = 0, num_merge = 0, num_bridge = 0, num_kill = 0;
+	//os << "start" << endl;
+	//int collision = 0;
 
-	float inital_t = 1.0f;
+	//vec3 give_up;
+	//int num_split = 0, num_merge = 0, num_bridge = 0, num_kill = 0;
 
-	int energy_bigger_accept = 0;
-	int energy_smaller_accept = 0;
-	int energy_bigger_reject = 0;
-	int energy_smaller_reject = 0;
+	//float inital_t = 1.0f;
 
-	for (int i = 0; i < num_iteration; i += 1){
-		float now_t = inital_t * decrease_t(i);
+	//int energy_bigger_accept = 0;
+	//int energy_smaller_accept = 0;
+	//int energy_bigger_reject = 0;
+	//int energy_smaller_reject = 0;
 
-		os << i << " :" << endl;
+	//for (int i = 0; i < num_iteration; i += 1){
+	//	float now_t = inital_t * decrease_t(i);
 
-		vector<vector<zomeconn>> temp_connect(4);
-		temp_connect = test_connect;
+	//	os << i << " :" << endl;
 
-		start = clock();
+	//	vector<vector<zomeconn>> temp_connect(4);
+	//	temp_connect = test_connect;
 
-		int choose_op = rand() % 4;
-		if (choose_op == 0){
-			os << "split" << endl;
-			int result;
-			do{
-				result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
-			os << result << endl;
-			split(temp_connect, result, myObj, cloud, splite_table);
-			num_split += 1;
-		}
-		else if (choose_op == 1){
-			os << "merge" << endl;
-			vector<vec4> can_merge;
-			check_merge(temp_connect, can_merge, myObj, merge_table);
-			if (can_merge.size() > 0){
-				int merge_index = rand() % can_merge.size();
-				os << merge_index << endl;
-				merge(temp_connect, can_merge.at(merge_index));
-			}
-			num_merge += 1;
-		}
-		else if (choose_op == 2){
-			os << "bridge" << endl;
-			vector<vec4> can_bridge;
-			check_bridge(temp_connect, can_bridge, myObj, merge_table);
-			if (can_bridge.size() > 0){
-				int bridge_index = rand() % can_bridge.size();
-				bridge(temp_connect, can_bridge.at(bridge_index));
-			}
-			num_bridge += 1;
-		}
-		else {
-			os << "kill" << endl;
-			int result;
-			do{
-				result = rand() % test_connect.at(COLOR_WHITE).size();
-			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
-			//			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
-			os << result << endl;
-			kill(temp_connect, result);
-			num_kill += 1;
-		}
+	//	start = clock();
 
-		finish = clock();
-		duration = (float)(finish - start) / CLOCKS_PER_SEC;
-		os << "op : " << duration << " s" << endl;
+	//	int choose_op = rand() % 4;
+	//	if (choose_op == 0){
+	//		os << "split" << endl;
+	//		int result;
+	//		do{
+	//			result = rand() % test_connect.at(COLOR_WHITE).size();
+	//		} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
+	//		os << result << endl;
+	//		split(temp_connect, result, myObj, cloud, splite_table);
+	//		num_split += 1;
+	//	}
+	//	else if (choose_op == 1){
+	//		os << "merge" << endl;
+	//		vector<vec4> can_merge;
+	//		check_merge(temp_connect, can_merge, myObj, merge_table);
+	//		if (can_merge.size() > 0){
+	//			int merge_index = rand() % can_merge.size();
+	//			os << merge_index << endl;
+	//			merge(temp_connect, can_merge.at(merge_index));
+	//		}
+	//		num_merge += 1;
+	//	}
+	//	else if (choose_op == 2){
+	//		os << "bridge" << endl;
+	//		vector<vec4> can_bridge;
+	//		check_bridge(temp_connect, can_bridge, myObj, merge_table);
+	//		if (can_bridge.size() > 0){
+	//			int bridge_index = rand() % can_bridge.size();
+	//			bridge(temp_connect, can_bridge.at(bridge_index));
+	//		}
+	//		num_bridge += 1;
+	//	}
+	//	else {
+	//		os << "kill" << endl;
+	//		int result;
+	//		do{
+	//			result = rand() % test_connect.at(COLOR_WHITE).size();
+	//		} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+	//		//			} while (!test_connect.at(COLOR_WHITE).at(result).exist || test_connect.at(COLOR_WHITE).at(result).outter);
+	//		os << result << endl;
+	//		kill(temp_connect, result);
+	//		num_kill += 1;
+	//	}
 
-		judge_outter(temp_connect);
+	//	finish = clock();
+	//	duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	//	os << "op : " << duration << " s" << endl;
 
-		start = clock();
-		float term[4];
-		float temp_e = compute_energy(temp_connect, myObj, cloud, term);
-		finish = clock();
-		duration = (float)(finish - start) / CLOCKS_PER_SEC;
-		os << "energy : " << duration << " s" << endl;
+	//	judge_outter(temp_connect);
 
-		float p = (float)rand() / (float)RAND_MAX;
-		os << p << " " << exp((origin_e - temp_e) / now_t) << endl;
+	//	start = clock();
+	//	float term[4];
+	//	float temp_e = compute_energy(temp_connect, myObj, cloud, term);
+	//	finish = clock();
+	//	duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	//	os << "energy : " << duration << " s" << endl;
 
-		if (p < exp((origin_e - temp_e) / now_t)){
-			if (collision_test(temp_connect, give_up)){
+	//	float p = (float)rand() / (float)RAND_MAX;
+	//	os << p << " " << exp((origin_e - temp_e) / now_t) << endl;
 
-				//start = clock();
-				test_connect = temp_connect;
-				finish = clock();
-				//duration = (float)(finish - start) / CLOCKS_PER_SEC;
-				//cout << "copy : " << duration << " s" << endl;
+	//	if (p < exp((origin_e - temp_e) / now_t)){
+	//		if (collision_test(temp_connect, give_up)){
 
-				os << "accept energy : " << temp_e << endl;
-				os << "energy(dist) : " << term[0] << endl;
-				os << "energy(angle) : " << term[1] << endl;
-				os << "energy(total_number) : " << term[2] << endl;
-				os << "energy(use_stick) : " << term[3] << endl;
+	//			//start = clock();
+	//			test_connect = temp_connect;
+	//			finish = clock();
+	//			//duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	//			//cout << "copy : " << duration << " s" << endl;
 
-				if (temp_e < origin_e){
-					energy_smaller_accept += 1;
-				}
-				else{
-					energy_bigger_accept += 1;
-				}
+	//			os << "accept energy : " << temp_e << endl;
+	//			os << "energy(dist) : " << term[0] << endl;
+	//			os << "energy(angle) : " << term[1] << endl;
+	//			os << "energy(total_number) : " << term[2] << endl;
+	//			os << "energy(use_stick) : " << term[3] << endl;
 
-				origin_e = temp_e;
+	//			if (temp_e < origin_e){
+	//				energy_smaller_accept += 1;
+	//			}
+	//			else{
+	//				energy_bigger_accept += 1;
+	//			}
 
-				//output_zometool(temp_connect, string(to_string(i) + ".obj"));
-			}
-			else{
-				collision += 1;
-				os << "reject energy : " << temp_e << endl;
-				os << "energy(dist) : " << term[0] << endl;
-				os << "energy(angle) : " << term[1] << endl;
-				os << "energy(total_number) : " << term[2] << endl;
-				os << "energy(use_stick) : " << term[3] << endl;
+	//			origin_e = temp_e;
 
-				if (temp_e < origin_e){
-					energy_smaller_reject += 1;
-				}
-				else{
-					energy_bigger_reject += 1;
-				}
-			}
-		}
-		else{
-			os << "reject energy : " << temp_e << endl;
-			os << "energy(dist) : " << term[0] << endl;
-			os << "energy(angle) : " << term[1] << endl;
-			os << "energy(total_number) : " << term[2] << endl;
-			os << "energy(use_stick) : " << term[3] << endl;
+	//			//output_zometool(temp_connect, string(to_string(i) + ".obj"));
+	//		}
+	//		else{
+	//			collision += 1;
+	//			os << "reject energy : " << temp_e << endl;
+	//			os << "energy(dist) : " << term[0] << endl;
+	//			os << "energy(angle) : " << term[1] << endl;
+	//			os << "energy(total_number) : " << term[2] << endl;
+	//			os << "energy(use_stick) : " << term[3] << endl;
 
-			if (temp_e < origin_e){
-				energy_smaller_reject += 1;
-			}
-			else{
-				energy_bigger_reject += 1;
-			}
-		}
-		os << "T : " << now_t << endl;;
-		os << endl;
-	}
+	//			if (temp_e < origin_e){
+	//				energy_smaller_reject += 1;
+	//			}
+	//			else{
+	//				energy_bigger_reject += 1;
+	//			}
+	//		}
+	//	}
+	//	else{
+	//		os << "reject energy : " << temp_e << endl;
+	//		os << "energy(dist) : " << term[0] << endl;
+	//		os << "energy(angle) : " << term[1] << endl;
+	//		os << "energy(total_number) : " << term[2] << endl;
+	//		os << "energy(use_stick) : " << term[3] << endl;
 
-	float final_term[4];
+	//		if (temp_e < origin_e){
+	//			energy_smaller_reject += 1;
+	//		}
+	//		else{
+	//			energy_bigger_reject += 1;
+	//		}
+	//	}
+	//	os << "T : " << now_t << endl;;
+	//	os << endl;
+	//}
+
+	/*float final_term[4];
 	float final_e = compute_energy(test_connect, myObj, cloud, final_term);
 
 	os << "final energy : " << final_e << endl;
@@ -790,15 +859,15 @@ int main(int argc, char **argv)
 	os << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
 	os << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
 	os << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
-	os << "Ball : " << count[3][0] << endl;
+	os << "Ball : " << count[3][0] << endl;*/
 
-	total_finish = clock();
+	/*total_finish = clock();
 	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
 	os << endl << "totoal time : " << duration << " s" << endl;
 
-	os.close();
+	os.close();*/
 
-	vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
+	/*vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
 	kdtree_near_node_colorful(myObj, test_connect, materials_color);
 
 	output_zometool(test_connect, string("2000_0.obj"));
@@ -818,12 +887,13 @@ int main(int argc, char **argv)
 
 	energy_material(test_connect, material_use_stick, ENERGY_USE_STICK);
 	output_material(material_use_stick, std::string("2000_0_energy_use_stick.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_2000_0(use_stick).obj"), material_use_stick, std::string("2000_0_energy_use_stick.mtl"), ENERGY_USE_STICK);
+	output_zometool_exp(test_connect, string("fake_energy_2000_0(use_stick).obj"), material_use_stick, std::string("2000_0_energy_use_stick.mtl"), ENERGY_USE_STICK);*/
 	
 	vector<simple_material> materials_graph_cut;
-	test_graph_cut(myObj, test_connect, materials_graph_cut);
-	output_material(materials_graph_cut, std::string("graph_cut.mtl"));
-	glmWriteOBJ_EXP(myObj, "graph_cut.obj", materials_graph_cut, std::string("graph_cut.mtl"), GRAPH_CUT);
+	test_graph_cut(myObj, test_connect, materials_graph_cut, color_material);
+	output_material(materials_graph_cut, std::string("graph_cut10000_normal(data_smooth).mtl"));
+	glmWriteOBJ_EXP(myObj, "graph_cut10000_normal(data_smooth).obj", materials_graph_cut, std::string("graph_cut10000_normal(data_smooth).mtl"), GRAPH_CUT);
+	
 	///*output_struc(test_connect, string("fake123.txt"));*/
 
 

@@ -142,6 +142,13 @@ public:
   std::vector<Loop> *loop = NULL;
 };
 
+void output_nearest_point(GLMmodel *model, std::string &filename);
+
+void nearest_point_parser(GLMmodel *model, std::string &filename);
+
+vec3
+glmCentroid(GLMmodel *model);
+
 GLMmodel* glmCopy(GLMmodel* m1);
 
 /* glmUnitize: "unitize" a model by translating it to the origin and

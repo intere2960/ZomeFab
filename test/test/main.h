@@ -30,7 +30,7 @@ GLMmodel *myObj_inner = NULL;
 GLMmodel temp_piece;
 
 char model_source[] = "test_model/head_2times.obj";
-//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head
+//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head
 char model_out[] = "test_model/out/out_p.obj";
 
 int width, height;
@@ -141,6 +141,14 @@ std::vector<GLMmodel> seg;
 
 zometable splite_table(SPLITE);
 zometable merge_table(MERGE);
+
+float color_material[20][3]
+= { 
+{ 0.5546875, 0.5546875, 0.5546875 }, { 0.9140625, 0.0, 0.0 }, { 1, 0.20703125, 0.6015625 }, { 1.0, 0.0, 1.0 }, { 0.609375, 0.20703125, 1.0 },
+{ 0.4140625, 0.4140625, 1.0 }, { 0.15625, 0.578125, 1.0 }, { 0.0, 1.0, 1.0 }, { 0.1015625, 0.98828125, 0.609375 }, { 0.15625, 1.0, 0.15625 },
+{ 0.65625, 1.0, 0.140625 }, { 0.97265625, 0.97265625, 0.0 }, { 1.0, 0.82421875, 0.0234375 }, { 1.0, 0.625, 0.2578125 }, { 1.0, 0.5, 0.25 },
+{ 0.80859375, 0.6171875, 0.6171875 }, { 0.7578125, 0.7578125, 0.52734375 }, { 0.58203125, 0.7890625, 0.7890625 }, { 0.71875, 0.71875, 0.859375 }, { 0.7890625, 0.5546875, 0.7578125 }
+};
 
 //bounding box
 
