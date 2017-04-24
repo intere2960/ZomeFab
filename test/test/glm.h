@@ -146,6 +146,9 @@ void output_nearest_point(GLMmodel *model, std::string &filename);
 
 void nearest_point_parser(GLMmodel *model, std::string &filename);
 
+vec2
+tri_find_neigbor(GLMtriangle t1, GLMtriangle t2);
+
 vec3
 glmCentroid(GLMmodel *model);
 
@@ -176,6 +179,9 @@ glmDimensions(GLMmodel* model, GLfloat* dimensions);
  */
 GLvoid
 glmScale(GLMmodel* model, GLfloat scale);
+
+GLvoid
+glmScale_y(GLMmodel* model, GLfloat scale_y);
 
 GLvoid
 glmRT(GLMmodel* model, vec3 &rotate, vec3 &translate);

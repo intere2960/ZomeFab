@@ -21,7 +21,7 @@ MRFGraphCut::MRFGraphCut(const MRFProblem * problem, double real2int)
 			m_aLabelCost[i*m_pProblem->NLabels()+j] = (i==j? 0 : 1);
 
 		m_pGeneralGraphOptim->setSmoothCost(m_aLabelCost);
-		m_pGeneralGraphOptim->setLabelCost(0);
+		m_pGeneralGraphOptim->setLabelCost(1000);
 		
 		for (int n1=0; n1<m_pProblem->NNodes(); n1++)
 		for (int nn=0; nn<m_pProblem->NNeighbors(n1); nn++)
@@ -41,6 +41,50 @@ MRFGraphCut::MRFGraphCut(const MRFProblem * problem, double real2int)
 	catch (...)
 	{
 		std::cout<<"[ERROR] MRF Initialization failed with unknown exception"<<std::endl;
+		assert(false);
+	}
+}
+
+MRFGraphCut::MRFGraphCut(const MRFProblem * problem, float label, double real2int)
+	: MRFOptimizer(problem)
+{
+	m_fReal2Int = real2int;
+	try
+	{
+		m_pProblem = problem;
+		assert(m_pProblem != NULL && m_pProblem->NLabels()>0 && m_pProblem->NNodes());
+		m_aDataCost = new int[m_pProblem->NNodes()*m_pProblem->NLabels()];
+		m_aLabelCost = new int[m_pProblem->NLabels()*m_pProblem->NLabels()];
+
+		m_pGeneralGraphOptim = new GCoptimizationGeneralGraph(m_pProblem->NNodes(), m_pProblem->NLabels());
+
+		UpdateDataCosts();
+
+		for (int i = 0; i<m_pProblem->NLabels(); i++)
+			for (int j = 0; j<m_pProblem->NLabels(); j++)
+				m_aLabelCost[i*m_pProblem->NLabels() + j] = (i == j ? 0 : 1);
+
+		m_pGeneralGraphOptim->setSmoothCost(m_aLabelCost);
+		m_pGeneralGraphOptim->setLabelCost(label);
+
+		for (int n1 = 0; n1<m_pProblem->NNodes(); n1++)
+			for (int nn = 0; nn<m_pProblem->NNeighbors(n1); nn++)
+			{
+				int n2 = m_pProblem->Neighbor(n1, nn);
+				assert(n2 < m_pProblem->NNodes());
+				assert(m_pProblem->SafeCastToSmoothness() != NULL);		// i.e. different labeling will have the same penalty
+				double w = m_pProblem->EdgeCost(n1, n2, 0, 1);			// just any different labels
+				m_pGeneralGraphOptim->setNeighbors(n1, n2, (int)(w*m_fReal2Int));
+			}
+	}
+	catch (GCException exception)
+	{
+		exception.Report();
+		assert(false);
+	}
+	catch (...)
+	{
+		std::cout << "[ERROR] MRF Initialization failed with unknown exception" << std::endl;
 		assert(false);
 	}
 }

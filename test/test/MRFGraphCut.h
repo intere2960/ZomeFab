@@ -17,6 +17,7 @@ class MRFGraphCut : public MRFOptimizer
 {
 	public:
 		MRFGraphCut(const MRFProblem * problem, double real2int=1000);
+		MRFGraphCut(const MRFProblem * problem, float label, double real2int = 1000);
 		virtual ~MRFGraphCut();
 		
 		virtual void Optimize(int nIterations = -1);

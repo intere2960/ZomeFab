@@ -1,6 +1,7 @@
 #include "operation.h"
 #include <algorithm>
 #include <omp.h>
+#include <ctime>
 
 #include <iostream>
 using namespace std;
@@ -399,12 +400,17 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 
 	//energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * num_outter);
 
+	//start = clock();
 	kdtree_near_node(model, test_connect);
 	for (unsigned int i = 0; i < model->numtriangles; i += 1){
 		energy_dist += model->triangles->at(i).energy_d;
 	}
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * model->numtriangles);
+	/*finish = clock();
+	duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	cout << "dist : " << duration << " s" << endl;*/
 
+	//start = clock();
 	float energy_angle = 0.0f;
 	float energy_use_stick = 0.0f;
 	//#pragma omp parallel for
@@ -451,6 +457,9 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	}
 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
+	/*finish = clock();
+	duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	cout << "angle, use_stick : " << duration << " s" << endl;*/
 
 	/*float energy_number = 0.0f;
 	float target_number = 500.0f;
@@ -465,8 +474,9 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	energy_number = pow((number - target_number), 2.0f) / target_number;*/
 
 	float energy_total_number = 0.0f;
-	float target_total_number = 2000.0f;
+	float target_total_number = 1500.0f;
 
+	//start = clock();
 	int total_number = 0;
 	for (int i = 0; i < test_connect.size(); i += 1){
 		for (int j = 0; j < test_connect.at(i).size(); j += 1){
@@ -477,6 +487,10 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	}
 
 	energy_total_number = pow((total_number - target_total_number), 2.0f) / target_total_number;
+	/*finish = clock();
+	duration = (float)(finish - start) / CLOCKS_PER_SEC;
+	cout << "total : " << duration << " s" << endl;
+	cout << endl;*/
 
 	//float energy_fair = 0.0f;
 	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
@@ -557,7 +571,16 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 	index.buildIndex();
 
-	#pragma omp parallel for
+	size_t num_results;
+	if (test_connect.at(COLOR_WHITE).size() > 1000)
+		num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
+	else
+		num_results = 10;
+
+	//#pragma omp parallel for
+	int min_node;
+	float min_dist = 100000000000000000.0f;
+
 	for (int i = 0; i < model->numtriangles; i++)
 	{
 		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
@@ -566,11 +589,11 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 		vec3 test = (p1 + p2 + p3) / 3.0;
 
 		const float query_pt[3] = { test[0], test[1], test[2] };
-
-		size_t num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
+		
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 
+		//cout << num_results << endl;
 		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
 
 		// In case of less points in the tree than requested:
@@ -602,19 +625,32 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 				}
 			}*/
 
-			if (model->triangles->at(i).near_node != temp_index){
+			if (model->triangles->at(i).near_node != ret_index.at(temp_index)){
 				//cout << i << " : " << temp_index << endl;
 				//test_connect.at(COLOR_WHITE).at(test_index).outter = true;
+				
+				//cout << "fuck" << endl;
 				
 				model->triangles->at(i).near_dist = sqrt(temp_dist);
 				
 				model->triangles->at(i).near_node = ret_index.at(temp_index);
+				
+				if (model->triangles->at(i).near_dist < 1.5 * SCALE){
+					//cout << model->triangles->at(i).near_node << " " << model->triangles->at(i).near_dist << endl;
+					if (model->triangles->at(i).near_dist < min_dist)
+					{
+						min_dist = model->triangles->at(i).near_dist;
+						min_node = model->triangles->at(i).near_node;
+					}
+				}
 				
 				model->triangles->at(i).energy_d = pow(model->triangles->at(i).near_dist, 2) * (1.0f + forbidden_energy(model->triangles->at(i).near_dist));
 			}
 		}
 		//cout << endl;
 	}
+
+	cout << min_node << " " << min_dist << endl;
 }
 
 void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
@@ -642,7 +678,11 @@ void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>>
 
 		const float query_pt[3] = { test[0], test[1], test[2] };
 
-		size_t num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
+		size_t num_results;
+		if (test_connect.at(COLOR_WHITE).size() > 1000)
+			num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
+		else
+			num_results = 10;
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 
@@ -686,6 +726,12 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 	my_kd_tree_t   index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */));
 	index.buildIndex();
 
+	size_t num_results;
+	if (test_connect.at(COLOR_WHITE).size() > 1000)
+		num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
+	else
+		num_results = 10;
+
 	//#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i++)
 	{
@@ -696,7 +742,6 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 
 		const float query_pt[3] = { test[0], test[1], test[2] };
 
-		size_t num_results = (size_t)(test_connect.at(COLOR_WHITE).size() * 0.01);
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 

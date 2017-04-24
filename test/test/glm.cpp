@@ -56,7 +56,7 @@ glmCentroid(GLMmodel *model)
 		area += face_area;
 	}
 
-	printf("c : %f %f %f\n", c[0] / area, c[1] / area, c[2] / area);
+	//printf("c : %f %f %f\n", c[0] / area, c[1] / area, c[2] / area);
 
 	if (area == 0) return c;
 	else return c / area;
@@ -1009,6 +1009,16 @@ glmScale(GLMmodel* model, GLfloat scale)
         model->vertices->at(3 * i + 1) *= scale;
         model->vertices->at(3 * i + 2) *= scale;
     }
+}
+
+GLvoid
+glmScale_y(GLMmodel* model, GLfloat scale_y)
+{
+	GLuint i;
+
+	for (i = 1; i <= model->numvertices; i++) {
+		model->vertices->at(3 * i + 1) *= scale_y;
+	}
 }
 
 GLvoid
@@ -2357,4 +2367,27 @@ void nearest_point_parser(GLMmodel *model, std::string &filename)
 	}
 
 	fclose(file);
+}
+
+vec2
+tri_find_neigbor(GLMtriangle t1, GLMtriangle t2)
+{
+	int num = 0;
+	vec2 ans;
+	for (int i = 0; i < 3; i += 1){
+		for (int j = 0; j < 3; j += 1){
+			if (t1.vindices[i] == t2.vindices[j]){
+				ans[num] = t1.vindices[i];
+				num += 1;
+				if (num == 2){
+					break;
+				}
+			}
+		}
+		if (num == 2){
+			break;
+		}
+	}
+
+	return ans;
 }

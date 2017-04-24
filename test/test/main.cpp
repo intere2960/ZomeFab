@@ -94,37 +94,39 @@ void init()
 
 	glmFacetNormals(myObj);
 
-	collect_edge(myObj, all_edge);
+	//collect_edge(myObj, all_edge);
 
-	find_near_tri(myObj, all_edge);
+	//find_near_tri(myObj, all_edge);
 
-	//    recount_normal(myObj);
-	//    process_inner(myObj, myObj_inner);
+	myObj_inner = glmCopy(myObj);
+	recount_normal(myObj);
+    process_inner(myObj, myObj_inner);
 	//
 	////    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
 	//
-	//    combine_inner_outfit(myObj, myObj_inner);
+	combine_inner_outfit(myObj, myObj_inner);
 	//
-	//    collect_edge(myObj, all_edge);
+    collect_edge(myObj, all_edge);
+	////
+    planes.push_back(test_plane1);
+	planes.push_back(test_plane2);
+    planes.push_back(test_plane3);
+    //planes.push_back(test_plane4);
+	//planes.push_back(test_plane5); //dir_plane
+	//planes.push_back(test_plane6); //dir_plane
+	//planes.push_back(test_plane7); //dir_plane
+	//planes.push_back(test_plane8); //dir_plane
+	//planes.push_back(test_plane9); //dir_plane
 	//
-	//    planes.push_back(test_plane1);
-	//    planes.push_back(test_plane2);
-	//    planes.push_back(test_plane3);
-	//    planes.push_back(test_plane4);
-	//    planes.push_back(test_plane5); //dir_plane
-	////    planes.push_back(test_plane6); //dir_plane
-	////    planes.push_back(test_plane7); //dir_plane
-	////    planes.push_back(test_plane8); //dir_plane
-	//
-	//    cut_intersection(myObj, planes, face_split_by_plane, false);
-	//
-	//    split_face(myObj, all_edge, face_split_by_plane, planes);
-	//
-	//    find_loop(myObj, all_edge, planes);
-	//
-	//    process_piece(temp_piece, myObj, face_split_by_plane);
-	//
-	//    fill_hole(temp_piece, true);
+	cut_intersection(myObj, planes, face_split_by_plane, false);
+	
+	split_face(myObj, all_edge, face_split_by_plane, planes);
+	
+	find_loop(myObj, all_edge, planes);
+	
+	process_piece(temp_piece, myObj, face_split_by_plane);
+	
+	fill_hole(temp_piece, true);
 }
 
 //void findzoom()
@@ -453,7 +455,11 @@ double AverageRadius(GLMmodel *model, vec3 &centroid)
 		return distance / area; 
 }
 
-void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, vector<simple_material> &materials, float color_material[20][3])
+float wedge = 0.1f;
+float wnode = 1.0f;
+float label = 0.0f;
+
+void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, vector<simple_material> &materials, float color_material[20][3], std::vector<std::vector<int>>& vertex_color)
 {
 	int num_labels = 0;
 
@@ -479,7 +485,7 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 
 	double radius = AverageRadius(model, glmCentroid(model));
 	cout << "radius : " << radius << endl;
-
+	
 	float max_data = 0.0f;
 	float max_smooth = 0.0f;
 	vector<double> dataterm(model->numtriangles * num_labels);
@@ -500,7 +506,18 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 				vec3 judge_p3 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[2] + 2));
 				vec3 judge_g = (judge_p1 + judge_p2 + judge_p3) / 3.0f;
 
-				float dist = (now_g - judge_g).length();
+				vec2 neighbor_index = tri_find_neigbor(model->triangles->at(i), model->triangles->at(model->triangles->at(i).near_tri[j]));
+
+				vec3 neighbor_v1 = vec3(model->vertices->at(3 * neighbor_index[0] + 0), model->vertices->at(3 * neighbor_index[0] + 1), model->vertices->at(3 * neighbor_index[0] + 2));
+				vec3 neighbor_v2 = vec3(model->vertices->at(3 * neighbor_index[1] + 0), model->vertices->at(3 * neighbor_index[1] + 1), model->vertices->at(3 * neighbor_index[1] + 2));
+
+				float edist = 10 * (neighbor_v1 - neighbor_v2).length() / radius;
+				float dot = edist * min(fabs(now_n * judge_n), 1.0f);
+				float smooth = dot * wedge / 3.0f;
+
+				//cout << smooth << endl;
+				
+				/*float dist = (now_g - judge_g).length();
 				float edist = 10 * dist / radius;
 				float angle;
 				if (fabs(now_n * judge_n - 1) < 0.001f){
@@ -509,16 +526,16 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 				else{
 					angle = acos(now_n * judge_n);
 				}
-				float smooth = -log(angle / M_PI) * edist;
+				float smooth = -log(angle / M_PI) * edist;*/
 
 				//cout << i << " : " << now_n * judge_n << " " << angle << " " << dist << " " << -log(angle / M_PI) << " " << -log(angle / M_PI) * dist << endl;
 				//cout << i << " : " << model->triangles->at(i).near_tri[j] << " : " << -log(angle / M_PI) * dist << endl;
 
 				nhd->AddEdge(i, model->triangles->at(i).near_tri[j], smooth);
 
-				if (max_smooth < smooth){
+				/*if (max_smooth < smooth){
 					max_smooth = smooth;
-				}
+				}*/
 			}
 		}
 
@@ -533,21 +550,23 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 		}
 	}
 
-	for (int i = 0; i < model->numtriangles; i += 1){
+	/*for (int i = 0; i < model->numtriangles; i += 1){
 		for (int j = 0; j < nhd->Node(i)->edges.size(); j += 1){
 			nhd->Node(i)->edges.at(j)->weight /= max_smooth;
 		}
-	}
+	}*/
 
 	for (int i = 0; i < dataterm.size(); i += 1){
 		dataterm.at(i) /= max_data;
+		//dataterm.at(i) /= 1.0;
+		dataterm.at(i) = wnode * (0.998f - min(1.0f, dataterm.at(i), l));
 	}
 
 	std::cout << "NEdges = " << nhd->NumEdges() << std::endl;
 	
 	MRFProblemSmoothness problem(model->numtriangles, num_labels, nhd, dataterm);
 
-	MRFGraphCut mrfSolver(&problem);
+	MRFGraphCut mrfSolver(&problem, label);
 
 	mrfSolver.Optimize();
 
@@ -555,10 +574,10 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	double E = mrfSolver.Energy(&Edata, &Esmooth, &Elabel);
 	std::cout << "E1 = " << E << " = " << Edata << " + " << Esmooth << " + " << Elabel << std::endl;
 
-	cout << "max data : " << max_data << endl;
-	cout << "max smooth : " << max_smooth << endl;
+	/*cout << "max data : " << max_data << endl;
+	cout << "max smooth : " << max_smooth << endl;*/
 
-	vector<vector<int>> mat(model->numtriangles);
+	vector<vector<int>> mat(num_labels);
 		
 	for (int i = 0; i < model->numtriangles; i += 1){
 		mat.at(mrfSolver.Label(i)).push_back(i);
@@ -566,63 +585,152 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	}
 	
 	int material_class = 0;
-	for (int i = 0; i < model->numtriangles; i += 1){
+	for (int i = 0; i < num_labels; i += 1){
 		if (mat.at(i).size() > 0){
+			//cout << i << " : " << mat.at(i).size() << endl;
 			for (unsigned int j = 0; j < mat.at(i).size(); j += 1){
 				model->triangles->at(mat.at(i).at(j)).material_id_graph_cut = material_class;
+
+				for (int k = 0; k < 3; k += 1){
+					int index = find(vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).begin(), vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).end(), material_class) - vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).begin();
+					if (index >= vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).size())
+						vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).push_back(material_class);
+				}
+				/*vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[1]).push_back(material_class);
+				vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[2]).push_back(material_class);*/
 			}
 			
 			simple_material temp_m;
 			temp_m.name = std::to_string(materials.size());
-			temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
+			/*temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
 			temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
-			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;
-			/*temp_m.diffuse[0] = color_material[i % 20][0];
-			temp_m.diffuse[1] = color_material[i % 20][1];
-			temp_m.diffuse[2] = color_material[i % 20][2];*/
+			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;*/
+			temp_m.diffuse[0] = color_material[material_class % 20][0];
+			temp_m.diffuse[1] = color_material[material_class % 20][1];
+			temp_m.diffuse[2] = color_material[material_class % 20][2];
 			materials.push_back(temp_m);
 			
 			material_class += 1;
 		}
 	}
+}
 
-	/*vec3 deleta = vec3(0.0f, 1.0f, -1.0f) / material_class;
-	for (int i = 0; i < material_class; i += 1){
-		simple_material temp_m;
-		temp_m.name = std::to_string(materials.size());
-		temp_m.diffuse[0] = 0.8f + deleta[0] * i;
-		temp_m.diffuse[1] = 0.0f + deleta[1] * i;
-		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
-		materials.push_back(temp_m);
-	}*/
+bool have_same_material(int now_material, int p1, int p2, std::vector<std::vector<int>> &vertex_color)
+{
+	for (int i = 0; i < vertex_color.at(p1).size(); i += 1){
+		for (int j = 0; j < vertex_color.at(p2).size(); j += 1){
+			if (vertex_color.at(p1).at(i) == vertex_color.at(p2).at(j) && vertex_color.at(p1).at(i) != now_material)
+				return true;
+		}
+	}
+	return false;
+}
 
+void fuck(GLMmodel* model)
+{
+	zomedir t;
+
+	vector<int> use_ball;
+	vector<vec3> use_ball_insect;
+
+	int use_solt = 13;
+
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+
+		vec3 p = test_connect.at(COLOR_WHITE).at(i).position;
+		vec3 ball_n = t.dir->at(use_solt);
+
+		for (int j = 0; j < model->triangles->size(); j += 1){
+
+			vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
+			vec3 p2(model->vertices->at(3 * model->triangles->at(j).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 2));
+			vec3 p3(model->vertices->at(3 * model->triangles->at(j).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 2));
+			vec3 v1 = p1 - p2;
+			vec3 v2 = p3 - p2;
+			vec3 n = (v2 ^ v1).normalize();
+			float d = n * p1;
+
+			vec3 edge1 = p2 - p1;
+			vec3 edge2 = p3 - p2;
+			vec3 edge3 = p1 - p3;
+			vec3 insect_p;
+			vec3 judge1;
+			vec3 judge2;
+			vec3 judge3;
+
+			float td = (d - (test_connect.at(COLOR_WHITE).at(i).position * n)) / (n * ball_n);
+			if (td > 0){
+				insect_p = test_connect.at(COLOR_WHITE).at(i).position + ball_n * td;
+
+				judge1 = insect_p - p1;
+				judge2 = insect_p - p2;
+				judge3 = insect_p - p3;
+
+				if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+					//cout << "fuck" << endl;
+					if ((p - insect_p).length() < 0.8 * SCALE){
+						if ((find(use_ball.begin(), use_ball.end(), i) - use_ball.begin()) >= use_ball.size()){
+							use_ball.push_back(i);
+							use_ball_insect.push_back(insect_p);
+						}
+					}
+				}
+			}
+		
+		}
+	}
+	//cout << use_ball.size();
 	
-	//
-	
-	//	for (int i = 0; i < model->numtriangles; i += 1){
-	//		if (mat.at(i).size() > 0){
-	//			for (unsigned int j = 0; j < mat.at(i).size(); j += 1){
-	//				model->triangles->at(mat.at(i).at(j)).material_id_graph_cut = material_class;
-	//			}
-	//
-	//			simple_material temp_m;
-	//			temp_m.name = std::to_string(materials.size());
-	//			temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
-	//			temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
-	//			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;
-	//			materials.push_back(temp_m);
-	//
-	//			material_class += 1;
-	//		}
-	//	}
+	for (int i = 0; i < use_ball.size(); i += 1){
+	//for (int i = 0; i < 1; i += 1){
+		GLMmodel *xxx = NULL;
+
+		int color = t.face_color(use_solt);
+		if (color == COLOR_BLUE){
+			xxx = glmReadOBJ("test_model/zometool/blue.obj");
+		}
+		else if (color == COLOR_RED){
+			xxx = glmReadOBJ("test_model/zometool/red.obj");
+		}
+		else if (color == COLOR_YELLOW){
+			xxx = glmReadOBJ("test_model/zometool/yellow.obj");
+		}
+
+		cout << use_ball.at(i) << endl;
+		vec3 p = test_connect.at(COLOR_WHITE).at(use_ball.at(i)).position;
+		vec3 inserct_p = use_ball_insect.at(i);
+
+		vec3 new_p = (p + inserct_p) / 2;
+
+		float l = ((p - inserct_p).length() - ERROR_THICKNESS) / 3.0f;
+
+		glmScale_y(xxx, l);
+		glmRT(xxx, vec3(0.0, t.roll(t.opposite_face(use_solt)), 0.0), vec3(0.0, 0.0, 0.0));
+		glmRT(xxx, vec3(0.0, t.phi(t.opposite_face(use_solt)), t.theta(t.opposite_face(use_solt))), vec3(0.0, 0.0, 0.0));
+		glmR(xxx, vec3(0.0, 0.0, 0.0));
+		glmRT(xxx, vec3(0.0, 0.0, 0.0), new_p);
+
+		glmCombine(myObj, xxx);
+	}
+	glmWriteOBJ(myObj, "test_model/out/out_p-zome.obj", GLM_NONE);
 }
 
 int main(int argc, char **argv)
 {
 	//    findzoom();
+	if (argc == 4){
+		wnode = atof(argv[1]);
+		wedge = atof(argv[2]);
+		label = atof(argv[3]);
+		cout << wnode << " " << wedge << " " << label << endl;
+	}
+	else{
+		wedge = 0.1f;
+		wnode = 1.0f;
+		label = 0.0f;
+	}
 
 	myObj = glmReadOBJ(model_source);
-	//myObj_inner = glmCopy(myObj);
 
 	init();
 	
@@ -647,22 +755,30 @@ int main(int argc, char **argv)
 	//output_zometool(output_ans, string("fake_head_out.obj"));
 	//output_struc(output_ans, string("fake_head_out.txt"));
 
-	clock_t total_start, total_finish;
+	/*clock_t total_start, total_finish;
 	total_start = clock();
 
 	clock_t start, finish;
-	float duration;
+	float duration;*/
 
-	srand((unsigned)time(NULL));
-	struc_parser(test_connect, string("2000_20000.txt"));
+	//srand((unsigned)time(NULL));
+	//struc_parser(test_connect, string("1500_10000.txt"));
 
-	nearest_point_parser(myObj, string("head_2times_nearest_point.txt"));
+	//////nearest_point_parser(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
 
-	////start = clock();
+	//////cout << test_connect.at(COLOR_WHITE).size() << endl;
+
+	//////start = clock();
 
 	//PointCloud<float> cloud;
 	//// Generate points:
+
 	//generatePointCloud(cloud, myObj);
+
+	//kdtree_near_node(myObj, test_connect);
+	//kdtree_near_node(myObj, test_connect);
+	
+	//fuck(myObj);
 
 	//judge_outter(test_connect);
 
@@ -671,15 +787,16 @@ int main(int argc, char **argv)
 	//float origin_term[4];
 	//float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	//output_nearest_point(myObj, string("head_2times_nearest_point.txt"));
+	////output_nearest_point(myObj, string("fake_head_nearest_point.txt"));
+	//output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
 	//
-	//int num_iteration = 0;
+	//int num_iteration = 10000;
 
 	//finish = clock();
 	//duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	//cout << duration << " s" << endl;
 
-	//ofstream os("energy_2000_0.txt");
+	//ofstream os("energy_1500_10000.txt");
 
 	//os << "origin energy : " << origin_e << endl;
 	//os << "origin energy(dist) : " << origin_term[0] << endl;
@@ -834,87 +951,186 @@ int main(int argc, char **argv)
 	//	os << endl;
 	//}
 
-	/*float final_term[4];
-	float final_e = compute_energy(test_connect, myObj, cloud, final_term);
+	//float final_term[4];
+	//float final_e = compute_energy(test_connect, myObj, cloud, final_term);
 
-	os << "final energy : " << final_e << endl;
-	os << "final energy(dist) : " << final_term[0] << endl;
-	os << "final energy(angle) : " << final_term[1] << endl;
-	os << "final energy(total_number) : " << final_term[2] << endl;
-	os << "final energy(use_stick) : " << final_term[3] << endl;
-	os << endl;
+	//os << "final energy : " << final_e << endl;
+	//os << "final energy(dist) : " << final_term[0] << endl;
+	//os << "final energy(angle) : " << final_term[1] << endl;
+	//os << "final energy(total_number) : " << final_term[2] << endl;
+	//os << "final energy(use_stick) : " << final_term[3] << endl;
+	//os << endl;
 
-	os << "collision : " << collision << " " << num_iteration << endl;
-	os << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << endl;
-	os << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
+	//os << "collision : " << collision << " " << num_iteration << endl;
+	//os << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << endl;
+	//os << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << endl;
 
-	os << "Z' < Z and accept : " << energy_smaller_accept << endl;
-	os << "Z' > Z and accept : " << energy_bigger_accept << endl;
-	os << "Z' < Z and reject : " << energy_smaller_reject << endl;
-	os << "Z' > Z and reject : " << energy_bigger_reject << endl;
-	os << endl;
+	//os << "Z' < Z and accept : " << energy_smaller_accept << endl;
+	//os << "Z' > Z and accept : " << energy_bigger_accept << endl;
+	//os << "Z' < Z and reject : " << energy_smaller_reject << endl;
+	//os << "Z' > Z and reject : " << energy_bigger_reject << endl;
+	//os << endl;
 
-	vec3 count[4];
-	count_struct(test_connect, count);
-	os << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
-	os << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
-	os << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
-	os << "Ball : " << count[3][0] << endl;*/
+	//vec3 count[4];
+	//count_struct(test_connect, count);
+	//os << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << endl;
+	//os << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << endl;
+	//os << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << endl;
+	//os << "Ball : " << count[3][0] << endl;
 
-	/*total_finish = clock();
-	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
-	os << endl << "totoal time : " << duration << " s" << endl;
+	//total_finish = clock();
+	//duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
+	//os << endl << "totoal time : " << duration << " s" << endl;
 
-	os.close();*/
+	//os.close();
 
 	/*vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
 	kdtree_near_node_colorful(myObj, test_connect, materials_color);
 
-	output_zometool(test_connect, string("2000_0.obj"));
-	output_struc(test_connect, string("2000_0.txt"));
+	output_zometool(test_connect, string("1500_10000.obj"));
+	output_struc(test_connect, string("1500_10000.txt"));
 
-	output_material(materials_color, std::string("2000_0_colorful.mtl"));
-	output_zometool_exp(test_connect, string("fake_2000_0(colorful).obj"), materials_color, std::string("2000_0_colorful.mtl"), COLORFUL);
-	glmWriteOBJ_EXP(myObj, "fake_model_2000_0(colorful).obj", materials_color, std::string("2000_0_colorful.mtl"), COLORFUL);
+	output_material(materials_color, std::string("1500_10000_colorful.mtl"));
+	output_zometool_exp(test_connect, string("fake_1500_10000(colorful).obj"), materials_color, std::string("1500_10000_colorful.mtl"), COLORFUL);
+	glmWriteOBJ_EXP(myObj, "fake_model_1500_10000(colorful).obj", materials_color, std::string("1500_10000_colorful.mtl"), COLORFUL);
 
 	kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
-	output_material(material_energy_dist, std::string("2000_0_energy_dist.mtl"));
-	glmWriteOBJ_EXP(myObj, "fake_model_2000_0(dist).obj", material_energy_dist, std::string("2000_0_energy_dist.mtl"), ENERGY_DIST);
+	output_material(material_energy_dist, std::string("1500_10000_energy_dist.mtl"));
+	glmWriteOBJ_EXP(myObj, "fake_model_1500_10000(dist).obj", material_energy_dist, std::string("1500_10000_energy_dist.mtl"), ENERGY_DIST);
 
 	energy_material(test_connect, material_energy_angle, ENERGY_ANGLE);
-	output_material(material_energy_angle, std::string("2000_0_energy_angle.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_2000_0(angle).obj"), material_energy_angle, std::string("2000_0_energy_angle.mtl"), ENERGY_ANGLE);
+	output_material(material_energy_angle, std::string("1500_10000_energy_angle.mtl"));
+	output_zometool_exp(test_connect, string("fake_energy_1500_10000(angle).obj"), material_energy_angle, std::string("1500_10000_energy_angle.mtl"), ENERGY_ANGLE);
 
 	energy_material(test_connect, material_use_stick, ENERGY_USE_STICK);
-	output_material(material_use_stick, std::string("2000_0_energy_use_stick.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_2000_0(use_stick).obj"), material_use_stick, std::string("2000_0_energy_use_stick.mtl"), ENERGY_USE_STICK);*/
+	output_material(material_use_stick, std::string("1500_10000_energy_use_stick.mtl"));
+	output_zometool_exp(test_connect, string("fake_energy_1500_10000(use_stick).obj"), material_use_stick, std::string("1500_10000_energy_use_stick.mtl"), ENERGY_USE_STICK);
 	
+	output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point.txt"));*/
+
+	
+
+	/*std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
+
 	vector<simple_material> materials_graph_cut;
-	test_graph_cut(myObj, test_connect, materials_graph_cut, color_material);
-	output_material(materials_graph_cut, std::string("graph_cut10000_normal(data_smooth).mtl"));
-	glmWriteOBJ_EXP(myObj, "graph_cut10000_normal(data_smooth).obj", materials_graph_cut, std::string("graph_cut10000_normal(data_smooth).mtl"), GRAPH_CUT);
-	
+	test_graph_cut(myObj, test_connect, materials_graph_cut, color_material, vertex_color);
+
+	int num_point = 0;
+	for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+		if (vertex_color.at(i).size() >= 3){
+			num_point += 1;
+		}
+	}*/
+
+	//ofstream point("color_point.txt");
+	//point << num_point << endl;
+	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+	//	if (vertex_color.at(i).size() >= 3){
+	//		/*cout << i << endl;
+	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+	//			cout << vertex_color.at(i).at(j) << " ";
+	//		}
+	//		cout << endl;*/
+	//		point << i << " " << vertex_color.at(i).size() << endl;
+	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+	//			point << vertex_color.at(i).at(j) << " ";
+	//		}
+	//		point << endl;
+	//	}
+	//}
+	//point.close();
+
+	//ifstream point("color_point.txt");
+	//int num_point;
+	//point >> num_point;
+	//std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
+	//std::vector<int> convert_index;
+	//for (int i = 0; i < num_point; i += 1){
+	//	int index, num;
+	//	point >> index >> num;
+	//	//cout << index << " " << num << endl;
+	//	convert_index.push_back(index);
+	//	for (int j = 0; j < num; j += 1){
+	//		int temp;
+	//		point >> temp;
+	//		vertex_color.at(index).push_back(temp);
+	//		//cout << temp << " ";
+	//	}
+	//	//cout << endl;
+	//}
+	//point.close();
+
+	//vector<vector<int>> material_point(11);
+	//for (int i = 0; i < convert_index.size(); i += 1){
+	//	//cout << convert_index.at(i) << endl;
+	//	for (int j = 0; j < vertex_color.at(convert_index.at(i)).size(); j += 1){
+	//		//cout << vertex_color.at(convert_index.at(i)).at(j) << " ";
+	//		material_point.at(vertex_color.at(convert_index.at(i)).at(j)).push_back(convert_index.at(i));
+	//	}
+	//	//cout << endl;
+	//}
+
+	///*for (int i = 0; i < 11; i += 1){
+	//	cout << i << endl;
+	//	for (int j = 0; j < material_point.at(i).size(); j += 1){
+	//		cout << material_point.at(i).at(j) << " ";
+	//	}
+	//	cout << endl;
+	//}*/
+
+	//for (int i = 0; i < 11; i += 1){
+	////for (int i = 0; i < 1; i += 1){
+	//	for (int j = 0; j < material_point.at(i).size(); j += 1){
+	//		vec3 p1(myObj->vertices->at(3 * material_point.at(i).at(j) + 0), myObj->vertices->at(3 * material_point.at(i).at(j) + 1), myObj->vertices->at(3 * material_point.at(i).at(j) + 2));
+	//		vec3 n_p1(myObj->normals[3 * material_point.at(i).at(j) + 0], myObj->normals[3 * material_point.at(i).at(j) + 1], myObj->normals[3 * material_point.at(i).at(j) + 2]);
+
+	//		for (int k = j + 1; k < material_point.at(i).size(); k += 1){
+	//							
+	//			if (have_same_material(i, material_point.at(i).at(j), material_point.at(i).at(k), vertex_color)){
+	//				vec3 p2(myObj->vertices->at(3 * material_point.at(i).at(k) + 0), myObj->vertices->at(3 * material_point.at(i).at(k) + 1), myObj->vertices->at(3 * material_point.at(i).at(k) + 2));
+	//				vec3 n_p2(myObj->normals[3 * material_point.at(i).at(k) + 0], myObj->normals[3 * material_point.at(i).at(k) + 1], myObj->normals[3 * material_point.at(i).at(k) + 2]);
+
+	//				vec3 v1 = (p2 - p1).normalize();
+	//				vec3 v2 = ((n_p1 + n_p2) / 2.0).normalize();
+
+	//				vec3 n_vector = v1 ^ v2;
+	//				float d = n_vector * p1;
+	//				cout << n_vector[0] << ", " << n_vector[1] << ", " << n_vector[2] << ", " << d << endl;
+	//			}
+	//		}
+	//	}
+	//	cout << endl;
+	//}
+
+	//string exp_name = to_string(materials_graph_cut.size()) + "(data_" + to_string(wnode) + ",_smooth_" + to_string(wedge) + ",_label_" + to_string(label) + ")";
+	//string mtl_name = exp_name + ".mtl";
+	//string obj_name = exp_name + ".obj";
+	///*output_material(materials_graph_cut, std::string("simple_graph_cut_test.mtl"));
+	//glmWriteOBJ_EXP(myObj, "simple_graph_cut_test.obj", materials_graph_cut, std::string("simple_graph_cut_test.mtl"), GRAPH_CUT);*/
+	//output_material(materials_graph_cut, mtl_name);
+	//glmWriteOBJ_EXP(myObj, my_strdup(obj_name.c_str()), materials_graph_cut, mtl_name, GRAPH_CUT);
+
 	///*output_struc(test_connect, string("fake123.txt"));*/
 
 
-	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	//glutInitWindowSize(1000,1000);
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(1000,1000);
 
-	//   glutCreateWindow("Zometool");
-	//glutDisplayFunc(display);
-	//glutReshapeFunc(myReshape);
-	//glutMouseFunc(mouse);
-	//   glutMotionFunc(mouseMotion);
-	//   glutKeyboardFunc(keyboard);
-	//   glutSpecialFunc(special);
-	//glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
+	   glutCreateWindow("Zometool");
+	glutDisplayFunc(display);
+	glutReshapeFunc(myReshape);
+	glutMouseFunc(mouse);
+	   glutMotionFunc(mouseMotion);
+	   glutKeyboardFunc(keyboard);
+	   glutSpecialFunc(special);
+	glEnable(GL_DEPTH_TEST); /* Enable hidden--surface--removal */
 
-	//glewInit();
+	glewInit();
 
-	//setShaders();
+	setShaders();
 
-	//glutMainLoop();
-	//
+	glutMainLoop();
+	
 	system("pause");
 	return 0;
 }
