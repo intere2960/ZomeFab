@@ -61,13 +61,13 @@ void process_inner(GLMmodel *myObj,GLMmodel *myObj_inner)
     myObj_inner->normals = new GLfloat[3 * (myObj_inner->numnormals + 1)];
     for(unsigned int i = 1 ; i <= myObj_inner->numvertices ; i += 1)
     {
-		myObj_inner->vertices->at(3 * i + 0) = myObj->vertices->at(3 * i + 0) - 8.0f * myObj->normals[3 * i + 0];
+		myObj_inner->vertices->at(3 * i + 0) = myObj->vertices->at(3 * i + 0) - 10.0f * myObj->normals[3 * i + 0];
         myObj_inner->normals[3 * i + 0] = myObj->normals[3 * i + 0];
 
-        myObj_inner->vertices->at(3 * i + 1) = myObj->vertices->at(3 * i + 1) - 8.0f * myObj->normals[3 * i + 1];
+        myObj_inner->vertices->at(3 * i + 1) = myObj->vertices->at(3 * i + 1) - 10.0f * myObj->normals[3 * i + 1];
         myObj_inner->normals[3 * i + 1] = myObj->normals[3 * i + 1];
 
-        myObj_inner->vertices->at(3 * i + 2) = myObj->vertices->at(3 * i + 2) - 8.0f * myObj->normals[3 * i + 2];
+        myObj_inner->vertices->at(3 * i + 2) = myObj->vertices->at(3 * i + 2) - 10.0f * myObj->normals[3 * i + 2];
         myObj_inner->normals[3 * i + 2] = myObj->normals[3 * i + 2];
     }
 	glmFacetNormals(myObj_inner);

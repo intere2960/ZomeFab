@@ -110,6 +110,7 @@
     <ClCompile Include="GCoptimization.cpp" />
     <ClCompile Include="glm.cpp" />
     <ClCompile Include="graph.cpp" />
+    <ClCompile Include="graphcut.cpp" />
     <ClCompile Include="LinAlg.cpp" />
     <ClCompile Include="LinkedBlockList.cpp" />
     <ClCompile Include="main.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="global.h" />
     <ClInclude Include="glui_internal.h" />
     <ClInclude Include="graph.h" />
+    <ClInclude Include="graphcut.h" />
     <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="LinAlg.h" />
     <ClInclude Include="LinkedBlockList.h" />

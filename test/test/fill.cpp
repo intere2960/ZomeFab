@@ -104,9 +104,14 @@ void fill_prepare(GLMmodel &temp_piece, bool two_d)
 			temp_piece.loop->at(i).two_d_point = new std::vector<vec2>();
 			convert_2d(temp_piece, temp_piece.loop->at(i));
 		}
-		/*else{
+		else{
 			temp_piece.loop->at(i).three_d_point = new std::vector<vec3>();		
-		}*/
+
+			for (unsigned int j = 0; j < temp_piece.loop->at(i).loop_line->size(); j += 1){
+				vec3 p(temp_piece.vertices->at(3 * temp_piece.loop->at(i).loop_line->at(j) + 0), temp_piece.vertices->at(3 * temp_piece.loop->at(i).loop_line->at(j) + 1), temp_piece.vertices->at(3 * temp_piece.loop->at(i).loop_line->at(j) + 2));
+				temp_piece.loop->at(i).three_d_point->push_back(p);
+			}
+		}
 
         temp_piece.loop->at(i).sign_flip = 1.0;
         temp_piece.loop->at(i).travel_reverse = false;

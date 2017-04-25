@@ -147,6 +147,9 @@
     <ClCompile Include="float_math.cpp">
       <Filter>原始程式檔\Graph_Cut</Filter>
     </ClCompile>
+    <ClCompile Include="graphcut.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="nanoflann.hpp">
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="VKGraph.h">
       <Filter>標頭檔\Graph_Cut</Filter>
+    </ClInclude>
+    <ClInclude Include="graphcut.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

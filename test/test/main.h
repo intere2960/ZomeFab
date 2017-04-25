@@ -23,6 +23,7 @@
 #include "bestfitobb.h"
 #include "pathdata.h"
 #include "operation.h"
+#include "graphcut.h"
 
 GLMmodel *myObj = NULL;
 GLMmodel *myObj_inner = NULL;
@@ -31,7 +32,7 @@ GLMmodel temp_piece;
 
 char model_source[] = "test_model/fake_head.obj";
 //char model_source[] = "test_model/use/material 11.obj";
-//char model_source[] = "test_model/use/material 9-2-1-1-fill.obj";
+//char model_source[] = "test_model/use/material 2-1-fill.obj";
 //cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head fake_head-2times
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -131,14 +132,13 @@ bool show_piece = true;
 //plane test_plane7(-0.837661, -0.521881, 0.161134, 67.0868, -1);
 //plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
-plane test_plane1(0.223149, -0.657791, 0.712275, -152.862, 1);
-plane test_plane2(0.0, 0.0, 1.0, 0.0, -1);
-plane test_plane3(0.916365, -0.365211, -0.135677, -139.37, -1);
-plane test_plane4(1.0, 0.0, 0.0, -100.0, -1);
-plane test_plane5(0.0, 1.0, 0.0, 75.0, 1); //(-1,-2)
-//plane test_plane6(0.0849077, 0.026043, -0.99538, -17.4646, -1);
-plane test_plane7(0.0, 0.0, 1.0, 0, 1);
-
+plane test_plane1(-0.136551, 0.338695, -0.928133, 109.087, -1); // ax+by+cz=d  e->cut dir
+plane test_plane2(-0.947401, -0.088736, 0.169652, 85.8411, 1);
+plane test_plane3(0.0101777, -0.827726, -0.559473, -135.593, -1);
+plane test_plane4(0.372631, 0.63799, 0.653618, 52.8128, 1);
+plane test_plane5(0.532004, -0.831296, 0.140068, -164.655, -1);
+plane test_plane6(0.0, 1.0, 0.0, 220.0, -1);
+plane test_plane7(0.916365, -0.365211, -0.135677, -139.37, -1);
 plane test_plane8(-0.285818, 0.935506, -0.206426, 163.572, 1);
 plane test_plane9(0.0, 1.0, 0.0, 230.0, -1);
 

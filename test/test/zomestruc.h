@@ -96,4 +96,5 @@ void judge_outter(std::vector<std::vector<zomeconn>> &test_connect);
 
 void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, int mode);
 
+void generate_tenon(GLMmodel* model, GLMmodel &temp_piece, std::vector<std::vector<zomeconn>> &test_connect, int use_solt);
 #endif // ZOMESTRUC_H_INCLUDED

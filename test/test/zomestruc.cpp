@@ -1261,3 +1261,89 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 		//cout << "m " << i << " : " << temp_m.diffuse[0] << " " << temp_m.diffuse[1] << " " << temp_m.diffuse[2] << endl;
 	}
 }
+
+void generate_tenon(GLMmodel* model, GLMmodel &temp_piece,std::vector<std::vector<zomeconn>> &test_connect , int use_solt)
+{
+	zomedir t;
+
+	std::vector<int> use_ball;
+	std::vector<vec3> use_ball_insect;
+
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+
+		vec3 p = test_connect.at(COLOR_WHITE).at(i).position;
+		vec3 ball_n = t.dir->at(use_solt);
+
+		for (int j = 0; j < model->triangles->size(); j += 1){
+
+			vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
+			vec3 p2(model->vertices->at(3 * model->triangles->at(j).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 2));
+			vec3 p3(model->vertices->at(3 * model->triangles->at(j).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 2));
+			vec3 v1 = p1 - p2;
+			vec3 v2 = p3 - p2;
+			vec3 n = (v2 ^ v1).normalize();
+			float d = n * p1;
+
+			vec3 edge1 = p2 - p1;
+			vec3 edge2 = p3 - p2;
+			vec3 edge3 = p1 - p3;
+			vec3 insect_p;
+			vec3 judge1;
+			vec3 judge2;
+			vec3 judge3;
+
+			float td = (d - (test_connect.at(COLOR_WHITE).at(i).position * n)) / (n * ball_n);
+			if (td > 0){
+				insect_p = test_connect.at(COLOR_WHITE).at(i).position + ball_n * td;
+
+				judge1 = insect_p - p1;
+				judge2 = insect_p - p2;
+				judge3 = insect_p - p3;
+
+				if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+					if ((p - insect_p).length() < 0.8 * SCALE){
+						if ((find(use_ball.begin(), use_ball.end(), i) - use_ball.begin()) >= use_ball.size()){
+							use_ball.push_back(i);
+							use_ball_insect.push_back(insect_p);
+						}
+					}
+				}
+			}
+
+		}
+	}
+	//cout << use_ball.size();
+
+	for (int i = 0; i < use_ball.size(); i += 1){
+		//for (int i = 0; i < 1; i += 1){
+		GLMmodel *xxx = NULL;
+
+		int color = t.face_color(use_solt);
+		if (color == COLOR_BLUE){
+			xxx = glmReadOBJ("test_model/zometool/blue.obj");
+		}
+		else if (color == COLOR_RED){
+			xxx = glmReadOBJ("test_model/zometool/red.obj");
+		}
+		else if (color == COLOR_YELLOW){
+			xxx = glmReadOBJ("test_model/zometool/yellow.obj");
+		}
+
+		cout << use_ball.at(i) << endl;
+		vec3 p = test_connect.at(COLOR_WHITE).at(use_ball.at(i)).position;
+		vec3 inserct_p = use_ball_insect.at(i);
+
+		vec3 new_p = (p + inserct_p) / 2;
+
+		float l = ((p - inserct_p).length() - ERROR_THICKNESS) / 2.0f;
+
+		glmScale_y(xxx, l);
+		glmRT(xxx, vec3(0.0, t.roll(t.opposite_face(use_solt)), 0.0), vec3(0.0, 0.0, 0.0));
+		glmRT(xxx, vec3(0.0, t.phi(t.opposite_face(use_solt)), t.theta(t.opposite_face(use_solt))), vec3(0.0, 0.0, 0.0));
+		glmR(xxx, vec3(0.0, 0.0, 0.0));
+		glmRT(xxx, vec3(0.0, 0.0, 0.0), new_p);
+
+		glmCombine(&temp_piece, xxx);
+	}
+	glmWriteOBJ(&temp_piece, "test_model/out/out_p-zome.obj", GLM_NONE);
+}

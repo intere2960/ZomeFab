@@ -1343,6 +1343,9 @@ void inform_vertex(GLMmodel *model, std::vector<edge> &all_edge)
 	}
 }
 
+#include <iostream>
+using namespace std;
+
 void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes)
 {
     //bool use_plane[planes.size()] = { false };
@@ -1366,14 +1369,21 @@ void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> 
         model->loop->at(i).plane_normal[2] = planes.at(i).plane_par[2];
         model->loop->at(i).loop_line = new std::vector<int>();
         for(unsigned int j = 0; j < model->multi_vertex->size(); j += 1){
-            if(model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(0) == i || model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(1) == i){
-                use_plane[i] = true;
-                model->loop->at(i).loop_line->push_back(model->multi_vertex->at(j));
-                start_index = model->multi_vertex->at(j);
-                use_vertex[model->multi_vertex->at(j)] = true;
-                find_plane = true;
-                break;
-            }
+			if (model->multi_vertex->at(j) != 1197){
+				if (model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(0) == i || model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(1) == i){
+					use_plane[i] = true;
+					model->loop->at(i).loop_line->push_back(model->multi_vertex->at(j));
+					start_index = model->multi_vertex->at(j);
+					use_vertex[model->multi_vertex->at(j)] = true;
+					find_plane = true;
+					break;
+				}
+			}
+			/*else{
+				cout << "fuck" << endl;
+				find_plane = false;
+				break;
+			}*/
         }
 
         if(!find_plane)
@@ -1440,13 +1450,15 @@ void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> 
             int next_index;
             bool find_vertex = false;
             for(unsigned int j = 0; j < model->multi_vertex->size(); j += 1){
-                if(model->multi_vertex->at(j) != (unsigned int)end_index && std::equal(model->cut_loop->at(end_index).align_plane.begin(), model->cut_loop->at(end_index).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin())){
-                     start_index = model->multi_vertex->at(j);
-                     model->loop->at(i).loop_line->push_back(start_index);
-                     use_vertex[start_index] = true;
-                     find_vertex = true;
-                     break;
-                }
+				if (model->multi_vertex->at(j) != 1197){
+					if (model->multi_vertex->at(j) != (unsigned int)end_index && std::equal(model->cut_loop->at(end_index).align_plane.begin(), model->cut_loop->at(end_index).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin())){
+						start_index = model->multi_vertex->at(j);
+						model->loop->at(i).loop_line->push_back(start_index);
+						use_vertex[start_index] = true;
+						find_vertex = true;
+						break;
+					}
+				}
             }
 
             if(!find_vertex)
