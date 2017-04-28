@@ -100,75 +100,54 @@ void init()
 
 	myObj_inner = glmCopy(myObj);
 	recount_normal(myObj);
-    process_inner(myObj, myObj_inner);
-	//
-	////    glmRT(myObj_inner, vec3(0.0, 90.0, 0.0), vec3(0.0, 0.0, 500.0));
-	//
+
+    process_inner(myObj, myObj_inner, 4.0f);
+
 	combine_inner_outfit(myObj, myObj_inner);
-	//
-    collect_edge(myObj, all_edge);
-	////
-    planes.push_back(test_plane1);
+		
+	collect_edge(myObj, all_edge);
+		
+	planes.push_back(test_plane1);
 	planes.push_back(test_plane2);
-    planes.push_back(test_plane3);
-    planes.push_back(test_plane4);
+	planes.push_back(test_plane3);
+	planes.push_back(test_plane4);
 	planes.push_back(test_plane5); //dir_plane
-	planes.push_back(test_plane6); //dir_plane
+	//planes.push_back(test_plane6); //dir_plane
 	//planes.push_back(test_plane7); //dir_plane
 	//planes.push_back(test_plane8); //dir_plane
 	//planes.push_back(test_plane9); //dir_plane
-	//
+
 	cut_intersection(myObj, planes, face_split_by_plane, false);
-	
-	split_face(myObj, all_edge, face_split_by_plane, planes);
 
-	for (int i = 0; i < myObj->multi_vertex->size(); i += 1){
-		cout << myObj->multi_vertex->at(i) << " : ";
-		for (int j = 0; j < myObj->cut_loop->at(myObj->multi_vertex->at(i)).align_plane.size(); j += 1){
-			cout << myObj->cut_loop->at(myObj->multi_vertex->at(i)).align_plane.at(j) << " ";
+	bool judge_shell = shell_valid(myObj, face_split_by_plane);
+	cout << "shell_valid : " << judge_shell << endl;
+	if (!judge_shell){
+		cout << "bad shell" << endl;
+	}
+
+	if (judge_shell){
+
+		split_face(myObj, all_edge, face_split_by_plane, planes);
+
+		bool judge_split = split_valid(myObj);
+		cout << "split_valid : " << judge_split << endl;
+		if (!judge_split){
+			cout << "bad split" << endl;
 		}
-		cout << endl;
-	}
-	
-	find_loop(myObj, all_edge, planes);
-	
-	process_piece(temp_piece, myObj, face_split_by_plane);
 
-	/*for (int i = 0; i < myObj->loop->size(); i += 1){
-		cout << "i : ";
-		for (int j = 0; j < myObj->loop->at(i).loop_line->size(); j += 1){
-			cout << myObj->loop->at(i).loop_line->at(j) << " ";
+		if (judge_split){
+
+			find_loop(myObj, all_edge, planes);
+
+			process_piece(temp_piece, myObj, face_split_by_plane);
+			
+			fill_hole(temp_piece, true);
+
+			glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
+			//glmWriteOBJ(&temp_piece, "test_model/out/out_p123.obj", GLM_NONE);
+			//glmWriteOBJ(myObj_inner, model_out, GLM_NONE);
 		}
-		cout << endl;
-	}*/
-	/*ofstream os("test_model/out/out_p123.obj");
-	for (int i = 1; i <= temp_piece.numvertices; i += 1){
-		os << "v " << temp_piece.vertices->at(3 * i + 0) << " " << temp_piece.vertices->at(3 * i + 1) << " " << temp_piece.vertices->at(3 * i + 2) << endl;
 	}
-
-	for (int i = 0; i < temp_piece.numtriangles; i += 1){
-		os << "f " << temp_piece.triangles->at(i).vindices[0] << " " << temp_piece.triangles->at(i).vindices[1] << " " << temp_piece.triangles->at(i).vindices[2] << endl;
-	}
-
-	for (int i = 0; i < temp_piece.loop->size(); i += 1){
-		os << "f ";
-		for (int j = 0; j < temp_piece.loop->at(i).loop_line->size(); j += 1){
-			os << temp_piece.loop->at(i).loop_line->at(j) << " ";
-		}
-		os << endl; 
-	}
-
-	os.close();*/
-
-	for (int i = 0; i < temp_piece.loop->size(); i += 1){
-		cout << "f ";
-		for (int j = 0; j < temp_piece.loop->at(i).loop_line->size(); j += 1){
-			cout << temp_piece.loop->at(i).loop_line->at(j) << " ";
-		}
-		cout << endl;
-	}
-	
-	fill_hole(temp_piece, true);
 }
 
 //void findzoom()
@@ -887,6 +866,6 @@ int main(int argc, char **argv)
 
 	//glutMainLoop();
 	//
-	//system("pause");
+	system("pause");
 	return 0;
 }

@@ -181,7 +181,7 @@ bool split_edge(GLMmodel *model, std::vector<edge> &all_edge,int split_tri_id, p
                 }
                 judge = true;
             }
-            else if(dir[0] == 0 || dir[1] == 0){
+			else if ((dir[0] == 0 || dir[1] == 0) && (dir[0] != dir[1])){
 
                 vec3 face_vertex1[3];
                 for(int j = 0; j < 3; j += 1){
@@ -206,6 +206,10 @@ bool split_edge(GLMmodel *model, std::vector<edge> &all_edge,int split_tri_id, p
                     judge = true;
                 }
             }
+			else if ((dir[0] == 0 || dir[1] == 0) && (dir[0] == dir[1])){
+				model->cut_loop->at(all_edge.at(model->triangles->at(split_tri_id).edge_index[i]).index[0]).connect_edge.push_back(model->triangles->at(split_tri_id).edge_index[i]);
+				model->cut_loop->at(all_edge.at(model->triangles->at(split_tri_id).edge_index[i]).index[1]).connect_edge.push_back(model->triangles->at(split_tri_id).edge_index[i]);
+			}
         }
     }
     return judge;
@@ -1343,9 +1347,6 @@ void inform_vertex(GLMmodel *model, std::vector<edge> &all_edge)
 	}
 }
 
-#include <iostream>
-using namespace std;
-
 void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes)
 {
     //bool use_plane[planes.size()] = { false };
@@ -1369,21 +1370,14 @@ void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> 
         model->loop->at(i).plane_normal[2] = planes.at(i).plane_par[2];
         model->loop->at(i).loop_line = new std::vector<int>();
         for(unsigned int j = 0; j < model->multi_vertex->size(); j += 1){
-			if (model->multi_vertex->at(j) != 1197){
-				if (model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(0) == i || model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(1) == i){
-					use_plane[i] = true;
-					model->loop->at(i).loop_line->push_back(model->multi_vertex->at(j));
-					start_index = model->multi_vertex->at(j);
-					use_vertex[model->multi_vertex->at(j)] = true;
-					find_plane = true;
-					break;
-				}
-			}
-			/*else{
-				cout << "fuck" << endl;
-				find_plane = false;
+			if (model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(0) == i || model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(1) == i){
+				use_plane[i] = true;
+				model->loop->at(i).loop_line->push_back(model->multi_vertex->at(j));
+				start_index = model->multi_vertex->at(j);
+				use_vertex[model->multi_vertex->at(j)] = true;
+				find_plane = true;
 				break;
-			}*/
+			}
         }
 
         if(!find_plane)
@@ -1450,14 +1444,12 @@ void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> 
             int next_index;
             bool find_vertex = false;
             for(unsigned int j = 0; j < model->multi_vertex->size(); j += 1){
-				if (model->multi_vertex->at(j) != 1197){
-					if (model->multi_vertex->at(j) != (unsigned int)end_index && std::equal(model->cut_loop->at(end_index).align_plane.begin(), model->cut_loop->at(end_index).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin())){
-						start_index = model->multi_vertex->at(j);
-						model->loop->at(i).loop_line->push_back(start_index);
-						use_vertex[start_index] = true;
-						find_vertex = true;
-						break;
-					}
+				if (model->multi_vertex->at(j) != (unsigned int)end_index && std::equal(model->cut_loop->at(end_index).align_plane.begin(), model->cut_loop->at(end_index).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin())){
+					start_index = model->multi_vertex->at(j);
+					model->loop->at(i).loop_line->push_back(start_index);
+					use_vertex[start_index] = true;
+					find_vertex = true;
+					break;
 				}
             }
 
@@ -1651,4 +1643,110 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *model, std::vector<int> &face
 			}
 		}
 	}
+}
+
+bool shell_valid(GLMmodel *model, std::vector<int> face_split_by_plane)
+{
+	GLMmodel *test_model = glmCopy(model);
+
+	std::vector<edge> inner_edge;
+	collect_edge(test_model, inner_edge);
+
+	for (int i = 0; i < face_split_by_plane.size(); i += 1){
+
+		vec3 p1(test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[0] + 0), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[0] + 1), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[0] + 2));
+		vec3 p2(test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[1] + 0), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[1] + 1), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[1] + 2));
+		vec3 p3(test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[2] + 0), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[2] + 1), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[2] + 2));
+
+		vec3 v1 = p1 - p2;
+		vec3 v2 = p3 - p2;
+
+		vec3 n = (v2 ^ v1).normalize();
+		float d = n * p1;
+
+		for (unsigned int j = 0; j < inner_edge.size(); j += 1){
+
+			bool check = false;
+			for (int k = 0; k < 3; k += 1){
+				if (test_model->triangles->at(face_split_by_plane.at(i)).vindices[k] == inner_edge.at(j).index[0]){
+					check = true;
+					break;
+				}
+				if (test_model->triangles->at(face_split_by_plane.at(i)).vindices[k] == inner_edge.at(j).index[1]){
+					check = true;
+					break;
+				}
+			}
+
+			if (check)
+				continue;
+
+			int dir[3] = { 0.0, 0.0, 0.0 };
+			for (int k = 0; k < 2; k += 1){
+				vec3 now_p(test_model->vertices->at(3 * inner_edge.at(j).index[k] + 0), test_model->vertices->at(3 * inner_edge.at(j).index[k] + 1), test_model->vertices->at(3 * inner_edge.at(j).index[k] + 2));
+				float judge = n * now_p - d;
+
+				if (judge > 0.0001)
+					dir[2] += 1;
+				else if (judge < -0.0001)
+					dir[0] += 1;
+				else
+					dir[1] += 1;
+			}
+
+			if ((dir[0] == dir[2]) && (dir[0] == 1)){
+
+				vec3 edge_p1(test_model->vertices->at(3 * inner_edge.at(j).index[0] + 0), test_model->vertices->at(3 * inner_edge.at(j).index[0] + 1), test_model->vertices->at(3 * inner_edge.at(j).index[0] + 2));
+				vec3 edge_p2(test_model->vertices->at(3 * inner_edge.at(j).index[1] + 0), test_model->vertices->at(3 * inner_edge.at(j).index[1] + 1), test_model->vertices->at(3 * inner_edge.at(j).index[1] + 2));
+
+				vec3 e_dir = (edge_p2 - edge_p1).normalize();
+				float times = (d - (edge_p1 * n)) / (e_dir * n);
+				vec3 insect_p = edge_p1 + times * e_dir;
+
+				vec3 edge1 = p2 - p1;
+				vec3 edge2 = p3 - p2;
+				vec3 edge3 = p1 - p3;
+				vec3 judge1 = insect_p - p1;
+				vec3 judge2 = insect_p - p2;
+				vec3 judge3 = insect_p - p3;
+
+				if (((edge1 ^ judge1) * n > 0.001f) && ((edge2 ^ judge2) * n > 0.001f) && ((edge3 ^ judge3) * n > 0.001f)){
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool split_valid(GLMmodel *model)
+{
+	int *use_times = new int[model->multi_vertex->size()];
+	for (int i = 0; i < model->multi_vertex->size(); i += 1){
+		use_times[i] = 0;
+	}
+
+	for (int i = 0; i < model->multi_vertex->size(); i += 1){
+		for (int j = i + 1; j < model->multi_vertex->size(); j += 1){
+			int judge = 0;
+			for (int k = 0; k < model->cut_loop->at(model->multi_vertex->at(i)).align_plane.size(); k += 1){
+				int index = find(model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(i)).align_plane.at(k)) - model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin();
+				if (index < model->cut_loop->at(model->multi_vertex->at(j)).align_plane.size()){
+					judge += 1;
+				}
+			}
+
+			if (judge >= 2){
+				use_times[i] += 1;
+				use_times[j] += 1;
+			}
+		}
+	}
+
+	for (int i = 0; i < model->multi_vertex->size(); i += 1){
+		if (use_times[i] != 1){
+			return false;
+		}
+	}
+	return true;
 }
