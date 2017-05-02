@@ -112,9 +112,9 @@ void init()
 	planes.push_back(test_plane3);
 	planes.push_back(test_plane4);
 	planes.push_back(test_plane5); //dir_plane
-	//planes.push_back(test_plane6); //dir_plane
-	//planes.push_back(test_plane7); //dir_plane
-	//planes.push_back(test_plane8); //dir_plane
+	planes.push_back(test_plane6); //dir_plane
+	planes.push_back(test_plane7); //dir_plane
+	planes.push_back(test_plane8); //dir_plane
 	//planes.push_back(test_plane9); //dir_plane
 
 	cut_intersection(myObj, planes, face_split_by_plane, false);
@@ -445,16 +445,24 @@ float decrease_t(int iteration)
 	return pow(0.99f, (float)num);
 }
 
-bool have_same_material(int now_material, int p1, int p2, std::vector<std::vector<int>> &vertex_color)
+int have_same_material(int now_material, int p1, int p2, std::vector<std::vector<int>> &vertex_color)
 {
 	for (int i = 0; i < vertex_color.at(p1).size(); i += 1){
 		for (int j = 0; j < vertex_color.at(p2).size(); j += 1){
 			if (vertex_color.at(p1).at(i) == vertex_color.at(p2).at(j) && vertex_color.at(p1).at(i) != now_material)
-				return true;
+				return vertex_color.at(p1).at(i);
 		}
 	}
-	return false;
+	return -1;
 }
+
+class cut_plane
+{
+public:
+	plane split_plane;
+	int use_vertex[2];
+	float normal_percent[2];
+};
 
 int main(int argc, char **argv)
 {
@@ -462,7 +470,10 @@ int main(int argc, char **argv)
 
 	myObj = glmReadOBJ(model_source);
 
-	init();
+	//init();
+
+	/*struc_parser(test_connect, string("1500_10000.txt"));
+	generate_tenon(myObj, test_connect, 18);*/
 	
 	//==================================================================
 	//(voxelization)
@@ -741,11 +752,245 @@ int main(int argc, char **argv)
 		
 	//==================================================================
 	//(graph cut)
+	recount_normal(myObj);
+	collect_edge(myObj, all_edge);
+	find_near_tri(myObj, all_edge);
+	struc_parser(test_connect, string("1500_10000.txt"));
 	//float origin_term[4];
 	//float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
 	////output_nearest_point(myObj, string("fake_head_nearest_point.txt"));
-	//output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
+	nearest_point_parser(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
+
+	//float wnode = 1.0f;
+	//float wedge = 0.1f;
+	//float label = 0.0f;	
+
+	//std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
+
+	//vector<simple_material> materials_graph_cut;
+	//test_graph_cut(myObj, test_connect, materials_graph_cut, color_material, vertex_color);
+	//int num_point = 0;
+	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+	//	if (vertex_color.at(i).size() >= 3){
+	//		num_point += 1;
+	//	}
+	//}
+
+	////ofstream point("color_point.txt");
+	////point << num_point << endl;
+	//std::vector<int> convert_index;
+	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+	//	if (vertex_color.at(i).size() >= 3){
+	//		convert_index.push_back(i);
+	//		/*cout << i << endl;
+	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+	//			cout << vertex_color.at(i).at(j) << " ";
+	//		}
+	//		cout << endl;*/
+	//		//point << i << " " << vertex_color.at(i).size() << endl;
+	//		//for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+	//			//point << vertex_color.at(i).at(j) << " ";
+	//		//}
+	//		//point << endl;
+	//	}
+	//}
+	////point.close();
+
+	ifstream point("color_point.txt");
+	int num_point;
+	point >> num_point;
+	std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
+	std::vector<int> convert_index;
+	for (int i = 0; i < num_point; i += 1){
+		int index, num;
+		point >> index >> num;
+		//cout << index << " " << num << endl;
+		convert_index.push_back(index);
+		for (int j = 0; j < num; j += 1){
+			int temp;
+			point >> temp;
+			vertex_color.at(index).push_back(temp);
+			//cout << temp << " ";
+		}
+		//cout << endl;
+	}
+	point.close();
+
+	vector<vector<int>> material_point(11);
+	for (int i = 0; i < convert_index.size(); i += 1){
+		//cout << convert_index.at(i) << endl;
+		for (int j = 0; j < vertex_color.at(convert_index.at(i)).size(); j += 1){
+			//cout << vertex_color.at(convert_index.at(i)).at(j) << " ";
+			material_point.at(vertex_color.at(convert_index.at(i)).at(j)).push_back(convert_index.at(i));
+		}
+		//cout << endl;
+	}
+
+	/*for (int i = 0; i < 11; i += 1){
+		cout << i << endl;
+		for (int j = 0; j < material_point.at(i).size(); j += 1){
+			cout << material_point.at(i).at(j) << " ";
+		}
+		cout << endl;
+	}*/
+
+	std::vector<std::vector<vec2>> partition_plane(11);
+
+	std::vector<cut_plane> plane_queue;
+
+	for (int i = 0; i < 11; i += 1){
+		GLMmodel *planes = NULL;
+		int num_plane = 0;
+
+		for (int j = 0; j < material_point.at(i).size(); j += 1){
+			vec3 p1(myObj->vertices->at(3 * material_point.at(i).at(j) + 0), myObj->vertices->at(3 * material_point.at(i).at(j) + 1), myObj->vertices->at(3 * material_point.at(i).at(j) + 2));
+			vec3 n_p1(myObj->normals[3 * material_point.at(i).at(j) + 0], myObj->normals[3 * material_point.at(i).at(j) + 1], myObj->normals[3 * material_point.at(i).at(j) + 2]);
+
+			for (int k = j + 1; k < material_point.at(i).size(); k += 1){
+				int same_material = have_same_material(i, material_point.at(i).at(j), material_point.at(i).at(k), vertex_color);
+
+				if (same_material != -1){
+
+					GLMmodel *temp_plane = glmReadOBJ("test_model/cube.obj");
+										
+					vec3 p2(myObj->vertices->at(3 * material_point.at(i).at(k) + 0), myObj->vertices->at(3 * material_point.at(i).at(k) + 1), myObj->vertices->at(3 * material_point.at(i).at(k) + 2));
+					vec3 n_p2(myObj->normals[3 * material_point.at(i).at(k) + 0], myObj->normals[3 * material_point.at(i).at(k) + 1], myObj->normals[3 * material_point.at(i).at(k) + 2]);
+
+					glmScale_y(temp_plane, (p1 - p2).length() / 2.0f);
+					glmScale_z(temp_plane, (p1 - p2).length() / 2.0f);
+					
+					int plane_index = -1;
+					for (int a = 0; a < plane_queue.size(); a += 1){
+						if ((plane_queue.at(a).use_vertex[0] == material_point.at(i).at(j) && plane_queue.at(a).use_vertex[1] == material_point.at(i).at(k)) || (plane_queue.at(a).use_vertex[1] == material_point.at(i).at(j) && plane_queue.at(a).use_vertex[0] == material_point.at(i).at(k))){
+							plane_index = a;
+							break;
+						}
+					}
+
+					if (plane_index == -1){
+						vec3 v1 = (p2 - p1).normalize();
+						vec3 v2 = ((n_p1 + n_p2) / 2.0).normalize();
+
+						vec3 n_vector = (v1 ^ v2).normalize();
+						float d = n_vector * p1;
+
+						cut_plane temp_record;
+						temp_record.split_plane.plane_par = vec4(n_vector, d);
+						temp_record.normal_percent[0] = 0.5f;
+						temp_record.normal_percent[1] = 0.5f;
+						temp_record.use_vertex[0] = material_point.at(i).at(j);
+						temp_record.use_vertex[1] = material_point.at(i).at(k);
+
+						plane_queue.push_back(temp_record);
+
+						vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
+						float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
+						float angle = acos(dot_angle);
+						//glmR(temp_plane, axis, angle);
+						mat4 R = rotation3Drad(axis, angle);
+
+						for (unsigned int i = 1; i <= temp_plane->numvertices; i += 1) {
+							vec3 temp(temp_plane->vertices->at(3 * i + 0), temp_plane->vertices->at(3 * i + 1), temp_plane->vertices->at(3 * i + 2));
+							temp = R * temp;
+							temp_plane->vertices->at(3 * i + 0) = temp[0];
+							temp_plane->vertices->at(3 * i + 1) = temp[1];
+							temp_plane->vertices->at(3 * i + 2) = temp[2];
+						}
+
+						glmT(temp_plane, (p1 + p2) / 2.0f);
+
+						if (num_plane == 0){
+							planes = glmCopy(temp_plane);
+							num_plane += 1;
+						}
+						else{
+							glmCombine(planes, temp_plane);
+							num_plane += 1;
+						}
+
+						float dir = 0;
+						for (int a = 0; a < material_point.at(i).size(); a += 1){
+							vec3 judge_vertex(myObj->vertices->at(3 * material_point.at(i).at(a) + 0), myObj->vertices->at(3 * material_point.at(i).at(a) + 1), myObj->vertices->at(3 * material_point.at(i).at(a) + 2));
+							float temp_d = n_vector * judge_vertex - d;
+							if (temp_d > 0.0001f){
+								dir = 1;
+								break;
+							}
+							if (temp_d < -0.0001f){
+								dir = -1;
+								break;
+							}
+						}
+
+						vec2 plane_info(plane_queue.size() - 1, dir);
+						partition_plane.at(i).push_back(plane_info);
+					}
+					else{
+						vec3 n_vector;
+						n_vector[0] = plane_queue.at(plane_index).split_plane.plane_par[0];
+						n_vector[1] = plane_queue.at(plane_index).split_plane.plane_par[1];
+						n_vector[2] = plane_queue.at(plane_index).split_plane.plane_par[2];
+						float d = plane_queue.at(plane_index).split_plane.plane_par[3];
+						
+						vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
+						float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
+						float angle = acos(dot_angle);
+						//glmR(temp_plane, axis, angle);
+						mat4 R = rotation3Drad(axis, angle);
+
+						for (unsigned int i = 1; i <= temp_plane->numvertices; i += 1) {
+							vec3 temp(temp_plane->vertices->at(3 * i + 0), temp_plane->vertices->at(3 * i + 1), temp_plane->vertices->at(3 * i + 2));
+							temp = R * temp;
+							temp_plane->vertices->at(3 * i + 0) = temp[0];
+							temp_plane->vertices->at(3 * i + 1) = temp[1];
+							temp_plane->vertices->at(3 * i + 2) = temp[2];
+						}
+
+						glmT(temp_plane, (p1 + p2) / 2.0f);
+
+						if (num_plane == 0){
+							planes = glmCopy(temp_plane);
+							num_plane += 1;
+						}
+						else{
+							glmCombine(planes, temp_plane);
+							num_plane += 1;
+						}
+
+						float dir = 0;
+						for (int a = 0; a < material_point.at(i).size(); a += 1){
+							vec3 judge_vertex(myObj->vertices->at(3 * material_point.at(i).at(a) + 0), myObj->vertices->at(3 * material_point.at(i).at(a) + 1), myObj->vertices->at(3 * material_point.at(i).at(a) + 2));
+							float temp_d = n_vector * judge_vertex - d;
+
+							if (temp_d > 0.0001f){
+								dir = 1;
+								break;
+							}
+							if (temp_d < -0.0001f){
+								dir = -1;
+								break;
+							}
+						}
+
+						vec2 plane_info(plane_index, dir);
+						partition_plane.at(i).push_back(plane_info);
+					}
+				}
+			}
+		}
+		std::string filename = to_string(i) + ".obj";
+		glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);
+	}
+
+	/*for (int i = 0; i < 11; i += 1){
+		cout << i << " = > " << endl;
+		for (int j = 0; j < partition_plane.at(i).size(); j += 1){
+			cout << partition_plane.at(i).at(j)[0] << " " << partition_plane.at(i).at(j)[1] << endl;
+		}
+		cout << endl;
+		cout << endl;
+	}*/
 
 	//string exp_name = to_string(materials_graph_cut.size()) + "(data_" + to_string(wnode) + ",_smooth_" + to_string(wedge) + ",_label_" + to_string(label) + ")";
 	//string mtl_name = exp_name + ".mtl";
@@ -755,97 +1000,6 @@ int main(int argc, char **argv)
 	//output_material(materials_graph_cut, mtl_name);
 	//glmWriteOBJ_EXP(myObj, my_strdup(obj_name.c_str()), materials_graph_cut, mtl_name, GRAPH_CUT);
 
-	/*std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
-
-	vector<simple_material> materials_graph_cut;
-	test_graph_cut(myObj, test_connect, materials_graph_cut, color_material, vertex_color);
-
-	int num_point = 0;
-	for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
-	if (vertex_color.at(i).size() >= 3){
-	num_point += 1;
-	}
-	}*/
-
-	//ofstream point("color_point.txt");
-	//point << num_point << endl;
-	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
-	//	if (vertex_color.at(i).size() >= 3){
-	//		/*cout << i << endl;
-	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
-	//			cout << vertex_color.at(i).at(j) << " ";
-	//		}
-	//		cout << endl;*/
-	//		point << i << " " << vertex_color.at(i).size() << endl;
-	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
-	//			point << vertex_color.at(i).at(j) << " ";
-	//		}
-	//		point << endl;
-	//	}
-	//}
-	//point.close();
-
-	//ifstream point("color_point.txt");
-	//int num_point;
-	//point >> num_point;
-	//std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
-	//std::vector<int> convert_index;
-	//for (int i = 0; i < num_point; i += 1){
-	//	int index, num;
-	//	point >> index >> num;
-	//	//cout << index << " " << num << endl;
-	//	convert_index.push_back(index);
-	//	for (int j = 0; j < num; j += 1){
-	//		int temp;
-	//		point >> temp;
-	//		vertex_color.at(index).push_back(temp);
-	//		//cout << temp << " ";
-	//	}
-	//	//cout << endl;
-	//}
-	//point.close();
-
-	//vector<vector<int>> material_point(11);
-	//for (int i = 0; i < convert_index.size(); i += 1){
-	//	//cout << convert_index.at(i) << endl;
-	//	for (int j = 0; j < vertex_color.at(convert_index.at(i)).size(); j += 1){
-	//		//cout << vertex_color.at(convert_index.at(i)).at(j) << " ";
-	//		material_point.at(vertex_color.at(convert_index.at(i)).at(j)).push_back(convert_index.at(i));
-	//	}
-	//	//cout << endl;
-	//}
-
-	///*for (int i = 0; i < 11; i += 1){
-	//	cout << i << endl;
-	//	for (int j = 0; j < material_point.at(i).size(); j += 1){
-	//		cout << material_point.at(i).at(j) << " ";
-	//	}
-	//	cout << endl;
-	//}*/
-
-	//for (int i = 0; i < 11; i += 1){
-	////for (int i = 0; i < 1; i += 1){
-	//	for (int j = 0; j < material_point.at(i).size(); j += 1){
-	//		vec3 p1(myObj->vertices->at(3 * material_point.at(i).at(j) + 0), myObj->vertices->at(3 * material_point.at(i).at(j) + 1), myObj->vertices->at(3 * material_point.at(i).at(j) + 2));
-	//		vec3 n_p1(myObj->normals[3 * material_point.at(i).at(j) + 0], myObj->normals[3 * material_point.at(i).at(j) + 1], myObj->normals[3 * material_point.at(i).at(j) + 2]);
-
-	//		for (int k = j + 1; k < material_point.at(i).size(); k += 1){
-	//							
-	//			if (have_same_material(i, material_point.at(i).at(j), material_point.at(i).at(k), vertex_color)){
-	//				vec3 p2(myObj->vertices->at(3 * material_point.at(i).at(k) + 0), myObj->vertices->at(3 * material_point.at(i).at(k) + 1), myObj->vertices->at(3 * material_point.at(i).at(k) + 2));
-	//				vec3 n_p2(myObj->normals[3 * material_point.at(i).at(k) + 0], myObj->normals[3 * material_point.at(i).at(k) + 1], myObj->normals[3 * material_point.at(i).at(k) + 2]);
-
-	//				vec3 v1 = (p2 - p1).normalize();
-	//				vec3 v2 = ((n_p1 + n_p2) / 2.0).normalize();
-
-	//				vec3 n_vector = v1 ^ v2;
-	//				float d = n_vector * p1;
-	//				cout << n_vector[0] << ", " << n_vector[1] << ", " << n_vector[2] << ", " << d << endl;
-	//			}
-	//		}
-	//	}
-	//	cout << endl;
-	//}
 	//==================================================================
 
 	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);

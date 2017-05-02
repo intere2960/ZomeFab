@@ -184,6 +184,9 @@ GLvoid
 glmScale_y(GLMmodel* model, GLfloat scale_y);
 
 GLvoid
+glmScale_z(GLMmodel* model, GLfloat scale_z);
+
+GLvoid
 glmRT(GLMmodel* model, vec3 &rotate, vec3 &translate);
 
 GLvoid

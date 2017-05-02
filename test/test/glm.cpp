@@ -1022,6 +1022,16 @@ glmScale_y(GLMmodel* model, GLfloat scale_y)
 }
 
 GLvoid
+glmScale_z(GLMmodel* model, GLfloat scale_z)
+{
+	GLuint i;
+
+	for (i = 1; i <= model->numvertices; i++) {
+		model->vertices->at(3 * i + 2) *= scale_z;
+	}
+}
+
+GLvoid
 glmRT(GLMmodel* model, vec3 &rotate, vec3 &translate)
 {
     mat4 RT = (rotation3Drad(vec3(1.0, 0.0, 0.0), rotate[0])) * (rotation3Drad(vec3(0.0, 1.0, 0.0), rotate[1])) * rotation3Drad(vec3(0.0, 0.0, 1.0), rotate[2]) * (translation3D(translate));

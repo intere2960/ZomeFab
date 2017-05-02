@@ -30,9 +30,9 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/fake_head.obj";
+char model_source[] = "test_model/fake_head-2times.obj";
 //char model_source[] = "test_model/use/material 11.obj";
-//char model_source[] = "test_model/use/material 2-1-fill.obj";
+//char model_source[] = "test_model/out/material 11-fill.obj";
 //cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head fake_head-2times
 char model_out[] = "test_model/out/out_p.obj";
 
@@ -132,13 +132,13 @@ bool show_piece = true;
 //plane test_plane7(-0.837661, -0.521881, 0.161134, 67.0868, -1);
 //plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
-plane test_plane1(0.436113, -0.268887, 0.848868, -123.672, 1); // ax+by+cz=d  e->cut dir
-plane test_plane2(-0.947401, -0.088736, 0.169652, 85.8411, -1);
-plane test_plane3(-0.691125, 0.630287, -0.17477, 122.875, 1);
-plane test_plane4(-0.201387, -0.261071, -0.906173, -55.4945, -1);
-plane test_plane5(-0.265131, 0.958359, -0.0744703, 163.743, 1);
-//plane test_plane6(0.0849077, 0.026043, -0.99538, -17.4646, -1);
-plane test_plane7(0.0, 0.0, 1.0, 0, 1);
+plane test_plane1(0.223149, -0.657791, 0.712275, -152.862, -1); // ax+by+cz=d  e->cut dir
+plane test_plane2(-0.136551, 0.338695, -0.928133, 109.087, 1);
+plane test_plane3(0.224202, 0.579042, -0.768344, 71.9395, 1);
+plane test_plane4(0.0218311, -0.163908, 0.969126, -40.4698, -1);
+plane test_plane5(0.635567, 0.415604, -0.638775, -22.1703, 1);
+plane test_plane6(-0.912523, 0.089691, -0.0639837, 109.59, 1);
+plane test_plane7(0.916365, -0.365211, -0.135677, -139.37, -1);
 plane test_plane8(-0.285818, 0.935506, -0.206426, 163.572, 1);
 plane test_plane9(0.0, 1.0, 0.0, 230.0, -1);
 

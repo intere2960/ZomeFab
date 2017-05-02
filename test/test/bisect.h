@@ -25,7 +25,7 @@ class plane
 public:
     plane();
     plane(float a, float b, float c, float d,int e);
-    float plane_par[4]; // ax+by+cz=d  e->cut dir
+	vec4 plane_par; // ax+by+cz=d  e->cut dir
     int dir;
 };
 

@@ -28,6 +28,7 @@ double AverageRadius(GLMmodel *model, vec3 &centroid)
 		return distance / area;
 }
 
+#include <fstream>
 
 void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, float color_material[20][3], std::vector<std::vector<int>>& vertex_color)
 {
@@ -130,12 +131,20 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	nhd->Node(i)->edges.at(j)->weight /= max_smooth;
 	}
 	}*/
+	//std::ofstream os;
+	//os.open("dataterm.txt");
+	//os << model->numtriangles << " " << num_labels << std::endl;
 
 	for (int i = 0; i < dataterm.size(); i += 1){
+		//os << dataterm.at(i) << " ";
 		dataterm.at(i) /= max_data;
 		//dataterm.at(i) /= 1.0;
 		dataterm.at(i) = wnode * (0.998f - std::min(1.0, dataterm.at(i)));
+		//if ((i + 1) % num_labels == 0){
+		//	os << std::endl;
+		//}
 	}
+	//os.close();
 
 	std::cout << "NEdges = " << nhd->NumEdges() << std::endl;
 

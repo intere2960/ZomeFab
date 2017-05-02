@@ -57,9 +57,9 @@ float plane_dir_point(vec3 &point, plane plane) //have problem
 {
     float judge = plane.plane_par[0] * point[0] + plane.plane_par[1] * point[1] + plane.plane_par[2] * point[2] - plane.plane_par[3];
 
-    if(judge > 0.0001)
+    if(judge > 0.0001f)
         judge = 1;
-    else if(judge < -0.0001)
+    else if(judge < -0.0001f)
         judge = -1;
     else
         judge = 0;
@@ -1632,17 +1632,17 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *model, std::vector<int> &face
 
 	temp_piece.cut_loop = new std::vector<vertex>(temp_piece.numvertices + 1);
 
-	if (model->loop->size() > 0){
-		for (unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
-			temp_piece.loop->at(i).loop_line = new std::vector<int>();
-			temp_piece.loop->at(i).plane_normal[0] = model->loop->at(i).plane_normal[0];
-			temp_piece.loop->at(i).plane_normal[1] = model->loop->at(i).plane_normal[1];
-			temp_piece.loop->at(i).plane_normal[2] = model->loop->at(i).plane_normal[2];
-			for (unsigned int j = 0; j < model->loop->at(i).loop_line->size(); j += 1){
-				temp_piece.loop->at(i).loop_line->push_back(vertex_map.at(model->loop->at(i).loop_line->at(j)));
-			}
+if (model->loop->size() > 0){
+	for (unsigned int i = 0; i < temp_piece.loop->size(); i += 1){
+		temp_piece.loop->at(i).loop_line = new std::vector<int>();
+		temp_piece.loop->at(i).plane_normal[0] = model->loop->at(i).plane_normal[0];
+		temp_piece.loop->at(i).plane_normal[1] = model->loop->at(i).plane_normal[1];
+		temp_piece.loop->at(i).plane_normal[2] = model->loop->at(i).plane_normal[2];
+		for (unsigned int j = 0; j < model->loop->at(i).loop_line->size(); j += 1){
+			temp_piece.loop->at(i).loop_line->push_back(vertex_map.at(model->loop->at(i).loop_line->at(j)));
 		}
 	}
+}
 }
 
 bool shell_valid(GLMmodel *model, std::vector<int> face_split_by_plane)
@@ -1719,6 +1719,9 @@ bool shell_valid(GLMmodel *model, std::vector<int> face_split_by_plane)
 	return true;
 }
 
+#include <iostream>
+using namespace std;
+
 bool split_valid(GLMmodel *model)
 {
 	int *use_times = new int[model->multi_vertex->size()];
@@ -1727,6 +1730,12 @@ bool split_valid(GLMmodel *model)
 	}
 
 	for (int i = 0; i < model->multi_vertex->size(); i += 1){
+		cout << i << " : ";
+		for (int j = 0; j < model->cut_loop->at(model->multi_vertex->at(j)).align_plane.size(); j += 1){
+			cout << model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(j) << " ";
+		}
+		cout << endl;
+
 		for (int j = i + 1; j < model->multi_vertex->size(); j += 1){
 			int judge = 0;
 			for (int k = 0; k < model->cut_loop->at(model->multi_vertex->at(i)).align_plane.size(); k += 1){

@@ -1262,7 +1262,7 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 	}
 }
 
-void generate_tenon(GLMmodel* model, GLMmodel &temp_piece,std::vector<std::vector<zomeconn>> &test_connect , int use_solt)
+void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect , int use_solt)
 {
 	zomedir t;
 
@@ -1301,7 +1301,7 @@ void generate_tenon(GLMmodel* model, GLMmodel &temp_piece,std::vector<std::vecto
 				judge3 = insect_p - p3;
 
 				if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-					if ((p - insect_p).length() < 0.8 * SCALE){
+					if ((p - insect_p).length() < 1.0 * SCALE){
 						if ((find(use_ball.begin(), use_ball.end(), i) - use_ball.begin()) >= use_ball.size()){
 							use_ball.push_back(i);
 							use_ball_insect.push_back(insect_p);
@@ -1335,7 +1335,7 @@ void generate_tenon(GLMmodel* model, GLMmodel &temp_piece,std::vector<std::vecto
 
 		vec3 new_p = (p + inserct_p) / 2;
 
-		float l = ((p - inserct_p).length() - ERROR_THICKNESS) / 2.0f;
+		float l = ((p - inserct_p).length() - ERROR_THICKNESS) / 2.5f;
 
 		glmScale_y(xxx, l);
 		glmRT(xxx, vec3(0.0, t.roll(t.opposite_face(use_solt)), 0.0), vec3(0.0, 0.0, 0.0));
@@ -1343,7 +1343,7 @@ void generate_tenon(GLMmodel* model, GLMmodel &temp_piece,std::vector<std::vecto
 		glmR(xxx, vec3(0.0, 0.0, 0.0));
 		glmRT(xxx, vec3(0.0, 0.0, 0.0), new_p);
 
-		glmCombine(&temp_piece, xxx);
+		glmCombine(model, xxx);
 	}
-	glmWriteOBJ(&temp_piece, "test_model/out/out_p-zome.obj", GLM_NONE);
+	glmWriteOBJ(model, "test_model/out/out_p-zome.obj", GLM_NONE);
 }
