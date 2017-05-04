@@ -18,6 +18,7 @@
 #include "bisect.h"
 #include "fill.h"
 #include "zomedir.h"
+#include "zomestruc.h"
 #include "voxel.h"
 //#include "segment.h"
 #include "bestfitobb.h"

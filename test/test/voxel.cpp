@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <string>
+#include <fstream>
 #include <omp.h>
 #include "voxel.h"
 #include "zomedir.h"
@@ -168,7 +169,7 @@ voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rot
 
 	for (int i = 0; i < 8; i += 1){
 		for (int j = 0; j < 6; j += 1){
-			if (fabs(vertex_p[i] * toward_vector.at(j) - plane_d[j]) < 0.001){
+			if (fabs(vertex_p[i] * toward_vector.at(j) - plane_d[j]) < 0.001f){
 				face_p[i].push_back(j);
 			}
 		}
@@ -176,7 +177,7 @@ voxel::voxel(int t_color, int t_size, float t_scale, vec3 t_position, vec3 t_rot
 
 	for (int i = 0; i < 12; i += 1){
 		for (int j = 0; j < 6; j += 1){
-			if (fabs(edge_p[i] * toward_vector.at(j) - plane_d[j]) < 0.001){
+			if (fabs(edge_p[i] * toward_vector.at(j) - plane_d[j]) < 0.001f){
 				face_edge[i].push_back(j);
 			}
 		}
@@ -683,9 +684,9 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	rebuild_facetoward(all_voxel);
 
 	#pragma omp parallel for
-	for(int i = 0; i < model->numtriangles; i += 1){
+	for (int i = 0; i < model->numtriangles; i += 1){
 		#pragma omp parallel for
-		for(int k = 0; k < 8; k += 1){
+		for (int k = 0; k < 8; k += 1){
 			int dx = 0;
 			int dy = 2;
 			int dz = 4;
@@ -701,10 +702,10 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 
 			int test_coord[3];
 			vec3 test_p[3];
-			for(int j = 0; j < 3; j += 1){
+			for (int j = 0; j < 3; j += 1){
 				test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
 				test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
-				if(all_voxel.at(test_coord[j]).show)
+				if (all_voxel.at(test_coord[j]).show)
 					all_voxel.at(test_coord[j]).show = false;
 			}
 			cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
@@ -715,28 +716,28 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 
 	bool *use = new bool[all_voxel.size()];
 	#pragma omp parallel for
-	for(int i = 0; i < all_voxel.size(); i += 1){
-		if(!all_voxel.at(i).show)
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (!all_voxel.at(i).show)
 			use[i] = true;
 		else
 			use[i] = false;
 	}
 
 	std::vector<std::vector<int>> region;
-	while(true){
+	while (true){
 		std::vector<int> t_queue;
-		for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-			if(!use[i]){
+		for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+			if (!use[i]){
 				t_queue.push_back(i);
 				use[i] = true;
 				break;
 			}
 		}
 
-		for(unsigned int i = 0; i < t_queue.size(); i += 1){
-			for(int j = 0; j < 6; j += 1){
-				if(all_voxel.at(t_queue.at(i)).face_toward[j] != -1){
-					if(!use[all_voxel.at(t_queue.at(i)).face_toward[j]]){
+		for (unsigned int i = 0; i < t_queue.size(); i += 1){
+			for (int j = 0; j < 6; j += 1){
+				if (all_voxel.at(t_queue.at(i)).face_toward[j] != -1){
+					if (!use[all_voxel.at(t_queue.at(i)).face_toward[j]]){
 						t_queue.push_back(all_voxel.at(t_queue.at(i)).face_toward[j]);
 						use[all_voxel.at(t_queue.at(i)).face_toward[j]] = true;
 					}
@@ -747,29 +748,29 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 		region.push_back(t_queue);
 
 		bool test = true;
-		for(unsigned int i = 0; i < all_voxel.size(); i += 1){
-			if(!use[i]){
+		for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+			if (!use[i]){
 				test = false;
 				break;
 			}
 		}
 
-		if(test)
+		if (test)
 			break;
 	}
 
 	#pragma omp parallel for
-	for(int i = 0; i < region.size(); i += 1){
+	for (int i = 0; i < region.size(); i += 1){
 		bool test = false;
-		for(unsigned int j = 0; j < region.at(i).size(); j += 1){
-			if(test){
+		for (unsigned int j = 0; j < region.at(i).size(); j += 1){
+			if (test){
 				all_voxel.at(region.at(i).at(j)).show = false;
 				region.at(i).erase(region.at(i).begin() + j);
 				j -= 1;
 			}
 			else{
-				for(int k = 0 ; k < 6; k += 1){
-					if(all_voxel.at(region.at(i).at(j)).face_toward[k] == -1){
+				for (int k = 0; k < 6; k += 1){
+					if (all_voxel.at(region.at(i).at(j)).face_toward[k] == -1){
 						j = -1;
 						test = true;
 						break;
@@ -780,6 +781,159 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	}
 
 	voxel_zometool(all_voxel, zome_queue, region, angle);
+}
+
+#include <iostream>
+using namespace std;
+
+void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, float length)
+{
+	voxel start(-1, -1, length / 2.0f, bound_center, angle);
+	vec3 origin = vec3(bound_center) + start.scale * (start.toward_vector.at(0) + start.toward_vector.at(2) + start.toward_vector.at(4));
+
+	int max_d = -1;
+	for (int i = 0; i < 3; i += 1){
+		float pos = ceil((bounding_max[i] - origin[i]) / (start.scale * 2)),
+			neg = ceil((origin[i] - bounding_min[i]) / (start.scale * 2));
+		if (pos > max_d)
+			max_d = (int)pos;
+		if (neg > max_d)
+			max_d = (int)neg;
+	}
+
+	int half_edge = 1;
+	while (true){
+		if (half_edge < max_d)
+			half_edge *= 2;
+		else{
+			max_d = half_edge;
+			break;
+		}
+	}
+
+	start.position += (float)(max_d - 1) * (start.toward_vector.at(1) + start.toward_vector.at(3) + start.toward_vector.at(5)) * start.scale * 2.0f;
+
+	cout << max_d * 2 << endl;
+
+	for (int i = 0; i < max_d * 2; i += 1){
+		for (int j = 0; j < max_d * 2; j += 1){
+			for (int k = 0; k < max_d * 2; k += 1){
+				vec3 new_p = start.position + start.scale * 2.0f * ((float)i * start.toward_vector.at(0) + (float)j * start.toward_vector.at(2) + (float)k * start.toward_vector.at(4));
+				voxel temp(start, new_p, start.rotation);
+				assign_coord(temp, origin);
+				all_voxel.push_back(temp);
+			}
+		}
+	}
+
+	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
+	rebuild_facetoward(all_voxel);
+
+	#pragma omp parallel for
+	for (int i = 0; i < model->numtriangles; i += 1){
+		//#pragma omp parallel for
+		//for (int k = 0; k < 8; k += 1){
+			/*int dx = 0;
+			int dy = 2;
+			int dz = 4;
+
+			if (k % 2 == 1)
+				dx = 1;
+			if ((k / 2) % 2 == 1)
+				dy = 3;
+			if (k / 4 == 1)
+				dz = 5;*/
+
+			//vec3 ball_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * NODE_DIAMETER / 2.0;
+			vec3 ball_error = vec3(0.0f, 0.0f, 0.0f);
+
+			int test_coord[4];
+			vec3 test_p[4];
+			for (int j = 0; j < 3; j += 1){
+				test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
+				test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
+				if (all_voxel.at(test_coord[j]).show)
+					all_voxel.at(test_coord[j]).show = false;
+			}
+
+			test_p[3] = (test_p[0] + test_p[1] + test_p[2]) / 3.0f;
+			test_coord[3] = search_coord(all_voxel, 0, all_voxel.size(), test_p[3], 0, ball_error);
+
+			cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
+			cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2], ball_error);
+			cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0], ball_error);
+
+			cross_edge(all_voxel, test_p[0], test_p[3], test_coord[0], test_coord[3], ball_error);
+			cross_edge(all_voxel, test_p[1], test_p[3], test_coord[1], test_coord[3], ball_error);
+			cross_edge(all_voxel, test_p[2], test_p[3], test_coord[2], test_coord[3], ball_error);
+		//}
+	}
+
+	bool *use = new bool[all_voxel.size()];
+	#pragma omp parallel for
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (!all_voxel.at(i).show)
+			use[i] = true;
+		else
+			use[i] = false;
+	}
+
+	std::vector<std::vector<int>> region;
+	while (true){
+		std::vector<int> t_queue;
+		for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+			if (!use[i]){
+				t_queue.push_back(i);
+				use[i] = true;
+				break;
+			}
+		}
+
+		for (unsigned int i = 0; i < t_queue.size(); i += 1){
+			for (int j = 0; j < 6; j += 1){
+				if (all_voxel.at(t_queue.at(i)).face_toward[j] != -1){
+					if (!use[all_voxel.at(t_queue.at(i)).face_toward[j]]){
+						t_queue.push_back(all_voxel.at(t_queue.at(i)).face_toward[j]);
+						use[all_voxel.at(t_queue.at(i)).face_toward[j]] = true;
+					}
+				}
+			}
+		}
+
+		region.push_back(t_queue);
+
+		bool test = true;
+		for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+			if (!use[i]){
+				test = false;
+				break;
+			}
+		}
+
+		if (test)
+			break;
+	}
+
+	#pragma omp parallel for
+	for (int i = 0; i < region.size(); i += 1){
+		bool test = false;
+		for (unsigned int j = 0; j < region.at(i).size(); j += 1){
+			if (test){
+				all_voxel.at(region.at(i).at(j)).show = false;
+				region.at(i).erase(region.at(i).begin() + j);
+				j -= 1;
+			}
+			else{
+				for (int k = 0; k < 6; k += 1){
+					if (all_voxel.at(region.at(i).at(j)).face_toward[k] == -1){
+						j = -1;
+						test = true;
+						break;
+					}
+				}
+			}
+		}
+	}
 }
 
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
@@ -808,5 +962,29 @@ void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
 	if (num != 0){
 		std::string s = "voxel_" + std::to_string(piece_id) + ".obj";
 		glmWriteOBJ(output, my_strdup(s.c_str()), GLM_NONE);
+	}
+}
+
+void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename)
+{
+	std::ofstream os(filename);
+
+	os << all_voxel.size() << std::endl;
+	for (unsigned int i = 0; i < all_voxel.size(); i += 1){
+		os << all_voxel.at(i).position[0] << " " << all_voxel.at(i).position[1] << " " << all_voxel.at(i).position[2] << " ";
+		os << all_voxel.at(i).rotation[0] << " " << all_voxel.at(i).rotation[1] << " " << all_voxel.at(i).rotation[2] << " ";
+		os << all_voxel.at(i).color << " " << all_voxel.at(i).stick_size << " " << all_voxel.at(i).scale << " ";
+		os << all_voxel.at(i).face_toward[0] << " " << all_voxel.at(i).face_toward[1] << " " << all_voxel.at(i).face_toward[2] << " ";
+		os << all_voxel.at(i).face_toward[3] << " " << all_voxel.at(i).face_toward[4] << " " << all_voxel.at(i).face_toward[5] << " ";
+		os << all_voxel.at(i).show << " ";
+		os << all_voxel.at(i).coord.size() << " ";
+		for (unsigned int j = 0; j < all_voxel.at(i).coord.size(); j += 1){
+			os << all_voxel.at(i).coord.at(j) << " ";
+		}
+		os << all_voxel.at(i).coord_origin.size() << " ";
+		for (unsigned int j = 0; j < all_voxel.at(i).coord_origin.size(); j += 1){
+			os << all_voxel.at(i).coord_origin.at(j)[0] << " " << all_voxel.at(i).coord_origin.at(j)[1] << " " << all_voxel.at(i).coord_origin.at(j)[2] << " ";
+		}
+		os << std::endl;
 	}
 }

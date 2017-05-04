@@ -1180,7 +1180,7 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 	return pointInside(poly, points.at(0));
 }
 
-void judge_outter(std::vector<std::vector<zomeconn>> &test_connect)
+void judge_outer(std::vector<std::vector<zomeconn>> &test_connect)
 {
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		//cout << i << endl;

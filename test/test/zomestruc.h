@@ -92,7 +92,7 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p);
 bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & give_up);
 void count_struct(std::vector<std::vector<zomeconn>> &test_connect, vec3 *count);
-void judge_outter(std::vector<std::vector<zomeconn>> &test_connect);
+void judge_outer(std::vector<std::vector<zomeconn>> &test_connect);
 
 void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, int mode);
 

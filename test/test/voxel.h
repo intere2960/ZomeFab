@@ -40,6 +40,8 @@ int search_coord(std::vector<voxel> &all_voxel, int start, int end, vec3 &p, int
 void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, int index2, vec3 &ball_error);
 void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region, vec3 &angle);
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, int v_size);
+void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, float length);
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id);
+void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename);
 
 #endif // VOXEL_H_INCLUDED
