@@ -31,10 +31,10 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/fake_head-2times.obj";
+char model_source[] = "test_model/MAOI.obj";
 //char model_source[] = "test_model/use/material 11.obj";
 //char model_source[] = "test_model/out/material 11-fill.obj";
-//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head fake_head-2times
+//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head fake_head-2times MAOI MAOI_inner
 char model_out[] = "test_model/out/out_p.obj";
 
 int width, height;

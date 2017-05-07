@@ -152,6 +152,20 @@ void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<
 
 void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filename)
 {
+	std::vector<std::vector<int>> convert_index(4);
+	for (int i = 0; i < 4; i += 1){
+		int number = 0;
+		for (unsigned int j = 0; j < target.at(i).size(); j += 1){
+			if (target.at(i).at(j).exist){
+				convert_index.at(i).push_back(number);
+				number += 1;
+			}
+			else{
+				convert_index.at(i).push_back(-1);
+			}
+		}
+	}
+
 	std::ofstream os;
 	os.open(filename);
 	for (int i = 0; i < 4; i += 1){
@@ -165,8 +179,8 @@ void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filen
 				if (i < 3){
 					os << target.at(i).at(j).size << " ";
 					os << target.at(i).at(j).fromface << " " << target.at(i).at(j).towardface << " ";
-					os << target.at(i).at(j).fromindex[0] << " " << target.at(i).at(j).fromindex[1] << " ";
-					os << target.at(i).at(j).towardindex[0] << " " << target.at(i).at(j).towardindex[1] << " ";
+					os << target.at(i).at(j).fromindex[0] << " " << convert_index.at(target.at(i).at(j).fromindex[0]).at(target.at(i).at(j).fromindex[1]) << " ";
+					os << target.at(i).at(j).towardindex[0] << " " << convert_index.at(target.at(i).at(j).towardindex[0]).at(target.at(i).at(j).towardindex[1]) << " ";
 				}
 				else{
 					int num = 0;
@@ -177,7 +191,7 @@ void output_struc(std::vector<std::vector<zomeconn>> &target, std::string &filen
 					os << num << " ";
 					for (unsigned int k = 0; k < 62; k += 1){
 						if (target.at(i).at(j).connect_stick[k] != vec2(-1.0f, -1.0f))
-							os << k << " " << target.at(i).at(j).connect_stick[k][0] << " " << target.at(i).at(j).connect_stick[k][1] << " ";
+							os << k << " " << target.at(i).at(j).connect_stick[k][0] << " " << convert_index.at(target.at(i).at(j).connect_stick[k][0]).at(target.at(i).at(j).connect_stick[k][1]) << " ";
 					}
 				}
 				os << std::endl;
@@ -719,10 +733,10 @@ float ball_surface_dist(GLMmodel *model, vec3 &p)
 		float d = n * test[0];
 
 		for (int j = 0; j < 4; j += 1){
-			if (((p - test[j]).length() < surface_d) && ((p - test[j]).length() > NODE_DIAMETER)){
+			if (((p - test[j]).length() < surface_d) && ((p - test[j]).length() > 2 * NODE_DIAMETER)){
 				surface_d = (p - test[j]).length();
 			}
-			if ((p - test[j]).length() < NODE_DIAMETER){
+			if ((p - test[j]).length() < 2 * NODE_DIAMETER){
 				return 100000000000000.0f;
 			}
 		}
@@ -739,7 +753,7 @@ float ball_surface_dist(GLMmodel *model, vec3 &p)
 		vec3 judge3 = insect_p - test[2];
 
 		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-			if ((p - insect_p).length() < NODE_DIAMETER){
+			if ((p - insect_p).length() < 2 * NODE_DIAMETER){
 				return 100000000000000.0f;
 			}
 			else{
@@ -770,10 +784,11 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 		float d = n * test[0];
 
 		for (int j = 0; j < 4; j += 1){
-			if (((p - test[j]).length() < surface_d) && ((p - test[j]).length() > NODE_DIAMETER)){
+			if (((p - test[j]).length() < surface_d) && ((p - test[j]).length() > 2 * NODE_DIAMETER)){
 				surface_d = (p - test[j]).length();
 			}
-			if ((p - test[j]).length() < NODE_DIAMETER){
+			if ((p - test[j]).length() < 2 * NODE_DIAMETER){
+				//cout << "retrun " << 100000000000000.0f << endl;
 				return 100000000000000.0f;
 			}
 		}
@@ -790,7 +805,8 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 		vec3 judge3 = insect_p - test[2];
 
 		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-			if ((p - insect_p).length() < NODE_DIAMETER){
+			if ((p - insect_p).length() < 2 * NODE_DIAMETER){
+				//cout << "retrun " << 100000000000000.0f << endl;
 				return 100000000000000.0f;
 			}
 			else{
@@ -800,6 +816,7 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 			}
 		}
 	}
+	//cout << "retrun " << surface_d << endl;
 	return surface_d;
 }
 
@@ -859,18 +876,20 @@ bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p)
 			//cout << endl;
 
 			if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+				//cout << "insect true" << endl;
 				return true;
 			}
 		}
 		//cout << "i : " << i << endl;
 		for (int j = 0; j < 3; j += 1){
-			float dist_times = -(p - test[j]) * dir / (dir * dir);
+			//float dist_times = -(p - test[j]) * dir / (dir * dir);
 			//cout << dist_times << endl;
 			//if (dist_times > 0.0f){
-				float line_d = (test[j] - (p + dist_times * dir)).length();
-				if (line_d < ERROR_THICKNESS){
-					return true;
-				}
+				//float line_d = (test[j] - (p + dist_times * dir)).length();
+			if ((p - test[j]).length() < ERROR_THICKNESS){
+				//cout << "short true" << endl;
+				return true;
+			}
 			//}
 		}
 	}

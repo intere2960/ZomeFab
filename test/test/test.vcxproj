@@ -66,6 +66,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:/dev/CGAL-4.9/vc_build/lib;C:/dev/CGAL-4.9/vc_build/lib/$(Configuration);C:/boost_1_63_0/lib32-msvc-12.0;C:/boost_1_63_0/lib32-msvc-12.0/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glut32.lib;glu32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;C:\dev\CGAL-4.9\auxiliary\gmp\lib\libmpfr-4.lib;C:\dev\CGAL-4.9\auxiliary\gmp\lib\libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -96,6 +97,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:/dev/CGAL-4.9/vc_build/lib;C:/dev/CGAL-4.9/vc_build/lib/$(Configuration);C:/boost_1_63_0/lib32-msvc-12.0;C:/boost_1_63_0/lib32-msvc-12.0/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glut32.lib;glu32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;C:\dev\CGAL-4.9\auxiliary\gmp\lib\libmpfr-4.lib;C:\dev\CGAL-4.9\auxiliary\gmp\lib\libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>

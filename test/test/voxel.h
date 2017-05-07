@@ -43,5 +43,6 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, float length);
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id);
 void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename);
+void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename);
 
 #endif // VOXEL_H_INCLUDED

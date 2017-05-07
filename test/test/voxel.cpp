@@ -831,42 +831,27 @@ void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &b
 
 	#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i += 1){
-		//#pragma omp parallel for
-		//for (int k = 0; k < 8; k += 1){
-			/*int dx = 0;
-			int dy = 2;
-			int dz = 4;
+		vec3 ball_error = vec3(0.0f, 0.0f, 0.0f);
 
-			if (k % 2 == 1)
-				dx = 1;
-			if ((k / 2) % 2 == 1)
-				dy = 3;
-			if (k / 4 == 1)
-				dz = 5;*/
+		int test_coord[4];
+		vec3 test_p[4];
+		for (int j = 0; j < 3; j += 1){
+			test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
+			test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
+			if (all_voxel.at(test_coord[j]).show)
+				all_voxel.at(test_coord[j]).show = false;
+		}
 
-			//vec3 ball_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * NODE_DIAMETER / 2.0;
-			vec3 ball_error = vec3(0.0f, 0.0f, 0.0f);
+		test_p[3] = (test_p[0] + test_p[1] + test_p[2]) / 3.0f;
+		test_coord[3] = search_coord(all_voxel, 0, all_voxel.size(), test_p[3], 0, ball_error);
 
-			int test_coord[4];
-			vec3 test_p[4];
-			for (int j = 0; j < 3; j += 1){
-				test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
-				test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
-				if (all_voxel.at(test_coord[j]).show)
-					all_voxel.at(test_coord[j]).show = false;
-			}
+		cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
+		cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2], ball_error);
+		cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0], ball_error);
 
-			test_p[3] = (test_p[0] + test_p[1] + test_p[2]) / 3.0f;
-			test_coord[3] = search_coord(all_voxel, 0, all_voxel.size(), test_p[3], 0, ball_error);
-
-			cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
-			cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2], ball_error);
-			cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0], ball_error);
-
-			cross_edge(all_voxel, test_p[0], test_p[3], test_coord[0], test_coord[3], ball_error);
-			cross_edge(all_voxel, test_p[1], test_p[3], test_coord[1], test_coord[3], ball_error);
-			cross_edge(all_voxel, test_p[2], test_p[3], test_coord[2], test_coord[3], ball_error);
-		//}
+		cross_edge(all_voxel, test_p[0], test_p[3], test_coord[0], test_coord[3], ball_error);
+		cross_edge(all_voxel, test_p[1], test_p[3], test_coord[1], test_coord[3], ball_error);
+		cross_edge(all_voxel, test_p[2], test_p[3], test_coord[2], test_coord[3], ball_error);
 	}
 
 	bool *use = new bool[all_voxel.size()];
@@ -968,6 +953,7 @@ void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
 void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename)
 {
 	std::ofstream os(filename);
+	os << all_voxel.at(0).coord_origin.at(0)[0] << " " << all_voxel.at(0).coord_origin.at(0)[1] << " " << all_voxel.at(0).coord_origin.at(0)[2] << std::endl;
 
 	os << all_voxel.size() << std::endl;
 	for (unsigned int i = 0; i < all_voxel.size(); i += 1){
@@ -976,15 +962,67 @@ void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename)
 		os << all_voxel.at(i).color << " " << all_voxel.at(i).stick_size << " " << all_voxel.at(i).scale << " ";
 		os << all_voxel.at(i).face_toward[0] << " " << all_voxel.at(i).face_toward[1] << " " << all_voxel.at(i).face_toward[2] << " ";
 		os << all_voxel.at(i).face_toward[3] << " " << all_voxel.at(i).face_toward[4] << " " << all_voxel.at(i).face_toward[5] << " ";
-		os << all_voxel.at(i).show << " ";
-		os << all_voxel.at(i).coord.size() << " ";
-		for (unsigned int j = 0; j < all_voxel.at(i).coord.size(); j += 1){
-			os << all_voxel.at(i).coord.at(j) << " ";
+		
+		if (all_voxel.at(i).show){
+			os << 1 << " ";
 		}
-		os << all_voxel.at(i).coord_origin.size() << " ";
-		for (unsigned int j = 0; j < all_voxel.at(i).coord_origin.size(); j += 1){
-			os << all_voxel.at(i).coord_origin.at(j)[0] << " " << all_voxel.at(i).coord_origin.at(j)[1] << " " << all_voxel.at(i).coord_origin.at(j)[2] << " ";
+		else{
+			os << 0 << " ";
 		}
+
 		os << std::endl;
 	}
+}
+
+void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename)
+{
+	std::ifstream is(filename);
+	
+	vec3 origin;
+	is >> origin[0] >> origin[1] >> origin[2];
+	
+	int voxel_size;
+	is >> voxel_size;
+
+	for (int i = 0; i < voxel_size; i += 1){
+		vec3 position, rotation;
+		int color, stick_size;
+		float scale;
+		
+		is >> position[0] >> position[1] >> position[2];
+		is >> rotation[0] >> rotation[1] >> rotation[2];
+		is >> color >> stick_size >> scale;
+
+		voxel temp_voxel(color, stick_size, scale, position, rotation);
+
+		int face_toward[6];
+
+		is >> face_toward[0] >> face_toward[1] >> face_toward[2];
+		is >> face_toward[3] >> face_toward[4] >> face_toward[5];
+
+		temp_voxel.face_toward[0] = face_toward[0];
+		temp_voxel.face_toward[1] = face_toward[1];
+		temp_voxel.face_toward[2] = face_toward[2];
+		temp_voxel.face_toward[3] = face_toward[3];
+		temp_voxel.face_toward[4] = face_toward[4];
+		temp_voxel.face_toward[5] = face_toward[5];
+
+		int show;
+		is >> show;
+		
+		if (show == 1){
+			temp_voxel.show = true;
+		}
+		else{
+			temp_voxel.show = false;
+		}
+		
+		assign_coord(temp_voxel, origin);
+
+		all_voxel.push_back(temp_voxel);
+	}
+	
+	is.close();
+
+	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
 }

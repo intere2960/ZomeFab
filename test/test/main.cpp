@@ -2,6 +2,8 @@
 #include <ctime>
 #include <fstream>
 #include <omp.h>
+//#pragma comment(linker, "/STACK:3500000000")
+//#pragma comment(linker, "/HEAP:400000000")
 
 using namespace std;
 
@@ -477,6 +479,19 @@ int main(int argc, char **argv)
 
 	myObj = glmReadOBJ(model_source);
 
+	//glmFacetNormals(myObj);
+
+	////collect_edge(myObj, all_edge);
+
+	////find_near_tri(myObj, all_edge);
+
+	//myObj_inner = glmCopy(myObj);
+	//recount_normal(myObj);
+
+	//process_inner(myObj, myObj_inner, -NODE_DIAMETER / 2.0f);
+
+	//glmWriteOBJ(myObj_inner, "MAOI_inner.obj", GLM_NONE);
+
 	//init();
 
 	/*struc_parser(test_connect, string("1500_10000.txt"));
@@ -502,26 +517,26 @@ int main(int argc, char **argv)
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	//output_zometool(output_ans, string("fake_head_out.obj"));
-	//output_struc(output_ans, string("fake_head_out.txt"));
+	//output_zometool(output_ans, string("MAOI_out.obj"));
+	//output_struc(output_ans, string("MAOI_out.txt"));
 	//===================================================================
 
 	//==================================================================
 	//(SA)
-	/*clock_t total_start, total_finish;
-	total_start = clock();
+	//clock_t total_start, total_finish;
+	//total_start = clock();
 
-	clock_t start, finish;
-	float duration;*/
+	//clock_t start, finish;
+	//float duration;
 
 	//srand((unsigned)time(NULL));
-	//struc_parser(test_connect, string("1500_10000.txt"));
+	//struc_parser(test_connect, string("MAOI_out.txt"));
 
 	//////nearest_point_parser(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
 
 	//////cout << test_connect.at(COLOR_WHITE).size() << endl;
 
-	//////start = clock();
+	//start = clock();
 
 	//PointCloud<float> cloud;
 	//// Generate points:
@@ -530,13 +545,20 @@ int main(int argc, char **argv)
 
 	//judge_outer(test_connect);
 
+	///*for (int i = 0; i < 100; i += 1){
+	//	int result = rand() % test_connect.at(COLOR_WHITE).size();
+	//	cout << result << endl;
+
+	//	split(test_connect, result, myObj, cloud, splite_table);
+	//}*/
+
 	//cout << myObj->numtriangles << endl;
 
 	//float origin_term[4];
 	//float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
 	////output_nearest_point(myObj, string("fake_head_nearest_point.txt"));
-	//output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
+	////output_nearest_point(myObj, string("1500_10_MAOI_nearest_point-2.txt"));
 	//
 	//int num_iteration = 10000;
 
@@ -573,6 +595,7 @@ int main(int argc, char **argv)
 	//	float now_t = inital_t * decrease_t(i);
 
 	//	os << i << " :" << endl;
+	//	cout << i << " :" << endl;
 
 	//	vector<vector<zomeconn>> temp_connect(4);
 	//	temp_connect = test_connect;
@@ -586,6 +609,7 @@ int main(int argc, char **argv)
 	//		do{
 	//			result = rand() % test_connect.at(COLOR_WHITE).size();
 	//		} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
+	//		//cout << "result : " << result << endl;
 	//		os << result << endl;
 	//		split(temp_connect, result, myObj, cloud, splite_table);
 	//		num_split += 1;
@@ -627,8 +651,6 @@ int main(int argc, char **argv)
 	//	duration = (float)(finish - start) / CLOCKS_PER_SEC;
 	//	os << "op : " << duration << " s" << endl;
 
-	//	judge_outter(temp_connect);
-
 	//	start = clock();
 	//	float term[4];
 	//	float temp_e = compute_energy(temp_connect, myObj, cloud, term);
@@ -662,6 +684,8 @@ int main(int argc, char **argv)
 	//			}
 
 	//			origin_e = temp_e;
+	//			
+	//			judge_outer(test_connect);
 
 	//			//output_zometool(temp_connect, string(to_string(i) + ".obj"));
 	//		}
@@ -732,29 +756,29 @@ int main(int argc, char **argv)
 
 	//os.close();
 
-	/*vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
-	kdtree_near_node_colorful(myObj, test_connect, materials_color);
+	//vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
+	//kdtree_near_node_colorful(myObj, test_connect, materials_color);
 
-	output_zometool(test_connect, string("1500_10000.obj"));
-	output_struc(test_connect, string("1500_10000.txt"));
+	//output_zometool(test_connect, string("1500_10000.obj"));
+	//output_struc(test_connect, string("1500_10000.txt"));
 
-	output_material(materials_color, std::string("1500_10000_colorful.mtl"));
-	output_zometool_exp(test_connect, string("fake_1500_10000(colorful).obj"), materials_color, std::string("1500_10000_colorful.mtl"), COLORFUL);
-	glmWriteOBJ_EXP(myObj, "fake_model_1500_10000(colorful).obj", materials_color, std::string("1500_10000_colorful.mtl"), COLORFUL);
+	//output_material(materials_color, std::string("1500_10000_colorful.mtl"));
+	//output_zometool_exp(test_connect, string("fake_1500_10000(colorful).obj"), materials_color, std::string("1500_10000_colorful.mtl"), COLORFUL);
+	//glmWriteOBJ_EXP(myObj, "fake_model_1500_10000(colorful).obj", materials_color, std::string("1500_10000_colorful.mtl"), COLORFUL);
 
-	kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
-	output_material(material_energy_dist, std::string("1500_10000_energy_dist.mtl"));
-	glmWriteOBJ_EXP(myObj, "fake_model_1500_10000(dist).obj", material_energy_dist, std::string("1500_10000_energy_dist.mtl"), ENERGY_DIST);
+	//kdtree_near_node_energy_dist(myObj, test_connect, material_energy_dist);
+	//output_material(material_energy_dist, std::string("1500_10000_energy_dist.mtl"));
+	//glmWriteOBJ_EXP(myObj, "fake_model_1500_10000(dist).obj", material_energy_dist, std::string("1500_10000_energy_dist.mtl"), ENERGY_DIST);
 
-	energy_material(test_connect, material_energy_angle, ENERGY_ANGLE);
-	output_material(material_energy_angle, std::string("1500_10000_energy_angle.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_1500_10000(angle).obj"), material_energy_angle, std::string("1500_10000_energy_angle.mtl"), ENERGY_ANGLE);
+	//energy_material(test_connect, material_energy_angle, ENERGY_ANGLE);
+	//output_material(material_energy_angle, std::string("1500_10000_energy_angle.mtl"));
+	//output_zometool_exp(test_connect, string("fake_energy_1500_10000(angle).obj"), material_energy_angle, std::string("1500_10000_energy_angle.mtl"), ENERGY_ANGLE);
 
-	energy_material(test_connect, material_use_stick, ENERGY_USE_STICK);
-	output_material(material_use_stick, std::string("1500_10000_energy_use_stick.mtl"));
-	output_zometool_exp(test_connect, string("fake_energy_1500_10000(use_stick).obj"), material_use_stick, std::string("1500_10000_energy_use_stick.mtl"), ENERGY_USE_STICK);
+	//energy_material(test_connect, material_use_stick, ENERGY_USE_STICK);
+	//output_material(material_use_stick, std::string("1500_10000_energy_use_stick.mtl"));
+	//output_zometool_exp(test_connect, string("fake_energy_1500_10000(use_stick).obj"), material_use_stick, std::string("1500_10000_energy_use_stick.mtl"), ENERGY_USE_STICK);
 
-	output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point.txt"));*/
+	//output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point.txt"));
 	//==================================================================
 
 	//==================================================================
@@ -1136,26 +1160,46 @@ int main(int argc, char **argv)
 	//==================================================================
 
 	all_voxel.resize(1);
-	zome_queue.resize(1);
 
-	obb_center.resize(1);
-	obb_max.resize(1);
-	obb_min.resize(1);
-	obb_size.resize(1);
-	obb_angle.resize(1);
+	//obb_center.resize(1);
+	//obb_max.resize(1);
+	//obb_min.resize(1);
+	//obb_size.resize(1);
+	//obb_angle.resize(1);
 
-	/*std::string s = "test";
-	std::string piece = s + std::to_string(0) + ".obj";
-	glmWriteOBJ(myObj, my_strdup(piece.c_str()), GLM_NONE);*/
+	///*std::string s = "test";
+	//std::string piece = s + std::to_string(0) + ".obj";
+	//glmWriteOBJ(myObj, my_strdup(piece.c_str()), GLM_NONE);*/
 
-	cout << "piece " << 0 + 1 << " :" << endl;
-	zome_queue.at(0).resize(4);
-	computeSimpleBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0));
-	//voxelization(myObj, all_voxel.at(0), zome_queue.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
-	simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 8.0f);
-	cout << "output piece " << 0 + 1 << endl;
-	output_voxel(all_voxel.at(0), 0);
-	voxel_txt(all_voxel.at(0), string("voxel_0.txt"));
+	//cout << "piece " << 0 + 1 << " :" << endl;
+	//computeSimpleBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0));
+	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 11.0f);
+	//cout << "output piece " << 0 + 1 << endl;
+	//output_voxel(all_voxel.at(0), 11);
+	//voxel_txt(all_voxel.at(0), string("voxel_11.0.txt"));
+
+	voxel_parser(all_voxel.at(0), string("voxel_12.5.txt"));
+	cout << "voxel_parser done" << endl;
+	//struc_parser(test_connect, string("1500_10000.txt"));
+	//cout << "struc_parser done" << endl;
+	//
+	/////#pragma omp parallel for
+	//for (int i = 0; i < 2; i += 1){
+	//	//#pragma omp parallel for
+	//	for (int j = 0; j < test_connect.at(i).size(); j += 1){
+	//		//cout << "(" << i << " , " << j << ") " << endl;
+	//		vec3 from_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
+	//		//cout << "from" << test_connect.at(i).at(j).fromindex[0] << " , " << test_connect.at(i).at(j).fromindex[1] << endl;
+	//		vec3 toward_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
+	//		//cout << "toward" << test_connect.at(i).at(j).towardindex[0] << " , " << test_connect.at(i).at(j).towardindex[1] << endl;
+	//		int from_voxel_index = search_coord(all_voxel.at(0), 0, all_voxel.at(0).size(), from_p, 0, vec3(0.0f, 0.0f, 0.0f));
+	//		int toward_voxel_index = search_coord(all_voxel.at(0), 0, all_voxel.at(0).size(), toward_p, 0, vec3(0.0f, 0.0f, 0.0f));
+
+	//		cross_edge(all_voxel.at(0), from_p, toward_p, from_voxel_index, toward_voxel_index, vec3(0.0f, 0.0f, 0.0f));
+	//	}
+	//}
+	
+	//output_voxel(all_voxel.at(0), 111);
 
 	//==================================================================
 	

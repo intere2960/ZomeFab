@@ -66,16 +66,22 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 		}
 	}
 
+	//cout << "temp.size() : " << temp.size() << endl;
+
 	std::vector<int> near_tri;
 
 	int choose_split = 0;
 	float split_dist = 10000000000000000.0f;
 	for (unsigned int i = 0; i < temp.size(); i += 1){
+		//cout << "conn " << i << endl;
 		vec3 test_d = use_ball_p + t.dir->at((int)temp.at(i).travel_1[0]) * t.face_length((int)temp.at(i).travel_1[0], (int)temp.at(i).travel_1[1]);
 		kdtree_search(model, cloud, test_d, near_tri);
 		bool dist = (ball_surface_dist_fast(model, test_d, near_tri) < 100000000000000.0f);
+		//cout << dist << endl;
 		bool insect = !check_stick_intersect(model, test_d, use_ball_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, use_ball_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f) && !check_stick_intersect(model, test_d, toward_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, toward_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f);
+		//cout << insect << endl;
 		bool not_near = (ball_surface_dist_fast(model, (test_d + use_ball_p) / 2.0f, near_tri) < 100000000000000.0f) && (ball_surface_dist_fast(model, (test_d + toward_p) / 2.0f, near_tri) < 100000000000000.0f);
+		//cout << not_near << endl;
 		if (!(dist && insect && not_near)){
 			temp.erase(temp.begin() + i);
 			i -= 1;
@@ -83,6 +89,9 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 	}
 
 	if (temp.size() > 0){
+
+		//cout << "ac" << endl;
+
 		choose_split = rand() % temp.size();
 
 		zomeconn new_ball;
@@ -345,9 +354,9 @@ float forbidden_energy(float dist)
 	if (dist > p2[0]){
 		return p2[1];
 	}
-	if (dist < p1[0]){
+	/*if (dist < p1[0]){
 		return 0.0f;
-	}
+	}*/
 
 	return a * pow((dist - p1[0]), 2);
 }
@@ -577,10 +586,10 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 	else
 		num_results = 10;
 
-	//#pragma omp parallel for
 	int min_node;
 	float min_dist = 100000000000000000.0f;
-
+	
+	#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i++)
 	{
 		vec3 p1(model->vertices->at(3 * model->triangles->at(i).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[0] + 2));
@@ -650,7 +659,7 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 		//cout << endl;
 	}
 
-	cout << min_node << " " << min_dist << endl;
+	//cout << min_node << " " << min_dist << endl;
 }
 
 void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
