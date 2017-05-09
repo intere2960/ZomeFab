@@ -1352,13 +1352,13 @@ void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_co
 
 		int color = t.face_color(use_solt);
 		if (color == COLOR_BLUE){
-			xxx = glmReadOBJ("test_model/zometool/blue.obj");
+			xxx = glmReadOBJ("test_model/zometool/blue2.obj");
 		}
 		else if (color == COLOR_RED){
-			xxx = glmReadOBJ("test_model/zometool/red.obj");
+			xxx = glmReadOBJ("test_model/zometool/red2.obj");
 		}
 		else if (color == COLOR_YELLOW){
-			xxx = glmReadOBJ("test_model/zometool/yellow.obj");
+			xxx = glmReadOBJ("test_model/zometool/yellow2.obj");
 		}
 
 		cout << use_ball.at(i) << endl;
