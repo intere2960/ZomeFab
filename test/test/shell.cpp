@@ -130,3 +130,290 @@ void combine_inner_outfit2(GLMmodel *myObj)
         myObj->numfacetnorms += 1;
     }
 }
+
+void voxel_shell(std::vector<voxel> &all_voxel)
+{
+	std::vector<int> exist_index;
+	int edge_length = pow(all_voxel.at(0).size(), 1.0 / 3);
+	std::vector<std::vector<std::vector<int>>> convert_vertex(edge_length + 1);
+	for (int i = 0; i < edge_length + 1; i += 1){
+		convert_vertex.at(i).resize(edge_length + 1);
+
+		for (int j = 0; j < edge_length + 1; j += 1){
+			convert_vertex.at(i).at(j).resize(edge_length + 1);
+
+			for (int k = 0; k < edge_length + 1; k += 1){
+				convert_vertex.at(i).at(j).at(k) = -1;
+			}
+		}
+	}
+
+	std::vector<vec3> search_index;
+	for (int i = 0; i < all_voxel.at(0).size(); i += 1){
+		if (all_voxel.at(0).at(i).show){
+			for (int j = 0; j < 6; j += 1){
+				if (all_voxel.at(0).at(i).face_toward[j] != -1){
+					if (!all_voxel.at(0).at(all_voxel.at(0).at(i).face_toward[j]).show){
+						exist_index.push_back(i);
+						break;
+					}
+				}
+				else{
+					exist_index.push_back(i);
+					break;
+				}
+			}
+		}
+
+		vec3 index;
+		for (int j = 0; j < all_voxel.at(0).at(i).coord.size(); j += 1){
+
+			if ((all_voxel.at(0).at(i).coord.at(j) % 2) == 1){
+				index[0] += pow(2.0f, all_voxel.at(0).at(i).coord.size() - 1 - j);
+			}
+
+			if ((all_voxel.at(0).at(i).coord.at(j) / 2) % 2 == 1){
+				index[1] += pow(2.0f, all_voxel.at(0).at(i).coord.size() - 1 - j);
+			}
+
+			if (all_voxel.at(0).at(i).coord.at(j) > 3){
+				index[2] += pow(2.0f, all_voxel.at(0).at(i).coord.size() - 1 - j);
+			}
+		}
+
+		search_index.push_back(index);
+	}
+
+	GLMmodel surface;
+	empty_model(&surface);
+	int numvertex = 0;
+
+	for (int i = 0; i < exist_index.size(); i += 1){
+		voxel now = all_voxel.at(0).at(exist_index.at(i));
+
+		if (now.face_toward[0] == -1 || !all_voxel.at(0).at(now.face_toward[0]).show){
+			vec3 index[4];
+			int use_point[4] = { 0, 2, 6, 4 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[1] == -1 || !all_voxel.at(0).at(now.face_toward[1]).show){
+			vec3 index[4];
+			int use_point[4] = { 1, 5, 7, 3 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 1.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 0.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[2] == -1 || !all_voxel.at(0).at(now.face_toward[2]).show){
+			vec3 index[4];
+			int use_point[4] = { 0, 4, 5, 1 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[3] == -1 || !all_voxel.at(0).at(now.face_toward[3]).show){
+			vec3 index[4];
+			int use_point[4] = { 2, 3, 7, 6 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 0.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 1.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[4] == -1 || !all_voxel.at(0).at(now.face_toward[4]).show){
+			vec3 index[4];
+			int use_point[4] = { 0, 1, 3, 2 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 0.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[5] == -1 || !all_voxel.at(0).at(now.face_toward[5]).show){
+			vec3 index[4];
+			int use_point[4] = { 4, 6, 7, 5 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 1.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 1.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+	}
+	surface.numvertices = numvertex;
+	glmWriteOBJ(&surface, "voxel_shell.obj", GLM_NONE);
+}

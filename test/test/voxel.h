@@ -29,6 +29,7 @@ public:
     vec2 edge_point[12];
 
     bool show = true;
+	bool inner_kill = false;
     std::vector<int> coord;
     std::vector<vec3> coord_origin;
 };
@@ -44,5 +45,6 @@ void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &b
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id);
 void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename);
 void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename);
+void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue);
 
 #endif // VOXEL_H_INCLUDED

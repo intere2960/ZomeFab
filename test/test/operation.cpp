@@ -714,7 +714,7 @@ void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>>
 
 		if (temp_index != -1){
 			//cout << i << " : " << temp_index << endl;
-			test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
+			test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outer = true;
 		}
 		//cout << endl;
 	}

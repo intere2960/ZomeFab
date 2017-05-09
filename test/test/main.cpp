@@ -235,7 +235,7 @@ void init()
 //	}
 //}
 
-void simple_test()
+void simple_voxelize_zome()
 {
 	all_voxel.resize(1);
 	zome_queue.resize(1);
@@ -500,7 +500,7 @@ int main(int argc, char **argv)
 	//==================================================================
 	//(voxelization)
 	////test();
-	//simple_test();
+	//simple_voxelize_zome();
 
 	////fake();
 	//	
@@ -1015,139 +1015,13 @@ int main(int argc, char **argv)
 	//}
 
 	/*for (int i = 0; i < 11; i += 1){
-	cout << i << " = > " << endl;
-	for (int j = 0; j < partition_plane.at(i).size(); j += 1){
-	cout << partition_plane.at(i).at(j)[0] << " " << partition_plane.at(i).at(j)[1] << endl;
-	}
-	cout << endl;
-	cout << endl;
+		cout << i << " = > " << endl;
+		for (int j = 0; j < partition_plane.at(i).size(); j += 1){
+			cout << partition_plane.at(i).at(j)[0] << " " << partition_plane.at(i).at(j)[1] << endl;
+		}
+		cout << endl;
+		cout << endl;
 	}*/
-
-	//std::vector<int> use;
-	//for (int i = 0; i < myObj->numtriangles; i += 1){
-	//	int test_index = find(use.begin(), use.end(), myObj->triangles->at(i).near_node) - use.begin();
-	//	if (test_index == use.size()){
-	//		use.push_back(myObj->triangles->at(i).near_node);
-	//	}
-	//}
-
-	//std::vector<Point> points;
-	//for (unsigned int i = 0; i < use.size(); i += 1){
-	//	Point temp(test_connect.at(COLOR_WHITE).at(use.at(i)).position[0], test_connect.at(COLOR_WHITE).at(use.at(i)).position[1], test_connect.at(COLOR_WHITE).at(use.at(i)).position[2]);
-	//	points.push_back(temp);
-	//}
-
-	//Polyhedron_3 poly;
-	//if (points.size() > 3){
-	//	CGAL::convex_hull_3(points.begin(), points.end(), poly);
-	//}
-
-	//std::ofstream os;
-	//os.open("inner2.obj");
-
-	////os << mesh;
-	////GLMmodel inner;
-	//////inner.vertices->push_back(1);
-	////inner.vertices = new std::vector<GLfloat>(3);
-	////inner.numvertices = 0;
-	////inner.triangles = new std::vector<GLMtriangle>();
-	////inner.numtriangles = 0;
-	////inner.facetnorms = new std::vector<GLfloat>(3);
-	////inner.numfacetnorms = 0;
-
-	//Vertex_iterator v = poly.vertices_begin();
-	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
-	//	os << "v " << v->point() << std::endl;
-	//	//cout << "v " << v->point() << endl;
-	//	/*cout << "vx " << v->point()[0] << endl;
-	//	cout << "vy " << v->point()[1] << endl;
-	//	cout << "vz " << v->point()[2] << endl;*/
-	//	/*inner.vertices->push_back(v->point()[0]);
-	//	inner.vertices->push_back(v->point()[0]);
-	//	inner.vertices->push_back(v->point()[0]);*/
-	//	v++;
-	//}
-
-	////os << std::endl;
-	//Face_iterator f = poly.facets_begin();
-	//for (int i = 0; i < poly.size_of_facets(); i += 1){
-	//	Halfedge_facet_circulator edge = f->facet_begin();
-	//	os << "f ";
-	//	//cout << "f ";
-	//	for (int j = 0; j < CGAL::circulator_size(edge); j += 1){
-	//		os << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
-	//		//cout << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
-	//		edge++;
-	//	}
-	//	os << std::endl;
-	//	//cout << std::endl;
-	//	f++;
-	//}
-	//os.close();
-
-	//myObj_inner = glmReadOBJ("inner2.obj");
-	//recount_normal(myObj_inner);
-	//GLMmodel *new_inner = NULL;
-	//new_inner = glmCopy(myObj_inner);
-	//process_inner(myObj_inner, new_inner, -NODE_DIAMETER);
-	//for (int i = 0; i < new_inner->numtriangles; i += 1){
-	//	int temp = new_inner->triangles->at(i).vindices[0];
-	//	new_inner->triangles->at(i).vindices[0] = new_inner->triangles->at(i).vindices[2];
-	//	new_inner->triangles->at(i).vindices[2] = temp;
-	//}
-	//glmWriteOBJ(new_inner, "new_inner3.obj", GLM_NONE);
-
-	
-////ifstream is("test_model/fake_head.off");
-//	Polyhedron_3 outer_P;
-//	//is >> outer_P;
-//	//is.close();
-//	//load_model("test_model/fake_head.obj", outer_P);
-//	SMeshLib::IO::importOBJ("test_model/fake_head.obj", &outer_P);
-//	//cout << outer_P;
-//	//is.open("new_inner.off");
-//	Polyhedron_3 inner_P;
-//	//load_model("new_inner.obj", inner_P);
-//	//is >> inner_P;
-//	//is.close();	
-//	//cout << inner_P << endl;
-//	SMeshLib::IO::importOBJ("new_inner.obj", &inner_P);
-//	Nef_polyhedron N1(outer_P);
-//
-//	Nef_polyhedron N2(inner_P);
-//
-//	Nef_polyhedron N3 = N1 - N2;
-//	Polyhedron_3 poly;
-//	N3.convert_to_polyhedron(poly);
-//
-//	cout << poly << endl;
-//
-//	std::ofstream os;
-//	os.open("test.obj");
-//
-//	Vertex_iterator v = poly.vertices_begin();
-//	for (int i = 0; i < poly.size_of_vertices(); i += 1){
-//		os << "v " << v->point() << std::endl;
-//		v++;
-//	}
-//
-//	//os << std::endl;
-//	Face_iterator f = poly.facets_begin();
-//	for (int i = 0; i < poly.size_of_facets(); i += 1){
-//		Halfedge_facet_circulator edge = f->facet_begin();
-//		os << "f ";
-//		//cout << "f ";
-//		for (int j = 0; j < CGAL::circulator_size(edge); j += 1){
-//			os << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
-//			//cout << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
-//			edge++;
-//		}
-//		os << std::endl;
-//		//cout << std::endl;
-//		f++;
-//	}
-//	os.close();
-
 
 	//string exp_name = to_string(materials_graph_cut.size()) + "(data_" + to_string(wnode) + ",_smooth_" + to_string(wedge) + ",_label_" + to_string(label) + ")";
 	//string mtl_name = exp_name + ".mtl";
@@ -1158,8 +1032,8 @@ int main(int argc, char **argv)
 	//glmWriteOBJ_EXP(myObj, my_strdup(obj_name.c_str()), materials_graph_cut, mtl_name, GRAPH_CUT);
 
 	//==================================================================
-
-	all_voxel.resize(1);
+	//(voxelization inner shell)
+	//all_voxel.resize(1);
 
 	//obb_center.resize(1);
 	//obb_max.resize(1);
@@ -1167,39 +1041,27 @@ int main(int argc, char **argv)
 	//obb_size.resize(1);
 	//obb_angle.resize(1);
 
-	///*std::string s = "test";
-	//std::string piece = s + std::to_string(0) + ".obj";
-	//glmWriteOBJ(myObj, my_strdup(piece.c_str()), GLM_NONE);*/
-
-	//cout << "piece " << 0 + 1 << " :" << endl;
 	//computeSimpleBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0));
-	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 11.0f);
+	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 5.36f);
 	//cout << "output piece " << 0 + 1 << endl;
-	//output_voxel(all_voxel.at(0), 11);
-	//voxel_txt(all_voxel.at(0), string("voxel_11.0.txt"));
-
-	voxel_parser(all_voxel.at(0), string("voxel_12.5.txt"));
-	cout << "voxel_parser done" << endl;
-	//struc_parser(test_connect, string("1500_10000.txt"));
-	//cout << "struc_parser done" << endl;
-	//
-	/////#pragma omp parallel for
-	//for (int i = 0; i < 2; i += 1){
-	//	//#pragma omp parallel for
-	//	for (int j = 0; j < test_connect.at(i).size(); j += 1){
-	//		//cout << "(" << i << " , " << j << ") " << endl;
-	//		vec3 from_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
-	//		//cout << "from" << test_connect.at(i).at(j).fromindex[0] << " , " << test_connect.at(i).at(j).fromindex[1] << endl;
-	//		vec3 toward_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
-	//		//cout << "toward" << test_connect.at(i).at(j).towardindex[0] << " , " << test_connect.at(i).at(j).towardindex[1] << endl;
-	//		int from_voxel_index = search_coord(all_voxel.at(0), 0, all_voxel.at(0).size(), from_p, 0, vec3(0.0f, 0.0f, 0.0f));
-	//		int toward_voxel_index = search_coord(all_voxel.at(0), 0, all_voxel.at(0).size(), toward_p, 0, vec3(0.0f, 0.0f, 0.0f));
-
-	//		cross_edge(all_voxel.at(0), from_p, toward_p, from_voxel_index, toward_voxel_index, vec3(0.0f, 0.0f, 0.0f));
-	//	}
-	//}
+	//output_voxel(all_voxel.at(0), 536);
+	//voxel_txt(all_voxel.at(0), string("voxel_5.36.txt"));
 	
-	//output_voxel(all_voxel.at(0), 111);
+	/*voxel_parser(all_voxel.at(0), string("voxel_5.36.txt"));
+	cout << "voxel_parser done" << endl;*/
+	//struc_parser(test_connect, string("1500_1000.txt"));
+	//cout << "struc_parser done" << endl;
+	//judge_outer(test_connect);
+
+	//kill_inner_SA(all_voxel.at(0), test_connect);
+	//output_voxel(all_voxel.at(0), 11);
+	//voxel_txt(all_voxel.at(0), string("voxel_112.txt"));
+	
+	//voxel_shell(all_voxel.at(0));
+
+	/*GLMmodel *outer = glmReadOBJ("voxel_shell.obj");
+	glmCombine(myObj, outer);
+	glmWriteOBJ(myObj, "MAOI_done.obj", GLM_NONE);*/
 
 	//==================================================================
 	

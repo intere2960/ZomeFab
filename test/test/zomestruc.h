@@ -10,6 +10,12 @@
 #include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+#include <CGAL/Side_of_triangle_mesh.h>
 
 class zomeconn
 {
@@ -38,11 +44,12 @@ public:
 	float energy_use_stick;
 
 	bool exist;
-	bool outter;
+	bool outer;
 
 	int material_id;
 	int material_id_energy_angle;
 	int material_id_energy_use_stick;
+	int material_id_outer;
 };
 
 class zomestruc
@@ -72,8 +79,14 @@ typedef Polyhedron_3::Face_iterator Face_iterator;
 typedef Polyhedron_3::Plane_iterator Plane_iterator;
 typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
 
+typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron_3> Primitive;
+typedef CGAL::AABB_traits<K, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> Tree;
+typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
+
 void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now);
 bool pointInside(Polyhedron_3 &polyhedron, Point &query);
+bool is_pointInside(Polyhedron_3 &polyhedron, Point &query);
 bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now);
 
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source);

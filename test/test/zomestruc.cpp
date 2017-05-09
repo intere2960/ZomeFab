@@ -21,7 +21,7 @@ zomeconn::zomeconn()
 	energy_use_stick = 100000000000000.0f;
 
 	exist = true;
-	outter = false;
+	outer = false;
 	material_id = -1;
 	material_id_energy_angle = -1;
 	material_id_energy_use_stick = -1;
@@ -450,9 +450,9 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 			//cout << face_index.at(i).size() << endl;
 			for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
 				if ((j % z_b->numtriangles) == 0){
-					if (!output_connect.at(i).at(j / z_b->numtriangles).outter)
+					if (!output_connect.at(i).at(j / z_b->numtriangles).outer)
 						os << "usemtl white" << std::endl;
-					else if (output_connect.at(i).at(j / z_b->numtriangles).outter)
+					else if (output_connect.at(i).at(j / z_b->numtriangles).outer)
 						os << "usemtl white" << std::endl;
 				}
 				os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
@@ -1148,6 +1148,17 @@ bool pointInside(Polyhedron_3 &polyhedron, Point &query)
 	return true;
 }
 
+bool is_pointInside(Polyhedron_3 &polyhedron, Point &query) {
+	// Construct AABB tree with a KdTree
+	Tree tree(faces(polyhedron).first, faces(polyhedron).second, polyhedron);
+	tree.accelerate_distance_queries();
+	// Initialize the point-in-polyhedron tester
+	Point_inside inside_tester(tree);
+
+	// Determine the side and return true if inside!
+	return inside_tester(query) == CGAL::ON_BOUNDED_SIDE;
+}
+
 bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 {
 	std::vector<int> check_index;
@@ -1202,13 +1213,15 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 void judge_outer(std::vector<std::vector<zomeconn>> &test_connect)
 {
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		//cout << i << endl;
-		bool judge = check_inside(test_connect, i);
-		//cout << judge << endl;
-		if (!judge)
-			test_connect.at(COLOR_WHITE).at(i).outter = true;
-		else
-			test_connect.at(COLOR_WHITE).at(i).outter = false;
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			//cout << i << endl;
+			bool judge = check_inside(test_connect, i);
+			//cout << judge << endl;
+			if (!judge)
+				test_connect.at(COLOR_WHITE).at(i).outer = true;
+			else
+				test_connect.at(COLOR_WHITE).at(i).outer = false;
+		}
 	}
 }
 

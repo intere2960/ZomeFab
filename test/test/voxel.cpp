@@ -4,6 +4,8 @@
 #include <omp.h>
 #include "voxel.h"
 #include "zomedir.h"
+#include "shell.h"
+#include "ImportOBJ.h"
 #include "global.h"
 
 voxel::voxel(int t_color, int t_size, float t_scale)
@@ -944,6 +946,7 @@ void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
 		}
 	}	
 
+	cout << "num : " << num << endl;
 	if (num != 0){
 		std::string s = "voxel_" + std::to_string(piece_id) + ".obj";
 		glmWriteOBJ(output, my_strdup(s.c_str()), GLM_NONE);
@@ -964,6 +967,13 @@ void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename)
 		os << all_voxel.at(i).face_toward[3] << " " << all_voxel.at(i).face_toward[4] << " " << all_voxel.at(i).face_toward[5] << " ";
 		
 		if (all_voxel.at(i).show){
+			os << 1 << " ";
+		}
+		else{
+			os << 0 << " ";
+		}
+
+		if (all_voxel.at(i).inner_kill){
 			os << 1 << " ";
 		}
 		else{
@@ -1016,6 +1026,15 @@ void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename)
 		else{
 			temp_voxel.show = false;
 		}
+
+		int inner_kill;
+		is >> inner_kill;
+		if (inner_kill == 1){
+			temp_voxel.inner_kill = true;
+		}
+		else{
+			temp_voxel.inner_kill = false;
+		}
 		
 		assign_coord(temp_voxel, origin);
 
@@ -1025,4 +1044,137 @@ void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename)
 	is.close();
 
 	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
+}
+
+void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &test_connect)
+{
+	std::vector<int> obj_index;
+	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+		if (test_connect.at(COLOR_WHITE).at(i).exist){
+			if (test_connect.at(COLOR_WHITE).at(i).outer){
+				obj_index.push_back(i);
+			}
+		}
+	}
+
+	std::vector<Point> points;
+	for (unsigned int i = 0; i < obj_index.size(); i += 1){
+		Point temp(test_connect.at(COLOR_WHITE).at(obj_index.at(i)).position[0], test_connect.at(COLOR_WHITE).at(obj_index.at(i)).position[1], test_connect.at(COLOR_WHITE).at(obj_index.at(i)).position[2]);
+		points.push_back(temp);
+	}
+
+	Polyhedron_3 poly;
+	if (points.size() > 3){
+		CGAL::convex_hull_3(points.begin(), points.end(), poly);
+	}
+
+	std::ofstream os;
+	os.open("outtttttt.obj");
+	
+	Vertex_iterator v = poly.vertices_begin();
+	for (int i = 0; i < poly.size_of_vertices(); i += 1){
+		os << "v " << v->point() << std::endl;
+		v++;
+	}
+
+	Face_iterator f = poly.facets_begin();
+	for (int i = 0; i < poly.size_of_facets(); i += 1){
+		Halfedge_facet_circulator edge = f->facet_begin();
+		os << "f ";
+		for (int j = 0; j < CGAL::circulator_size(edge); j += 1){
+			os << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
+			edge++;
+		}
+		os << std::endl;
+		f++;
+	}
+	os.close();
+
+	GLMmodel *outer = glmReadOBJ("outtttttt.obj");
+	recount_normal(outer);
+	GLMmodel *new_outer = glmCopy(outer);
+	process_inner(outer, new_outer, -NODE_DIAMETER / 2.5f);
+	glmWriteOBJ(new_outer, "outtttttt_test2.obj", GLM_NONE);
+	
+	Polyhedron_3 check_poly;
+	SMeshLib::IO::importOBJ("outtttttt_test2.obj", &check_poly);
+	remove("outtttttt.obj");
+	remove("outtttttt_test2.obj");
+
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (all_voxel.at(i).show){
+			//Point
+			vec3 voxel_p = all_voxel.at(i).position;
+			
+			Point judge_p(voxel_p[0], voxel_p[1], voxel_p[2]);
+			//cout << judge_p << endl;
+
+			bool judge = is_pointInside(check_poly, judge_p);
+
+			if (judge){
+				all_voxel.at(i).show = false;
+			}
+		}
+	}
+	
+	#pragma omp parallel for
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (all_voxel.at(i).show){
+			vec3 voxel_p = all_voxel.at(i).position;
+			for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
+				if ((voxel_p - test_connect.at(COLOR_WHITE).at(j).position).length() < NODE_DIAMETER * 0.9){
+					all_voxel.at(i).show = false;
+					break;
+				}
+			}
+		}
+	}
+
+	#pragma omp parallel for
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (all_voxel.at(i).show){
+			int kill = 0;
+			for (int j = 0; j < 6; j += 1){
+				if (!all_voxel.at(all_voxel.at(i).face_toward[j]).show){
+					kill += 1;
+				}
+			}
+			if (kill == 6){
+				all_voxel.at(i).show = false;
+			}
+		}
+	}
+
+	#pragma omp parallel for
+	for (int i = 0; i < 2; i += 1){
+		#pragma omp parallel for
+		for (int j = 0; j < test_connect.at(i).size(); j += 1){
+			//cout << "(" << i << " , " << j << ") " << endl;
+			vec3 from_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
+			//cout << "from" << test_connect.at(i).at(j).fromindex[0] << " , " << test_connect.at(i).at(j).fromindex[1] << endl;
+			vec3 toward_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
+			//cout << "toward" << test_connect.at(i).at(j).towardindex[0] << " , " << test_connect.at(i).at(j).towardindex[1] << endl;
+			
+			#pragma omp parallel for
+			for (int k = 0; k < 8; k += 1){
+				int dx = 0;
+				int dy = 2;
+				int dz = 4;
+
+				if (k % 2 == 1)
+					dx = 1;
+				if ((k / 2) % 2 == 1)
+					dy = 3;
+				if (k / 4 == 1)
+					dz = 5;
+
+				vec3 stick_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * ERROR_THICKNESS * 2;
+
+				int from_voxel_index = search_coord(all_voxel, 0, all_voxel.size(), from_p, 0, stick_error);
+				int toward_voxel_index = search_coord(all_voxel, 0, all_voxel.size(), toward_p, 0, stick_error);
+
+				cross_edge(all_voxel, from_p, toward_p, from_voxel_index, toward_voxel_index, stick_error);
+			}
+		}
+	}
 }

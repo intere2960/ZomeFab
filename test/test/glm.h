@@ -92,6 +92,9 @@ class vertex {
 public:
     std::vector<unsigned int> connect_edge;
     std::vector<unsigned int> align_plane;
+
+	int index = -1;
+	vec3 point;
 };
 
 class Loop{
@@ -141,6 +144,8 @@ public:
 
   std::vector<Loop> *loop = NULL;
 };
+
+void empty_model(GLMmodel *model);
 
 void output_nearest_point(GLMmodel *model, std::string &filename);
 

@@ -2401,3 +2401,15 @@ tri_find_neigbor(GLMtriangle t1, GLMtriangle t2)
 
 	return ans;
 }
+
+void empty_model(GLMmodel *model)
+{
+	model->numvertices = 0;
+	model->vertices = new std::vector<GLfloat>(3);
+
+	model->numfacetnorms = 0;
+	model->facetnorms = new std::vector<GLfloat>();
+
+	model->numtriangles = 0;
+	model->triangles = new std::vector<GLMtriangle>();
+}
