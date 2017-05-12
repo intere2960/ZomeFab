@@ -76,6 +76,8 @@ public:
   int near_node;
   float near_dist;
   float energy_d;
+
+  int tag;
 };
 
 /* GLMgroup: Structure that defines a group in a model.
@@ -92,9 +94,7 @@ class vertex {
 public:
     std::vector<unsigned int> connect_edge;
     std::vector<unsigned int> align_plane;
-
-	int index = -1;
-	vec3 point;
+	int tag;
 };
 
 class Loop{

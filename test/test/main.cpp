@@ -94,62 +94,58 @@ void init()
 
 	eye_pos[2] = eye_pos[2] + 2.0f * bound_size[2];
 
+	//collect_edge(myObj, all_edge);
+
+	//find_near_tri(myObj, all_edge);
+
+	
+
 	glmFacetNormals(myObj);
+
+	myObj_inner = glmReadOBJ(shell_source);
+	glmFacetNormals(myObj_inner);
+	combine_inner_outfit(myObj, myObj_inner);
 
 	//collect_edge(myObj, all_edge);
 
 	//find_near_tri(myObj, all_edge);
 
-	myObj_inner = glmCopy(myObj);
+	/*myObj_inner = glmCopy(myObj);
 	recount_normal(myObj);
 
 	process_inner(myObj, myObj_inner, 4.0f);
 
-	combine_inner_outfit(myObj, myObj_inner);
+	combine_inner_outfit(myObj, myObj_inner);*/
 
 	collect_edge(myObj, all_edge);
+	cout << all_edge.size() << endl;
 
 	planes.push_back(test_plane1);
 	planes.push_back(test_plane2);
 	planes.push_back(test_plane3);
 	planes.push_back(test_plane4);
-	planes.push_back(test_plane5); //dir_plane
-	planes.push_back(test_plane6); //dir_plane
-	planes.push_back(test_plane7); //dir_plane
-	planes.push_back(test_plane8); //dir_plane
+	//planes.push_back(test_plane5); //dir_plane
+	//planes.push_back(test_plane6); //dir_plane
+	//planes.push_back(test_plane7); //dir_plane
+	//planes.push_back(test_plane8); //dir_plane
 	//planes.push_back(test_plane9); //dir_plane
 
 	cut_intersection(myObj, planes, face_split_by_plane, false);
 
-	bool judge_shell = shell_valid(myObj, face_split_by_plane);
-	cout << "shell_valid : " << judge_shell << endl;
-	if (!judge_shell){
-		cout << "bad shell" << endl;
-	}
+	split_face(myObj, all_edge, face_split_by_plane, planes);
+	
+	process_piece(temp_piece, myObj, face_split_by_plane);
+			
+	std::vector<edge> fill_edge;
+	collect_edge(&temp_piece, fill_edge);
 
-	if (judge_shell){
+	find_shell_loop(&temp_piece, fill_edge, planes);
 
-		split_face(myObj, all_edge, face_split_by_plane, planes);
+	fill_hole(temp_piece, true);
 
-		bool judge_split = split_valid(myObj);
-		cout << "split_valid : " << judge_split << endl;
-		if (!judge_split){
-			cout << "bad split" << endl;
-		}
-
-		if (judge_split){
-
-			find_loop(myObj, all_edge, planes);
-
-			process_piece(temp_piece, myObj, face_split_by_plane);
-
-			fill_hole(temp_piece, true);
-
-			glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
-			//glmWriteOBJ(&temp_piece, "test_model/out/out_p123.obj", GLM_NONE);
-			//glmWriteOBJ(myObj_inner, model_out, GLM_NONE);
-		}
-	}
+	glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
+	//glmWriteOBJ(myObj, "test_model/out/out_p123.obj", GLM_NONE);
+	//glmWriteOBJ(myObj, model_out, GLM_NONE);
 }
 
 //void findzoom()
@@ -492,7 +488,7 @@ int main(int argc, char **argv)
 
 	//glmWriteOBJ(myObj_inner, "MAOI_inner.obj", GLM_NONE);
 
-	//init();
+	init();
 
 	/*struc_parser(test_connect, string("1500_10000.txt"));
 	generate_tenon(myObj, test_connect, 18);*/
@@ -786,69 +782,76 @@ int main(int argc, char **argv)
 	//recount_normal(myObj);
 	//collect_edge(myObj, all_edge);
 	//find_near_tri(myObj, all_edge);
-	//struc_parser(test_connect, string("1500_10000.txt"));
+	//struc_parser(test_connect, string("1500_1000.txt"));
+	//
+	////PointCloud<float> cloud;
+	////// Generate points:
+
+	////generatePointCloud(cloud, myObj);
 	////float origin_term[4];
 	////float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	//////output_nearest_point(myObj, string("fake_head_nearest_point.txt"));
-	//nearest_point_parser(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
+	////output_nearest_point(myObj, string("MAOI_nearest_point.txt"));
+	//nearest_point_parser(myObj, string("MAOI_nearest_point.txt"));
 
-	////float wnode = 1.0f;
-	////float wedge = 0.1f;
-	////float label = 0.0f;	
+	//float wnode = 1.0f;
+	//float wedge = 0.1f;
+	//float label = 0.0f;	
 
-	////std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
+	//std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
+	//
+	//vector<simple_material> materials_graph_cut;
+	//test_graph_cut(myObj, test_connect, materials_graph_cut, color_material, vertex_color);
+	//
+	//int num_point = 0;
+	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+	//	if (vertex_color.at(i).size() >= 3){
+	//		num_point += 1;
+	//	}
+	//}
+
+	////ofstream point("color_point.txt");
+	////point << num_point << endl;
+	//std::vector<int> convert_index;
+	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+	//	if (vertex_color.at(i).size() >= 3){
+	//		convert_index.push_back(i);
+	//		/*cout << i << endl;
+	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+	//			cout << vertex_color.at(i).at(j) << " ";
+	//		}
+	//		cout << endl;*/
+	//		/*point << i << " " << vertex_color.at(i).size() << endl;
+	//		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+	//			point << vertex_color.at(i).at(j) << " ";
+	//		}
+	//		point << endl;*/
+	//	}
+	//}
+	////point.close();
 
 	////vector<simple_material> materials_graph_cut;
-	////test_graph_cut(myObj, test_connect, materials_graph_cut, color_material, vertex_color);
-	////int num_point = 0;
-	////for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
-	////	if (vertex_color.at(i).size() >= 3){
-	////		num_point += 1;
-	////	}
-	////}
-
-	//////ofstream point("color_point.txt");
-	//////point << num_point << endl;
+	////ifstream point("color_point.txt");
+	////int num_point;
+	////point >> num_point;
+	////std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
 	////std::vector<int> convert_index;
-	////for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
-	////	if (vertex_color.at(i).size() >= 3){
-	////		convert_index.push_back(i);
-	////		/*cout << i << endl;
-	////		for (int j = 0; j < vertex_color.at(i).size(); j += 1){
-	////			cout << vertex_color.at(i).at(j) << " ";
-	////		}
-	////		cout << endl;*/
-	////		//point << i << " " << vertex_color.at(i).size() << endl;
-	////		//for (int j = 0; j < vertex_color.at(i).size(); j += 1){
-	////			//point << vertex_color.at(i).at(j) << " ";
-	////		//}
-	////		//point << endl;
+	////for (int i = 0; i < num_point; i += 1){
+	////	int index, num;
+	////	point >> index >> num;
+	////	//cout << index << " " << num << endl;
+	////	convert_index.push_back(index);
+	////	for (int j = 0; j < num; j += 1){
+	////		int temp;
+	////		point >> temp;
+	////		vertex_color.at(index).push_back(temp);
+	////		//cout << temp << " ";
 	////	}
+	////	//cout << endl;
 	////}
-	//////point.close();
+	////point.close();
 
-	//ifstream point("color_point.txt");
-	//int num_point;
-	//point >> num_point;
-	//std::vector<std::vector<int>> vertex_color(myObj->numvertices + 1);
-	//std::vector<int> convert_index;
-	//for (int i = 0; i < num_point; i += 1){
-	//	int index, num;
-	//	point >> index >> num;
-	//	//cout << index << " " << num << endl;
-	//	convert_index.push_back(index);
-	//	for (int j = 0; j < num; j += 1){
-	//		int temp;
-	//		point >> temp;
-	//		vertex_color.at(index).push_back(temp);
-	//		//cout << temp << " ";
-	//	}
-	//	//cout << endl;
-	//}
-	//point.close();
-
-	//vector<vector<int>> material_point(11);
+	//vector<vector<int>> material_point(materials_graph_cut.size());
 	//for (int i = 0; i < convert_index.size(); i += 1){
 	//	//cout << convert_index.at(i) << endl;
 	//	for (int j = 0; j < vertex_color.at(convert_index.at(i)).size(); j += 1){
@@ -866,11 +869,11 @@ int main(int argc, char **argv)
 	//	cout << endl;
 	//}*/
 
-	//std::vector<std::vector<vec2>> partition_plane(11);
+	//std::vector<std::vector<vec2>> partition_plane(materials_graph_cut.size());
 
 	//std::vector<cut_plane> plane_queue;
 
-	//for (int i = 0; i < 11; i += 1){
+	//for (int i = 0; i < materials_graph_cut.size(); i += 1){
 	//	GLMmodel *planes = NULL;
 	//	int num_plane = 0;
 
@@ -1014,14 +1017,17 @@ int main(int argc, char **argv)
 	//	glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);
 	//}
 
-	/*for (int i = 0; i < 11; i += 1){
-		cout << i << " = > " << endl;
-		for (int j = 0; j < partition_plane.at(i).size(); j += 1){
-			cout << partition_plane.at(i).at(j)[0] << " " << partition_plane.at(i).at(j)[1] << endl;
-		}
-		cout << endl;
-		cout << endl;
-	}*/
+	//for (int i = 0; i < materials_graph_cut.size(); i += 1){
+	//	cout << i << " = > " << endl;
+	//	for (int j = 0; j < partition_plane.at(i).size(); j += 1){
+	//		cout << "plane " << "test_plane" << j + 1;
+	//		//cout << partition_plane.at(i).at(j)[0] << " " << partition_plane.at(i).at(j)[1] << endl;
+	//		cout << "( " << plane_queue.at(partition_plane.at(i).at(j)[0]).split_plane.plane_par[0] << ", " << plane_queue.at(partition_plane.at(i).at(j)[0]).split_plane.plane_par[1] << ", " << plane_queue.at(partition_plane.at(i).at(j)[0]).split_plane.plane_par[2] << ", " << plane_queue.at(partition_plane.at(i).at(j)[0]).split_plane.plane_par[3] << ", ";
+	//		cout << partition_plane.at(i).at(j)[1] << ");" << endl;
+	//	}
+	//	cout << endl;
+	//	cout << endl;
+	//}
 
 	//string exp_name = to_string(materials_graph_cut.size()) + "(data_" + to_string(wnode) + ",_smooth_" + to_string(wedge) + ",_label_" + to_string(label) + ")";
 	//string mtl_name = exp_name + ".mtl";

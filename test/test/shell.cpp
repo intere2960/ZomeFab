@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include "shell.h"
+#include "global.h"
 
 void recount_normal(GLMmodel *myObj)
 {
@@ -81,6 +82,7 @@ void combine_inner_outfit(GLMmodel *myObj,GLMmodel *myObj_inner)
         temp.vindices[1] += myObj->numvertices;
         temp.vindices[2] += myObj->numvertices;
         temp.findex += myObj->numfacetnorms;
+		temp.tag = INNER;
         myObj->triangles->push_back(temp);
         myObj->numtriangles += 1;
     }
@@ -134,7 +136,7 @@ void combine_inner_outfit2(GLMmodel *myObj)
 void voxel_shell(std::vector<voxel> &all_voxel)
 {
 	std::vector<int> exist_index;
-	int edge_length = pow(all_voxel.at(0).size(), 1.0 / 3);
+	int edge_length = pow(all_voxel.size(), 1.0 / 3);
 	std::vector<std::vector<std::vector<int>>> convert_vertex(edge_length + 1);
 	for (int i = 0; i < edge_length + 1; i += 1){
 		convert_vertex.at(i).resize(edge_length + 1);
@@ -149,11 +151,11 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 	}
 
 	std::vector<vec3> search_index;
-	for (int i = 0; i < all_voxel.at(0).size(); i += 1){
-		if (all_voxel.at(0).at(i).show){
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (all_voxel.at(i).show){
 			for (int j = 0; j < 6; j += 1){
-				if (all_voxel.at(0).at(i).face_toward[j] != -1){
-					if (!all_voxel.at(0).at(all_voxel.at(0).at(i).face_toward[j]).show){
+				if (all_voxel.at(i).face_toward[j] != -1){
+					if (!all_voxel.at(all_voxel.at(i).face_toward[j]).show){
 						exist_index.push_back(i);
 						break;
 					}
@@ -166,18 +168,18 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 		}
 
 		vec3 index;
-		for (int j = 0; j < all_voxel.at(0).at(i).coord.size(); j += 1){
+		for (int j = 0; j < all_voxel.at(i).coord.size(); j += 1){
 
-			if ((all_voxel.at(0).at(i).coord.at(j) % 2) == 1){
-				index[0] += pow(2.0f, all_voxel.at(0).at(i).coord.size() - 1 - j);
+			if ((all_voxel.at(i).coord.at(j) % 2) == 1){
+				index[0] += pow(2.0f, all_voxel.at(i).coord.size() - 1 - j);
 			}
 
-			if ((all_voxel.at(0).at(i).coord.at(j) / 2) % 2 == 1){
-				index[1] += pow(2.0f, all_voxel.at(0).at(i).coord.size() - 1 - j);
+			if ((all_voxel.at(i).coord.at(j) / 2) % 2 == 1){
+				index[1] += pow(2.0f, all_voxel.at(i).coord.size() - 1 - j);
 			}
 
-			if (all_voxel.at(0).at(i).coord.at(j) > 3){
-				index[2] += pow(2.0f, all_voxel.at(0).at(i).coord.size() - 1 - j);
+			if (all_voxel.at(i).coord.at(j) > 3){
+				index[2] += pow(2.0f, all_voxel.at(i).coord.size() - 1 - j);
 			}
 		}
 
@@ -189,9 +191,9 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 	int numvertex = 0;
 
 	for (int i = 0; i < exist_index.size(); i += 1){
-		voxel now = all_voxel.at(0).at(exist_index.at(i));
+		voxel now = all_voxel.at(exist_index.at(i));
 
-		if (now.face_toward[0] == -1 || !all_voxel.at(0).at(now.face_toward[0]).show){
+		if (now.face_toward[0] == -1 || !all_voxel.at(now.face_toward[0]).show){
 			vec3 index[4];
 			int use_point[4] = { 0, 2, 6, 4 };
 			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
@@ -228,7 +230,7 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 			surface.triangles->push_back(temp_tri1);
 			surface.triangles->push_back(temp_tri2);
 		}
-		if (now.face_toward[1] == -1 || !all_voxel.at(0).at(now.face_toward[1]).show){
+		if (now.face_toward[1] == -1 || !all_voxel.at(now.face_toward[1]).show){
 			vec3 index[4];
 			int use_point[4] = { 1, 5, 7, 3 };
 			index[0] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
@@ -265,7 +267,7 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 			surface.triangles->push_back(temp_tri1);
 			surface.triangles->push_back(temp_tri2);
 		}
-		if (now.face_toward[2] == -1 || !all_voxel.at(0).at(now.face_toward[2]).show){
+		if (now.face_toward[2] == -1 || !all_voxel.at(now.face_toward[2]).show){
 			vec3 index[4];
 			int use_point[4] = { 0, 4, 5, 1 };
 			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
@@ -302,7 +304,7 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 			surface.triangles->push_back(temp_tri1);
 			surface.triangles->push_back(temp_tri2);
 		}
-		if (now.face_toward[3] == -1 || !all_voxel.at(0).at(now.face_toward[3]).show){
+		if (now.face_toward[3] == -1 || !all_voxel.at(now.face_toward[3]).show){
 			vec3 index[4];
 			int use_point[4] = { 2, 3, 7, 6 };
 			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
@@ -339,7 +341,7 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 			surface.triangles->push_back(temp_tri1);
 			surface.triangles->push_back(temp_tri2);
 		}
-		if (now.face_toward[4] == -1 || !all_voxel.at(0).at(now.face_toward[4]).show){
+		if (now.face_toward[4] == -1 || !all_voxel.at(now.face_toward[4]).show){
 			vec3 index[4];
 			int use_point[4] = { 0, 1, 3, 2 };
 			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
@@ -376,7 +378,7 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 			surface.triangles->push_back(temp_tri1);
 			surface.triangles->push_back(temp_tri2);
 		}
-		if (now.face_toward[5] == -1 || !all_voxel.at(0).at(now.face_toward[5]).show){
+		if (now.face_toward[5] == -1 || !all_voxel.at(now.face_toward[5]).show){
 			vec3 index[4];
 			int use_point[4] = { 4, 6, 7, 5 };
 			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);

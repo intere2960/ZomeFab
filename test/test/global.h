@@ -38,5 +38,8 @@
 #define ENERGY_USE_STICK 4
 #define GRAPH_CUT 5
 
+#define OUTER 0
+#define INNER 1
+#define MIDDLE 2
 
 #endif

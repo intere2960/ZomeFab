@@ -699,6 +699,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
+					T(numtriangles).tag = OUTER;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -720,6 +721,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
+						T(numtriangles).tag = OUTER;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
@@ -748,6 +750,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
+					T(numtriangles).tag = OUTER;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -772,6 +775,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
+						T(numtriangles).tag = OUTER;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
@@ -797,6 +801,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
+					T(numtriangles).tag = OUTER;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -818,6 +823,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
+						T(numtriangles).tag = OUTER;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;
@@ -841,6 +847,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 					T(numtriangles).near_node = -1;
 					T(numtriangles).near_dist = 100000000000000000000.0f;
 					T(numtriangles).energy_d = 100000000000000000000.0f;
+					T(numtriangles).tag = OUTER;
 
                     group->triangles[group->numtriangles++] = numtriangles;
                     numtriangles++;
@@ -860,6 +867,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
 						T(numtriangles).near_node = -1;
 						T(numtriangles).near_dist = 100000000000000000000.0f;
 						T(numtriangles).energy_d = 100000000000000000000.0f;
+						T(numtriangles).tag = OUTER;
 
                         group->triangles[group->numtriangles++] = numtriangles;
                         numtriangles++;

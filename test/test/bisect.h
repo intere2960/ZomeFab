@@ -41,6 +41,7 @@ void find_near_tri(GLMmodel *model, std::vector<edge> &all_edge);
 void inform_vertex(GLMmodel *model, std::vector<edge> &all_edge);
 void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes);
 void find_easy_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<int> &single_use);
+void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes);
 void process_piece(GLMmodel &temp_piece, GLMmodel *model, std::vector<int> &face_split_by_plane);
 bool shell_valid(GLMmodel *model, std::vector<int> face_split_by_plane);
 bool split_valid(GLMmodel *model);
