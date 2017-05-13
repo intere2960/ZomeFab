@@ -124,7 +124,7 @@ void init()
 	planes.push_back(test_plane2);
 	planes.push_back(test_plane3);
 	planes.push_back(test_plane4);
-	//planes.push_back(test_plane5); //dir_plane
+	planes.push_back(test_plane5); //dir_plane
 	//planes.push_back(test_plane6); //dir_plane
 	//planes.push_back(test_plane7); //dir_plane
 	//planes.push_back(test_plane8); //dir_plane
@@ -462,12 +462,6 @@ public:
 	float normal_percent[2];
 };
 
-#include <CGAL/Nef_polyhedron_3.h>
-#include <CGAL/IO/Nef_polyhedron_iostream_3.h>
-
-#include "ImportOBJ.h"
-
-typedef CGAL::Nef_polyhedron_3<K>  Nef_polyhedron;
 
 int main(int argc, char **argv)
 {
@@ -490,8 +484,14 @@ int main(int argc, char **argv)
 
 	init();
 
-	/*struc_parser(test_connect, string("1500_10000.txt"));
-	generate_tenon(myObj, test_connect, 18);*/
+	struc_parser(test_connect, string("1500_10000.txt"));
+
+	std::vector<std::vector<int>> solt_ball(62);
+	std::vector<std::vector<vec3>> solt_dist(62);
+
+	int solt = near_solt(&temp_piece, test_connect, solt_ball, solt_dist);
+	cout << solt << endl;
+	generate_tenon(&temp_piece, test_connect, solt, solt_ball.at(solt), solt_dist.at(solt));
 
 	//==================================================================
 	//(voxelization)

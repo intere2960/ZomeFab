@@ -1,6 +1,7 @@
 #include <vector>
 #include "algebra3.h"
 #include "fill.h"
+#include "global.h"
 
 void convert_2d(GLMmodel &temp_piece, Loop &loop)
 {
@@ -263,6 +264,7 @@ void fill_hole(GLMmodel &temp_piece, bool two_d)
 			temp.vindices[0] = (GLuint)tri_vindex[0];
 			temp.vindices[1] = (GLuint)tri_vindex[1];
             temp.vindices[2] = (GLuint)tri_vindex[2];
+			temp.tag = MIDDLE;
             temp_piece.triangles->push_back(temp);
             temp_piece.numtriangles += 1;
         }

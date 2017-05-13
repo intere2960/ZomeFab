@@ -1824,21 +1824,21 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 
 	for (int i = 0; i < planes.size(); i += 1){
 	//for (int i = 0; i < planes.size(); i += 1){
-		cout << "plane : " << i << endl;
+		//cout << "plane : " << i << endl;
 
 		std::vector<int> outer_loop;
 		std::vector<int> inner_loop;
 		
 		//outer
-		cout << "outer : ";
+		//cout << "outer : ";
 		for (int j = 0; j < outer_index.size(); j += 1){
 			if (find(model->cut_loop->at(outer_index.at(j)).align_plane.begin(), model->cut_loop->at(outer_index.at(j)).align_plane.end(), i) - model->cut_loop->at(outer_index.at(j)).align_plane.begin() < model->cut_loop->at(outer_index.at(j)).align_plane.size()){
 				outer_loop.push_back(outer_index.at(j));
-				cout << outer_index.at(j) << " ( ";
+				/*cout << outer_index.at(j) << " ( ";
 				for (int k = 0; k < model->cut_loop->at(outer_index.at(j)).align_plane.size(); k += 1){
 					cout << model->cut_loop->at(outer_index.at(j)).align_plane.at(k) << " ";
 				}
-				cout << ") ";
+				cout << ") ";*/
 				//cout << ") " << endl;
 				
 				/*cout << "\t" << outer_index.at(j) << " ( ";
@@ -1848,7 +1848,7 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 				cout << ") " << endl;*/
 			}
 		}
-		cout << endl;
+		//cout << endl;
 		
 		if (outer_loop.size() == 0){
 			continue;
@@ -1899,8 +1899,8 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 				}
 			}
 		}
-		cout << "start " << outer_start_index << endl;
-		cout << "end " << outer_end_index << endl;
+		/*cout << "start " << outer_start_index << endl;
+		cout << "end " << outer_end_index << endl;*/
 
 		std::vector<int> final_outer;
 		int outer_next = outer_start_index;
@@ -1925,25 +1925,25 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 			}
 		}
 
-		cout << "final_outer : ";
+		/*cout << "final_outer : ";
 		for (int j = 0; j < final_outer.size(); j += 1){
 			cout << final_outer.at(j) << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
 		//inner
-		cout << "inner : ";
+		//cout << "inner : ";
 		for (int j = 0; j < inner_index.size(); j += 1){
 			if (find(model->cut_loop->at(inner_index.at(j)).align_plane.begin(), model->cut_loop->at(inner_index.at(j)).align_plane.end(), i) - model->cut_loop->at(inner_index.at(j)).align_plane.begin() < model->cut_loop->at(inner_index.at(j)).align_plane.size()){
 				inner_loop.push_back(inner_index.at(j));
-				cout << inner_index.at(j) << " ( ";
+				/*cout << inner_index.at(j) << " ( ";
 				for (int k = 0; k < model->cut_loop->at(inner_index.at(j)).align_plane.size(); k += 1){
 					cout << model->cut_loop->at(inner_index.at(j)).align_plane.at(k) << " ";
 				}
-				cout << ") ";
+				cout << ") ";*/
 			}
 		}
-		cout << endl;
+		//cout << endl;
 
 		if (inner_loop.size() == 0){
 			continue;
@@ -1994,8 +1994,8 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 				}
 			}
 		}
-		cout << "start " << inner_start_index << endl;
-		cout << "end " << inner_end_index << endl;
+		/*cout << "start " << inner_start_index << endl;
+		cout << "end " << inner_end_index << endl;*/
 
 		std::vector<int> final_inner;
 		int inner_next = inner_start_index;
@@ -2020,11 +2020,11 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 			}
 		}
 
-		cout << "final_inner : ";
+		/*cout << "final_inner : ";
 		for (int j = 0; j < final_inner.size(); j += 1){
 			cout << final_inner.at(j) << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 
 		//combine
 
@@ -2039,7 +2039,7 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 
 		if (ol_if > ol_il)
 			inverse = true;
-		cout << inverse << endl;
+		//cout << inverse << endl;
 
 		std::vector<int> final_loop;
 		for (int j = 0; j < final_outer.size(); j += 1){
@@ -2060,12 +2060,12 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 		Loop temp;
 		temp.loop_line = new std::vector<int>();
 
-		cout << "final : " << endl;
+		//cout << "final : " << endl;
 		for (int j = 0; j < final_loop.size(); j += 1){
-			cout << final_loop.at(j) << " ";
+			//cout << final_loop.at(j) << " ";
 			temp.loop_line->push_back(final_loop.at(j));
 		}
-		cout << endl;
+		//cout << endl;
 
 		temp.plane_normal = vec3(planes.at(i).plane_par[0], planes.at(i).plane_par[1], planes.at(i).plane_par[2]);
 

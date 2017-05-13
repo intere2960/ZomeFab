@@ -3,6 +3,7 @@
 #include <omp.h>
 #include "zomestruc.h"
 #include "zomedir.h"
+#include "operation.h"
 #include "global.h"
 
 zomeconn::zomeconn()
@@ -1294,60 +1295,118 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 	}
 }
 
-void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect , int use_solt)
+bool near_middle(GLMmodel *model, vec3 &test_p, std::vector<int> &middle_point)
+{
+	for (int i = 0; i < middle_point.size(); i += 1){
+		vec3 p(model->vertices->at(3 * middle_point.at(i) + 0), model->vertices->at(3 * middle_point.at(i) + 1), model->vertices->at(3 * middle_point.at(i) + 2));
+		
+		if ((p - test_p).length() < 2 * ERROR_THICKNESS){
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<std::vector<int>> &solt_ball, std::vector<std::vector<vec3>> &solt_dist)
 {
 	zomedir t;
 
-	std::vector<int> use_ball;
-	std::vector<vec3> use_ball_insect;
+	float threshold = SCALE;
 
-	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
+	std::vector<int> inner_tri;
+	std::vector<int> middle_tri;
+	std::vector<int> middle_point;
 
-		vec3 p = test_connect.at(COLOR_WHITE).at(i).position;
-		vec3 ball_n = t.dir->at(use_solt);
+	for (int i = 0; i < model->triangles->size(); i += 1){
+		if (model->triangles->at(i).tag == INNER){
+			inner_tri.push_back(i);
+		}
+		if (model->triangles->at(i).tag == MIDDLE){
+			middle_tri.push_back(i);
+		}
+	}
 
-		for (int j = 0; j < model->triangles->size(); j += 1){
+	for (int i = 0; i < middle_tri.size(); i += 1){
+		for (int j = 0; j < 3; j += 1){
+			int temp = model->triangles->at(middle_tri.at(i)).vindices[j];
+			if (find(middle_point.begin(), middle_point.end(), temp) - middle_point.begin() >= middle_point.size()){
+				middle_point.push_back(temp);
+			}
+		}
+	}
 
-			vec3 p1(model->vertices->at(3 * model->triangles->at(j).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[0] + 2));
-			vec3 p2(model->vertices->at(3 * model->triangles->at(j).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[1] + 2));
-			vec3 p3(model->vertices->at(3 * model->triangles->at(j).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(j).vindices[2] + 2));
-			vec3 v1 = p1 - p2;
-			vec3 v2 = p3 - p2;
-			vec3 n = (v2 ^ v1).normalize();
-			float d = n * p1;
+	for (int x = 0; x < 3; x += 1){
+		#pragma omp parallel for
+		for (int a = 0; a < 62; a += 1){
+			#pragma omp parallel for
+			for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 
-			vec3 edge1 = p2 - p1;
-			vec3 edge2 = p3 - p2;
-			vec3 edge3 = p1 - p3;
-			vec3 insect_p;
-			vec3 judge1;
-			vec3 judge2;
-			vec3 judge3;
+				vec3 p = test_connect.at(COLOR_WHITE).at(i).position;
+				vec3 ball_n = t.dir->at(a);
 
-			float td = (d - (test_connect.at(COLOR_WHITE).at(i).position * n)) / (n * ball_n);
-			if (td > 0){
-				insect_p = test_connect.at(COLOR_WHITE).at(i).position + ball_n * td;
+				for (int j = 0; j < inner_tri.size(); j += 1){
 
-				judge1 = insect_p - p1;
-				judge2 = insect_p - p2;
-				judge3 = insect_p - p3;
+					if (model->triangles->at(inner_tri.at(j)).tag == INNER){
 
-				if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-					if ((p - insect_p).length() < 1.0 * SCALE){
-						if ((find(use_ball.begin(), use_ball.end(), i) - use_ball.begin()) >= use_ball.size()){
-							use_ball.push_back(i);
-							use_ball_insect.push_back(insect_p);
+						vec3 p1(model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[0] + 2));
+						vec3 p2(model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[1] + 2));
+						vec3 p3(model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(inner_tri.at(j)).vindices[2] + 2));
+						vec3 v1 = p1 - p2;
+						vec3 v2 = p3 - p2;
+						vec3 n = (v2 ^ v1).normalize();
+						float d = n * p1;
+
+						vec3 edge1 = p2 - p1;
+						vec3 edge2 = p3 - p2;
+						vec3 edge3 = p1 - p3;
+						vec3 insect_p;
+						vec3 judge1;
+						vec3 judge2;
+						vec3 judge3;
+
+						float td = (d - (test_connect.at(COLOR_WHITE).at(i).position * n)) / (n * ball_n);
+						if (td > 0){
+							insect_p = test_connect.at(COLOR_WHITE).at(i).position + ball_n * td;
+
+							judge1 = insect_p - p1;
+							judge2 = insect_p - p2;
+							judge3 = insect_p - p3;
+
+							if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
+								if (((p - insect_p).length() < threshold * pow(GOLDEN, x)) && !near_middle(model, insect_p, middle_point)){
+									if ((find(solt_ball.at(a).begin(), solt_ball.at(a).end(), i) - solt_ball.at(a).begin()) >= solt_ball.at(a).size()){
+										solt_ball.at(a).push_back(i);
+										solt_dist.at(a).push_back(insect_p);
+									}
+								}
+							}
 						}
 					}
 				}
 			}
+		}
 
+		int ans = 0;
+		for (int i = 1; i < 62; i += 1){
+			if (solt_ball.at(i).size() > solt_ball.at(ans).size()){
+				ans = i;
+			}
+		}
+
+		if (solt_ball.at(ans).size() != 0){
+			return ans;
 		}
 	}
-	//cout << use_ball.size();
 
-	for (int i = 0; i < use_ball.size(); i += 1){
-		//for (int i = 0; i < 1; i += 1){
+	return 0;
+}
+
+void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt, std::vector<int> &solt_ball, std::vector<vec3> &solt_dist)
+{
+	zomedir t;
+
+	for (int i = 0; i < solt_ball.size(); i += 1){
 		GLMmodel *xxx = NULL;
 
 		int color = t.face_color(use_solt);
@@ -1361,15 +1420,23 @@ void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_co
 			xxx = glmReadOBJ("test_model/zometool/yellow2.obj");
 		}
 
-		cout << use_ball.at(i) << endl;
-		vec3 p = test_connect.at(COLOR_WHITE).at(use_ball.at(i)).position;
-		vec3 inserct_p = use_ball_insect.at(i);
+		cout << solt_ball.at(i) << endl;
+		vec3 p = test_connect.at(COLOR_WHITE).at(solt_ball.at(i)).position;
+		vec3 inserct_p = solt_dist.at(i);
 
-		vec3 new_p = (p + inserct_p) / 2;
+		vec3 new_p = inserct_p;
 
-		float l = ((p - inserct_p).length() - ERROR_THICKNESS) / 2.5f;
+		float l = ((p - inserct_p).length() - ERROR_THICKNESS / 2.0f - NODE_DIAMETER / 2.0f);
 
-		glmScale_y(xxx, l);
+		for (int i = 1; i <= xxx->numvertices; i += 1){
+			if (fabs(xxx->vertices->at(3 * i + 1)) > 0.001f){
+				xxx->vertices->at(3 * i + 1) += l;
+			}
+			else{
+				xxx->vertices->at(3 * i + 1) -= 2.0f;
+			}
+		}
+
 		glmRT(xxx, vec3(0.0, t.roll(t.opposite_face(use_solt)), 0.0), vec3(0.0, 0.0, 0.0));
 		glmRT(xxx, vec3(0.0, t.phi(t.opposite_face(use_solt)), t.theta(t.opposite_face(use_solt))), vec3(0.0, 0.0, 0.0));
 		glmR(xxx, vec3(0.0, 0.0, 0.0));

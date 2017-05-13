@@ -109,5 +109,7 @@ void judge_outer(std::vector<std::vector<zomeconn>> &test_connect);
 
 void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, int mode);
 
-void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt);
+bool near_middle(GLMmodel *model, vec3 &test_p, std::vector<int> &middle_point);
+int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<std::vector<int>> &solt_ball, std::vector<std::vector<vec3>> &solt_dist);
+void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt, std::vector<int> &solt_ball, std::vector<vec3> &solt_dist);
 #endif // ZOMESTRUC_H_INCLUDED
