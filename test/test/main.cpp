@@ -97,8 +97,7 @@ void init()
 	//collect_edge(myObj, all_edge);
 
 	//find_near_tri(myObj, all_edge);
-
-	
+		
 
 	glmFacetNormals(myObj);
 
@@ -123,8 +122,8 @@ void init()
 	planes.push_back(test_plane1);
 	planes.push_back(test_plane2);
 	planes.push_back(test_plane3);
-	planes.push_back(test_plane4);
-	planes.push_back(test_plane5); //dir_plane
+	//planes.push_back(test_plane4);
+	//planes.push_back(test_plane5); //dir_plane
 	//planes.push_back(test_plane6); //dir_plane
 	//planes.push_back(test_plane7); //dir_plane
 	//planes.push_back(test_plane8); //dir_plane
@@ -140,6 +139,12 @@ void init()
 	collect_edge(&temp_piece, fill_edge);
 
 	find_shell_loop(&temp_piece, fill_edge, planes);
+
+	/*glmFacetNormals(&temp_piece);
+	recount_normal(&temp_piece);
+	vec4 aaa = easy_plane(&temp_piece, 7743, 4460);
+
+	cout << aaa[0] << ", " << aaa[1] << ", " << aaa[2] << ", " << aaa[3] << endl;*/
 
 	fill_hole(temp_piece, true);
 
@@ -443,31 +448,21 @@ float decrease_t(int iteration)
 	return pow(0.99f, (float)num);
 }
 
-int have_same_material(int now_material, int p1, int p2, std::vector<std::vector<int>> &vertex_color)
-{
-	for (int i = 0; i < vertex_color.at(p1).size(); i += 1){
-		for (int j = 0; j < vertex_color.at(p2).size(); j += 1){
-			if (vertex_color.at(p1).at(i) == vertex_color.at(p2).at(j) && vertex_color.at(p1).at(i) != now_material)
-				return vertex_color.at(p1).at(i);
-		}
-	}
-	return -1;
-}
-
-class cut_plane
-{
-public:
-	plane split_plane;
-	int use_vertex[2];
-	float normal_percent[2];
-};
-
-
 int main(int argc, char **argv)
 {
 	//    findzoom();
 
 	myObj = glmReadOBJ(model_source);
+	
+	/*glmFacetNormals(myObj);
+
+	myObj_inner = glmCopy(myObj);
+	recount_normal(myObj);
+
+	process_inner(myObj, myObj_inner, NODE_DIAMETER / 2.0f);
+	glmWriteOBJ(myObj_inner, "pig_inner.obj", GLM_NONE);*/
+
+	//combine_inner_outfit(myObj, myObj_inner);
 
 	//glmFacetNormals(myObj);
 
@@ -490,8 +485,48 @@ int main(int argc, char **argv)
 	std::vector<std::vector<vec3>> solt_dist(62);
 
 	int solt = near_solt(&temp_piece, test_connect, solt_ball, solt_dist);
-	cout << solt << endl;
+	//cout << solt << endl;
 	generate_tenon(&temp_piece, test_connect, solt, solt_ball.at(solt), solt_dist.at(solt));
+
+	//glmFacetNormals(myObj);
+
+	//recount_normal(myObj);
+
+	///*vec4 plane2 = easy_plane(myObj, 14197, 14234);
+	//cout << plane2[0] << " " << plane2[1] << " " << plane2[2] << " " << plane2[3] << endl;
+
+	//vec4 plane3 = easy_plane(myObj, 14197, 27340);
+	//cout << plane3[0] << " " << plane3[1] << " " << plane3[2] << " " << plane3[3] << endl;
+
+	//vec4 plane1 = easy_plane(myObj, 14234, 27178);
+	//cout << plane1[0] << " " << plane1[1] << " " << plane1[2] << " " << plane1[3] << endl;
+
+	//vec4 plane4 = easy_plane(myObj, 27178, 27340);
+	//cout << plane4[0] << " " << plane4[1] << " " << plane4[2] << " " << plane4[3] << endl;	
+
+	//vec4 plane5 = easy_plane(myObj, 14197, 27178);
+	//cout << plane5[0] << " " << plane5[1] << " " << plane5[2] << " " << plane5[3] << endl;*/
+
+	//vec4 plane2 = easy_plane(myObj, 14197, 13654);
+	//cout << plane2[0] << " " << plane2[1] << " " << plane2[2] << " " << plane2[3] << endl;
+
+	//vec4 plane3 = easy_plane(myObj, 13654, 1029);
+	//cout << plane3[0] << " " << plane3[1] << " " << plane3[2] << " " << plane3[3] << endl;
+
+	//vec4 plane1 = easy_plane(myObj, 1029, 1190);
+	//cout << plane1[0] << " " << plane1[1] << " " << plane1[2] << " " << plane1[3] << endl;
+
+	//vec4 plane4 = easy_plane(myObj, 1190, 13794);
+	//cout << plane4[0] << " " << plane4[1] << " " << plane4[2] << " " << plane4[3] << endl;
+
+	//vec4 plane5 = easy_plane(myObj, 13794, 14234);
+	//cout << plane5[0] << " " << plane5[1] << " " << plane5[2] << " " << plane5[3] << endl;
+
+	//vec4 plane6 = easy_plane(myObj, 14197, 14234);
+	//cout << plane6[0] << " " << plane6[1] << " " << plane6[2] << " " << plane6[3] << endl;
+
+	//vec4 plane7 = easy_plane(myObj, 1190, 13654);
+	//cout << plane7[0] << " " << plane7[1] << " " << plane7[2] << " " << plane7[3] << endl;
 
 	//==================================================================
 	//(voxelization)
@@ -513,8 +548,8 @@ int main(int argc, char **argv)
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	//output_zometool(output_ans, string("MAOI_out.obj"));
-	//output_struc(output_ans, string("MAOI_out.txt"));
+	//output_zometool(output_ans, string("squirrel_out.obj"));
+	//output_struc(output_ans, string("squirrel_out.txt"));
 	//===================================================================
 
 	//==================================================================
@@ -526,7 +561,7 @@ int main(int argc, char **argv)
 	//float duration;
 
 	//srand((unsigned)time(NULL));
-	//struc_parser(test_connect, string("MAOI_out.txt"));
+	//struc_parser(test_connect, string("pig_out.txt"));
 
 	//////nearest_point_parser(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
 
@@ -604,7 +639,7 @@ int main(int argc, char **argv)
 	//		int result;
 	//		do{
 	//			result = rand() % test_connect.at(COLOR_WHITE).size();
-	//		} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outter);
+	//		} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outer);
 	//		//cout << "result : " << result << endl;
 	//		os << result << endl;
 	//		split(temp_connect, result, myObj, cloud, splite_table);
@@ -774,7 +809,7 @@ int main(int argc, char **argv)
 	//output_material(material_use_stick, std::string("1500_10000_energy_use_stick.mtl"));
 	//output_zometool_exp(test_connect, string("fake_energy_1500_10000(use_stick).obj"), material_use_stick, std::string("1500_10000_energy_use_stick.mtl"), ENERGY_USE_STICK);
 
-	//output_nearest_point(myObj, string("1500_10000_fake_head_nearest_point.txt"));
+	//output_nearest_point(myObj, string("1500_10000_pig_nearest_point.txt"));
 	//==================================================================
 
 	//==================================================================
@@ -851,7 +886,7 @@ int main(int argc, char **argv)
 	////}
 	////point.close();
 
-	//vector<vector<int>> material_point(materials_graph_cut.size());
+	//std::vector<std::vector<int>> material_point(materials_graph_cut.size());
 	//for (int i = 0; i < convert_index.size(); i += 1){
 	//	//cout << convert_index.at(i) << endl;
 	//	for (int j = 0; j < vertex_color.at(convert_index.at(i)).size(); j += 1){
@@ -874,7 +909,7 @@ int main(int argc, char **argv)
 	//std::vector<cut_plane> plane_queue;
 
 	//for (int i = 0; i < materials_graph_cut.size(); i += 1){
-	//	GLMmodel *planes = NULL;
+	//	//GLMmodel *planes = NULL;
 	//	int num_plane = 0;
 
 	//	for (int j = 0; j < material_point.at(i).size(); j += 1){
@@ -886,13 +921,13 @@ int main(int argc, char **argv)
 
 	//			if (same_material != -1){
 
-	//				GLMmodel *temp_plane = glmReadOBJ("test_model/cube.obj");
+	//				//GLMmodel *temp_plane = glmReadOBJ("test_model/cube.obj");
 	//									
 	//				vec3 p2(myObj->vertices->at(3 * material_point.at(i).at(k) + 0), myObj->vertices->at(3 * material_point.at(i).at(k) + 1), myObj->vertices->at(3 * material_point.at(i).at(k) + 2));
 	//				vec3 n_p2(myObj->normals[3 * material_point.at(i).at(k) + 0], myObj->normals[3 * material_point.at(i).at(k) + 1], myObj->normals[3 * material_point.at(i).at(k) + 2]);
 
-	//				glmScale_y(temp_plane, (p1 - p2).length() / 2.0f);
-	//				glmScale_z(temp_plane, (p1 - p2).length() / 2.0f);
+	//				//glmScale_y(temp_plane, (p1 - p2).length() / 2.0f);
+	//				//glmScale_z(temp_plane, (p1 - p2).length() / 2.0f);
 	//				
 	//				int plane_index = -1;
 	//				for (int a = 0; a < plane_queue.size(); a += 1){
@@ -903,11 +938,10 @@ int main(int argc, char **argv)
 	//				}
 
 	//				if (plane_index == -1){
-	//					vec3 v1 = (p2 - p1).normalize();
-	//					vec3 v2 = ((n_p1 + n_p2) / 2.0).normalize();
-
-	//					vec3 n_vector = (v1 ^ v2).normalize();
-	//					float d = n_vector * p1;
+	//					vec4 plane_par = easy_plane(myObj, material_point.at(i).at(j), material_point.at(i).at(k));
+	//					
+	//					vec3 n_vector = vec3(plane_par[0], plane_par[1], plane_par[2]);
+	//					float d = plane_par[3];
 
 	//					cut_plane temp_record;
 	//					temp_record.split_plane.plane_par = vec4(n_vector, d);
@@ -918,30 +952,30 @@ int main(int argc, char **argv)
 
 	//					plane_queue.push_back(temp_record);
 
-	//					vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
-	//					float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
-	//					float angle = acos(dot_angle);
-	//					//glmR(temp_plane, axis, angle);
-	//					mat4 R = rotation3Drad(axis, angle);
+	//					//vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
+	//					//float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
+	//					//float angle = acos(dot_angle);
+	//					////glmR(temp_plane, axis, angle);
+	//					//mat4 R = rotation3Drad(axis, angle);
 
-	//					for (unsigned int i = 1; i <= temp_plane->numvertices; i += 1) {
-	//						vec3 temp(temp_plane->vertices->at(3 * i + 0), temp_plane->vertices->at(3 * i + 1), temp_plane->vertices->at(3 * i + 2));
-	//						temp = R * temp;
-	//						temp_plane->vertices->at(3 * i + 0) = temp[0];
-	//						temp_plane->vertices->at(3 * i + 1) = temp[1];
-	//						temp_plane->vertices->at(3 * i + 2) = temp[2];
-	//					}
+	//					//for (unsigned int a = 1; a <= temp_plane->numvertices; a += 1) {
+	//					//	vec3 temp(temp_plane->vertices->at(3 * a + 0), temp_plane->vertices->at(3 * a + 1), temp_plane->vertices->at(3 * a + 2));
+	//					//	temp = R * temp;
+	//					//	temp_plane->vertices->at(3 * a + 0) = temp[0];
+	//					//	temp_plane->vertices->at(3 * a + 1) = temp[1];
+	//					//	temp_plane->vertices->at(3 * a + 2) = temp[2];
+	//					//}
 
-	//					glmT(temp_plane, (p1 + p2) / 2.0f);
+	//					//glmT(temp_plane, (p1 + p2) / 2.0f);
 
-	//					if (num_plane == 0){
-	//						planes = glmCopy(temp_plane);
-	//						num_plane += 1;
-	//					}
-	//					else{
-	//						glmCombine(planes, temp_plane);
-	//						num_plane += 1;
-	//					}
+	//					//if (num_plane == 0){
+	//					//	planes = glmCopy(temp_plane);
+	//					//	num_plane += 1;
+	//					//}
+	//					//else{
+	//					//	glmCombine(planes, temp_plane);
+	//					//	num_plane += 1;
+	//					//}
 
 	//					float dir = 0;
 	//					for (int a = 0; a < material_point.at(i).size(); a += 1){
@@ -967,30 +1001,30 @@ int main(int argc, char **argv)
 	//					n_vector[2] = plane_queue.at(plane_index).split_plane.plane_par[2];
 	//					float d = plane_queue.at(plane_index).split_plane.plane_par[3];
 	//					
-	//					vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
-	//					float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
-	//					float angle = acos(dot_angle);
-	//					//glmR(temp_plane, axis, angle);
-	//					mat4 R = rotation3Drad(axis, angle);
+	//					//vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
+	//					//float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
+	//					//float angle = acos(dot_angle);
+	//					////glmR(temp_plane, axis, angle);
+	//					//mat4 R = rotation3Drad(axis, angle);
 
-	//					for (unsigned int i = 1; i <= temp_plane->numvertices; i += 1) {
-	//						vec3 temp(temp_plane->vertices->at(3 * i + 0), temp_plane->vertices->at(3 * i + 1), temp_plane->vertices->at(3 * i + 2));
-	//						temp = R * temp;
-	//						temp_plane->vertices->at(3 * i + 0) = temp[0];
-	//						temp_plane->vertices->at(3 * i + 1) = temp[1];
-	//						temp_plane->vertices->at(3 * i + 2) = temp[2];
-	//					}
+	//					//for (unsigned int a = 1; a <= temp_plane->numvertices; a += 1) {
+	//					//	vec3 temp(temp_plane->vertices->at(3 * a + 0), temp_plane->vertices->at(3 * a + 1), temp_plane->vertices->at(3 * a + 2));
+	//					//	temp = R * temp;
+	//					//	temp_plane->vertices->at(3 * a + 0) = temp[0];
+	//					//	temp_plane->vertices->at(3 * a + 1) = temp[1];
+	//					//	temp_plane->vertices->at(3 * a + 2) = temp[2];
+	//					//}
 
-	//					glmT(temp_plane, (p1 + p2) / 2.0f);
+	//					//glmT(temp_plane, (p1 + p2) / 2.0f);
 
-	//					if (num_plane == 0){
-	//						planes = glmCopy(temp_plane);
-	//						num_plane += 1;
-	//					}
-	//					else{
-	//						glmCombine(planes, temp_plane);
-	//						num_plane += 1;
-	//					}
+	//					//if (num_plane == 0){
+	//					//	planes = glmCopy(temp_plane);
+	//					//	num_plane += 1;
+	//					//}
+	//					//else{
+	//					//	glmCombine(planes, temp_plane);
+	//					//	num_plane += 1;
+	//					//}
 
 	//					float dir = 0;
 	//					for (int a = 0; a < material_point.at(i).size(); a += 1){
@@ -1013,11 +1047,27 @@ int main(int argc, char **argv)
 	//			}
 	//		}
 	//	}
-	//	std::string filename = to_string(i) + ".obj";
-	//	glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);
+	//	/*std::string filename = to_string(i) + ".obj";
+	//	glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);*/
 	//}
 
-	//for (int i = 0; i < materials_graph_cut.size(); i += 1){
+	//for (int i = 0; i < partition_plane.size(); i += 1){
+	////for (int i = 7; i < 8; i += 1){
+	//	std::vector<vec2> error_info;
+	//	bool error = cut_plane_error(myObj, partition_plane.at(i), plane_queue, material_point.at(i), error_info);
+
+	//	for (int j = 0; j < error_info.size(); j += 1){
+	//		cout << error_info.at(j)[0] << " " << error_info.at(j)[1] << endl;
+	//	}
+	//	if (error){
+	//		alter_plane(myObj, partition_plane, i, plane_queue, material_point, error_info);
+	//		partition_plane.erase(partition_plane.begin() + i);
+	//		material_point.erase(material_point.begin() + i);
+	//		i -= 1;
+	//	}
+	//}
+
+	//for (int i = 0; i < partition_plane.size(); i += 1){
 	//	cout << i << " = > " << endl;
 	//	for (int j = 0; j < partition_plane.at(i).size(); j += 1){
 	//		cout << "plane " << "test_plane" << j + 1;
@@ -1026,6 +1076,7 @@ int main(int argc, char **argv)
 	//		cout << partition_plane.at(i).at(j)[1] << ");" << endl;
 	//	}
 	//	cout << endl;
+	//	//cut_plane_error(myObj, partition_plane.at(i), plane_queue, material_point.at(i));
 	//	cout << endl;
 	//}
 
@@ -1048,26 +1099,26 @@ int main(int argc, char **argv)
 	//obb_angle.resize(1);
 
 	//computeSimpleBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0));
-	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 5.36f);
+	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 5.52f);
 	//cout << "output piece " << 0 + 1 << endl;
 	//output_voxel(all_voxel.at(0), 536);
-	//voxel_txt(all_voxel.at(0), string("voxel_5.36.txt"));
-	
-	/*voxel_parser(all_voxel.at(0), string("voxel_5.36.txt"));
-	cout << "voxel_parser done" << endl;*/
-	//struc_parser(test_connect, string("1500_1000.txt"));
+	//voxel_txt(all_voxel.at(0), string("voxel_5.52.txt"));
+	//
+	///*voxel_parser(all_voxel.at(0), string("voxel_5.36.txt"));
+	//cout << "voxel_parser done" << endl;*/
+	///*struc_parser(test_connect, string("1500_10000.txt"));
 	//cout << "struc_parser done" << endl;
-	//judge_outer(test_connect);
+	//judge_outer(test_connect);*/
 
-	//kill_inner_SA(all_voxel.at(0), test_connect);
+	///*kill_inner_SA(all_voxel.at(0), test_connect);
 	//output_voxel(all_voxel.at(0), 11);
-	//voxel_txt(all_voxel.at(0), string("voxel_112.txt"));
-	
+	//voxel_txt(all_voxel.at(0), string("voxel_112.txt"));*/
+	//
 	//voxel_shell(all_voxel.at(0));
 
-	/*GLMmodel *outer = glmReadOBJ("voxel_shell.obj");
-	glmCombine(myObj, outer);
-	glmWriteOBJ(myObj, "MAOI_done.obj", GLM_NONE);*/
+	///*GLMmodel *outer = glmReadOBJ("voxel_shell.obj");
+	//glmCombine(myObj, outer);
+	//glmWriteOBJ(myObj, "MAOI_done.obj", GLM_NONE);*/
 
 	//==================================================================
 	

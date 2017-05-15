@@ -1308,6 +1308,19 @@ bool near_middle(GLMmodel *model, vec3 &test_p, std::vector<int> &middle_point)
 	return false;
 }
 
+bool near_outer(GLMmodel *model, vec3 &test_p, std::vector<int> &outer_point)
+{
+	for (int i = 0; i < outer_point.size(); i += 1){
+		vec3 p(model->vertices->at(3 * outer_point.at(i) + 0), model->vertices->at(3 * outer_point.at(i) + 1), model->vertices->at(3 * outer_point.at(i) + 2));
+
+		if ((p - test_p).length() < ERROR_THICKNESS){
+			return true;
+		}
+	}
+
+	return false;
+}
+
 int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<std::vector<int>> &solt_ball, std::vector<std::vector<vec3>> &solt_dist)
 {
 	zomedir t;
@@ -1316,7 +1329,10 @@ int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect,
 
 	std::vector<int> inner_tri;
 	std::vector<int> middle_tri;
+	std::vector<int> outer_tri;
+
 	std::vector<int> middle_point;
+	std::vector<int> outer_point;
 
 	for (int i = 0; i < model->triangles->size(); i += 1){
 		if (model->triangles->at(i).tag == INNER){
@@ -1325,6 +1341,9 @@ int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect,
 		if (model->triangles->at(i).tag == MIDDLE){
 			middle_tri.push_back(i);
 		}
+		if (model->triangles->at(i).tag == OUTER){
+			outer_tri.push_back(i);
+		}
 	}
 
 	for (int i = 0; i < middle_tri.size(); i += 1){
@@ -1332,6 +1351,15 @@ int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect,
 			int temp = model->triangles->at(middle_tri.at(i)).vindices[j];
 			if (find(middle_point.begin(), middle_point.end(), temp) - middle_point.begin() >= middle_point.size()){
 				middle_point.push_back(temp);
+			}
+		}
+	}
+
+	for (int i = 0; i < outer_tri.size(); i += 1){
+		for (int j = 0; j < 3; j += 1){
+			int temp = model->triangles->at(outer_tri.at(i)).vindices[j];
+			if (find(outer_point.begin(), outer_point.end(), temp) - outer_point.begin() >= outer_point.size()){
+				outer_point.push_back(temp);
 			}
 		}
 	}
@@ -1374,7 +1402,7 @@ int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect,
 							judge3 = insect_p - p3;
 
 							if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-								if (((p - insect_p).length() < threshold * pow(GOLDEN, x)) && !near_middle(model, insect_p, middle_point)){
+								if (((p - insect_p).length() < threshold * pow(GOLDEN, x)) && !near_middle(model, insect_p, middle_point) && !near_outer(model, insect_p, outer_point)){
 									if ((find(solt_ball.at(a).begin(), solt_ball.at(a).end(), i) - solt_ball.at(a).begin()) >= solt_ball.at(a).size()){
 										solt_ball.at(a).push_back(i);
 										solt_dist.at(a).push_back(insect_p);
@@ -1420,7 +1448,7 @@ void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_co
 			xxx = glmReadOBJ("test_model/zometool/yellow2.obj");
 		}
 
-		cout << solt_ball.at(i) << endl;
+		//cout << solt_ball.at(i) << endl;
 		vec3 p = test_connect.at(COLOR_WHITE).at(solt_ball.at(i)).position;
 		vec3 inserct_p = solt_dist.at(i);
 

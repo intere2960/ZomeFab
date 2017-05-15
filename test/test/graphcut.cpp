@@ -198,3 +198,300 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 		}
 	}
 }
+
+int have_same_material(int now_material, int p1, int p2, std::vector<std::vector<int>> &vertex_color)
+{
+	for (int i = 0; i < vertex_color.at(p1).size(); i += 1){
+		for (int j = 0; j < vertex_color.at(p2).size(); j += 1){
+			if (vertex_color.at(p1).at(i) == vertex_color.at(p2).at(j) && vertex_color.at(p1).at(i) != now_material)
+				return vertex_color.at(p1).at(i);
+		}
+	}
+	return -1;
+}
+
+vec4 easy_plane(GLMmodel *model, int index1, int index2)
+{
+	vec3 p2(model->vertices->at(3 * index2 + 0), model->vertices->at(3 * index2 + 1), model->vertices->at(3 * index2 + 2));
+	vec3 p1(model->vertices->at(3 * index1 + 0), model->vertices->at(3 * index1 + 1), model->vertices->at(3 * index1 + 2));
+
+	vec3 n_p1(model->normals[3 * index1 + 0], model->normals[3 * index1 + 1], model->normals[3 * index1 + 2]);
+	vec3 n_p2(model->normals[3 * index2 + 0], model->normals[3 * index2 + 1], model->normals[3 * index2 + 2]);
+
+	vec3 v1 = (p2 - p1).normalize();
+	vec3 v2 = ((n_p1 + n_p2) / 2.0).normalize();
+
+	vec3 n_vector = (v1 ^ v2).normalize();
+	float d = n_vector * p1;
+
+	vec4 ans(n_vector, d);
+
+	return ans;
+}
+
+#include <iostream>
+using namespace std;
+
+bool cut_plane_error(GLMmodel *model, std::vector<vec2> &partition_plane, std::vector<cut_plane> &plane_queue, std::vector<int> &material_point, std::vector<vec2> &error_info)
+{
+	bool ans = false;
+	for (int i = 0; i < partition_plane.size(); i += 1){
+		plane now_plane = plane_queue.at(partition_plane.at(i)[0]).split_plane;
+		for (int j = 0; j < material_point.size(); j += 1){
+			vec3 now_point(model->vertices->at(3 * material_point.at(j) + 0), model->vertices->at(3 * material_point.at(j) + 1), model->vertices->at(3 * material_point.at(j) + 2));
+			int dir = plane_dir_point(now_point, now_plane);
+			if (dir == -1.0f * partition_plane.at(i)[1]){
+				ans = true;
+				//cout << i << " " << material_point.at(j) << endl;
+				
+				error_info.push_back(vec2(i, material_point.at(j)));
+			}
+		}
+	}
+
+	return ans;
+}
+
+void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plane, int piece_id, std::vector<cut_plane> &plane_queue, std::vector<std::vector<int>> &material_point, std::vector<vec2> &error_info)
+{
+	std::vector<vec2> connect_info;
+	
+	//cout << "all : ";
+	for (int i = 0; i < partition_plane.at(piece_id).size(); i += 1){
+		//cout << partition_plane.at(piece_id).at(i)[0] << " ";
+		//cout << plane_queue.at(partition_plane.at(i)[0]).use_vertex[0] << " " << plane_queue.at(partition_plane.at(i)[0]).use_vertex[1] << endl;
+		connect_info.push_back(vec2(plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[0], plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[1]));
+	}
+	//cout << endl;
+
+	std::vector<int> point_loop;
+	int loop_pre_index = -1;
+	int loop_next_index = connect_info.at(0)[1];
+	int loop_end_index = connect_info.at(0)[0];
+	point_loop.push_back(loop_next_index);
+
+	while (loop_next_index != loop_end_index){
+		for (int i = 1; i < connect_info.size(); i += 1){
+			if (connect_info.at(i)[0] == loop_next_index){
+				if (connect_info.at(i)[1] != loop_pre_index){
+					loop_pre_index = loop_next_index;
+					loop_next_index = connect_info.at(i)[1];
+
+					point_loop.push_back(loop_next_index);
+					break;
+				}
+			}
+
+			if (connect_info.at(i)[1] == loop_next_index){
+				if (connect_info.at(i)[0] != loop_pre_index){
+					loop_pre_index = loop_next_index;
+					loop_next_index = connect_info.at(i)[0];
+
+					point_loop.push_back(loop_next_index);
+					break;
+				}
+			}
+		}
+	}
+
+	/*for (int i = 0; i < point_loop.size(); i += 1){
+		cout << point_loop.at(i) << " ";
+	}
+	cout << endl;*/
+
+	std::vector<std::vector<int>> plane_error(partition_plane.at(piece_id).size());
+	for (int i = 0; i < error_info.size(); i += 1){
+		plane_error.at(error_info.at(i)[0]).push_back(error_info.at(i)[1]);
+	}
+
+	int min_error = -1;
+	int min_error_number = 10000;
+	for (int i = 0; i < plane_error.size(); i += 1){
+		if (plane_error.at(i).size() != 0){
+			if (plane_error.at(i).size() < min_error_number){
+				min_error = i;
+				min_error_number = plane_error.at(i).size();
+			}
+		}
+	}
+
+	bool done = false;
+	//for (int i = 0; i < plane_error.size(); i += 1){
+		/*cout << i << " => ";
+		for (int j = 0; j < plane_error.at(i).size(); j += 1){
+			cout << plane_error.at(i).at(j) << " ";
+		}
+		cout << endl;*/
+	if (plane_error.at(min_error).size() != 0){
+		for (int j = 0; j < 2; j += 1){
+			int start_point = plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[j];
+			std::vector<bool> choose(point_loop.size());
+			for (int k = 0; k < choose.size(); k += 1){
+				choose.at(k) = true;
+			}
+
+			int now_index = find(point_loop.begin(), point_loop.end(), start_point) - point_loop.begin();
+			int next_index = (now_index + 1) % point_loop.size();
+			int pre_index = (now_index - 1 + point_loop.size()) % point_loop.size();
+
+			choose.at(now_index) = false;
+			choose.at(next_index) = false;
+			choose.at(pre_index) = false;
+
+			for (int k = 0; k < plane_error.at(min_error).size(); k += 1){
+				int find_index = find(point_loop.begin(), point_loop.end(), plane_error.at(min_error).at(k)) - point_loop.begin();
+				choose.at(find_index) = false;
+			}
+
+			//int new_plane_index = -1;
+			std::vector<int> new_plane_index;
+			for (int k = 0; k < choose.size(); k += 1){
+				if (choose.at(k)){
+					new_plane_index.push_back(point_loop.at(k));
+					//cout << j << " " << point_loop.at(now_index) << " " << new_plane_index << endl;
+					//break;
+				}
+			}
+								
+			if (new_plane_index.size() != 0){
+				for (int a = 0; a < new_plane_index.size(); a += 1){
+					vec4 new_plane_par = easy_plane(model, point_loop.at(now_index), new_plane_index.at(a));
+					vec3 now_p1 = vec3(model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[0] + 0), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[0] + 1), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[0] + 2));
+					vec3 now_p2 = vec3(model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[1] + 0), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[1] + 1), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[1] + 2));
+					plane new_plane(new_plane_par[0], new_plane_par[1], new_plane_par[2], new_plane_par[3], 0);
+
+					bool vaild = true;
+					int error_dir;
+					for (int k = 0; k < plane_error.at(min_error).size(); k += 1){
+						vec3 error_p = vec3(model->vertices->at(3 * plane_error.at(min_error).at(k) + 0), model->vertices->at(3 * plane_error.at(min_error).at(k) + 1), model->vertices->at(3 * plane_error.at(min_error).at(k) + 2));
+							
+						int dir[3];
+
+						dir[0] = plane_dir_point(now_p1, new_plane);
+						dir[1] = plane_dir_point(now_p2, new_plane);
+						dir[2] = plane_dir_point(error_p, new_plane);
+						error_dir = dir[2];
+						//cout << dir[0] << " " << dir[1] << " " << dir[2] << endl;
+
+						if ((dir[0] == dir[2]) || (dir[1] == dir[2])){
+							vaild = false;
+							break;
+						}
+					}
+						
+					if (vaild){
+						//cout << "fucking ya" << endl;
+
+						cut_plane new_cut;
+						new_cut.split_plane = new_plane;
+						new_cut.use_vertex[0] = point_loop.at(now_index);
+						new_cut.use_vertex[1] = new_plane_index.at(a);
+						new_cut.normal_percent[0] = 0.5;
+						new_cut.normal_percent[1] = 0.5;
+
+						plane_queue.push_back(new_cut);
+
+						std::vector<vec2> error_piece;
+						std::vector<int> error_point;
+							
+						std::vector<vec2> normal_piece;
+						std::vector<int> normal_point;
+
+						error_piece.push_back(vec2(plane_queue.size() - 1, error_dir));
+						error_point.push_back(point_loop.at(now_index));
+						error_point.push_back(new_plane_index.at(a));
+
+						normal_piece.push_back(vec2(plane_queue.size() - 1, error_dir * -1));
+						normal_point.push_back(point_loop.at(now_index));
+						normal_point.push_back(new_plane_index.at(a));
+
+						for (int k = 0; k < partition_plane.at(piece_id).size(); k += 1){
+							int test_index1 = plane_queue.at(partition_plane.at(piece_id).at(k)[0]).use_vertex[0];
+							vec3 test_point1 = vec3(model->vertices->at(3 * test_index1 + 0), model->vertices->at(3 * test_index1 + 1), model->vertices->at(3 * test_index1 + 2));
+							int test_index2 = plane_queue.at(partition_plane.at(piece_id).at(k)[0]).use_vertex[1];
+							vec3 test_point2 = vec3(model->vertices->at(3 * test_index2 + 0), model->vertices->at(3 * test_index2 + 1), model->vertices->at(3 * test_index2 + 2));
+
+							int dir[2];
+							dir[0] = plane_dir_point(test_point1, new_plane);
+							dir[1] = plane_dir_point(test_point2, new_plane);
+
+							if ((dir[0] + dir[1] == error_dir) || (dir[0] + dir[1] == 2 * error_dir)){
+								error_piece.push_back(partition_plane.at(piece_id).at(k));
+
+								if (find(error_point.begin(), error_point.end(), test_index1) - error_point.begin() >= error_point.size()){
+									error_point.push_back(test_index1);
+								}
+								if (find(error_point.begin(), error_point.end(), test_index2) - error_point.begin() >= error_point.size()){
+									error_point.push_back(test_index2);
+								}
+							}
+							else{
+								normal_piece.push_back(partition_plane.at(piece_id).at(k));
+
+								if (find(normal_point.begin(), normal_point.end(), test_index1) - normal_point.begin() >= normal_point.size()){
+									normal_point.push_back(test_index1);
+								}
+								if (find(normal_point.begin(), normal_point.end(), test_index2) - normal_point.begin() >= normal_point.size()){
+									normal_point.push_back(test_index2);
+								}
+							}
+						}
+
+						/*cout << "error : ";
+						for (int k = 0; k < error_piece.size(); k += 1){
+							cout << error_piece.at(k)[0] << " ";
+						}
+						cout << endl;
+
+						cout << "normal : ";
+						for (int k = 0; k < normal_piece.size(); k += 1){
+							cout << normal_piece.at(k)[0] << " ";
+						}
+						cout << endl;
+
+						cout << "error : ";
+						for (int k = 0; k < error_point.size(); k += 1){
+							cout << error_point.at(k) << " ";
+						}
+						cout << endl;
+
+						cout << "normal : ";
+						for (int k = 0; k < normal_point.size(); k += 1){
+							cout << normal_point.at(k) << " ";
+						}
+						cout << endl;*/
+
+						std::vector<vec2> error_info_error;
+						std::vector<vec2> error_info_normal;
+
+						cut_plane_error(model, error_piece, plane_queue, error_point, error_info_error);
+						cut_plane_error(model, normal_piece, plane_queue, normal_point, error_info_normal);
+
+						if ((error_info_error.size() <= 1) && (error_info_normal.size() <= 1)){
+							partition_plane.push_back(error_piece);
+							partition_plane.push_back(normal_piece);
+
+							material_point.push_back(error_point);
+							material_point.push_back(normal_point);
+
+							done = true;
+							break;
+						}
+						else{
+							plane_queue.erase(plane_queue.begin() + plane_queue.size() - 1);
+						}
+					}
+				}					
+			}
+
+			if (done)
+				break;
+		}		
+	}
+
+		//if (done)
+		//	break;
+	//}
+
+	//return true;
+}

@@ -1776,6 +1776,52 @@ void find_easy_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<in
 	}
 }
 
+void combine_loop(GLMmodel *model, plane &plane, std::vector<int> &final_outer, std::vector<int> &final_inner)
+{
+	bool inverse = false;
+	vec3 outer_last = vec3(model->vertices->at(3 * final_outer.at(final_outer.size() - 1) + 0), model->vertices->at(3 * final_outer.at(final_outer.size() - 1) + 1), model->vertices->at(3 * final_outer.at(final_outer.size() - 1) + 2));
+	vec3 inner_first = vec3(model->vertices->at(3 * final_inner.at(0) + 0), model->vertices->at(3 * final_inner.at(0) + 1), model->vertices->at(3 * final_inner.at(0) + 2));
+	vec3 inner_last = vec3(model->vertices->at(3 * final_inner.at(final_inner.size() - 1) + 0), model->vertices->at(3 * final_inner.at(final_inner.size() - 1) + 1), model->vertices->at(3 * final_inner.at(final_inner.size() - 1) + 2));
+
+	float ol_if, ol_il;
+	ol_if = (outer_last - inner_first).length();
+	ol_il = (outer_last - inner_last).length();
+
+	if (ol_if > ol_il)
+		inverse = true;
+	//cout << inverse << endl;
+
+	std::vector<int> final_loop;
+	for (int j = 0; j < final_outer.size(); j += 1){
+		final_loop.push_back(final_outer.at(j));
+	}
+
+	if (!inverse){
+		for (int j = 0; j < final_inner.size(); j += 1){
+			final_loop.push_back(final_inner.at(j));
+		}
+	}
+	else{
+		for (int j = final_inner.size() - 1; j >= 0; j -= 1){
+			final_loop.push_back(final_inner.at(j));
+		}
+	}
+
+	Loop temp;
+	temp.loop_line = new std::vector<int>();
+
+	//cout << "final : " << endl;
+	for (int j = 0; j < final_loop.size(); j += 1){
+		//cout << final_loop.at(j) << " ";
+		temp.loop_line->push_back(final_loop.at(j));
+	}
+	//cout << endl;
+
+	temp.plane_normal = vec3(plane.plane_par[0], plane.plane_par[1], plane.plane_par[2]);
+
+	model->loop->push_back(temp);
+}
+
 void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes)
 {
 	for (int i = 0; i < planes.size(); i += 1){
@@ -1822,8 +1868,8 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 	}
 	cout << endl;*/
 
+	//for (int i = 0; i < 1; i += 1){
 	for (int i = 0; i < planes.size(); i += 1){
-	//for (int i = 0; i < planes.size(); i += 1){
 		//cout << "plane : " << i << endl;
 
 		std::vector<int> outer_loop;
@@ -1860,69 +1906,64 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 		bool outer_get_start = false;
 
 		for (int j = 0; j < outer_loop.size(); j += 1){
-			if (!outer_get_start){
-				bool get_index = false;
+			bool get_index = false;
 				
-				for (int k = 0; k < model->cut_loop->at(outer_loop.at(j)).connect_edge.size(); k += 1){
-					edge temp = all_edge.at(model->cut_loop->at(outer_loop.at(j)).connect_edge.at(k));
-					if (find(outer_loop.begin(), outer_loop.end(), temp.index[0]) - outer_loop.begin() >= outer_loop.size()){
-						get_index = true;
-						break;
-					}
-					if (find(outer_loop.begin(), outer_loop.end(), temp.index[1]) - outer_loop.begin() >= outer_loop.size()){
-						get_index = true;
-						break;
-					}
+			for (int k = 0; k < model->cut_loop->at(outer_loop.at(j)).connect_edge.size(); k += 1){
+				edge temp = all_edge.at(model->cut_loop->at(outer_loop.at(j)).connect_edge.at(k));
+				if (find(outer_loop.begin(), outer_loop.end(), temp.index[0]) - outer_loop.begin() >= outer_loop.size()){
+					get_index = true;
+					break;
 				}
-				if (get_index){
-					outer_start_index = outer_loop.at(j);
-					outer_get_start = true;
-					continue;
-				}
-			}
-			else{
-				bool get_index = false;
-				for (int k = 0; k < model->cut_loop->at(outer_loop.at(j)).connect_edge.size(); k += 1){
-					edge temp = all_edge.at(model->cut_loop->at(outer_loop.at(j)).connect_edge.at(k));
-					if (find(outer_loop.begin(), outer_loop.end(), temp.index[0]) - outer_loop.begin() >= outer_loop.size()){
-						get_index = true;
-						break;
-					}
-					if (find(outer_loop.begin(), outer_loop.end(), temp.index[1]) - outer_loop.begin() >= outer_loop.size()){
-						get_index = true;
-						break;
-					}
-				}
-				if (get_index){
-					outer_end_index = outer_loop.at(j);
+				if (find(outer_loop.begin(), outer_loop.end(), temp.index[1]) - outer_loop.begin() >= outer_loop.size()){
+					get_index = true;
 					break;
 				}
 			}
+			if (get_index){
+				outer_start_index = outer_loop.at(j);
+				outer_get_start = true;
+				break;
+			}
 		}
-		/*cout << "start " << outer_start_index << endl;
-		cout << "end " << outer_end_index << endl;*/
+		//cout << "start " << outer_start_index << endl;
+		//cout << "end " << outer_end_index << endl;
 
 		std::vector<int> final_outer;
 		int outer_next = outer_start_index;
-		int outer_pre = -1;
 		final_outer.push_back(outer_next);
 
-		while (outer_next != outer_end_index){
+		int outer_loop_start_index = find(outer_loop.begin(), outer_loop.end(), outer_next) - outer_loop.begin();
+		outer_loop.erase(outer_loop.begin() + outer_loop_start_index);
+
+		while (true){
+			bool end_time = true;
+
 			for (int j = 0; j < model->cut_loop->at(outer_next).connect_edge.size(); j += 1){
 				edge temp = all_edge.at(model->cut_loop->at(outer_next).connect_edge.at(j));
-				if ((temp.index[0] != outer_next) && (temp.index[0] != outer_pre) && (find(outer_loop.begin(), outer_loop.end(), temp.index[0]) - outer_loop.begin() < outer_loop.size())){
-					outer_pre = outer_next;
+				if ((temp.index[0] != outer_next) && (find(outer_loop.begin(), outer_loop.end(), temp.index[0]) - outer_loop.begin() < outer_loop.size())){
 					outer_next = temp.index[0];
 					final_outer.push_back(outer_next);
+					
+					int index = find(outer_loop.begin(), outer_loop.end(), temp.index[0]) - outer_loop.begin();
+					outer_loop.erase(outer_loop.begin() + index);
+
+					end_time = false;
 					break;
 				}
-				if ((temp.index[1] != outer_next) && (temp.index[1] != outer_pre) && (find(outer_loop.begin(), outer_loop.end(), temp.index[1]) - outer_loop.begin() < outer_loop.size())){
-					outer_pre = outer_next;
+				if ((temp.index[1] != outer_next) && (find(outer_loop.begin(), outer_loop.end(), temp.index[1]) - outer_loop.begin() < outer_loop.size())){
 					outer_next = temp.index[1];
 					final_outer.push_back(outer_next);
+
+					int index = find(outer_loop.begin(), outer_loop.end(), temp.index[1]) - outer_loop.begin();
+					outer_loop.erase(outer_loop.begin() + index);
+
+					end_time = false;
 					break;
 				}
 			}
+
+			if (end_time)
+				break;
 		}
 
 		/*cout << "final_outer : ";
@@ -1936,11 +1977,18 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 		for (int j = 0; j < inner_index.size(); j += 1){
 			if (find(model->cut_loop->at(inner_index.at(j)).align_plane.begin(), model->cut_loop->at(inner_index.at(j)).align_plane.end(), i) - model->cut_loop->at(inner_index.at(j)).align_plane.begin() < model->cut_loop->at(inner_index.at(j)).align_plane.size()){
 				inner_loop.push_back(inner_index.at(j));
-				/*cout << inner_index.at(j) << " ( ";
-				for (int k = 0; k < model->cut_loop->at(inner_index.at(j)).align_plane.size(); k += 1){
-					cout << model->cut_loop->at(inner_index.at(j)).align_plane.at(k) << " ";
-				}
-				cout << ") ";*/
+				//cout << inner_index.at(j) << " ( ";
+				//for (int k = 0; k < model->cut_loop->at(inner_index.at(j)).align_plane.size(); k += 1){
+				//	cout << model->cut_loop->at(inner_index.at(j)).align_plane.at(k) << " ";
+				//}
+				////cout << ") ";
+				//cout << ") " << endl;
+
+				//cout << "\t" << inner_index.at(j) << " ( ";
+				//for (int k = 0; k < model->cut_loop->at(inner_index.at(j)).connect_edge.size(); k += 1){
+				//cout << model->cut_loop->at(inner_index.at(j)).connect_edge.at(k) << " ";
+				//}
+				//cout << ") " << endl;
 			}
 		}
 		//cout << endl;
@@ -1955,69 +2003,64 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 		bool inner_get_start = false;
 
 		for (int j = 0; j < inner_loop.size(); j += 1){
-			if (!inner_get_start){
-				bool get_index = false;
+			bool get_index = false;
 
-				for (int k = 0; k < model->cut_loop->at(inner_loop.at(j)).connect_edge.size(); k += 1){
-					edge temp = all_edge.at(model->cut_loop->at(inner_loop.at(j)).connect_edge.at(k));
-					if (find(inner_loop.begin(), inner_loop.end(), temp.index[0]) - inner_loop.begin() >= inner_loop.size()){
-						get_index = true;
-						break;
-					}
-					if (find(inner_loop.begin(), inner_loop.end(), temp.index[1]) - inner_loop.begin() >= inner_loop.size()){
-						get_index = true;
-						break;
-					}
+			for (int k = 0; k < model->cut_loop->at(inner_loop.at(j)).connect_edge.size(); k += 1){
+				edge temp = all_edge.at(model->cut_loop->at(inner_loop.at(j)).connect_edge.at(k));
+				if (find(inner_loop.begin(), inner_loop.end(), temp.index[0]) - inner_loop.begin() >= inner_loop.size()){
+					get_index = true;
+					break;
 				}
-				if (get_index){
-					inner_start_index = inner_loop.at(j);
-					inner_get_start = true;
-					continue;
-				}
-			}
-			else{
-				bool get_index = false;
-				for (int k = 0; k < model->cut_loop->at(inner_loop.at(j)).connect_edge.size(); k += 1){
-					edge temp = all_edge.at(model->cut_loop->at(inner_loop.at(j)).connect_edge.at(k));
-					if (find(inner_loop.begin(), inner_loop.end(), temp.index[0]) - inner_loop.begin() >= inner_loop.size()){
-						get_index = true;
-						break;
-					}
-					if (find(inner_loop.begin(), inner_loop.end(), temp.index[1]) - inner_loop.begin() >= inner_loop.size()){
-						get_index = true;
-						break;
-					}
-				}
-				if (get_index){
-					inner_end_index = inner_loop.at(j);
+				if (find(inner_loop.begin(), inner_loop.end(), temp.index[1]) - inner_loop.begin() >= inner_loop.size()){
+					get_index = true;
 					break;
 				}
 			}
+			if (get_index){
+				inner_start_index = inner_loop.at(j);
+				inner_get_start = true;
+				break;
+			}
 		}
-		/*cout << "start " << inner_start_index << endl;
-		cout << "end " << inner_end_index << endl;*/
+		//cout << "start " << inner_start_index << endl;
+		//cout << "end " << inner_end_index << endl;
 
 		std::vector<int> final_inner;
 		int inner_next = inner_start_index;
-		int inner_pre = -1;
 		final_inner.push_back(inner_next);
 
-		while (inner_next != inner_end_index){
+		int inner_loop_start_index = find(inner_loop.begin(), inner_loop.end(), inner_next) - inner_loop.begin();
+		inner_loop.erase(inner_loop.begin() + inner_loop_start_index);
+
+		while (true){
+			bool end_time = true;
+
 			for (int j = 0; j < model->cut_loop->at(inner_next).connect_edge.size(); j += 1){
 				edge temp = all_edge.at(model->cut_loop->at(inner_next).connect_edge.at(j));
-				if ((temp.index[0] != inner_next) && (temp.index[0] != inner_pre) && (find(inner_loop.begin(), inner_loop.end(), temp.index[0]) - inner_loop.begin() < inner_loop.size())){
-					inner_pre = inner_next;
+				if ((temp.index[0] != inner_next) && (find(inner_loop.begin(), inner_loop.end(), temp.index[0]) - inner_loop.begin() < inner_loop.size())){
 					inner_next = temp.index[0];
-					final_inner.push_back(inner_next);					
+					final_inner.push_back(inner_next);
+
+					int index = find(inner_loop.begin(), inner_loop.end(), temp.index[0]) - inner_loop.begin();
+					inner_loop.erase(inner_loop.begin() + index);
+
+					end_time = false;
 					break;
 				}
-				if ((temp.index[1] != inner_next) && (temp.index[1] != inner_pre) && (find(inner_loop.begin(), inner_loop.end(), temp.index[1]) - inner_loop.begin() < inner_loop.size())){
-					inner_pre = inner_next;
+				if ((temp.index[1] != inner_next) && (find(inner_loop.begin(), inner_loop.end(), temp.index[1]) - inner_loop.begin() < inner_loop.size())){
 					inner_next = temp.index[1];
 					final_inner.push_back(inner_next);
+
+					int index = find(inner_loop.begin(), inner_loop.end(), temp.index[1]) - inner_loop.begin();
+					inner_loop.erase(inner_loop.begin() + index);
+
+					end_time = false;
 					break;
 				}
 			}
+
+			if (end_time)
+				break;
 		}
 
 		/*cout << "final_inner : ";
@@ -2027,49 +2070,7 @@ void find_shell_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<p
 		cout << endl;*/
 
 		//combine
-
-		bool inverse = false;
-		vec3 outer_last = vec3(model->vertices->at(3 * final_outer.at(final_outer.size() - 1) + 0), model->vertices->at(3 * final_outer.at(final_outer.size() - 1) + 1), model->vertices->at(3 * final_outer.at(final_outer.size() - 1) + 2));
-		vec3 inner_first = vec3(model->vertices->at(3 * final_inner.at(0) + 0), model->vertices->at(3 * final_inner.at(0) + 1), model->vertices->at(3 * final_inner.at(0) + 2));
-		vec3 inner_last = vec3(model->vertices->at(3 * final_inner.at(final_inner.size() - 1) + 0), model->vertices->at(3 * final_inner.at(final_inner.size() - 1) + 1), model->vertices->at(3 * final_inner.at(final_inner.size() - 1) + 2));
-
-		float ol_if, ol_il;
-		ol_if = (outer_last - inner_first).length();
-		ol_il = (outer_last - inner_last).length();
-
-		if (ol_if > ol_il)
-			inverse = true;
-		//cout << inverse << endl;
-
-		std::vector<int> final_loop;
-		for (int j = 0; j < final_outer.size(); j += 1){
-			final_loop.push_back(final_outer.at(j));
-		}
-
-		if (!inverse){
-			for (int j = 0; j < final_inner.size(); j += 1){
-				final_loop.push_back(final_inner.at(j));
-			}
-		}
-		else{
-			for (int j = final_inner.size() - 1; j >= 0; j -= 1){
-				final_loop.push_back(final_inner.at(j));
-			}
-		}
-
-		Loop temp;
-		temp.loop_line = new std::vector<int>();
-
-		//cout << "final : " << endl;
-		for (int j = 0; j < final_loop.size(); j += 1){
-			//cout << final_loop.at(j) << " ";
-			temp.loop_line->push_back(final_loop.at(j));
-		}
-		//cout << endl;
-
-		temp.plane_normal = vec3(planes.at(i).plane_par[0], planes.at(i).plane_par[1], planes.at(i).plane_par[2]);
-
-		model->loop->push_back(temp);
+		combine_loop(model, planes.at(i), final_outer, final_inner);
 	}
 }
 
@@ -2147,6 +2148,10 @@ void process_piece(GLMmodel &temp_piece, GLMmodel *model, std::vector<int> &face
     }	
 
 	temp_piece.loop = new std::vector<Loop>();
+
+	temp_piece.facetnorms = new std::vector<GLfloat>();
+
+	//temp_piece.facetnorms = new std::vector<GLfloat>();
 	/*if (model->loop->size() > 0){
 		temp_piece.loop = new std::vector<Loop>(model->loop->size());
 	}

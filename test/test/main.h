@@ -35,7 +35,7 @@ char model_source[] = "test_model/MAOI.obj";
 char shell_source[] = "test_model/MAOI_voxel_shell.obj";
 //char model_source[] = "test_model/use/material 11.obj";
 //char model_source[] = "test_model/out/material 11-fill.obj";
-//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head fake_head-2times MAOI MAOI_inner
+//cube bunny alduin TestBall TestBall2 kitten dolphin Column4 ateneav0525 sphere mrhumpty5Std triceratops head head_2times fake_head fake_head-2times MAOI MAOI_inner pig squirrel
 char model_out[] = "test_model/out/out_p.obj";
 
 int width, height;
@@ -134,15 +134,14 @@ bool show_piece = true;
 //plane test_plane7(-0.837661, -0.521881, 0.161134, 67.0868, -1);
 //plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
-plane test_plane1(-0.022476, -0.0117056, -0.999679, -3.08041, 1);
-plane test_plane2(0.633686, -4.82627e-008, 0.773591, -0.361492, -1);
-plane test_plane3(-0.0406662, -0.75734, -0.651753, -109.665, 1);
-plane test_plane4(0.0727703, -0.995197, -0.0654711, -152.061, 1);
-plane test_plane5(0.99102, -0.0359693, -0.128781, 4.73747, -1);
+plane test_plane1(0.971321, -0.022611, 0.236696, 16.8208, 1);
+plane test_plane2(0.366832, -0.885438, -0.285367, -167.353, -1);
+plane test_plane3(-0.7604, 0.302845, 0.574523, 85.8434, 1);
+plane test_plane4(-0.0406662, -0.75734, -0.651753, -109.665, -1);
+plane test_plane5(0, 0, 1, 0, 1);
 plane test_plane6(0.0213449, 0.0118793, -0.999702, 4.05133, -1);
-plane test_plane7(0.916365, -0.365211, -0.135677, -139.37, -1);
-plane test_plane8(-0.285818, 0.935506, -0.206426, 163.572, 1);
-plane test_plane9(0.0, 1.0, 0.0, 230.0, -1);
+plane test_plane7(-0.971321, 0.022611, -0.236696, -16.8208, 1);
+plane test_plane8(0.0, 1.0, 0.0, 230.0, -1);
 
 std::vector<plane> planes;
 
