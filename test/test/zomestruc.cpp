@@ -1366,7 +1366,7 @@ int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect,
 
 	for (int x = 0; x < 3; x += 1){
 		#pragma omp parallel for
-		for (int a = 0; a < 62; a += 1){
+		for (int a = 0; a < 29; a += 1){
 			#pragma omp parallel for
 			for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 

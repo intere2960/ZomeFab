@@ -700,7 +700,7 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 			if (k / 4 == 1)
 				dz = 5;
 
-			vec3 ball_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * NODE_DIAMETER / 2.0;
+			vec3 ball_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * NODE_DIAMETER;
 
 			int test_coord[3];
 			vec3 test_p[3];
@@ -833,27 +833,41 @@ void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &b
 
 	#pragma omp parallel for
 	for (int i = 0; i < model->numtriangles; i += 1){
-		vec3 ball_error = vec3(0.0f, 0.0f, 0.0f);
+		#pragma omp parallel for
+		for (int k = 0; k < 8; k += 1){
+			int dx = 0;
+			int dy = 2;
+			int dz = 4;
 
-		int test_coord[4];
-		vec3 test_p[4];
-		for (int j = 0; j < 3; j += 1){
-			test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
-			test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
-			if (all_voxel.at(test_coord[j]).show)
-				all_voxel.at(test_coord[j]).show = false;
+			if (k % 2 == 1)
+				dx = 1;
+			if ((k / 2) % 2 == 1)
+				dy = 3;
+			if (k / 4 == 1)
+				dz = 5;
+
+			vec3 ball_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * ERROR_THICKNESS;
+
+			int test_coord[4];
+			vec3 test_p[4];
+			for (int j = 0; j < 3; j += 1){
+				test_p[j] = vec3(model->vertices->at(3 * model->triangles->at(i).vindices[j] + 0), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 1), model->vertices->at(3 * model->triangles->at(i).vindices[j] + 2));
+				test_coord[j] = search_coord(all_voxel, 0, all_voxel.size(), test_p[j], 0, ball_error);
+				if (all_voxel.at(test_coord[j]).show)
+					all_voxel.at(test_coord[j]).show = false;
+			}
+
+			test_p[3] = (test_p[0] + test_p[1] + test_p[2]) / 3.0f;
+			test_coord[3] = search_coord(all_voxel, 0, all_voxel.size(), test_p[3], 0, ball_error);
+
+			cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
+			cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2], ball_error);
+			cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0], ball_error);
+
+			cross_edge(all_voxel, test_p[0], test_p[3], test_coord[0], test_coord[3], ball_error);
+			cross_edge(all_voxel, test_p[1], test_p[3], test_coord[1], test_coord[3], ball_error);
+			cross_edge(all_voxel, test_p[2], test_p[3], test_coord[2], test_coord[3], ball_error);
 		}
-
-		test_p[3] = (test_p[0] + test_p[1] + test_p[2]) / 3.0f;
-		test_coord[3] = search_coord(all_voxel, 0, all_voxel.size(), test_p[3], 0, ball_error);
-
-		cross_edge(all_voxel, test_p[0], test_p[1], test_coord[0], test_coord[1], ball_error);
-		cross_edge(all_voxel, test_p[1], test_p[2], test_coord[1], test_coord[2], ball_error);
-		cross_edge(all_voxel, test_p[2], test_p[0], test_coord[2], test_coord[0], ball_error);
-
-		cross_edge(all_voxel, test_p[0], test_p[3], test_coord[0], test_coord[3], ball_error);
-		cross_edge(all_voxel, test_p[1], test_p[3], test_coord[1], test_coord[3], ball_error);
-		cross_edge(all_voxel, test_p[2], test_p[3], test_coord[2], test_coord[3], ball_error);
 	}
 
 	bool *use = new bool[all_voxel.size()];

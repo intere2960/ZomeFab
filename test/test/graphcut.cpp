@@ -29,6 +29,9 @@ double AverageRadius(GLMmodel *model, vec3 &centroid)
 }
 
 #include <fstream>
+#include <iostream>
+
+using namespace std;
 
 void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, float color_material[20][3], std::vector<std::vector<int>>& vertex_color)
 {
@@ -74,8 +77,9 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 		vec3 now_g = (p1 + p2 + p3) / 3.0f;
 
 		for (int j = 0; j < 3; j += 1){
-			if (!nhd->Adjacent(model->triangles->at(i).near_tri[j], i))
+			if (!nhd->Adjacent(model->triangles->at(i).near_tri[j], i) && model->triangles->at(i).near_tri[j] != -1)
 			{
+				//cout << model->triangles->at(i).near_tri[j] << endl;
 				vec3 judge_n = vec3(model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 0), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 1), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 2));
 				vec3 judge_p1 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 2));
 				vec3 judge_p2 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 2));
@@ -239,10 +243,11 @@ bool cut_plane_error(GLMmodel *model, std::vector<vec2> &partition_plane, std::v
 		plane now_plane = plane_queue.at(partition_plane.at(i)[0]).split_plane;
 		for (int j = 0; j < material_point.size(); j += 1){
 			vec3 now_point(model->vertices->at(3 * material_point.at(j) + 0), model->vertices->at(3 * material_point.at(j) + 1), model->vertices->at(3 * material_point.at(j) + 2));
+			//cout << i << " " << material_point.at(j) << " ";
 			int dir = plane_dir_point(now_point, now_plane);
-			if (dir == -1.0f * partition_plane.at(i)[1]){
+			if (dir == -1.0f * partition_plane.at(i)[1] && dir != 0){
 				ans = true;
-				//cout << i << " " << material_point.at(j) << endl;
+				//cout << i << " " << material_point.at(j) << " " << dir << endl;
 				
 				error_info.push_back(vec2(i, material_point.at(j)));
 			}
@@ -256,13 +261,14 @@ void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plan
 {
 	std::vector<vec2> connect_info;
 	
-	//cout << "all : ";
+	cout << "all : ";
 	for (int i = 0; i < partition_plane.at(piece_id).size(); i += 1){
-		//cout << partition_plane.at(piece_id).at(i)[0] << " ";
-		//cout << plane_queue.at(partition_plane.at(i)[0]).use_vertex[0] << " " << plane_queue.at(partition_plane.at(i)[0]).use_vertex[1] << endl;
+		cout << partition_plane.at(piece_id).at(i)[0] << " ";
+		cout << plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[0] << " " << plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[1] << endl;
 		connect_info.push_back(vec2(plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[0], plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[1]));
 	}
-	//cout << endl;
+	cout << endl;
+	//cout << "size : " << connect_info.size() << endl;
 
 	std::vector<int> point_loop;
 	int loop_pre_index = -1;
@@ -271,6 +277,7 @@ void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plan
 	point_loop.push_back(loop_next_index);
 
 	while (loop_next_index != loop_end_index){
+		//cout << "hello1" << endl;
 		for (int i = 1; i < connect_info.size(); i += 1){
 			if (connect_info.at(i)[0] == loop_next_index){
 				if (connect_info.at(i)[1] != loop_pre_index){
@@ -324,6 +331,8 @@ void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plan
 		cout << endl;*/
 	if (plane_error.at(min_error).size() != 0){
 		for (int j = 0; j < 2; j += 1){
+			//cout << "hello2" << endl;
+
 			int start_point = plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[j];
 			std::vector<bool> choose(point_loop.size());
 			for (int k = 0; k < choose.size(); k += 1){
@@ -467,7 +476,7 @@ void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plan
 						cut_plane_error(model, error_piece, plane_queue, error_point, error_info_error);
 						cut_plane_error(model, normal_piece, plane_queue, normal_point, error_info_normal);
 
-						if ((error_info_error.size() <= 1) && (error_info_normal.size() <= 1)){
+						if ((error_info_error.size() <= error_point.size() - 3) && (error_info_normal.size() <= normal_point.size() - 3)){
 							partition_plane.push_back(error_piece);
 							partition_plane.push_back(normal_piece);
 
@@ -475,10 +484,12 @@ void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plan
 							material_point.push_back(normal_point);
 
 							done = true;
+							cout << "yaya" << endl;
 							break;
 						}
 						else{
 							plane_queue.erase(plane_queue.begin() + plane_queue.size() - 1);
+							cout << "fuck" << endl;
 						}
 					}
 				}					
