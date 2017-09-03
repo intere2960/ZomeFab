@@ -479,6 +479,130 @@ void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::st
 	os.close();
 }
 
+void output_zometool_color(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, int color)
+{
+	std::ofstream os(filename);
+	GLMmodel *z_b, *b_s, *b_m, *b_l, *r_s, *r_m, *r_l, *y_s, *y_m, *y_l;
+	z_b = glmReadOBJ("test_model/zometool/zomeball.obj");
+	b_s = glmReadOBJ("test_model/zometool/BlueS.obj");
+	b_m = glmReadOBJ("test_model/zometool/BlueM.obj");
+	b_l = glmReadOBJ("test_model/zometool/BlueL.obj");
+	r_s = glmReadOBJ("test_model/zometool/RedS.obj");
+	r_m = glmReadOBJ("test_model/zometool/RedM.obj");
+	r_l = glmReadOBJ("test_model/zometool/RedL.obj");
+	y_s = glmReadOBJ("test_model/zometool/YellowS.obj");
+	y_m = glmReadOBJ("test_model/zometool/YellowM.obj");
+	y_l = glmReadOBJ("test_model/zometool/YellowL.obj");
+
+	std::vector<std::vector<vec3>> face_index(4);
+
+	os << "mtllib color.mtl" << std::endl;
+
+	int num_v = 0;
+	for (unsigned int i = 0; i < output_connect.size(); i += 1){
+		if (i == color){
+			for (unsigned int j = 0; j < output_connect.at(i).size(); j += 1){
+				if (output_connect.at(i).at(j).exist){
+					GLMmodel *temp_model = NULL;
+					if (i == COLOR_WHITE){
+						temp_model = glmCopy(z_b);
+						glmR(temp_model, vec3(0.0, 0.0, 0.0));
+						glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
+					}
+					else{
+						zomedir t;
+						if (i == COLOR_BLUE){
+							if (output_connect.at(i).at(j).size == SIZE_S){
+								temp_model = glmCopy(b_s);
+							}
+							else if (output_connect.at(i).at(j).size == SIZE_M){
+								temp_model = glmCopy(b_m);
+							}
+							else{
+								temp_model = glmCopy(b_l);
+							}
+						}
+						else if (i == COLOR_RED){
+							if (output_connect.at(i).at(j).size == SIZE_S){
+								temp_model = glmCopy(r_s);
+							}
+							else if (output_connect.at(i).at(j).size == SIZE_M){
+								temp_model = glmCopy(r_m);
+							}
+							else{
+								temp_model = glmCopy(r_l);
+							}
+						}
+						else {
+							if (output_connect.at(i).at(j).size == SIZE_S){
+								temp_model = glmCopy(y_s);
+							}
+							else if (output_connect.at(i).at(j).size == SIZE_M){
+								temp_model = glmCopy(y_m);
+							}
+							else{
+								temp_model = glmCopy(y_l);
+							}
+						}
+
+						glmRT(temp_model, vec3(0.0, t.roll(output_connect.at(i).at(j).fromface), 0.0), vec3(0.0, 0.0, 0.0));
+						glmRT(temp_model, vec3(0.0, t.phi(output_connect.at(i).at(j).fromface), t.theta(output_connect.at(i).at(j).fromface)), vec3(0.0, 0.0, 0.0));
+						glmR(temp_model, vec3(0.0, 0.0, 0.0));
+						glmRT(temp_model, vec3(0.0, 0.0, 0.0), output_connect.at(i).at(j).position);
+					}
+
+					for (unsigned int k = 1; k <= temp_model->numvertices; k += 1){
+						os << "v " << temp_model->vertices->at(3 * k + 0) << " " << temp_model->vertices->at(3 * k + 1) << " " << temp_model->vertices->at(3 * k + 2) << std::endl;
+					}
+
+					for (unsigned int k = 0; k < temp_model->numtriangles; k += 1){
+						vec3 temp_t((float)temp_model->triangles->at(k).vindices[0] + num_v, (float)temp_model->triangles->at(k).vindices[1] + num_v, (float)temp_model->triangles->at(k).vindices[2] + num_v);
+						face_index.at(i).push_back(temp_t);
+					}
+					num_v += temp_model->numvertices;
+				}
+			}
+		}
+	}
+
+	os << std::endl;
+
+	//cout << z_b->numtriangles << endl;
+	for (unsigned int i = 0; i < output_connect.size(); i += 1){
+		if (i == color){
+			if (i == COLOR_WHITE){
+				//cout << face_index.at(i).size() << endl;
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					if ((j % z_b->numtriangles) == 0){
+						if (!output_connect.at(i).at(j / z_b->numtriangles).outer)
+							os << "usemtl white" << std::endl;
+						else if (output_connect.at(i).at(j / z_b->numtriangles).outer)
+							os << "usemtl white" << std::endl;
+					}
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+				}
+			}
+			else{
+				if (i == COLOR_BLUE){
+					os << "usemtl blue" << std::endl;
+				}
+				else if (i == COLOR_RED){
+					os << "usemtl red" << std::endl;
+				}
+				else {
+					os << "usemtl yellow" << std::endl;
+				}
+
+				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
+					os << "f " << face_index.at(i).at(j)[0] << " " << face_index.at(i).at(j)[1] << " " << face_index.at(i).at(j)[2] << std::endl;
+				}
+			}
+		}
+	}
+
+	os.close();
+}
+
 void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename, int mode)
 {
 	std::ofstream os(filename);

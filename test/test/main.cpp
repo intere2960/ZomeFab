@@ -100,9 +100,9 @@ void init()
 
 	glmFacetNormals(myObj);
 
-	myObj_inner = glmReadOBJ(shell_source);
+	/*myObj_inner = glmReadOBJ(shell_source);
 	glmFacetNormals(myObj_inner);
-	combine_inner_outfit(myObj, myObj_inner);
+	combine_inner_outfit(myObj, myObj_inner);*/
 
 	//collect_edge(myObj, all_edge);
 
@@ -118,36 +118,64 @@ void init()
 	collect_edge(myObj, all_edge);
 	cout << all_edge.size() << endl;
 
-	planes.push_back(test_plane1);
-	planes.push_back(test_plane2);
-	planes.push_back(test_plane3);
-	planes.push_back(test_plane4);
-	planes.push_back(test_plane5); //dir_plane
-	//planes.push_back(test_plane6); //dir_plane
-	//planes.push_back(test_plane7); //dir_plane
-	//planes.push_back(test_plane8); //dir_plane
-	//planes.push_back(test_plane9); //dir_plane
+	//planes.push_back(test_plane1);
+	//planes.push_back(test_plane2);
+	//planes.push_back(test_plane3);
+	//planes.push_back(test_plane4);
+	//planes.push_back(test_plane5); //dir_plane
+	////planes.push_back(test_plane6); //dir_plane
+	////planes.push_back(test_plane7); //dir_plane
+	////planes.push_back(test_plane8); //dir_plane
+	////planes.push_back(test_plane9); //dir_plane
 
-	cut_intersection(myObj, planes, face_split_by_plane, false);
+	//cut_intersection(myObj, planes, face_split_by_plane, false);
 
-	split_face(myObj, all_edge, face_split_by_plane, planes);
-	
-	process_piece(temp_piece, myObj, face_split_by_plane);
+	//split_face(myObj, all_edge, face_split_by_plane, planes);
+	//
+
+	plane_parser(all_planes);
+
+	/*for (unsigned int i = 0; i < all_planes.size(); i += 1){
+	cout << i << " : " << endl;
+	for (unsigned int j = 0; j < all_planes.at(i).size(); j += 1){
+	cout << all_planes.at(i).at(j).plane_par[0] << all_planes.at(i).at(j).plane_par[0] << " " << all_planes.at(i).at(j).plane_par[1] << " " << all_planes.at(i).at(j).plane_par[2] << " " << all_planes.at(i).at(j).plane_par[3] << " " << all_planes.at(i).at(j).dir << endl;
+	}
+	cout << endl;
+	}*/
+
+	for (unsigned int i = 0; i < all_planes.size(); i += 1){
+		std::vector<int> temp_face_split_by_plane;
+		cut_intersection(myObj, all_planes.at(i), temp_face_split_by_plane, false);
+		split_face(myObj, all_edge, temp_face_split_by_plane, all_planes.at(i));
+	}
+
+	std::vector<std::vector<int>> pieces_face(all_planes.size());
+	for (unsigned int i = 0; i < all_planes.size(); i += 1){
+		cut_intersection(myObj, all_planes.at(i), pieces_face.at(i), false);
+		//GLMmodel piece;
+		//process_piece(piece, myObj, pieces_face.at(i));
+		//cout << pieces_face.at(i).size() << endl;
+		
+		//string file_name = "test_model/out/piece" + to_string(i) + ".obj";
+		//glmWriteOBJ(&piece, my_strdup(file_name.c_str()), GLM_NONE);
+	}
+
+	//process_piece(temp_piece, myObj, face_split_by_plane);
 			
-	std::vector<edge> fill_edge;
+	/*std::vector<edge> fill_edge;
 	collect_edge(&temp_piece, fill_edge);
 
-	find_shell_loop(&temp_piece, fill_edge, planes);
+	find_shell_loop(&temp_piece, fill_edge, planes);*/
 
-	/*glmFacetNormals(&temp_piece);
-	recount_normal(&temp_piece);
-	vec4 aaa = easy_plane(&temp_piece, 7743, 4460);
+	///*glmFacetNormals(&temp_piece);
+	//recount_normal(&temp_piece);
+	//vec4 aaa = easy_plane(&temp_piece, 7743, 4460);
 
-	cout << aaa[0] << ", " << aaa[1] << ", " << aaa[2] << ", " << aaa[3] << endl;*/
+	//cout << aaa[0] << ", " << aaa[1] << ", " << aaa[2] << ", " << aaa[3] << endl;*/
 
-	fill_hole(temp_piece, true);
+	//fill_hole(temp_piece, true);
 
-	glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
+	//glmWriteOBJ(&temp_piece, model_out, GLM_NONE);
 	//glmWriteOBJ(myObj, "test_model/out/out_p123.obj", GLM_NONE);
 	//glmWriteOBJ(myObj, model_out, GLM_NONE);
 }
@@ -447,12 +475,259 @@ float decrease_t(int iteration)
 	return pow(0.99f, (float)num);
 }
 
+void fuck_plane()
+{
+	vec3 o_n(0.191172, -0.966777, -0.169691);
+	vec3 o_p1(28.208, -15.109, 58.923);
+	vec3 o_p2(-85.516, -47.748, 116.760);
+	vec3 p1(28.208, -15.109, 58.923);
+	vec3 p2(-88.041, -41.958, 116.376);
+
+	vec3 v1 = (o_p2 - o_p1).normalize();
+	vec3 v2 = (p2 - p1).normalize();
+
+	vec3 cross = v1 ^ v2;
+	float degree = acos(v1 * v2);
+
+	cout << cross[0] << " " << cross[1] << " " << cross[2] << endl;
+	cout << degree << endl;
+	vec3 n = (rotation3Drad(cross, degree) * o_n).normalize();
+	cout << n[0] << ", " << n[1] << ", " << n[2] << ", " << n * p1 << endl;
+	cout << n[0] << ", " << n[1] << ", " << n[2] << ", " << n * p2 << endl;
+	cout << v1 * o_n << endl;
+}
+
+void out_obb(vec3 &obb_scale, vec3 &obb_center, vec3 &obb_angle)
+{
+	GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
+	glmScale_x(cube, obb_scale[0] / 2);
+	glmScale_y(cube, obb_scale[1] / 2);
+	glmScale_z(cube, obb_scale[2] / 2);
+	glmT(cube, obb_center);
+	glmR(cube, obb_angle);
+	glmWriteOBJ(cube, "obb_origin.obj", GLM_NONE);
+}
+
+void fake_sailency()
+{
+	ifstream is("meshSaliney_mean.txt");
+	std::vector<float> temp_sailency(1);
+	for (int i = 0; i < myObj->numvertices; i += 1){
+		float temp;
+		is >> temp;
+		temp_sailency.push_back(temp);
+	}
+	is.close();
+
+	ifstream is1("nose_mouse.txt");
+	string aaa;
+	string bbb;
+	int a, b, c;
+
+	int count = 0;
+	vector<int> tag;
+	bool record = true;
+
+	for (int i = 0; i < 58269; i += 1){
+		is1 >> aaa;
+		if (aaa == string("usemtl")){
+			is1 >> bbb;
+
+			if (bbb == string("initialShadingGroup")){
+				if (count == 0){
+					record = false;
+				}
+				else{
+					record = !record;
+				}
+			}
+			else{
+				record = true;
+			}
+
+			//cout << aaa << " " << bbb << endl;
+		}
+		else{
+			is1 >> a >> b >> c;
+						
+			if (record){
+				tag.push_back(count);
+				temp_sailency.at(a) = 1.0;
+				temp_sailency.at(b) = 1.0;
+				temp_sailency.at(c) = 1.0;
+			}
+
+			count += 1;
+
+			//cout << aaa << " " << a << " " << b << " " << c << endl;
+		}
+	}
+	is.close();
+
+	ofstream os("meshSaliney_mean_fake_2.txt");
+	for (int i = 1; i <= myObj->numvertices; i += 1){
+		os << temp_sailency.at(i) << endl;
+	}
+	os.close();
+
+	//ofstream os("nose_tag.txt");
+	//for (unsigned int i = 0; i < tag.size(); i += 1){
+	//	//cout << tag.at(i) << endl;
+	//	os << tag.at(i) << endl;
+	//}
+	//os.close();
+
+	ifstream is2("MAOI_saliney.txt");
+	for (int i = 0; i < myObj->numtriangles; i += 1){
+		float temp;
+		is2 >> temp;
+		myObj->triangles->at(i).sailency = temp;
+	}
+	is2.close();
+
+	for (unsigned int i = 0; i < tag.size(); i += 1){
+		myObj->triangles->at(tag.at(i)).sailency = 1.0;
+	}
+
+	ofstream os2("MAOI_saliney_fake_2.txt");
+	for (int i = 0; i < myObj->numtriangles; i += 1){
+		os2 << myObj->triangles->at(i).sailency << endl;
+	}
+	os2.close();
+}
+
+void sailency_texture()
+{
+	ifstream is("meshSaliney_mean_fake_2.txt");
+	std::vector<float> temp_sailency(1);
+	for (int i = 0; i < myObj->numvertices; i += 1){
+		float temp;
+		is >> temp;
+		temp_sailency.push_back(temp);
+	}
+	is.close();
+
+	std::vector<simple_material> materials;
+	std::vector<vec3> material_queue;
+
+	for (int i = 1; i <= myObj->numvertices; i += 1){
+		vec2 test(i, temp_sailency.at(i));
+		material_queue.push_back(test);
+	}
+
+	std::sort(material_queue.begin(),
+		material_queue.end(),
+		[](vec2 a, vec2 b){
+		return b[1] > a[1];
+	});
+
+	myObj->numtexcoords = myObj->numvertices;
+
+	myObj->texcoords = (GLfloat*)malloc(sizeof(GLfloat) *
+		2 * (myObj->numtexcoords + 1));
+	//myObj->texcoords = new float(2 * (myObj->numtexcoords + 1));
+
+	int num_class = 0;
+	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		if (i == 0){
+			myObj->cut_loop->at(material_queue.at(i)[0]).material_id_sailency = num_class;
+			num_class += 1;
+		}
+		else{
+			if (material_queue.at(i)[1] == material_queue.at(i - 1)[1]){
+				num_class -= 1;
+				myObj->cut_loop->at(material_queue.at(i)[0]).material_id_sailency = num_class;
+				num_class += 1;
+			}
+			else{
+				myObj->cut_loop->at(material_queue.at(i)[0]).material_id_sailency = num_class;
+				num_class += 1;
+			}
+		}
+	}
+
+	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		myObj->texcoords[2 * (int)material_queue.at(i)[0] + 0] = (float)myObj->cut_loop->at(material_queue.at(i)[0]).material_id_sailency / num_class;
+		myObj->texcoords[2 * (int)material_queue.at(i)[0] + 1] = 0.0f;
+	}
+
+	/*int t_length = 256;
+
+	ColorImage image;
+	Pixel p = { 0, 0, 0 };
+
+	image.init(t_length, t_length);
+
+	for (int i = 0; i < t_length; i += 1){
+		for (int j = 0; j < t_length; j += 1){
+
+			vec3 deleta = vec3(255.0f, 0.0f, -255.0f) / t_length;
+
+			p.R = 0.0f + deleta[0] * i;
+			p.B = 255.0f + deleta[2] * i;
+			image.writePixel(i, j, p);
+		}
+	}
+
+	image.outputPPM("sailency_texture.ppm");*/
+
+	for (unsigned int i = 0; i < myObj->numtriangles; i += 1){
+		for (int j = 0; j < 3; j += 1){
+			myObj->triangles->at(i).tindices[j] = myObj->triangles->at(i).vindices[j];
+		}
+	}
+
+	glmWriteOBJ(myObj, "sailency_texture_test_fake_2.obj", GLM_TEXTURE);
+}
+
 int main(int argc, char **argv)
 {
 	//    findzoom();
 
 	myObj = glmReadOBJ(model_source);
+
+	/*obb_center.resize(1);
+	obb_max.resize(1);
+	obb_min.resize(1);
+	obb_size.resize(1);
+	obb_angle.resize(1);
+
+	computeBestFitOBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), obb_angle.at(0), start_m);
+
+	cout << obb_center.at(0)[0] << " " << obb_center.at(0)[1] << " " << obb_center.at(0)[2] << endl;
+	cout << obb_size.at(0)[0] / 2 << " " << obb_size.at(0)[1] / 2 << " " << obb_size.at(0)[2] / 2 << endl;
+	cout << obb_angle.at(0)[0] << " " << obb_angle.at(0)[1] << " " << obb_angle.at(0)[2] << endl;
+
+	out_obb(obb_size.at(0), obb_center.at(0), obb_angle.at(0));*/
+
+	/*obb_center.resize(1);
+	obb_max.resize(1);
+	obb_min.resize(1);
+	obb_size.resize(1);
+	obb_angle.resize(1);
 	
+	obb_angle.at(0) = vec3(-1, -1, -1);
+	
+	while (obb_angle.at(0) != vec3(0.0, 0.0, 0.0)){
+		computeBestFitOBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), obb_angle.at(0), start_m);
+
+		cout << obb_center.at(0)[0] << " " << obb_center.at(0)[1] << " " << obb_center.at(0)[2] << endl;
+		cout << obb_size.at(0)[0] / 2 << " " << obb_size.at(0)[1] / 2 << " " << obb_size.at(0)[2] / 2 << endl;
+		cout << obb_angle.at(0)[0] << " " << obb_angle.at(0)[1] << " " << obb_angle.at(0)[2] << endl;
+
+		out_obb(obb_size.at(0), obb_center.at(0), obb_angle.at(0));
+
+		glmR(myObj, -obb_angle.at(0));
+	}
+
+	glmWriteOBJ(myObj, "fuck_model.obj", GLM_NONE);*/
+
+	/*computeBestFitOBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), obb_angle.at(0), start_m);
+
+	cout << obb_center.at(0)[0] << " " << obb_center.at(0)[1] << " " << obb_center.at(0)[2] << endl;
+	cout << obb_size.at(0)[0] / 2 << " " << obb_size.at(0)[1] / 2 << " " << obb_size.at(0)[2] / 2 << endl;
+	cout << obb_angle.at(0)[0] << " " << obb_angle.at(0)[1] << " " << obb_angle.at(0)[2] << endl;*/
+
 	/*glmFacetNormals(myObj);
 
 	myObj_inner = glmCopy(myObj);
@@ -478,55 +753,17 @@ int main(int argc, char **argv)
 
 	init();
 
-	struc_parser(test_connect, string("1500_1000.txt"));
+	//struc_parser(test_connect, string("1500_1000.txt"));
 
-	std::vector<std::vector<int>> solt_ball(62);
-	std::vector<std::vector<vec3>> solt_dist(62);
+	//std::vector<std::vector<int>> solt_ball(62);
+	//std::vector<std::vector<vec3>> solt_dist(62);
 
-	int solt = near_solt(&temp_piece, test_connect, solt_ball, solt_dist);
-	//cout << solt << endl;
-	generate_tenon(&temp_piece, test_connect, solt, solt_ball.at(solt), solt_dist.at(solt));
+	//int solt = near_solt(&temp_piece, test_connect, solt_ball, solt_dist);
+	////cout << solt << endl;
+	//generate_tenon(&temp_piece, test_connect, solt, solt_ball.at(solt), solt_dist.at(solt));
 	  
-	//glmFacetNormals(myObj);
-
-	//recount_normal(myObj);
-
-	///*vec4 plane2 = easy_plane(myObj, 14197, 14234);
-	//cout << plane2[0] << " " << plane2[1] << " " << plane2[2] << " " << plane2[3] << endl;
-
-	//vec4 plane3 = easy_plane(myObj, 14197, 27340);
-	//cout << plane3[0] << " " << plane3[1] << " " << plane3[2] << " " << plane3[3] << endl;
-
-	//vec4 plane1 = easy_plane(myObj, 14234, 27178);
-	//cout << plane1[0] << " " << plane1[1] << " " << plane1[2] << " " << plane1[3] << endl;
-
-	//vec4 plane4 = easy_plane(myObj, 27178, 27340);
-	//cout << plane4[0] << " " << plane4[1] << " " << plane4[2] << " " << plane4[3] << endl;	
-
-	//vec4 plane5 = easy_plane(myObj, 14197, 27178);
-	//cout << plane5[0] << " " << plane5[1] << " " << plane5[2] << " " << plane5[3] << endl;*/
-
-	//vec4 plane2 = easy_plane(myObj, 14197, 13654);
-	//cout << plane2[0] << " " << plane2[1] << " " << plane2[2] << " " << plane2[3] << endl;
-
-	//vec4 plane3 = easy_plane(myObj, 13654, 1029);
-	//cout << plane3[0] << " " << plane3[1] << " " << plane3[2] << " " << plane3[3] << endl;
-
-	//vec4 plane1 = easy_plane(myObj, 1029, 1190);
-	//cout << plane1[0] << " " << plane1[1] << " " << plane1[2] << " " << plane1[3] << endl;
-
-	//vec4 plane4 = easy_plane(myObj, 1190, 13794);
-	//cout << plane4[0] << " " << plane4[1] << " " << plane4[2] << " " << plane4[3] << endl;
-
-	//vec4 plane5 = easy_plane(myObj, 13794, 14234);
-	//cout << plane5[0] << " " << plane5[1] << " " << plane5[2] << " " << plane5[3] << endl;
-
-	//vec4 plane6 = easy_plane(myObj, 14197, 14234);
-	//cout << plane6[0] << " " << plane6[1] << " " << plane6[2] << " " << plane6[3] << endl;
-
-	//vec4 plane7 = easy_plane(myObj, 1190, 13654);
-	//cout << plane7[0] << " " << plane7[1] << " " << plane7[2] << " " << plane7[3] << endl;
-
+	//fuck_plane();
+	
 	//==================================================================
 	//(voxelization)
 	////test();
@@ -547,8 +784,8 @@ int main(int argc, char **argv)
 	////combine_zome_ztruc(zome_queue.at(1), zome_queue.at(2));
 	////combine_zome_ztruc(zome_queue.at(1), test_connect);
 
-	//output_zometool(output_ans, string("mushroom_out.obj"));
-	//output_struc(output_ans, string("mushroom_out.txt"));
+	//output_zometool(output_ans, string("fuck_model_out.obj"));
+	//output_struc(output_ans, string("fuck_model_out.txt"));
 	//===================================================================
 
 	//==================================================================
@@ -560,7 +797,7 @@ int main(int argc, char **argv)
 	//float duration;
 
 	//srand((unsigned)time(NULL));
-	//struc_parser(test_connect, string("mushroom_out.txt"));
+	//struc_parser(test_connect, string("fuck_model_out.txt"));
 
 	//////nearest_point_parser(myObj, string("1500_10000_fake_head_nearest_point-2.txt"));
 
@@ -812,24 +1049,93 @@ int main(int argc, char **argv)
 
 	//==================================================================
 	//(graph cut)
-	//myObj_inner = glmReadOBJ(shell_source);
-	//glmFacetNormals(myObj_inner);
-	//combine_inner_outfit(myObj, myObj_inner);
+	//////myObj_inner = glmReadOBJ(shell_source);
+	//////glmFacetNormals(myObj_inner);
+	//////combine_inner_outfit(myObj, myObj_inner);
+	//	
+	////float min_sailency = 100000000.0f;
+	////float max_sailency = -100000000.0f;
+
+	////ifstream is("meshSaliney_mean.txt");
+	////std::vector<float> temp_sailency(1);
+	////for (int i = 0; i < myObj->numvertices; i += 1){
+	////	float temp;
+	////	is >> temp;
+	////	temp_sailency.push_back(temp);
+	////	//cout << temp << endl;
+
+	////	if (temp > max_sailency){
+	////		max_sailency = temp;
+	////	}
+
+	////	if (temp < min_sailency){
+	////		min_sailency = temp;
+	////	}
+	////}
+	////is.close();
+
+	////for (int i = 0; i < myObj->numvertices; i += 1){
+	////	temp_sailency.at(i) -= min_sailency;
+	////	temp_sailency.at(i) /= (max_sailency - min_sailency);
+	////}
+
+	////ofstream os("MAOI_saliney.txt");
+	////for (int i = 0; i < myObj->numtriangles; i += 1){
+	////	float temp = 0.0f;
+
+	////	temp += temp_sailency.at(myObj->triangles->at(i).vindices[0]);
+	////	temp += temp_sailency.at(myObj->triangles->at(i).vindices[1]);
+	////	temp += temp_sailency.at(myObj->triangles->at(i).vindices[2]);
+
+	////	myObj->triangles->at(i).sailency = temp / 3.0f;
+	////	//cout << myObj->triangles->at(i).sailency << endl;
+	////	os << myObj->triangles->at(i).sailency << endl;
+	////}
+	////os.close();
+
+	//ifstream is("MAOI_saliney_fake_2.txt");
+	//for (int i = 0; i < myObj->numtriangles; i += 1){
+	//	float temp;
+	//	is >> temp;
+	//	myObj->triangles->at(i).sailency = temp;
+	//}
+	//is.close();
+
+	////fake_sailency();
+
+	////sailency_texture();
+
+	//std::string filename = "vertex.txt";
+	//ofstream os(filename);
+	//for (unsigned int i = 1; i <= myObj->numvertices; i += 1){
+	//	//std::string filename = to_string(i) + ".txt";
+	//	//ofstream os(filename);
+	//	vec3 now(myObj->vertices->at(3 * i + 0), myObj->vertices->at(3 * i + 1), myObj->vertices->at(3 * i + 2));
+	//	os << now[0] << " " << now[1] << " " << now[2] << endl;
+	//	
+	//	/*for (unsigned int j = 0; j < material_group.at(i).size(); j += 1){
+	//		vec3 now(myObj->vertices->at(3 * material_group.at(i).at(j) + 0), myObj->vertices->at(3 * material_group.at(i).at(j) + 1), myObj->vertices->at(3 * material_group.at(i).at(j) + 2));
+	//		os << now[0] << " " << now[1] << " " << now[2] << endl;
+	//	}*/
+
+	//	//os.close();
+	//}
+	//os.close();
 
 	//recount_normal(myObj);
 	//collect_edge(myObj, all_edge);
 	//find_near_tri(myObj, all_edge);
 	//struc_parser(test_connect, string("1500_1000.txt"));
 	//
-	//PointCloud<float> cloud;
-	//// Generate points:
+	////PointCloud<float> cloud;
+	////// Generate points:
 
-	//generatePointCloud(cloud, myObj);
-	//float origin_term[4];
-	//float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
+	////generatePointCloud(cloud, myObj);
+	////float origin_term[4];
+	////float origin_e = compute_energy(test_connect, myObj, cloud, origin_term);
 
-	//output_nearest_point(myObj, string("1500_1000_mushroom_nearest_point.txt"));
-	////nearest_point_parser(myObj, string("1500_1000_Jigglypuff_nearest_point.txt"));
+	////output_nearest_point(myObj, string("1500_1000_MAOI_nearest_point.txt"));
+	//nearest_point_parser(myObj, string("1500_1000_MAOI_nearest_point.txt"));
 
 	//float wnode = 1.0f;
 	//float wedge = 0.1f;
@@ -933,7 +1239,7 @@ int main(int argc, char **argv)
 	//	}
 	//}
 
-	//ofstream neighbor("mushroom_neighbor.txt");
+	//ofstream neighbor("MAOI_neighbor.txt");
 	//for (unsigned int i = 0; i < material_boundary.size(); i += 1){
 	//	for (unsigned int j = 0; j < material_boundary.at(i).size(); j += 1){
 	//		//cout << material_boundary.at(i).at(j).size() << " ";
@@ -1259,10 +1565,10 @@ int main(int argc, char **argv)
 	//obb_angle.resize(1);
 
 	//computeSimpleBB(myObj->numvertices, myObj->vertices, obb_size.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0));
-	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 6.50f);
+	//simple_voxelization(myObj, all_voxel.at(0), obb_max.at(0), obb_min.at(0), obb_center.at(0), vec3(0.0, 0.0, 0.0), 10.00f);
 	//cout << "output piece " << 0 + 1 << endl;
-	//output_voxel(all_voxel.at(0), 650);
-	//voxel_txt(all_voxel.at(0), string("voxel_6.50.txt"));
+	//output_voxel(all_voxel.at(0), 1000);
+	//voxel_txt(all_voxel.at(0), string("voxel_10.00.txt"));
 	//
 	///*voxel_parser(all_voxel.at(0), string("voxel_5.36.txt"));
 	//cout << "voxel_parser done" << endl;*/
@@ -1279,6 +1585,28 @@ int main(int argc, char **argv)
 	///*GLMmodel *outer = glmReadOBJ("voxel_shell.obj");
 	//glmCombine(myObj, outer);
 	//glmWriteOBJ(myObj, "MAOI_done.obj", GLM_NONE);*/
+
+	//==================================================================
+	//(OUTPUT)
+	/*struc_parser(test_connect, string("iron_out.txt"));
+	if (test_connect.at(COLOR_BLUE).size() != 0)
+		output_zometool_color(test_connect, string("iron_out_BLUE.obj"), COLOR_BLUE);
+	if (test_connect.at(COLOR_RED).size() != 0)
+		output_zometool_color(test_connect, string("iron_out_RED.obj"), COLOR_RED);
+	if (test_connect.at(COLOR_YELLOW).size() != 0)
+		output_zometool_color(test_connect, string("iron_out_YELLOW.obj"), COLOR_YELLOW);
+	if (test_connect.at(COLOR_WHITE).size() != 0)
+		output_zometool_color(test_connect, string("iron_out_WHITE.obj"), COLOR_WHITE);*/
+
+	/*struc_parser(test_connect, string("1500_1000.txt"));
+	if (test_connect.at(COLOR_BLUE).size() != 0)
+		output_zometool_color(test_connect, string("iron_SA_out_BLUE.obj"), COLOR_BLUE);
+	if (test_connect.at(COLOR_RED).size() != 0)
+		output_zometool_color(test_connect, string("iron_SA_out_RED.obj"), COLOR_RED);
+	if (test_connect.at(COLOR_YELLOW).size() != 0)
+		output_zometool_color(test_connect, string("iron_SA_out_YELLOW.obj"), COLOR_YELLOW);
+	if (test_connect.at(COLOR_WHITE).size() != 0)
+		output_zometool_color(test_connect, string("iron_SA_out_WHITE.obj"), COLOR_WHITE);*/
 
 	//==================================================================
 	

@@ -1020,6 +1020,16 @@ glmScale(GLMmodel* model, GLfloat scale)
 }
 
 GLvoid
+glmScale_x(GLMmodel* model, GLfloat scale_x)
+{
+	GLuint i;
+
+	for (i = 1; i <= model->numvertices; i++) {
+		model->vertices->at(3 * i + 0) *= scale_x;
+	}
+}
+
+GLvoid
 glmScale_y(GLMmodel* model, GLfloat scale_y)
 {
 	GLuint i;
@@ -1915,6 +1925,16 @@ glmWriteOBJ_EXP(GLMmodel* model, char* filename, std::vector<simple_material> ma
 				T(i).vindices[1],
 				T(i).vindices[2]);
 		}
+		else if (mode == SAILENCY){
+			if (model->triangles->at(i).material_id_sailency != -1)
+				fprintf(file, "usemtl %s\n", materials.at(model->triangles->at(i).material_id_sailency).name.c_str());
+			else
+				fprintf(file, "usemtl initialShadingGroup\n");
+			fprintf(file, "f %d %d %d\n",
+				T(i).vindices[0],
+				T(i).vindices[1],
+				T(i).vindices[2]);
+		}
 	}
 
 	fclose(file);
@@ -2342,7 +2362,7 @@ void output_material(std::vector<simple_material> materials, std::string &filena
 		fprintf(file, "newmtl %s\n", materials.at(i).name.c_str());
 		fprintf(file, "illum 4\n");
 		fprintf(file, "Kd %f %f %f\n", materials.at(i).diffuse[0], materials.at(i).diffuse[1], materials.at(i).diffuse[2]);
-		fprintf(file, "Ka 0.00 0.00 0.00\n");
+		fprintf(file, "Ka %f %f %f\n", materials.at(i).diffuse[0] * 0.4f, materials.at(i).diffuse[1] * 0.4f, materials.at(i).diffuse[2] * 0.4f);
 		fprintf(file, "Tf 1.00 1.00 1.00\n");
 		fprintf(file, "Ni 1.00\n");
 	}

@@ -107,6 +107,7 @@
     <ClCompile Include="algebra3.cpp" />
     <ClCompile Include="bestfitobb.cpp" />
     <ClCompile Include="bisect.cpp" />
+    <ClCompile Include="edge.cpp" />
     <ClCompile Include="fill.cpp" />
     <ClCompile Include="float_math.cpp" />
     <ClCompile Include="GCoptimization.cpp" />
@@ -122,6 +123,7 @@
     <ClCompile Include="MRFProblems.cpp" />
     <ClCompile Include="operation.cpp" />
     <ClCompile Include="pathdata.cpp" />
+    <ClCompile Include="plane.cpp" />
     <ClCompile Include="RNBasics\R2Pixel.cpp" />
     <ClCompile Include="RNBasics\RNArray.cpp" />
     <ClCompile Include="RNBasics\RNBase.cpp" />
@@ -151,6 +153,7 @@
     <ClInclude Include="bestfitobb.h" />
     <ClInclude Include="bisect.h" />
     <ClInclude Include="block.h" />
+    <ClInclude Include="edge.h" />
     <ClInclude Include="energy.h" />
     <ClInclude Include="fill.h" />
     <ClInclude Include="float_math.h" />
@@ -170,6 +173,7 @@
     <ClInclude Include="nanoflann.hpp" />
     <ClInclude Include="operation.h" />
     <ClInclude Include="pathdata.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="RNBasics\R2Pixel.h" />
     <ClInclude Include="RNBasics\RNArray.h" />
     <ClInclude Include="RNBasics\RNBase.h" />

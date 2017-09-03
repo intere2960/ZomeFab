@@ -71,11 +71,14 @@ public:
   int material_id;
   int material_id_energy;
   int material_id_graph_cut;
+  int material_id_sailency;
   int near_tri[3];
 
   int near_node;
   float near_dist;
   float energy_d;
+  
+  float sailency;
 
   int tag;
 };
@@ -95,6 +98,7 @@ public:
     std::vector<unsigned int> connect_edge;
     std::vector<unsigned int> align_plane;
 	int tag;
+	int material_id_sailency;
 };
 
 class Loop{
@@ -184,6 +188,9 @@ glmDimensions(GLMmodel* model, GLfloat* dimensions);
  */
 GLvoid
 glmScale(GLMmodel* model, GLfloat scale);
+
+GLvoid
+glmScale_x(GLMmodel* model, GLfloat scale_x);
 
 GLvoid
 glmScale_y(GLMmodel* model, GLfloat scale_y);

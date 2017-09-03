@@ -37,6 +37,7 @@
 #define ENERGY_ANGLE 3
 #define ENERGY_USE_STICK 4
 #define GRAPH_CUT 5
+#define SAILENCY 6
 
 #define OUTER 0
 #define INNER 1

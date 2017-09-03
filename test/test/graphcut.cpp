@@ -67,6 +67,8 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	float wnode = 1.0f;
 	float label = 0.0f;
 
+	float salient = 1.0f;
+
 	std::vector<double> dataterm(model->numtriangles * num_labels);
 	for (int i = 0; i < model->numtriangles; i += 1){
 
@@ -77,7 +79,7 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 		vec3 now_g = (p1 + p2 + p3) / 3.0f;
 
 		for (int j = 0; j < 3; j += 1){
-			if (!nhd->Adjacent(model->triangles->at(i).near_tri[j], i) && model->triangles->at(i).near_tri[j] != -1)
+			if (model->triangles->at(i).near_tri[j] != -1 && !nhd->Adjacent(model->triangles->at(i).near_tri[j], i))
 			{
 				//cout << model->triangles->at(i).near_tri[j] << endl;
 				vec3 judge_n = vec3(model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 0), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 1), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 2));
@@ -93,8 +95,8 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 
 				float edist = 10 * (neighbor_v1 - neighbor_v2).length() / radius;
 				float dot = edist * min(fabs(now_n * judge_n), 1.0f);
-				float smooth = dot * wedge / 3.0f;
-
+				float smooth = dot * wedge / 3.0f + salient * model->triangles->at(i).sailency;
+				
 				//cout << smooth << endl;
 
 				/*float dist = (now_g - judge_g).length();

@@ -95,6 +95,7 @@ void struc_parser(std::vector<std::vector<zomeconn>> &target, std::string &filen
 
 void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_queue, int piece_id);
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename);
+void output_zometool_color(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, int color);
 void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename, std::vector<simple_material> &materials, std::string &materials_filename, int mode);
 
 float point_surface_dist(GLMmodel *model, vec3 &p);

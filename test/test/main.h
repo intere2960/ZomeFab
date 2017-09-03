@@ -14,6 +14,8 @@
 #include "algebra3.h"
 #include "global.h"
 
+#include "edge.h"
+#include "plane.h"
 #include "shell.h"
 #include "bisect.h"
 #include "fill.h"
@@ -31,8 +33,8 @@ GLMmodel *myObj_inner = NULL;
 
 GLMmodel temp_piece;
 
-char model_source[] = "test_model/doraemon.obj";
-char shell_source[] = "test_model/doraemon_voxel_shell.obj";
+char model_source[] = "test_model/MAOI.obj";
+char shell_source[] = "test_model/MAOI_voxel_shell.obj";
 //char model_source[] = "test_model/use/material 11.obj";
 //char model_source[] = "test_model/out/material 11-fill.obj";
 //cube bunny  TestBall TestBall2 kitten Column4 sphere head head_2times fake_head fake_head-2times MAOI MAOI_inner pig squirrel2 squirrel2_inner
@@ -80,6 +82,71 @@ std::vector<vec3> obb_angle;
 
 bool show = true;
 bool show_piece = true;
+
+
+#include <assert.h>
+
+struct Pixel {
+	unsigned char R, G, B;  // Blue, Green, Red
+};
+
+class ColorImage {
+	Pixel *pPixel;
+	int xRes, yRes;
+public:
+	ColorImage();
+	~ColorImage();
+	void init(int xSize, int ySize);
+	void clear(Pixel background);
+	Pixel readPixel(int x, int y);
+	void writePixel(int x, int y, Pixel p);
+	void outputPPM(char *filename);
+};
+
+ColorImage::ColorImage(){
+	pPixel = 0;
+}
+
+ColorImage::~ColorImage(){
+	if (pPixel) delete[] pPixel;
+	pPixel = 0;
+}
+
+void ColorImage::init(int xSize, int ySize){
+	Pixel p = { 0, 0, 0 };
+	xRes = xSize;
+	yRes = ySize;
+	pPixel = new Pixel[xSize*ySize];
+	clear(p);
+}
+
+void ColorImage::clear(Pixel background){
+	int i;
+
+	if (!pPixel) return;
+	for (i = 0; i<xRes*yRes; i++) pPixel[i] = background;
+}
+
+Pixel ColorImage::readPixel(int x, int y){
+	assert(pPixel); // die if image not initialized
+	return pPixel[x + y*yRes];
+}
+
+void ColorImage::writePixel(int x, int y, Pixel p){
+	assert(pPixel); // die if image not initialized
+	pPixel[x + y*yRes] = p;
+}
+
+void ColorImage::outputPPM(char *filename){
+	FILE *outFile = fopen(filename, "wb");
+
+	assert(outFile); // die if file can't be opened
+
+	fprintf(outFile, "P6 %d %d 255\n", xRes, yRes);
+	fwrite(pPixel, 1, 3 * xRes*yRes, outFile);
+
+	fclose(outFile);
+}
 
 //plane test_plane1(0.0, 1.0, 0.0, 0.5, -1); // ax+by+cz=d  e->cut dir
 //plane test_plane2(1.0, 0.0, 0.0, 0.5, -1);
@@ -134,17 +201,19 @@ bool show_piece = true;
 //plane test_plane7(-0.837661, -0.521881, 0.161134, 67.0868, -1);
 //plane test_plane8(0.0, 0.0, -1.0, 0.0, -1);
 
-plane test_plane1(0.008656, -0.972068, -0.234539, -171.001191, -1);
-plane test_plane2(-0.245737, -0.969335, -0.001998, -173.298963, -1);
-plane test_plane3(-0.002839, 0.009347, -0.999952, 14.264477, 1);
-plane test_plane4(-0.985601, 0.138101, -0.097563, 39.305172, 1);
-plane test_plane5(-0.758500, -0.521457, -0.390846, -101.937939, 1);
-plane test_plane6(-0.365646, 0.776534, 0.513126, 47.448877, 1);
-plane test_plane7(0.199767, -0.708803, 0.676528, -95.138830, 1);
-plane test_plane8(-0.707016, 0.707198, -0.000018, 62.897743, 1);
-
+plane test_plane1(-0.996958, -0.003588, 0.077857, -5.571984, -1);
+plane test_plane2(-0.220280, 0.417832, -0.881416, -6.769432, 1);
+plane test_plane3(-0.013068, -0.999895, 0.006272, -171.388144, 1);
+plane test_plane4(-0.114285, -0.943638, -0.310621, -180.440007, 1);
+plane test_plane5(0.538751, -0.836501, -0.100068, -119.776175, 1);
+plane test_plane6(-0.006940, 0.029930, -0.999528, 12.825542, -1);
+plane test_plane7(-0.108381, -0.368233, -0.923395, -81.495337, 1);
+plane test_plane8(0.024305, -0.730209, 0.682792, -30.217322, -1);
+plane test_plane9(-0.404565, 0.862583, 0.303772, -34.423380, -1);
 
 std::vector<plane> planes;
+
+std::vector<std::vector<plane>> all_planes;
 
 std::vector<edge> all_edge;
 std::vector<int> face_split_by_plane;
