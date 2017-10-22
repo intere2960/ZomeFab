@@ -2,6 +2,7 @@
 #define OPERATION_H_INCLUDED
 
 #include <vector>
+#include <string>
 #include "algebra3.h"
 #include "glm.h"
 #include "zomedir.h"
@@ -59,12 +60,12 @@ void check_bridge(std::vector<std::vector<zomeconn>> &test_connect, std::vector<
 void bridge(std::vector<std::vector<zomeconn>> &test_connect, vec4 &bridge_vector);
 void kill(std::vector<std::vector<zomeconn>> &test_connect, int index);
 float forbidden_energy(float dist);
-float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, PointCloud<float> &cloud, float *term);
+float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, PointCloud<float> &cloud, float *term, float target_total_number);
+void simulated_annealing(GLMmodel *model, std::string &model_file, float total_num, int iterations);
 
 template <typename T>
 void generatePointCloud(PointCloud<T> &point, GLMmodel *model)
 {
-	//std::cout << "Generating " << model->numtriangles << " point cloud...";
 	point.pts.resize(model->numtriangles);
 	for (size_t i = 0; i < model->numtriangles; i++)
 	{
@@ -77,14 +78,11 @@ void generatePointCloud(PointCloud<T> &point, GLMmodel *model)
 		point.pts[i].y = test[1];
 		point.pts[i].z = test[2];
 	}
-
-	//std::cout << "done\n";
 }
 
 template <typename T>
 void generatePointCloud(PointCloud<T> &point, std::vector<std::vector<zomeconn>> &test_connect)
 {
-	//std::cout << "Generating " << model->numtriangles << " point cloud...";
 	point.pts.resize(test_connect.at(COLOR_WHITE).size());
 	for (size_t i = 0; i < test_connect.at(COLOR_WHITE).size(); i++)
 	{
@@ -96,8 +94,6 @@ void generatePointCloud(PointCloud<T> &point, std::vector<std::vector<zomeconn>>
 			point.pts[i].z = test[2];
 		}
 	}
-
-	//std::cout << "done\n";
 }
 
 template <typename num_t>

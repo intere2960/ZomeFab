@@ -63,6 +63,4 @@ public:
     std::vector<std::vector<std::vector<zomerecord>>> table;
 };
 
-void findzoom();
-
 #endif // ZOMEDIR_H_INCLUDED

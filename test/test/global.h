@@ -43,4 +43,12 @@
 #define INNER 1
 #define MIDDLE 2
 
+#define VOXELIZATION 0
+#define SA 1
+#define FAKE_SALIENCY 2
+#define GRAPH_CUT_PROCESS 3
+#define INNER_SHELL 4
+#define CUT_MESH 5
+#define OUTPUT_ZOME 6
+
 #endif

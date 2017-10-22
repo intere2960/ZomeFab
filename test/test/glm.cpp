@@ -1926,8 +1926,8 @@ glmWriteOBJ_EXP(GLMmodel* model, char* filename, std::vector<simple_material> ma
 				T(i).vindices[2]);
 		}
 		else if (mode == SAILENCY){
-			if (model->triangles->at(i).material_id_sailency != -1)
-				fprintf(file, "usemtl %s\n", materials.at(model->triangles->at(i).material_id_sailency).name.c_str());
+			if (model->triangles->at(i).material_id_saliency != -1)
+				fprintf(file, "usemtl %s\n", materials.at(model->triangles->at(i).material_id_saliency).name.c_str());
 			else
 				fprintf(file, "usemtl initialShadingGroup\n");
 			fprintf(file, "f %d %d %d\n",

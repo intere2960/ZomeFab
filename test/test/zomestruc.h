@@ -2,6 +2,7 @@
 #define ZOMESTRUC_H_INCLUDED
 
 #include <vector>
+#include <string>
 #include "algebra3.h"
 #include "glm.h"
 
@@ -16,6 +17,20 @@
 #include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #include <CGAL/Side_of_triangle_mesh.h>
+
+typedef CGAL::Exact_predicates_exact_constructions_kernel K;
+typedef K::Point_3 Point;
+typedef CGAL::Polyhedron_3<K> Polyhedron_3;
+typedef K::Plane_3 Plane_3;
+typedef Polyhedron_3::Vertex_iterator Vertex_iterator;
+typedef Polyhedron_3::Face_iterator Face_iterator;
+typedef Polyhedron_3::Plane_iterator Plane_iterator;
+typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
+
+typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron_3> Primitive;
+typedef CGAL::AABB_traits<K, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> Tree;
+typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
 
 class zomeconn
 {
@@ -59,30 +74,7 @@ public:
 	~zomestruc();
 	int index;
 	vec3 position;
-//	zomestruc* originalBall;
-//	ZomeConnection** faceConnection;//62
-//	zomestruc** nextBall;//62
-//
-//	zomestruc* link;
-//	ModelObject* thisModel;
-//
-//	int CheckConnection( int faceIndex );// -1 0 1 2
-//	bool CheckBallExist( int faceIndex );
 };
-
-typedef CGAL::Exact_predicates_exact_constructions_kernel K;
-typedef K::Point_3 Point;
-typedef CGAL::Polyhedron_3<K> Polyhedron_3;
-typedef K::Plane_3 Plane_3;
-typedef Polyhedron_3::Vertex_iterator Vertex_iterator;
-typedef Polyhedron_3::Face_iterator Face_iterator;
-typedef Polyhedron_3::Plane_iterator Plane_iterator;
-typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
-
-typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron_3> Primitive;
-typedef CGAL::AABB_traits<K, Primitive> Traits;
-typedef CGAL::AABB_tree<Traits> Tree;
-typedef CGAL::Side_of_triangle_mesh<Polyhedron_3, K> Point_inside;
 
 void search_near_point(std::vector<std::vector<zomeconn>> &test_connect, std::vector<int> &check_index, int now);
 bool pointInside(Polyhedron_3 &polyhedron, Point &query);
@@ -113,5 +105,6 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 bool near_middle(GLMmodel *model, vec3 &test_p, std::vector<int> &middle_point);
 bool near_outer(GLMmodel *model, vec3 &test_p, std::vector<int> &outer_point);
 int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<std::vector<int>> &solt_ball, std::vector<std::vector<vec3>> &solt_dist);
-void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt, std::vector<int> &solt_ball, std::vector<vec3> &solt_dist);
+void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt, std::vector<int> &solt_ball, std::vector<vec3> &solt_dist, std::string &file_name, int piece_id);
+void output_color_zome(std::string &model_file, std::string &zome_file);
 #endif // ZOMESTRUC_H_INCLUDED

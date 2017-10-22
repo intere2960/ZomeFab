@@ -1,10 +1,9 @@
 #include "operation.h"
+#include <fstream>
+#include <iostream>
 #include <algorithm>
 #include <omp.h>
 #include <ctime>
-
-#include <iostream>
-using namespace std;
 
 void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmodel *model, PointCloud<float> &cloud, zometable &splite_table)
 {
@@ -66,22 +65,16 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 		}
 	}
 
-	//cout << "temp.size() : " << temp.size() << endl;
-
 	std::vector<int> near_tri;
 
 	int choose_split = 0;
 	float split_dist = 10000000000000000.0f;
 	for (unsigned int i = 0; i < temp.size(); i += 1){
-		//cout << "conn " << i << endl;
 		vec3 test_d = use_ball_p + t.dir->at((int)temp.at(i).travel_1[0]) * t.face_length((int)temp.at(i).travel_1[0], (int)temp.at(i).travel_1[1]);
 		kdtree_search(model, cloud, test_d, near_tri);
 		bool dist = (ball_surface_dist_fast(model, test_d, near_tri) < 100000000000000.0f);
-		//cout << dist << endl;
 		bool insect = !check_stick_intersect(model, test_d, use_ball_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, use_ball_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f) && !check_stick_intersect(model, test_d, toward_p) && !check_stick_intersect(model, (test_d + use_ball_p) / 2.0f, toward_p) && !check_stick_intersect(model, test_d, (test_d + use_ball_p) / 2.0f);
-		//cout << insect << endl;
 		bool not_near = (ball_surface_dist_fast(model, (test_d + use_ball_p) / 2.0f, near_tri) < 100000000000000.0f) && (ball_surface_dist_fast(model, (test_d + toward_p) / 2.0f, near_tri) < 100000000000000.0f);
-		//cout << not_near << endl;
 		if (!(dist && insect && not_near)){
 			temp.erase(temp.begin() + i);
 			i -= 1;
@@ -89,8 +82,6 @@ void split(std::vector<std::vector<zomeconn>> &test_connect, int s_index, GLMmod
 	}
 
 	if (temp.size() > 0){
-
-		//cout << "ac" << endl;
 
 		choose_split = rand() % temp.size();
 
@@ -361,7 +352,7 @@ float forbidden_energy(float dist)
 	return a * pow((dist - p1[0]), 2);
 }
 
-float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, PointCloud<float> &cloud, float *term)
+float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel *model, PointCloud<float> &cloud, float *term, float target_total_number)
 {
 	float energy = 0.0f;
 	zomedir t;
@@ -371,55 +362,12 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	time_t start, finish;
 	float duration;
 
-	//std::vector<int> near_tri;
-	//
-	////#pragma omp parallel for
-	//for (int a = 0; a < test_connect.size(); a += 1){
-	//	//#pragma omp parallel for
-	//	for (int i = 0; i < test_connect.at(a).size(); i += 1){
-	//		if (test_connect.at(a).at(i).exist){
-	//			if (test_connect.at(a).at(i).surface_d == 100000000000000.0f){
-	//				kdtree_search(model, cloud, test_connect.at(a).at(i).position, near_tri);
-	//				test_connect.at(a).at(i).surface_d = point_surface_dist_fast(model, test_connect.at(a).at(i).position, near_tri);
-	//				test_connect.at(a).at(i).energy_d = pow(test_connect.at(a).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(a).at(i).surface_d));
-	//				
-	//			}
-
-	//			energy_dist += test_connect.at(a).at(i).energy_d;
-	//		}
-	//	}
-	//}
-
-	//energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * (test_connect.at(COLOR_BLUE).size() + test_connect.at(COLOR_RED).size() + test_connect.at(COLOR_YELLOW).size() + test_connect.at(COLOR_WHITE).size()));
-	
-	//int num_outter = 0;
-	////#pragma omp parallel for
-	//for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-	//	if (test_connect.at(COLOR_WHITE).at(i).exist && test_connect.at(COLOR_WHITE).at(i).outter){
-	//		if (test_connect.at(COLOR_WHITE).at(i).surface_d == 100000000000000.0f){
-	//			kdtree_search(model, cloud, test_connect.at(COLOR_WHITE).at(i).position, near_tri);
-	//			test_connect.at(COLOR_WHITE).at(i).surface_d = point_surface_dist_fast(model, test_connect.at(COLOR_WHITE).at(i).position, near_tri);
-	//			test_connect.at(COLOR_WHITE).at(i).energy_d = pow(test_connect.at(COLOR_WHITE).at(i).surface_d, 2) * (1.0f + forbidden_energy(test_connect.at(COLOR_WHITE).at(i).surface_d));
-	//		}
-
-	//		energy_dist += test_connect.at(COLOR_WHITE).at(i).energy_d;
-	//		num_outter += 1;
-	//	}
-	//}
-
-	//energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * num_outter);
-
-	//start = clock();
 	kdtree_near_node(model, test_connect);
 	for (unsigned int i = 0; i < model->numtriangles; i += 1){
 		energy_dist += model->triangles->at(i).energy_d;
 	}
 	energy_dist /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * model->numtriangles);
-	/*finish = clock();
-	duration = (float)(finish - start) / CLOCKS_PER_SEC;
-	cout << "dist : " << duration << " s" << endl;*/
-
-	//start = clock();
+	
 	float energy_angle = 0.0f;
 	float energy_use_stick = 0.0f;
 	//#pragma omp parallel for
@@ -432,60 +380,32 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 				}
 			}
 
-			//cout << i << " : ";
-			//float sum_angle = 0.0f;
 			float min_angle = 10000000000000.0f;
 			//#pragma omp parallel for
 			for (int j = 0; j < use_stick.size() - 1; j += 1){
 				//#pragma omp parallel for
 				for (int k = j; k < use_stick.size(); k += 1){
 					if (use_stick.at(j) != use_stick.at(k)){
-						//sum_angle += fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f);
-						//cout << fabs(t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) - M_PI / 2.0f) << " + ";
-						//cout << " ( " << use_stick.at(j) << " , " << use_stick.at(k) << " ) ";
 						if (t.near_angle.at(use_stick.at(j)).at(use_stick.at(k)) < min_angle){
 							min_angle = t.near_angle.at(use_stick.at(j)).at(use_stick.at(k));
 						}
 					}
 				}
 			}
-			//cout << endl;
-			
-			//sum_angle -= M_PI;
-
-			//sum_angle = fabs(sum_angle);
 
 			test_connect.at(COLOR_WHITE).at(i).energy_angle = fabs(min_angle - M_PI / 2.0f);
 			test_connect.at(COLOR_WHITE).at(i).energy_use_stick = pow((use_stick.size() - 6.0f), 2.0f) / 6.0f;
 			
 			energy_angle += test_connect.at(COLOR_WHITE).at(i).energy_angle;
-			//cout << " = " << fabs(min_angle - M_PI / 2.0f) << endl;
-
+			
 			energy_use_stick += test_connect.at(COLOR_WHITE).at(i).energy_use_stick;
 		}
 	}
 
 	energy_angle /= test_connect.at(COLOR_WHITE).size();
-	/*finish = clock();
-	duration = (float)(finish - start) / CLOCKS_PER_SEC;
-	cout << "angle, use_stick : " << duration << " s" << endl;*/
-
-	/*float energy_number = 0.0f;
-	float target_number = 500.0f;
-
-	int number = 0;
-	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		if (test_connect.at(COLOR_WHITE).at(i).exist){
-			number += 1;
-		}
-	}
-
-	energy_number = pow((number - target_number), 2.0f) / target_number;*/
 
 	float energy_total_number = 0.0f;
-	float target_total_number = 1500.0f;
 
-	//start = clock();
 	int total_number = 0;
 	for (int i = 0; i < test_connect.size(); i += 1){
 		for (int j = 0; j < test_connect.at(i).size(); j += 1){
@@ -496,36 +416,10 @@ float compute_energy(std::vector<std::vector<zomeconn>> &test_connect, GLMmodel 
 	}
 
 	energy_total_number = pow((total_number - target_total_number), 2.0f) / target_total_number;
-	/*finish = clock();
-	duration = (float)(finish - start) / CLOCKS_PER_SEC;
-	cout << "total : " << duration << " s" << endl;
-	cout << endl;*/
-
-	//float energy_fair = 0.0f;
-	//for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-	//	vec3 temp_ring_p;
-	//	int use_stick = 0;
-	//	for (unsigned int j = 0; j < 62; j += 1){
-	//		if (test_connect.at(COLOR_WHITE).at(i).connect_stick[j] != vec2(-1.0f, -1.0f)){
-	//			//cout << "abcd : " << test_connect.at(COLOR_WHITE).at(i).connect_stick[j][0] << " " << test_connect.at(COLOR_WHITE).at(i).connect_stick[j][1] << endl;
-	//			temp_ring_p += test_connect.at(test_connect.at(COLOR_WHITE).at(i).connect_stick[j][0]).at(test_connect.at(COLOR_WHITE).at(i).connect_stick[j][1]).position;
-	//			use_stick += 1;
-	//		}
-	//	}
-	//	temp_ring_p /= use_stick;
-	//	energy_fair += (test_connect.at(COLOR_WHITE).at(i).position - temp_ring_p).length2();
-	//}
-	//energy_fair /= (pow(t.color_length(COLOR_BLUE, SIZE_S), 2) * test_connect.at(COLOR_WHITE).size());
-
-	//energy = energy_dist + energy_fair;
-	//energy = energy_dist + 0.1 * energy_angle;
-	//energy = energy_dist + 100.0f * energy_angle + energy_total_number;
 	energy = energy_dist + 100.0f * energy_angle + energy_total_number + energy_use_stick;
-	//energy = energy_dist + 0.1 * energy_angle + energy_number + energy_total_number;
 
 	term[0] = energy_dist;
 	term[1] = energy_angle;
-	//term[2] = energy_number;
 	term[2] = energy_total_number;
 	term[3] = energy_use_stick;
 
@@ -602,14 +496,11 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 		std::vector<size_t>   ret_index(num_results);
 		std::vector<float> out_dist_sqr(num_results);
 
-		//cout << num_results << endl;
 		num_results = index.knnSearch(&query_pt[0], num_results, &ret_index[0], &out_dist_sqr[0]);
 
 		// In case of less points in the tree than requested:
 		ret_index.resize(num_results);
 		out_dist_sqr.resize(num_results);
-
-		//cout << out_dist_sqr.size() << endl;
 
 		int temp_index = -1;
 		float temp_dist = 100000000000000000.0f;
@@ -622,30 +513,13 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 
 		if (temp_index != -1){
 			
-			/*int test_index;
-			vec3 test_p(cloud.pts[ret_index.at(temp_index)].x, cloud.pts[ret_index.at(temp_index)].y, cloud.pts[ret_index.at(temp_index)].z);
-			for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1)
-			{
-				if (test_connect.at(COLOR_WHITE).at(i).exist){
-					if ((test_p - test_connect.at(COLOR_WHITE).at(i).position).length() < 0.001f){
-						test_index = i;
-						break;
-					}
-				}
-			}*/
-
 			if (model->triangles->at(i).near_node != ret_index.at(temp_index)){
-				//cout << i << " : " << temp_index << endl;
-				//test_connect.at(COLOR_WHITE).at(test_index).outter = true;
-				
-				//cout << "fuck" << endl;
 				
 				model->triangles->at(i).near_dist = sqrt(temp_dist);
 				
 				model->triangles->at(i).near_node = ret_index.at(temp_index);
 				
 				if (model->triangles->at(i).near_dist < 1.5 * SCALE){
-					//cout << model->triangles->at(i).near_node << " " << model->triangles->at(i).near_dist << endl;
 					if (model->triangles->at(i).near_dist < min_dist)
 					{
 						min_dist = model->triangles->at(i).near_dist;
@@ -656,10 +530,7 @@ void kdtree_near_node(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_
 				model->triangles->at(i).energy_d = pow(model->triangles->at(i).near_dist, 2) * (1.0f + forbidden_energy(model->triangles->at(i).near_dist));
 			}
 		}
-		//cout << endl;
 	}
-
-	//cout << min_node << " " << min_dist << endl;
 }
 
 void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect)
@@ -701,7 +572,7 @@ void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>>
 		ret_index.resize(num_results);
 		out_dist_sqr.resize(num_results);
 
-		//cout << out_dist_sqr.size() << endl;
+		//cout << out_dist_sqr.size() << std::endl;
 
 		int temp_index = -1;
 		float temp_dist = 100000000000000000.0f;
@@ -713,10 +584,10 @@ void kdtree_near_node_outter(GLMmodel *model, std::vector<std::vector<zomeconn>>
 		}
 
 		if (temp_index != -1){
-			//cout << i << " : " << temp_index << endl;
+			//cout << i << " : " << temp_index << std::endl;
 			test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outer = true;
 		}
-		//cout << endl;
+		//cout << std::endl;
 	}
 }
 
@@ -760,8 +631,6 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 		ret_index.resize(num_results);
 		out_dist_sqr.resize(num_results);
 
-		//cout << out_dist_sqr.size() << endl;
-
 		int temp_index = -1;
 		float temp_dist = 100000000000000000.0f;
 		for (int j = 0; j < out_dist_sqr.size(); j += 1){
@@ -772,21 +641,6 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 		}
 
 		if (temp_index != -1){
-
-			/*int test_index;
-			vec3 test_p(cloud.pts[ret_index.at(temp_index)].x, cloud.pts[ret_index.at(temp_index)].y, cloud.pts[ret_index.at(temp_index)].z);
-			for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1)
-			{
-				if (test_connect.at(COLOR_WHITE).at(i).exist){
-					if ((test_p - test_connect.at(COLOR_WHITE).at(i).position).length() < 0.001f){
-						test_index = i;
-						break;
-					}
-				}
-			}*/
-
-			//cout << i << " : " << temp_index << endl;
-			//test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).outter = true;
 			if (test_connect.at(COLOR_WHITE).at(ret_index.at(temp_index)).material_id == -1){
 				simple_material temp_m;
 				temp_m.name = std::to_string(materials.size());
@@ -805,7 +659,6 @@ void kdtree_near_node_colorful(GLMmodel *model, std::vector<std::vector<zomeconn
 				model->triangles->at(i).near_node = ret_index.at(temp_index);
 			}
 		}
-		//cout << endl;
 	}
 }
 
@@ -854,4 +707,229 @@ void kdtree_near_node_energy_dist(GLMmodel *model, std::vector<std::vector<zomec
 		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
 		materials.push_back(temp_m);
 	}
+}
+
+float decrease_t(int iteration)
+{
+	int num = (iteration + 1) / 100;
+	return pow(0.99f, (float)num);
+}
+
+void simulated_annealing(GLMmodel *model, std::string &model_file, float total_num, int iterations)
+{
+	std::vector<std::vector<zomeconn>> test_connect(4);
+
+	clock_t total_start, total_finish;
+	total_start = clock();
+
+	clock_t start, finish;
+	float duration;
+
+	srand((unsigned)time(NULL));
+	struc_parser(test_connect, model_file + std::string("_out.txt"));
+
+	start = clock();
+
+	PointCloud<float> cloud;
+	// Generate points:
+
+	generatePointCloud(cloud, model);
+
+	judge_outer(test_connect);
+
+	float origin_term[4];
+	float origin_e = compute_energy(test_connect, model, cloud, origin_term, total_num);
+
+	int num_iteration = iterations;
+
+	finish = clock();
+	duration = (float)(finish - start) / CLOCKS_PER_SEC;
+
+	std::ofstream os("energy_" + model_file + "_" + std::to_string((int)total_num) + "_" + std::to_string(num_iteration) + ".txt");
+
+	os << "origin energy : " << origin_e << std::endl;
+	os << "origin energy(dist) : " << origin_term[0] << std::endl;
+	os << "origin energy(angle) : " << origin_term[1] << std::endl;
+	os << "origin energy(total_number) : " << origin_term[2] << std::endl;
+	os << "origin energy(use_stick) : " << origin_term[3] << std::endl;
+	os << std::endl;
+
+	os << "start" << std::endl;
+	int collision = 0;
+
+	vec3 give_up;
+	int num_split = 0, num_merge = 0, num_bridge = 0, num_kill = 0;
+
+	float inital_t = 1.0f;
+
+	int energy_bigger_accept = 0;
+	int energy_smaller_accept = 0;
+	int energy_bigger_reject = 0;
+	int energy_smaller_reject = 0;
+
+	zometable splite_table(SPLITE);
+	zometable merge_table(MERGE);
+
+	for (int i = 0; i < num_iteration; i += 1){
+		float now_t = inital_t * decrease_t(i);
+
+		std::vector<std::vector<zomeconn>> temp_connect(4);
+		temp_connect = test_connect;
+
+		start = clock();
+
+		int choose_op = rand() % 4;
+		if (choose_op == 0){
+			os << "split" << std::endl;
+			int result;
+			do{
+				result = rand() % test_connect.at(COLOR_WHITE).size();
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist || !test_connect.at(COLOR_WHITE).at(result).outer);
+
+			os << result << std::endl;
+			split(temp_connect, result, model, cloud, splite_table);
+			num_split += 1;
+		}
+		else if (choose_op == 1){
+			os << "merge" << std::endl;
+			std::vector<vec4> can_merge;
+			check_merge(temp_connect, can_merge, model, merge_table);
+			if (can_merge.size() > 0){
+				int merge_index = rand() % can_merge.size();
+				os << merge_index << std::endl;
+				merge(temp_connect, can_merge.at(merge_index));
+			}
+			num_merge += 1;
+		}
+		else if (choose_op == 2){
+			os << "bridge" << std::endl;
+			std::vector<vec4> can_bridge;
+			check_bridge(temp_connect, can_bridge, model, merge_table);
+			if (can_bridge.size() > 0){
+				int bridge_index = rand() % can_bridge.size();
+				bridge(temp_connect, can_bridge.at(bridge_index));
+			}
+			num_bridge += 1;
+		}
+		else {
+			os << "kill" << std::endl;
+			int result;
+			do{
+				result = rand() % test_connect.at(COLOR_WHITE).size();
+			} while (!test_connect.at(COLOR_WHITE).at(result).exist);
+
+			os << result << std::endl;
+			kill(temp_connect, result);
+			num_kill += 1;
+		}
+
+		finish = clock();
+		duration = (float)(finish - start) / CLOCKS_PER_SEC;
+		os << "op : " << duration << " s" << std::endl;
+
+		start = clock();
+		float term[4];
+		float temp_e = compute_energy(temp_connect, model, cloud, term, total_num);
+		finish = clock();
+		duration = (float)(finish - start) / CLOCKS_PER_SEC;
+		os << "energy : " << duration << " s" << std::endl;
+
+		float p = (float)rand() / (float)RAND_MAX;
+		os << p << " " << exp((origin_e - temp_e) / now_t) << std::endl;
+
+		if (p < exp((origin_e - temp_e) / now_t)){
+			if (collision_test(temp_connect, give_up)){
+
+				test_connect = temp_connect;
+				finish = clock();
+
+				os << "accept energy : " << temp_e << std::endl;
+				os << "energy(dist) : " << term[0] << std::endl;
+				os << "energy(angle) : " << term[1] << std::endl;
+				os << "energy(total_number) : " << term[2] << std::endl;
+				os << "energy(use_stick) : " << term[3] << std::endl;
+
+				if (temp_e < origin_e){
+					energy_smaller_accept += 1;
+				}
+				else{
+					energy_bigger_accept += 1;
+				}
+
+				origin_e = temp_e;
+
+				judge_outer(test_connect);
+			}
+			else{
+				collision += 1;
+				os << "reject energy : " << temp_e << std::endl;
+				os << "energy(dist) : " << term[0] << std::endl;
+				os << "energy(angle) : " << term[1] << std::endl;
+				os << "energy(total_number) : " << term[2] << std::endl;
+				os << "energy(use_stick) : " << term[3] << std::endl;
+
+				if (temp_e < origin_e){
+					energy_smaller_reject += 1;
+				}
+				else{
+					energy_bigger_reject += 1;
+				}
+			}
+		}
+		else{
+			os << "reject energy : " << temp_e << std::endl;
+			os << "energy(dist) : " << term[0] << std::endl;
+			os << "energy(angle) : " << term[1] << std::endl;
+			os << "energy(total_number) : " << term[2] << std::endl;
+			os << "energy(use_stick) : " << term[3] << std::endl;
+
+			if (temp_e < origin_e){
+				energy_smaller_reject += 1;
+			}
+			else{
+				energy_bigger_reject += 1;
+			}
+		}
+		os << "T : " << now_t << std::endl;;
+		os << std::endl;
+	}
+
+	float final_term[4];
+	float final_e = compute_energy(test_connect, model, cloud, final_term, total_num);
+
+	os << "final energy : " << final_e << std::endl;
+	os << "final energy(dist) : " << final_term[0] << std::endl;
+	os << "final energy(angle) : " << final_term[1] << std::endl;
+	os << "final energy(total_number) : " << final_term[2] << std::endl;
+	os << "final energy(use_stick) : " << final_term[3] << std::endl;
+	os << std::endl;
+
+	os << "collision : " << collision << " " << num_iteration << std::endl;
+	os << "split : " << num_split << " merge : " << num_merge << " bridge : " << num_bridge << " kill : " << num_kill << std::endl;
+	os << "ball-to-ball : " << give_up[0] << " ball-to-rod :  " << give_up[1] << " rod-to-rod :  " << give_up[2] << std::endl;
+
+	os << "Z' < Z and accept : " << energy_smaller_accept << std::endl;
+	os << "Z' > Z and accept : " << energy_bigger_accept << std::endl;
+	os << "Z' < Z and reject : " << energy_smaller_reject << std::endl;
+	os << "Z' > Z and reject : " << energy_bigger_reject << std::endl;
+	os << std::endl;
+
+	vec3 count[4];
+	count_struct(test_connect, count);
+	os << "BLUE : S => " << count[0][0] << ", M => " << count[0][1] << ", L => " << count[0][2] << std::endl;
+	os << "Red : S => " << count[1][0] << ", M => " << count[1][1] << ", L => " << count[1][2] << std::endl;
+	os << "Yellow : S => " << count[2][0] << ", M => " << count[2][1] << ", L => " << count[2][2] << std::endl;
+	os << "Ball : " << count[3][0] << std::endl;
+
+	total_finish = clock();
+	duration = (float)(total_finish - total_start) / CLOCKS_PER_SEC;
+	os << std::endl << "totoal time : " << duration << " s" << std::endl;
+
+	os.close();
+
+	std::vector<simple_material> materials_color, material_energy_dist, material_energy_angle, material_use_stick;
+	kdtree_near_node_colorful(model, test_connect, materials_color);
+
+	output_zometool(test_connect, model_file + "_" + std::to_string((int)total_num) + "_" + std::to_string(num_iteration) + ".obj");
+	output_struc(test_connect, model_file + "_" + std::to_string((int)total_num) + "_" + std::to_string(num_iteration) + ".txt");
 }

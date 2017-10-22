@@ -2,6 +2,7 @@
 #define SHELL_H_INCLUDED
 
 #include <vector>
+#include <string>
 #include "glm.h"
 #include "voxel.h"
 
@@ -9,6 +10,6 @@ void recount_normal(GLMmodel *myObj);
 void process_inner(GLMmodel *myObj, GLMmodel *myObj_inner, float shrink_size);
 void combine_inner_outfit(GLMmodel *myObj,GLMmodel *myObj_inner);
 void combine_inner_outfit2(GLMmodel *myObj);
-void voxel_shell(std::vector<voxel> &all_voxel);
+void voxel_shell(std::vector<voxel> &all_voxel, std::string model_file);
 
 #endif // SHELL_H_INCLUDED

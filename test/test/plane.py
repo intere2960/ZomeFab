@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.svm import SVC
+from array import array
 
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
@@ -7,11 +8,18 @@ import matplotlib.pyplot as plt
 
 import math 
 
+import scipy.optimize as optimize
+
 X = np.zeros((0, 3))
 Y = np.zeros(0)
 
-part = 8
+S = np.zeros(0)
+
+neighbor_set = np.zeros((0, 2))
+
+part = 16
 part_range = np.zeros((part, 2))
+model_file = "doraemon"
 
 def add_data(file_name, id):
 	array = []
@@ -21,11 +29,20 @@ def add_data(file_name, id):
 	
 	number = np.zeros((len(array), 3))
 
+	temp = [0.0, 0.0, 0.0]
+
 	for i in range(0, len(array), 1):
 	    x = array[i].split()
 	    number[i][0] = x[0]
 	    number[i][1] = x[1]
-	    number[i][2] = x[2]	
+	    number[i][2] = x[2]
+	    temp[0] += number[i][0]
+	    temp[1] += number[i][1]
+	    temp[2] += number[i][2]	
+
+	temp[0] /= len(array)
+	temp[1] /= len(array)
+	temp[2] /= len(array)
 
 	global X
 	if len(X) == 0:
@@ -40,6 +57,12 @@ def add_data(file_name, id):
 	else:
 		Y = Y + [id] * len(array)
 	part_range[id][1] = len(Y)
+
+	global S
+	if len(S) == 0:
+		S = temp
+	else:
+		S = S + temp
 
 def get_data(file_name, x, y, z):
 	array = []
@@ -64,8 +87,6 @@ def convert_index(x, y):
 	for i in range(0, small, 1):
 		count += (part - 1 - i)
 	count += (big - small - 1)
-	#print(count)
-	#print(x, y, small)
 	return count
 
 def judge_dir(a, b, c, d, id):
@@ -90,36 +111,12 @@ def judge_dir(a, b, c, d, id):
     	return 1
     else:
     	return -1
-"""
-add_data("vertex.txt", 0)
-add_data("vertex.txt", 1)
-"""
-add_data("0.txt", 0)
-add_data("1.txt", 1)
-add_data("2.txt", 2)
-add_data("3.txt", 3)
-add_data("4.txt", 4)
-add_data("5.txt", 5)
-add_data("6.txt", 6)
-add_data("7.txt", 7)
-"""
-add_data("8.txt", 8)
-add_data("9.txt", 9)
-add_data("10.txt", 10)
-add_data("11.txt", 11)
-add_data("12.txt", 12)
-add_data("13.txt", 13)
-add_data("14.txt", 14)
-add_data("15.txt", 15)
-"""
 
-
-clf = SVC(kernel='linear')
-clf.fit(X, Y) 
-
+for i in range(0, part, 1):
+	add_data(model_file + "_" + str(i) + ".txt", i)
 
 txt = []
-with open("MAOi_neighbor.txt") as f:
+with open(model_file + "_neighbor.txt") as f:
 	for line in f:
 		txt.append(line)
 
@@ -130,20 +127,62 @@ for i in range(0, part, 1):
     x = txt[i].split()
     for j in range(0, part, 1):
     	neighbor[i][j] = x[j]
-    	if neighbor[i][j] != 0:
+    	if neighbor[i][j] > 2:
     		num_neighbor[i] += 1
-"""
-for i in range(0, part, 1):
-	print('%d : %d' %(i, num_neighbor[i]))
-"""
 
-"""
-"""
-"""
-for i in range(0, 1, 1):
+neighbor_pair = np.zeros((0, 2));
+for i in range(0, part, 1):
+    for j in range(i, part, 1):
+    	if neighbor[i][j] > 2:
+    		if len(neighbor_pair) == 0:
+    			neighbor_pair = [i, j]
+    		else:
+    			neighbor_pair = np.vstack((neighbor_pair, [i, j]))
+
+tri_txt = []
+with open(model_file + "_tri_neighbor.txt") as f:
+	for line in f:
+		tri_txt.append(line)
+
+tri_neighbor = []
+
+for i in range(0, len(tri_txt), 1):
+    x = tri_txt[i].split()
+    temp_x = []
+    for j in range(0, len(x), 1):
+    	temp_x += [int(x[j])]
+
+    if len(tri_neighbor) == 0:
+    	tri_neighbor = [temp_x]
+    else:
+    	tri_neighbor = tri_neighbor + [temp_x]
+
+clf = SVC(kernel='linear')
+clf.fit(X, Y) 
+
+
+fo = open("training_plane_" + model_file + ".txt", "w")
+
+print('%d' %(part))
+fo.write('%d\n' %(part))
+
+for i in range(0, part, 1):
+    print(i, ":")
+    print('%d' %(num_neighbor[i]))
+    fo.write('%d\n' %(num_neighbor[i]))
+    plane_number = 0
     for j in range(0, part, 1):
-    	print(neighbor[i][j])
-"""
+        if neighbor[i][j] > 2:
+    		#print(i, j)
+            index = convert_index(i, j)
+            length = math.sqrt(clf.coef_[index][0] * clf.coef_[index][0] + clf.coef_[index][1] * clf.coef_[index][1] + clf.coef_[index][2] * clf.coef_[index][2])
+            p_dir = judge_dir(clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, i)
+            print('plane test_plane%d( %f, %f, %f, %f, %d);' % (plane_number + 1, clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, p_dir));
+            #print('%f, %f, %f, %f, %d' % (clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, p_dir))
+            fo.write('%f %f %f %f %d\n' % (clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, p_dir))
+            plane_number += 1
+    print()
+fo.close()
 
 """
 index = convert_index(4, 5)
@@ -196,46 +235,4 @@ ax.plot(x2, y2, z2, color='#6A6AFF', marker='*')
 ax.legend()
 
 plt.show()
-"""
-
-"""
-for i in range(0, len(clf.coef_), 1):
-	length = math.sqrt(clf.coef_[i][0] * clf.coef_[i][0] + clf.coef_[i][1] * clf.coef_[i][1] + clf.coef_[i][2] * clf.coef_[i][2])
-	print(i, ":")
-	print(clf.coef_[i][0] / length, ",", clf.coef_[i][1] / length, ",", clf.coef_[i][2] / length, ",", -clf.intercept_[i] / length)
-"""
-
-"""
-length = math.sqrt(clf.coef_[0][0] * clf.coef_[0][0] + clf.coef_[0][1] * clf.coef_[0][1] + clf.coef_[0][2] * clf.coef_[0][2])
-p_dir = judge_dir(clf.coef_[0][0] / length, clf.coef_[0][1] / length, clf.coef_[0][2] / length, -clf.intercept_[0] / length, 0)
-print('plane test_plane%d( %f, %f, %f, %f, %d);' % (0 + 1, clf.coef_[0][0] / length, clf.coef_[0][1] / length, clf.coef_[0][2] / length, -clf.intercept_[0] / length, p_dir))
-"""
-fo = open("training_plane.txt", "w")
-
-print('%d' %(part))
-fo.write('%d\n' %(part))
-
-for i in range(0, part, 1):
-    #print(i, ":")
-    print('%d' %(num_neighbor[i]))
-    fo.write('%d\n' %(num_neighbor[i]))
-    plane_number = 0
-    for j in range(0, part, 1):
-        if neighbor[i][j] > 1:
-    		#print(i, j)
-            index = convert_index(i, j)
-            length = math.sqrt(clf.coef_[index][0] * clf.coef_[index][0] + clf.coef_[index][1] * clf.coef_[index][1] + clf.coef_[index][2] * clf.coef_[index][2])
-            p_dir = judge_dir(clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, i)
-            #print('plane test_plane%d( %f, %f, %f, %f, %d);' % (plane_number + 1, clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, p_dir));
-            print('%f, %f, %f, %f, %d' % (clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, p_dir))
-            fo.write('%f %f %f %f %d\n' % (clf.coef_[index][0] / length, clf.coef_[index][1] / length, clf.coef_[index][2] / length, -clf.intercept_[index] / length, p_dir))
-            plane_number += 1
-    #print()
-
-fo.close()
-
-"""
-length = math.sqrt(clf.coef_[0][0] * clf.coef_[0][0] + clf.coef_[0][1] * clf.coef_[0][1] + clf.coef_[0][2] * clf.coef_[0][2])
-p_dir = judge_dir(clf.coef_[0][0] / length, clf.coef_[0][1] / length, clf.coef_[0][2] / length, -clf.intercept_[0] / length, 0)
-print('plane test_plane%d( %f, %f, %f, %f, %d);' % (0 + 1, clf.coef_[0][0] / length, clf.coef_[0][1] / length, clf.coef_[0][2] / length, -clf.intercept_[0] / length, p_dir))
 """

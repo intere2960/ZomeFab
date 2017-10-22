@@ -1,6 +1,7 @@
 
 #include "bestfitobb.h"
 #include "float_math.h"
+#include "glm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -98,10 +99,6 @@ void computeOBB(unsigned int vcount, const std::vector<float> *points, float *si
 	sides[0] *= 2.0f;
 	sides[1] *= 2.0f;
 	sides[2] *= 2.0f;
-
-	/*printf("%f %f %f\n", bmax[0], bmax[1], bmax[2]);
-	printf("%f %f %f\n", bmin[0], bmin[1], bmin[2]);
-	printf("%f %f %f\n", sides[0], sides[1], sides[2]);*/
 }
 
 // computes the OBB for this set of points relative to this transform matrix.
@@ -198,7 +195,6 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, ve
 
 					if (volume <= bestVolume)
 					{
-						//printf("ya\n");
 						bestVolume = volume;
 
 						obb_size[0] = psides[0];
@@ -208,9 +204,6 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, ve
 						t_angle[0] = x;
 						t_angle[1] = y;
 						t_angle[2] = z;
-
-						/*printf("a: %f %f %f\n", ax, ay, az);
-						printf("%f %f %f\n", angle[0], angle[1], angle[2]);*/
 
 						matrix = pmatrix;
 						found = true; // yes, we found an improvement.
@@ -250,12 +243,6 @@ void computeBestFitOBB(unsigned int vcount, const std::vector<float> *points, ve
 	obb_center[0] = center[0];
 	obb_center[1] = center[1];
 	obb_center[2] = center[2];
-
-	/*printf("%f %f %f\n", bmax[0], bmax[1], bmax[2]);
-	printf("%f %f %f\n", bmin[0], bmin[1], bmin[2]);
-	printf("%f %f %f\n", center[0], center[1], center[2]);
-	printf("%f %f %f\n", obb_size[0], obb_size[1], obb_size[2]);
-	printf("%f %f %f\n", ax, ay, az);*/
 }
 
 void computeBestFitOBB(unsigned int vcount,const float *points,unsigned int pstride,float *sides,float *matrix)
@@ -344,4 +331,15 @@ void computeBestFitOBB(unsigned int vcount,const float *points,unsigned int pstr
 
   }
 
+}
+
+void out_obb(vec3 &obb_scale, vec3 &obb_center, vec3 &obb_angle)
+{
+	GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
+	glmScale_x(cube, obb_scale[0] / 2);
+	glmScale_y(cube, obb_scale[1] / 2);
+	glmScale_z(cube, obb_scale[2] / 2);
+	glmT(cube, obb_center);
+	glmR(cube, obb_angle);
+	glmWriteOBJ(cube, "obb_origin.obj", GLM_NONE);
 }

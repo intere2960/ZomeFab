@@ -133,7 +133,7 @@ void combine_inner_outfit2(GLMmodel *myObj)
     }
 }
 
-void voxel_shell(std::vector<voxel> &all_voxel)
+void voxel_shell(std::vector<voxel> &all_voxel, std::string model_file)
 {
 	std::vector<int> exist_index;
 	int edge_length = pow(all_voxel.size(), 1.0 / 3);
@@ -417,5 +417,5 @@ void voxel_shell(std::vector<voxel> &all_voxel)
 		}
 	}
 	surface.numvertices = numvertex;
-	glmWriteOBJ(&surface, "voxel_shell.obj", GLM_NONE);
+	glmWriteOBJ(&surface, my_strdup((model_file + std::string("voxel_shell.obj")).c_str()), GLM_NONE);
 }

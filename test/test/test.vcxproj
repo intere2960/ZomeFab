@@ -122,7 +122,6 @@
     <ClCompile Include="MRFOptimization.cpp" />
     <ClCompile Include="MRFProblems.cpp" />
     <ClCompile Include="operation.cpp" />
-    <ClCompile Include="pathdata.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="RNBasics\R2Pixel.cpp" />
     <ClCompile Include="RNBasics\RNArray.cpp" />
@@ -140,9 +139,7 @@
     <ClCompile Include="RNBasics\RNSvd.cpp" />
     <ClCompile Include="RNBasics\RNTime.cpp" />
     <ClCompile Include="RNBasics\RNType.cpp" />
-    <ClCompile Include="segment.cpp" />
     <ClCompile Include="shell.cpp" />
-    <ClCompile Include="textfile.cpp" />
     <ClCompile Include="VKGraph.cpp" />
     <ClCompile Include="voxel.cpp" />
     <ClCompile Include="zomedir.cpp" />
@@ -166,13 +163,11 @@
     <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="LinAlg.h" />
     <ClInclude Include="LinkedBlockList.h" />
-    <ClInclude Include="main.h" />
     <ClInclude Include="MRFGraphCut.h" />
     <ClInclude Include="MRFOptimization.h" />
     <ClInclude Include="MRFProblems.h" />
     <ClInclude Include="nanoflann.hpp" />
     <ClInclude Include="operation.h" />
-    <ClInclude Include="pathdata.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="RNBasics\R2Pixel.h" />
     <ClInclude Include="RNBasics\RNArray.h" />
@@ -192,10 +187,8 @@
     <ClInclude Include="RNBasics\RNSvd.h" />
     <ClInclude Include="RNBasics\RNTime.h" />
     <ClInclude Include="RNBasics\RNType.h" />
-    <ClInclude Include="segment.h" />
     <ClInclude Include="shell.h" />
     <ClInclude Include="Sortable.h" />
-    <ClInclude Include="textfile.h" />
     <ClInclude Include="VkFunctions.h" />
     <ClInclude Include="VKGraph.h" />
     <ClInclude Include="voxel.h" />
@@ -203,11 +196,6 @@
     <ClInclude Include="zomestruc.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="myshader.frag" />
-    <None Include="myshader.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="to do list.txt" />
     <Text Include="zome_merge.txt" />
     <Text Include="zome_splite.txt" />
   </ItemGroup>

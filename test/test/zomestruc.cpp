@@ -1,4 +1,3 @@
-#include <string>
 #include <fstream>
 #include <omp.h>
 #include "zomestruc.h"
@@ -63,34 +62,12 @@ int zomeconn::getmodelnumber()
 
 zomestruc::zomestruc()
 {
-	//	faceConnection = new ZomeConnection*[62];
-	//	nextBall = new zomestruc*[62];
-	//	for( int i = 0; i < 62; i++ )
-	//	{
-	//		faceConnection[i] = NULL;
-	//		nextBall[i] = NULL;
-	//	}
 	position.set(0.0, 0.0, 0.0);
 }
 
 zomestruc::~zomestruc()
 {
-	//	delete[] faceConnection;
-	//	delete[] nextBall ;
-	//	delete[] position ;
 }
-
-//VirtualBall::VirtualBall( int i , ZomeConnection* c )
-//{
-//	index = i;
-//	MathHelper::CopyVector( position , c -> endPosition );
-//	isBottom = false;
-//	connIndex[0] = c -> index;
-//	//connectFace[0] = c -> towardFace;
-//
-//	connectionAmount = 0;//??
-//	conn[0] = c;
-//}
 
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source)
 {
@@ -356,9 +333,6 @@ void output_zometool(vec3 &rotation, std::vector<std::vector<zomeconn>> &zome_qu
 	}
 }
 
-#include <iostream>
-using namespace std;
-
 void output_zometool(std::vector<std::vector<zomeconn>> &output_connect, std::string &filename)
 {
 	std::ofstream os(filename);
@@ -567,11 +541,9 @@ void output_zometool_color(std::vector<std::vector<zomeconn>> &output_connect, s
 
 	os << std::endl;
 
-	//cout << z_b->numtriangles << endl;
 	for (unsigned int i = 0; i < output_connect.size(); i += 1){
 		if (i == color){
 			if (i == COLOR_WHITE){
-				//cout << face_index.at(i).size() << endl;
 				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
 					if ((j % z_b->numtriangles) == 0){
 						if (!output_connect.at(i).at(j / z_b->numtriangles).outer)
@@ -690,13 +662,10 @@ void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std
 	os << std::endl;
 
 	if (mode == COLORFUL){
-		//cout << z_b->numtriangles << endl;
 		for (unsigned int i = 0; i < output_connect.size(); i += 1){
 			if (i == COLOR_WHITE){
-				//cout << face_index.at(i).size() << endl;
 				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
 					if ((j % z_b->numtriangles) == 0){
-						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
 						if (output_connect.at(i).at(j / z_b->numtriangles).material_id == -1)
 							os << "usemtl initialShadingGroup" << std::endl;
 						else
@@ -716,13 +685,10 @@ void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std
 		}
 	}
 	else if (mode == ENERGY_ANGLE){
-		//cout << z_b->numtriangles << endl;
 		for (unsigned int i = 0; i < output_connect.size(); i += 1){
 			if (i == COLOR_WHITE){
-				//cout << face_index.at(i).size() << endl;
 				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
 					if ((j % z_b->numtriangles) == 0){
-						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
 						if (output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_angle == -1)
 							os << "usemtl initialShadingGroup" << std::endl;
 						else
@@ -742,13 +708,10 @@ void output_zometool_exp(std::vector<std::vector<zomeconn>> &output_connect, std
 		}
 	}
 	else if (mode == ENERGY_USE_STICK){
-		//cout << z_b->numtriangles << endl;
 		for (unsigned int i = 0; i < output_connect.size(); i += 1){
 			if (i == COLOR_WHITE){
-				//cout << face_index.at(i).size() << endl;
 				for (unsigned int j = 0; j < face_index.at(i).size(); j += 1){
 					if ((j % z_b->numtriangles) == 0){
-						//cout << output_connect.at(i).at(j / z_b->numtriangles).material_id << endl;
 						if (output_connect.at(i).at(j / z_b->numtriangles).material_id_energy_use_stick == -1)
 							os << "usemtl initialShadingGroup" << std::endl;
 						else
@@ -913,7 +876,6 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 				surface_d = (p - test[j]).length();
 			}
 			if ((p - test[j]).length() < 2 * NODE_DIAMETER){
-				//cout << "retrun " << 100000000000000.0f << endl;
 				return 100000000000000.0f;
 			}
 		}
@@ -931,7 +893,6 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 
 		if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
 			if ((p - insect_p).length() < 2 * NODE_DIAMETER){
-				//cout << "retrun " << 100000000000000.0f << endl;
 				return 100000000000000.0f;
 			}
 			else{
@@ -941,7 +902,6 @@ float ball_surface_dist_fast(GLMmodel *model, vec3 &p, std::vector<int> &near_tr
 			}
 		}
 	}
-	//cout << "retrun " << surface_d << endl;
 	return surface_d;
 }
 
@@ -984,12 +944,8 @@ bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p)
 
 			float times = (d - (p * n)) / (dir * n);
 
-			//cout << i << " : " << endl;
-			//cout << "tri : " << model->triangles->at(i).vindices[0] << " " << model->triangles->at(i).vindices[1] << " " << model->triangles->at(i).vindices[2] << endl;
-			//vec3 insect_p = (dist2 * p + dist1 * origin_p) / (dist1 + dist2);
 			vec3 insect_p = p + times * dir;
-			//cout << "insect_p : " << insect_p[0] << " " << insect_p[1] << " " << insect_p[2] << endl;
-
+			
 			vec3 edge1 = test[1] - test[0];
 			vec3 edge2 = test[2] - test[1];
 			vec3 edge3 = test[0] - test[2];
@@ -997,25 +953,15 @@ bool check_stick_intersect(GLMmodel *model, vec3 &p, vec3 &origin_p)
 			vec3 judge2 = insect_p - test[1];
 			vec3 judge3 = insect_p - test[2];
 
-			//cout << "judge : " << (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)) << endl;
-			//cout << endl;
-
 			if (((edge1 ^ judge1) * n > 0) && ((edge2 ^ judge2) * n > 0) && ((edge3 ^ judge3) * n > 0)){
-				//cout << "insect true" << endl;
 				return true;
 			}
 		}
-		//cout << "i : " << i << endl;
+		
 		for (int j = 0; j < 3; j += 1){
-			//float dist_times = -(p - test[j]) * dir / (dir * dir);
-			//cout << dist_times << endl;
-			//if (dist_times > 0.0f){
-				//float line_d = (test[j] - (p + dist_times * dir)).length();
 			if ((p - test[j]).length() < ERROR_THICKNESS){
-				//cout << "short true" << endl;
 				return true;
 			}
-			//}
 		}
 	}
 
@@ -1033,7 +979,6 @@ bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & giv
 			if (i != j){
 				float judge = (test_connect.at(COLOR_WHITE).at(i).position - test_connect.at(COLOR_WHITE).at(j).position).length();
 				if (fabs(judge - NODE_DIAMETER) < 0.5f){
-					//cout << fabs(judge - NODE_DIAMETER) << endl;
 					ball_ball_count += 1;
 				}
 			}
@@ -1188,8 +1133,6 @@ bool collision_test(std::vector<std::vector<zomeconn>> &test_connect, vec3 & giv
 	}
 	stick_stick_count /= 2;
 
-	//cout << "error => ball-to-ball : " << ball_ball_count << " ball-to-rod :  " << stick_ball_count << " rod-to-rod :  " << stick_stick_count << endl;
-
 	if (ball_ball_count != 0 || stick_ball_count != 0 || stick_stick_count != 0){
 		if (ball_ball_count != 0)
 			give_up[0] += 1.0f;
@@ -1303,35 +1246,6 @@ bool check_inside(std::vector<std::vector<zomeconn>> &test_connect, int now)
 		return true;
 	}
 
-	////cout << poly << endl;
-
-	//ofstream os;
-	//os.open("sphere.obj");
-
-	////os << mesh;
-	//Vertex_iterator v = poly.vertices_begin();
-	//for (int i = 0; i < poly.size_of_vertices(); i += 1){
-	//	os << "v " << v->point() << endl;
-	//	cout << "v " << v->point() << endl;
-	//	v++;
-	//}
-
-	//os << endl;
-	//Face_iterator f = poly.facets_begin();
-	//for (int i = 0; i < poly.size_of_facets(); i += 1){
-	//	Halfedge_facet_circulator edge = f->facet_begin();
-	//	os << "f ";
-	//	for (int j = 0; j < CGAL::circulator_size(edge); j += 1){
-	//		os << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
-	//		edge++;
-	//	}
-	//	os << endl;
-	//	f++;
-	//}
-	//os.close();
-
-	//std::cout << now  << " : The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
-
 	return pointInside(poly, points.at(0));
 }
 
@@ -1339,9 +1253,7 @@ void judge_outer(std::vector<std::vector<zomeconn>> &test_connect)
 {
 	for (unsigned int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
 		if (test_connect.at(COLOR_WHITE).at(i).exist){
-			//cout << i << endl;
 			bool judge = check_inside(test_connect, i);
-			//cout << judge << endl;
 			if (!judge)
 				test_connect.at(COLOR_WHITE).at(i).outer = true;
 			else
@@ -1374,7 +1286,6 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 
 	int num_class = 0;
 	for (unsigned int i = 0; i < material_queue.size(); i += 1){
-		//cout << material_queue.at(i)[0] << " " << material_queue.at(i)[1] << endl;
 		if (i == 0){
 			if (mode == ENERGY_ANGLE){
 				test_connect.at(COLOR_WHITE).at(material_queue.at(i)[0]).material_id_energy_angle = num_class;
@@ -1415,7 +1326,6 @@ void energy_material(std::vector<std::vector<zomeconn>> &test_connect, std::vect
 		temp_m.diffuse[1] = 0.0f + deleta[1] * i;
 		temp_m.diffuse[2] = 1.0f + deleta[2] * i;
 		materials.push_back(temp_m);
-		//cout << "m " << i << " : " << temp_m.diffuse[0] << " " << temp_m.diffuse[1] << " " << temp_m.diffuse[2] << endl;
 	}
 }
 
@@ -1554,9 +1464,11 @@ int near_solt(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect,
 	return 0;
 }
 
-void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt, std::vector<int> &solt_ball, std::vector<vec3> &solt_dist)
+void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_connect, int use_solt, std::vector<int> &solt_ball, std::vector<vec3> &solt_dist, std::string &file_name, int piece_id)
 {
 	zomedir t;
+
+	GLMmodel *result = NULL;
 
 	for (int i = 0; i < solt_ball.size(); i += 1){
 		GLMmodel *xxx = NULL;
@@ -1572,7 +1484,6 @@ void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_co
 			xxx = glmReadOBJ("test_model/zometool/yellow2.obj");
 		}
 
-		//cout << solt_ball.at(i) << endl;
 		vec3 p = test_connect.at(COLOR_WHITE).at(solt_ball.at(i)).position;
 		vec3 inserct_p = solt_dist.at(i);
 
@@ -1594,7 +1505,40 @@ void generate_tenon(GLMmodel* model, std::vector<std::vector<zomeconn>> &test_co
 		glmR(xxx, vec3(0.0, 0.0, 0.0));
 		glmRT(xxx, vec3(0.0, 0.0, 0.0), new_p);
 
-		glmCombine(model, xxx);
+		if (i == 0){
+			result = glmCopy(xxx);
+		}
+		else{
+			glmCombine(result, xxx);
+		}
 	}
-	glmWriteOBJ(model, "test_model/out/out_p-zome.obj", GLM_NONE);
+
+	if (result){
+		std::string output = file_name + std::to_string(piece_id) + ".obj";
+		glmWriteOBJ(result, my_strdup(output.c_str()), GLM_NONE);
+	}
+}
+
+void output_color_zome(std::string &model_file, std::string &zome_file)
+{
+	std::vector<std::vector<zomeconn>> test_connect(4);
+	struc_parser(test_connect, model_file + std::string("_out.txt"));
+	if (test_connect.at(COLOR_BLUE).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_out_BLUE.obj"), COLOR_BLUE);
+	if (test_connect.at(COLOR_RED).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_out_RED.obj"), COLOR_RED);
+	if (test_connect.at(COLOR_YELLOW).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_out_YELLOW.obj"), COLOR_YELLOW);
+	if (test_connect.at(COLOR_WHITE).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_out_WHITE.obj"), COLOR_WHITE);
+
+	struc_parser(test_connect, zome_file);
+	if (test_connect.at(COLOR_BLUE).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_SA_out_BLUE.obj"), COLOR_BLUE);
+	if (test_connect.at(COLOR_RED).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_SA_out_RED.obj"), COLOR_RED);
+	if (test_connect.at(COLOR_YELLOW).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_SA_out_YELLOW.obj"), COLOR_YELLOW);
+	if (test_connect.at(COLOR_WHITE).size() != 0)
+		output_zometool_color(test_connect, model_file + std::string("_SA_out_WHITE.obj"), COLOR_WHITE);
 }

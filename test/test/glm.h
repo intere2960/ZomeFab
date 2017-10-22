@@ -71,14 +71,14 @@ public:
   int material_id;
   int material_id_energy;
   int material_id_graph_cut;
-  int material_id_sailency;
+  int material_id_saliency;
   int near_tri[3];
 
   int near_node;
   float near_dist;
   float energy_d;
   
-  float sailency;
+  float saliency = 0.0f;
 
   int tag;
 };
@@ -97,8 +97,10 @@ class vertex {
 public:
     std::vector<unsigned int> connect_edge;
     std::vector<unsigned int> align_plane;
+	std::vector<unsigned int> tri_use;
+	std::vector<unsigned int> material;
 	int tag;
-	int material_id_sailency;
+	int material_id_saliency;
 };
 
 class Loop{
@@ -147,6 +149,11 @@ public:
   GLfloat position[3];          /* position of the model */
 
   std::vector<Loop> *loop = NULL;
+
+  vec3 obb_max;
+  vec3 obb_min;
+  vec3 obb_size;
+  vec3 obb_center;
 };
 
 void empty_model(GLMmodel *model);

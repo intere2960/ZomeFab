@@ -1,0 +1,19 @@
+doraemon
+1500
+1000
+0.1
+1.0
+0.0
+1.0
+0
+3
+
+// file name
+// SA total num
+// SA iterations
+// wedge
+// wnode
+// label
+// salient
+// plane tune
+// mode :: 0 (voxelization) 1 (SA) 2 //(fake saliency) 3 (graph cut) 4 (voxelization inner shell) 5 (cut_mesh) 6 (OUTPUT)

@@ -2,8 +2,10 @@
 #define VOXEL_H_INCLUDED
 
 #include <vector>
+#include <string>
 #include "algebra3.h"
 #include "zomestruc.h"
+#include "ImportOBJ.h"
 #include "glm.h"
 
 class voxel
@@ -42,9 +44,11 @@ void cross_edge(std::vector<voxel> &all_voxel, vec3 &p1, vec3 &p2, int index1, i
 void voxel_zometool(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, std::vector<std::vector<int>> &region, vec3 &angle);
 void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, int v_color, int v_size);
 void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, float length);
-void output_voxel(std::vector<voxel> &all_voxel, int piece_id);
+void output_voxel(std::vector<voxel> &all_voxel, int piece_id, std::string model_file);
 void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename);
 void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename);
 void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue);
+void voxelization(GLMmodel *model, std::string &model_file);
+void voxel_inner_shell(GLMmodel *model, std::string &model_file);
 
 #endif // VOXEL_H_INCLUDED

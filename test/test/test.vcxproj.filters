@@ -45,9 +45,6 @@
     <ClCompile Include="shell.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
-    <ClCompile Include="textfile.cpp">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
     <ClCompile Include="voxel.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
@@ -57,13 +54,7 @@
     <ClCompile Include="zomestruc.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
-    <ClCompile Include="segment.cpp">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
     <ClCompile Include="bestfitobb.cpp">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
-    <ClCompile Include="pathdata.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
     <ClCompile Include="operation.cpp">
@@ -182,25 +173,10 @@
     <ClInclude Include="glm.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="ImportOBJ.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="glui_internal.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="main.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="pathdata.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="segment.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="shell.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="textfile.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="voxel.h">
@@ -314,19 +290,11 @@
     <ClInclude Include="plane.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="ImportOBJ.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="myshader.vert">
-      <Filter>資源檔</Filter>
-    </None>
-    <None Include="myshader.frag">
-      <Filter>資源檔</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="to do list.txt">
-      <Filter>資源檔</Filter>
-    </Text>
     <Text Include="zome_merge.txt">
       <Filter>資源檔</Filter>
     </Text>

@@ -4,9 +4,6 @@
 #include "glui_internal.h"
 #include "global.h"
 
-#include <iostream>
-using namespace std;
-
 zomedir::zomedir()
 {
 	dir = new std::vector<vec3>();
@@ -114,7 +111,6 @@ zomedir::zomedir()
 			if (tmpDot > 1.0)
 				tmpDot = 1.0;
 			dir_angles[i][j] = acos(tmpDot);
-			//cout << dir_angles[i][j] << endl;
 		}
 	}
 	for (int i = 0; i < 62; i += 1)
@@ -135,7 +131,6 @@ zomedir::zomedir()
 				if (dir_angles[i][j] < tmpMin)
 					tmpMin = dir_angles[i][j];
 			}
-			//cout << tmpMin << endl;
 
 			for (int j = 0; j < 62; j += 1)
 			{
@@ -368,10 +363,6 @@ int zomedir::face_color(int index)
 
 int zomedir::opposite_face(int index)
 {
-	if(index < 0 )
-	{
-//		std::cout << "zomedir::GetOppositeFace error¡Gface id:-1" << std::endl;
-	}
 	vec3 fdir;
 	fdir = dir->at(index);
     fdir *= -1.0;
@@ -485,7 +476,6 @@ float zomedir::weight(int color, int size)
 	}
 	else
 	{
-//		std::cout << "zomedir::GetWeight error:color input error" << std::endl;
 		return 0;
 	}
 }

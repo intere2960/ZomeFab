@@ -1,5 +1,17 @@
 #include "graphcut.h"
+#include <iostream>
+#include <fstream>
 #include <algorithm>
+#include "shell.h"
+#include "operation.h"
+
+float color_material[20][3]
+= {
+	{ 0.140625, 0.140625, 0.140625 }, { 0.9140625, 0.0, 0.0 }, { 1, 0.20703125, 0.6015625 }, { 1.0, 0.0, 1.0 }, { 0.609375, 0.20703125, 1.0 },
+	{ 0.4140625, 0.4140625, 1.0 }, { 0.15625, 0.578125, 1.0 }, { 0.0, 1.0, 1.0 }, { 0.1015625, 0.98828125, 0.609375 }, { 0.15625, 1.0, 0.15625 },
+	{ 0.65625, 1.0, 0.140625 }, { 0.97265625, 0.97265625, 0.0 }, { 1.0, 0.82421875, 0.0234375 }, { 1.0, 0.625, 0.2578125 }, { 1.0, 0.5, 0.25 },
+	{ 0.80859375, 0.6171875, 0.6171875 }, { 0.7578125, 0.7578125, 0.52734375 }, { 0.58203125, 0.7890625, 0.7890625 }, { 0.71875, 0.71875, 0.859375 }, { 0.7890625, 0.5546875, 0.7578125 }
+};
 
 double AverageRadius(GLMmodel *model, vec3 &centroid)
 {
@@ -28,12 +40,7 @@ double AverageRadius(GLMmodel *model, vec3 &centroid)
 		return distance / area;
 }
 
-#include <fstream>
-#include <iostream>
-
-using namespace std;
-
-void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, float color_material[20][3], std::vector<std::vector<int>>& vertex_color)
+void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_connect, std::vector<simple_material> &materials, float color_material[20][3], std::vector<std::vector<int>>& vertex_color, float wedge, float wnode, float label, float salient)
 {
 	int num_labels = 0;
 
@@ -58,16 +65,9 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	VKGraph * nhd = new VKGraph(model->numtriangles);
 
 	double radius = AverageRadius(model, glmCentroid(model));
-	//cout << "radius : " << radius << endl;
-
+	
 	float max_data = 0.0f;
 	float max_smooth = 0.0f;
-
-	float wedge = 0.1f;
-	float wnode = 1.0f;
-	float label = 0.0f;
-
-	float salient = 1.0f;
 
 	std::vector<double> dataterm(model->numtriangles * num_labels);
 	for (int i = 0; i < model->numtriangles; i += 1){
@@ -81,7 +81,6 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 		for (int j = 0; j < 3; j += 1){
 			if (model->triangles->at(i).near_tri[j] != -1 && !nhd->Adjacent(model->triangles->at(i).near_tri[j], i))
 			{
-				//cout << model->triangles->at(i).near_tri[j] << endl;
 				vec3 judge_n = vec3(model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 0), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 1), model->facetnorms->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).findex + 2));
 				vec3 judge_p1 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[0] + 2));
 				vec3 judge_p2 = vec3(model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(model->triangles->at(i).near_tri[j]).vindices[1] + 2));
@@ -95,36 +94,16 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 
 				float edist = 10 * (neighbor_v1 - neighbor_v2).length() / radius;
 				float dot = edist * min(fabs(now_n * judge_n), 1.0f);
-				float smooth = dot * wedge / 3.0f + salient * model->triangles->at(i).sailency;
+				float smooth = dot * wedge / 3.0f + salient * model->triangles->at(i).saliency;
 				
-				//cout << smooth << endl;
-
-				/*float dist = (now_g - judge_g).length();
-				float edist = 10 * dist / radius;
-				float angle;
-				if (fabs(now_n * judge_n - 1) < 0.001f){
-				angle = 0.0f + numeric_limits<float>::epsilon();
-				}
-				else{
-				angle = acos(now_n * judge_n);
-				}
-				float smooth = -log(angle / M_PI) * edist;*/
-
-				//cout << i << " : " << now_n * judge_n << " " << angle << " " << dist << " " << -log(angle / M_PI) << " " << -log(angle / M_PI) * dist << endl;
-				//cout << i << " : " << model->triangles->at(i).near_tri[j] << " : " << -log(angle / M_PI) * dist << endl;
-
 				nhd->AddEdge(i, model->triangles->at(i).near_tri[j], smooth);
-
-				/*if (max_smooth < smooth){
-				max_smooth = smooth;
-				}*/
 			}
 		}
 
 		for (int j = 0; j < use.size(); j += 1){
 			vec3 judge_p = test_connect.at(COLOR_WHITE).at(use.at(j)).position;
 			float dist = (now_g - judge_p).length();
-			//cout << dist << endl;
+			
 			dataterm.at(i * num_labels + convert_index.at(use.at(j))) = dist;
 			if (max_data < dist){
 				max_data = dist;
@@ -132,25 +111,10 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 		}
 	}
 
-	/*for (int i = 0; i < model->numtriangles; i += 1){
-	for (int j = 0; j < nhd->Node(i)->edges.size(); j += 1){
-	nhd->Node(i)->edges.at(j)->weight /= max_smooth;
-	}
-	}*/
-	//std::ofstream os;
-	//os.open("dataterm.txt");
-	//os << model->numtriangles << " " << num_labels << std::endl;
-
 	for (int i = 0; i < dataterm.size(); i += 1){
-		//os << dataterm.at(i) << " ";
 		dataterm.at(i) /= max_data;
-		//dataterm.at(i) /= 1.0;
 		dataterm.at(i) = wnode * (0.998f - std::min(1.0, dataterm.at(i)));
-		//if ((i + 1) % num_labels == 0){
-		//	os << std::endl;
-		//}
 	}
-	//os.close();
 
 	std::cout << "NEdges = " << nhd->NumEdges() << std::endl;
 
@@ -164,20 +128,15 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 	double E = mrfSolver.Energy(&Edata, &Esmooth, &Elabel);
 	std::cout << "E1 = " << E << " = " << Edata << " + " << Esmooth << " + " << Elabel << std::endl;
 
-	/*cout << "max data : " << max_data << endl;
-	cout << "max smooth : " << max_smooth << endl;*/
-
 	std::vector<std::vector<int>> mat(num_labels);
 
 	for (int i = 0; i < model->numtriangles; i += 1){
 		mat.at(mrfSolver.Label(i)).push_back(i);
-		//cout << i << " : " << mrfSolver.Label(i) << endl;
 	}
 
 	int material_class = 0;
 	for (int i = 0; i < num_labels; i += 1){
 		if (mat.at(i).size() > 0){
-			//cout << i << " : " << mat.at(i).size() << endl;
 			for (unsigned int j = 0; j < mat.at(i).size(); j += 1){
 				model->triangles->at(mat.at(i).at(j)).material_id_graph_cut = material_class;
 
@@ -186,15 +145,10 @@ void test_graph_cut(GLMmodel *model, std::vector<std::vector<zomeconn>> &test_co
 					if (index >= vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).size())
 						vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[k]).push_back(material_class);
 				}
-				/*vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[1]).push_back(material_class);
-				vertex_color.at(model->triangles->at(mat.at(i).at(j)).vindices[2]).push_back(material_class);*/
 			}
 
 			simple_material temp_m;
 			temp_m.name = std::to_string(materials.size());
-			/*temp_m.diffuse[0] = (float)rand() / (float)RAND_MAX;
-			temp_m.diffuse[1] = (float)rand() / (float)RAND_MAX;
-			temp_m.diffuse[2] = (float)rand() / (float)RAND_MAX;*/
 			temp_m.diffuse[0] = color_material[material_class % 20][0];
 			temp_m.diffuse[1] = color_material[material_class % 20][1];
 			temp_m.diffuse[2] = color_material[material_class % 20][2];
@@ -216,295 +170,291 @@ int have_same_material(int now_material, int p1, int p2, std::vector<std::vector
 	return -1;
 }
 
-vec4 easy_plane(GLMmodel *model, int index1, int index2)
+void graph_cut(GLMmodel *model, std::string &model_file, std::string &zome_file, float total_num, float wedge, float wnode, float label, float salient)
 {
-	vec3 p2(model->vertices->at(3 * index2 + 0), model->vertices->at(3 * index2 + 1), model->vertices->at(3 * index2 + 2));
-	vec3 p1(model->vertices->at(3 * index1 + 0), model->vertices->at(3 * index1 + 1), model->vertices->at(3 * index1 + 2));
+	if (salient != 0.0f){
+		float min_saliency = 100000000.0f;
+		float max_saliency = -100000000.0f;
 
-	vec3 n_p1(model->normals[3 * index1 + 0], model->normals[3 * index1 + 1], model->normals[3 * index1 + 2]);
-	vec3 n_p2(model->normals[3 * index2 + 0], model->normals[3 * index2 + 1], model->normals[3 * index2 + 2]);
+		std::ifstream is(model_file + "_mean_saliency.txt");
+		std::vector<float> temp_saliency(1);
+		for (int i = 0; i < model->numvertices; i += 1){
+			float temp;
+			is >> temp;
+			temp_saliency.push_back(temp);
 
-	vec3 v1 = (p2 - p1).normalize();
-	vec3 v2 = ((n_p1 + n_p2) / 2.0).normalize();
+			if (temp > max_saliency){
+				max_saliency = temp;
+			}
 
-	vec3 n_vector = (v1 ^ v2).normalize();
-	float d = n_vector * p1;
+			if (temp < min_saliency){
+				min_saliency = temp;
+			}
+		}
+		is.close();
 
-	vec4 ans(n_vector, d);
+		for (int i = 0; i < model->numvertices; i += 1){
+			temp_saliency.at(i) -= min_saliency;
+			temp_saliency.at(i) /= (max_saliency - min_saliency);
+		}
 
-	return ans;
+		std::ofstream os(model_file + "_saliency.txt");
+		for (int i = 0; i < model->numtriangles; i += 1){
+			float temp = 0.0f;
+
+			temp += temp_saliency.at(model->triangles->at(i).vindices[0]);
+			temp += temp_saliency.at(model->triangles->at(i).vindices[1]);
+			temp += temp_saliency.at(model->triangles->at(i).vindices[2]);
+
+			model->triangles->at(i).saliency = temp / 3.0f;
+			os << model->triangles->at(i).saliency << std::endl;
+		}
+		os.close();
+
+		std::ifstream is2(model_file + "_saliency.txt");
+		for (int i = 0; i < model->numtriangles; i += 1){
+			float temp;
+			is2 >> temp;
+			model->triangles->at(i).saliency = temp;
+		}
+		is2.close();
+	}
+
+	std::vector<edge> all_edge;
+
+	recount_normal(model);
+	collect_edge(model, all_edge);
+	find_near_tri(model, all_edge);
+
+	std::vector<std::vector<zomeconn>> test_connect(4);
+	struc_parser(test_connect, zome_file);
+
+	std::string split_name = std::string(strtok(my_strdup(zome_file.c_str()), "."));
+
+	std::fstream fileStream;
+	fileStream.open(split_name + std::string("_nearest_point.txt"));
+	if (!fileStream.fail()) {
+		nearest_point_parser(model, split_name + std::string("_nearest_point.txt"));
+	}
+	else{
+		PointCloud<float> cloud;
+		// Generate points:
+
+		generatePointCloud(cloud, model);
+		float origin_term[4];
+		float origin_e = compute_energy(test_connect, model, cloud, origin_term, total_num);
+	}
+
+	std::vector<std::vector<int>> vertex_color(model->numvertices + 1);
+
+	std::vector<simple_material> materials_graph_cut;
+	test_graph_cut(model, test_connect, materials_graph_cut, color_material, vertex_color, wedge, wnode, label, salient);
+
+	int num_point = 0;
+	for (unsigned int i = 1; i <= model->numvertices; i += 1){
+		if (vertex_color.at(i).size() >= 3){
+			num_point += 1;
+		}
+	}
+
+	std::vector<std::vector<int>> material_group(materials_graph_cut.size());
+
+	std::vector<int> convert_index;
+	for (unsigned int i = 1; i <= model->numvertices; i += 1){
+		if (vertex_color.at(i).size() >= 3){
+			convert_index.push_back(i);
+		}
+
+		for (unsigned int j = 0; j < vertex_color.at(i).size(); j += 1){
+			material_group.at(vertex_color.at(i).at(j)).push_back(i);
+		}
+	}
+
+	for (unsigned int i = 0; i < materials_graph_cut.size(); i += 1){
+		std::string filename = model_file + "_" + std::to_string(i) + ".txt";
+		std::ofstream os(filename);
+
+		for (unsigned int j = 0; j < material_group.at(i).size(); j += 1){
+			vec3 now(model->vertices->at(3 * material_group.at(i).at(j) + 0), model->vertices->at(3 * material_group.at(i).at(j) + 1), model->vertices->at(3 * material_group.at(i).at(j) + 2));
+			os << now[0] << " " << now[1] << " " << now[2] << std::endl;
+		}
+
+		os.close();
+	}
+
+	std::vector<std::vector<int>> material_point(materials_graph_cut.size());
+	for (unsigned int i = 0; i < convert_index.size(); i += 1){
+		for (int j = 0; j < vertex_color.at(convert_index.at(i)).size(); j += 1){
+			material_point.at(vertex_color.at(convert_index.at(i)).at(j)).push_back(convert_index.at(i));
+		}
+	}
+
+	std::vector<std::vector<std::vector<int>>> material_boundary(materials_graph_cut.size());
+	for (unsigned int i = 0; i < material_boundary.size(); i += 1){
+		material_boundary.at(i).resize(materials_graph_cut.size());
+	}
+
+	std::ofstream tri_neighbor(model_file + "_tri_neighbor.txt");
+	for (unsigned int i = 1; i <= model->numvertices; i += 1){
+		if (vertex_color.at(i).size() >= 2){
+			for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+				for (int k = 0; k < vertex_color.at(i).size(); k += 1){
+					if (j != k){
+						material_boundary.at(vertex_color.at(i).at(j)).at(vertex_color.at(i).at(k)).push_back(i);
+					}
+				}
+			}
+		}
+
+		if (vertex_color.at(i).size() >= 3){
+			for (int j = 0; j < vertex_color.at(i).size(); j += 1){
+				tri_neighbor << vertex_color.at(i).at(j) << " ";
+			}
+			tri_neighbor << std::endl;
+		}
+	}
+	tri_neighbor.close();
+
+	std::ofstream neighbor(model_file + "_neighbor.txt");
+	for (unsigned int i = 0; i < material_boundary.size(); i += 1){
+		for (unsigned int j = 0; j < material_boundary.at(i).size(); j += 1){
+			neighbor << material_boundary.at(i).at(j).size() << " ";
+		}
+		neighbor << std::endl;
+	}
+	neighbor.close();
+
+	std::string exp_name = model_file + "_" + std::to_string(materials_graph_cut.size()) + "(data_" + std::to_string(wnode) + ",_smooth_" + std::to_string(wedge) + ",_label_" + std::to_string(label) + ",_saliency_" + std::to_string(salient) + ")";
+	std::string mtl_name = exp_name + ".mtl";
+	std::string obj_name = exp_name + ".obj";
+	output_material(materials_graph_cut, mtl_name);
+	glmWriteOBJ_EXP(model, my_strdup(obj_name.c_str()), materials_graph_cut, mtl_name, GRAPH_CUT);
 }
 
-#include <iostream>
-using namespace std;
-
-bool cut_plane_error(GLMmodel *model, std::vector<vec2> &partition_plane, std::vector<cut_plane> &plane_queue, std::vector<int> &material_point, std::vector<vec2> &error_info)
+void fake_saliency(GLMmodel *model, std::string &model_file)
 {
-	bool ans = false;
-	for (int i = 0; i < partition_plane.size(); i += 1){
-		plane now_plane = plane_queue.at(partition_plane.at(i)[0]).split_plane;
-		for (int j = 0; j < material_point.size(); j += 1){
-			vec3 now_point(model->vertices->at(3 * material_point.at(j) + 0), model->vertices->at(3 * material_point.at(j) + 1), model->vertices->at(3 * material_point.at(j) + 2));
-			//cout << i << " " << material_point.at(j) << " ";
-			int dir = plane_dir_point(now_point, now_plane);
-			if (dir == -1.0f * partition_plane.at(i)[1] && dir != 0){
-				ans = true;
-				//cout << i << " " << material_point.at(j) << " " << dir << endl;
-				
-				error_info.push_back(vec2(i, material_point.at(j)));
-			}
+	std::ifstream is(model_file + "_mean_saliency.txt");
+	std::vector<float> temp_saliency(1);
+	if (!is.fail()){
+		for (int i = 0; i < model->numvertices; i += 1){
+			float temp;
+			is >> temp;
+			temp_saliency.push_back(temp);
+		}
+		is.close();
+	}
+	else{
+		for (int i = 0; i < model->numvertices; i += 1){
+			temp_saliency.push_back(0.0f);
 		}
 	}
 
-	return ans;
+	std::ifstream is1(model_file + "_fake_saliency_tag.txt");
+	std::string aaa;
+	std::string bbb;
+	int a, b, c;
+
+	int count = 0;
+	std::vector<int> tag;
+	bool record = true;
+
+	while (is1 >> aaa){
+		if (aaa == std::string("usemtl")){
+			is1 >> bbb;
+
+			if (bbb == std::string("initialShadingGroup")){
+				if (count == 0){
+					record = false;
+				}
+				else{
+					record = !record;
+				}
+			}
+			else{
+				record = true;
+			}
+		}
+		else{
+			is1 >> a >> b >> c;
+
+			if (record){
+				tag.push_back(count);
+				temp_saliency.at(a) = 1.0f;
+				temp_saliency.at(b) = 1.0f;
+				temp_saliency.at(c) = 1.0f;
+			}
+
+			count += 1;
+		}
+	}
+	is.close();
+
+	std::ofstream os(model_file + "_mean_saliency.txt");
+	for (int i = 1; i <= model->numvertices; i += 1){
+		os << temp_saliency.at(i) << std::endl;
+	}
+	os.close();
 }
 
-void alter_plane(GLMmodel *model, std::vector<std::vector<vec2>> &partition_plane, int piece_id, std::vector<cut_plane> &plane_queue, std::vector<std::vector<int>> &material_point, std::vector<vec2> &error_info)
+void saliency_texture(GLMmodel *model, std::string &model_file)
 {
-	std::vector<vec2> connect_info;
-	
-	cout << "all : ";
-	for (int i = 0; i < partition_plane.at(piece_id).size(); i += 1){
-		cout << partition_plane.at(piece_id).at(i)[0] << " ";
-		cout << plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[0] << " " << plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[1] << endl;
-		connect_info.push_back(vec2(plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[0], plane_queue.at(partition_plane.at(piece_id).at(i)[0]).use_vertex[1]));
+	std::ifstream is(model_file + "_mean_saliency.txt");
+	std::vector<float> temp_saliency(1);
+	for (int i = 0; i < model->numvertices; i += 1){
+		float temp;
+		is >> temp;
+		temp_saliency.push_back(temp);
 	}
-	cout << endl;
-	//cout << "size : " << connect_info.size() << endl;
+	is.close();
 
-	std::vector<int> point_loop;
-	int loop_pre_index = -1;
-	int loop_next_index = connect_info.at(0)[1];
-	int loop_end_index = connect_info.at(0)[0];
-	point_loop.push_back(loop_next_index);
+	std::vector<simple_material> materials;
+	std::vector<vec3> material_queue;
 
-	while (loop_next_index != loop_end_index){
-		//cout << "hello1" << endl;
-		for (int i = 1; i < connect_info.size(); i += 1){
-			if (connect_info.at(i)[0] == loop_next_index){
-				if (connect_info.at(i)[1] != loop_pre_index){
-					loop_pre_index = loop_next_index;
-					loop_next_index = connect_info.at(i)[1];
+	for (int i = 1; i <= model->numvertices; i += 1){
+		vec2 test(i, temp_saliency.at(i));
+		material_queue.push_back(test);
+	}
 
-					point_loop.push_back(loop_next_index);
-					break;
-				}
+	std::sort(material_queue.begin(),
+		material_queue.end(),
+		[](vec2 a, vec2 b){
+		return b[1] > a[1];
+	});
+
+	model->numtexcoords = model->numvertices;
+
+	model->texcoords = (GLfloat*)malloc(sizeof(GLfloat) *
+		2 * (model->numtexcoords + 1));
+
+	int num_class = 0;
+	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		if (i == 0){
+			model->cut_loop->at(material_queue.at(i)[0]).material_id_saliency = num_class;
+			num_class += 1;
+		}
+		else{
+			if (material_queue.at(i)[1] == material_queue.at(i - 1)[1]){
+				num_class -= 1;
+				model->cut_loop->at(material_queue.at(i)[0]).material_id_saliency = num_class;
+				num_class += 1;
 			}
-
-			if (connect_info.at(i)[1] == loop_next_index){
-				if (connect_info.at(i)[0] != loop_pre_index){
-					loop_pre_index = loop_next_index;
-					loop_next_index = connect_info.at(i)[0];
-
-					point_loop.push_back(loop_next_index);
-					break;
-				}
+			else{
+				model->cut_loop->at(material_queue.at(i)[0]).material_id_saliency = num_class;
+				num_class += 1;
 			}
 		}
 	}
 
-	/*for (int i = 0; i < point_loop.size(); i += 1){
-		cout << point_loop.at(i) << " ";
-	}
-	cout << endl;*/
-
-	std::vector<std::vector<int>> plane_error(partition_plane.at(piece_id).size());
-	for (int i = 0; i < error_info.size(); i += 1){
-		plane_error.at(error_info.at(i)[0]).push_back(error_info.at(i)[1]);
+	for (unsigned int i = 0; i < material_queue.size(); i += 1){
+		model->texcoords[2 * (int)material_queue.at(i)[0] + 0] = (float)model->cut_loop->at(material_queue.at(i)[0]).material_id_saliency / num_class;
+		model->texcoords[2 * (int)material_queue.at(i)[0] + 1] = 0.0f;
 	}
 
-	int min_error = -1;
-	int min_error_number = 10000;
-	for (int i = 0; i < plane_error.size(); i += 1){
-		if (plane_error.at(i).size() != 0){
-			if (plane_error.at(i).size() < min_error_number){
-				min_error = i;
-				min_error_number = plane_error.at(i).size();
-			}
+	for (unsigned int i = 0; i < model->numtriangles; i += 1){
+		for (int j = 0; j < 3; j += 1){
+			model->triangles->at(i).tindices[j] = model->triangles->at(i).vindices[j];
 		}
 	}
 
-	bool done = false;
-	//for (int i = 0; i < plane_error.size(); i += 1){
-		/*cout << i << " => ";
-		for (int j = 0; j < plane_error.at(i).size(); j += 1){
-			cout << plane_error.at(i).at(j) << " ";
-		}
-		cout << endl;*/
-	if (plane_error.at(min_error).size() != 0){
-		for (int j = 0; j < 2; j += 1){
-			//cout << "hello2" << endl;
-
-			int start_point = plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[j];
-			std::vector<bool> choose(point_loop.size());
-			for (int k = 0; k < choose.size(); k += 1){
-				choose.at(k) = true;
-			}
-
-			int now_index = find(point_loop.begin(), point_loop.end(), start_point) - point_loop.begin();
-			int next_index = (now_index + 1) % point_loop.size();
-			int pre_index = (now_index - 1 + point_loop.size()) % point_loop.size();
-
-			choose.at(now_index) = false;
-			choose.at(next_index) = false;
-			choose.at(pre_index) = false;
-
-			for (int k = 0; k < plane_error.at(min_error).size(); k += 1){
-				int find_index = find(point_loop.begin(), point_loop.end(), plane_error.at(min_error).at(k)) - point_loop.begin();
-				choose.at(find_index) = false;
-			}
-
-			//int new_plane_index = -1;
-			std::vector<int> new_plane_index;
-			for (int k = 0; k < choose.size(); k += 1){
-				if (choose.at(k)){
-					new_plane_index.push_back(point_loop.at(k));
-					//cout << j << " " << point_loop.at(now_index) << " " << new_plane_index << endl;
-					//break;
-				}
-			}
-								
-			if (new_plane_index.size() != 0){
-				for (int a = 0; a < new_plane_index.size(); a += 1){
-					vec4 new_plane_par = easy_plane(model, point_loop.at(now_index), new_plane_index.at(a));
-					vec3 now_p1 = vec3(model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[0] + 0), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[0] + 1), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[0] + 2));
-					vec3 now_p2 = vec3(model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[1] + 0), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[1] + 1), model->vertices->at(3 * plane_queue.at(partition_plane.at(piece_id).at(min_error)[0]).use_vertex[1] + 2));
-					plane new_plane(new_plane_par[0], new_plane_par[1], new_plane_par[2], new_plane_par[3], 0);
-
-					bool vaild = true;
-					int error_dir;
-					for (int k = 0; k < plane_error.at(min_error).size(); k += 1){
-						vec3 error_p = vec3(model->vertices->at(3 * plane_error.at(min_error).at(k) + 0), model->vertices->at(3 * plane_error.at(min_error).at(k) + 1), model->vertices->at(3 * plane_error.at(min_error).at(k) + 2));
-							
-						int dir[3];
-
-						dir[0] = plane_dir_point(now_p1, new_plane);
-						dir[1] = plane_dir_point(now_p2, new_plane);
-						dir[2] = plane_dir_point(error_p, new_plane);
-						error_dir = dir[2];
-						//cout << dir[0] << " " << dir[1] << " " << dir[2] << endl;
-
-						if ((dir[0] == dir[2]) || (dir[1] == dir[2])){
-							vaild = false;
-							break;
-						}
-					}
-						
-					if (vaild){
-						//cout << "fucking ya" << endl;
-
-						cut_plane new_cut;
-						new_cut.split_plane = new_plane;
-						new_cut.use_vertex[0] = point_loop.at(now_index);
-						new_cut.use_vertex[1] = new_plane_index.at(a);
-						new_cut.normal_percent[0] = 0.5;
-						new_cut.normal_percent[1] = 0.5;
-
-						plane_queue.push_back(new_cut);
-
-						std::vector<vec2> error_piece;
-						std::vector<int> error_point;
-							
-						std::vector<vec2> normal_piece;
-						std::vector<int> normal_point;
-
-						error_piece.push_back(vec2(plane_queue.size() - 1, error_dir));
-						error_point.push_back(point_loop.at(now_index));
-						error_point.push_back(new_plane_index.at(a));
-
-						normal_piece.push_back(vec2(plane_queue.size() - 1, error_dir * -1));
-						normal_point.push_back(point_loop.at(now_index));
-						normal_point.push_back(new_plane_index.at(a));
-
-						for (int k = 0; k < partition_plane.at(piece_id).size(); k += 1){
-							int test_index1 = plane_queue.at(partition_plane.at(piece_id).at(k)[0]).use_vertex[0];
-							vec3 test_point1 = vec3(model->vertices->at(3 * test_index1 + 0), model->vertices->at(3 * test_index1 + 1), model->vertices->at(3 * test_index1 + 2));
-							int test_index2 = plane_queue.at(partition_plane.at(piece_id).at(k)[0]).use_vertex[1];
-							vec3 test_point2 = vec3(model->vertices->at(3 * test_index2 + 0), model->vertices->at(3 * test_index2 + 1), model->vertices->at(3 * test_index2 + 2));
-
-							int dir[2];
-							dir[0] = plane_dir_point(test_point1, new_plane);
-							dir[1] = plane_dir_point(test_point2, new_plane);
-
-							if ((dir[0] + dir[1] == error_dir) || (dir[0] + dir[1] == 2 * error_dir)){
-								error_piece.push_back(partition_plane.at(piece_id).at(k));
-
-								if (find(error_point.begin(), error_point.end(), test_index1) - error_point.begin() >= error_point.size()){
-									error_point.push_back(test_index1);
-								}
-								if (find(error_point.begin(), error_point.end(), test_index2) - error_point.begin() >= error_point.size()){
-									error_point.push_back(test_index2);
-								}
-							}
-							else{
-								normal_piece.push_back(partition_plane.at(piece_id).at(k));
-
-								if (find(normal_point.begin(), normal_point.end(), test_index1) - normal_point.begin() >= normal_point.size()){
-									normal_point.push_back(test_index1);
-								}
-								if (find(normal_point.begin(), normal_point.end(), test_index2) - normal_point.begin() >= normal_point.size()){
-									normal_point.push_back(test_index2);
-								}
-							}
-						}
-
-						/*cout << "error : ";
-						for (int k = 0; k < error_piece.size(); k += 1){
-							cout << error_piece.at(k)[0] << " ";
-						}
-						cout << endl;
-
-						cout << "normal : ";
-						for (int k = 0; k < normal_piece.size(); k += 1){
-							cout << normal_piece.at(k)[0] << " ";
-						}
-						cout << endl;
-
-						cout << "error : ";
-						for (int k = 0; k < error_point.size(); k += 1){
-							cout << error_point.at(k) << " ";
-						}
-						cout << endl;
-
-						cout << "normal : ";
-						for (int k = 0; k < normal_point.size(); k += 1){
-							cout << normal_point.at(k) << " ";
-						}
-						cout << endl;*/
-
-						std::vector<vec2> error_info_error;
-						std::vector<vec2> error_info_normal;
-
-						cut_plane_error(model, error_piece, plane_queue, error_point, error_info_error);
-						cut_plane_error(model, normal_piece, plane_queue, normal_point, error_info_normal);
-
-						if ((error_info_error.size() <= error_point.size() - 3) && (error_info_normal.size() <= normal_point.size() - 3)){
-							partition_plane.push_back(error_piece);
-							partition_plane.push_back(normal_piece);
-
-							material_point.push_back(error_point);
-							material_point.push_back(normal_point);
-
-							done = true;
-							cout << "yaya" << endl;
-							break;
-						}
-						else{
-							plane_queue.erase(plane_queue.begin() + plane_queue.size() - 1);
-							cout << "fuck" << endl;
-						}
-					}
-				}					
-			}
-
-			if (done)
-				break;
-		}		
-	}
-
-		//if (done)
-		//	break;
-	//}
-
-	//return true;
+	glmWriteOBJ(model, my_strdup(std::string(model_file + "_saliency.obj").c_str()), GLM_TEXTURE);
 }

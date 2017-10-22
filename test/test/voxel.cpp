@@ -1,12 +1,15 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
+#include <iostream>
 #include <omp.h>
 #include "voxel.h"
 #include "zomedir.h"
 #include "shell.h"
-#include "ImportOBJ.h"
+#include "bestfitobb.h"
 #include "global.h"
+
+using namespace std;
 
 voxel::voxel(int t_color, int t_size, float t_scale)
 {
@@ -785,9 +788,6 @@ void voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, std::vector<st
 	voxel_zometool(all_voxel, zome_queue, region, angle);
 }
 
-#include <iostream>
-using namespace std;
-
 void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &bounding_max, vec3 &bounding_min, vec3 &bound_center, vec3 &angle, float length)
 {
 	voxel start(-1, -1, length / 2.0f, bound_center, angle);
@@ -937,7 +937,7 @@ void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &b
 	}
 }
 
-void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
+void output_voxel(std::vector<voxel> &all_voxel, int piece_id, std::string model_file)
 {
 	GLMmodel *cube = glmReadOBJ("test_model/cube.obj");
 	GLMmodel *output = glmCopy(cube);
@@ -962,7 +962,7 @@ void output_voxel(std::vector<voxel> &all_voxel, int piece_id)
 
 	cout << "num : " << num << endl;
 	if (num != 0){
-		std::string s = "voxel_" + std::to_string(piece_id) + ".obj";
+		std::string s = model_file + "_voxel_" + std::to_string(piece_id) + ".obj";
 		glmWriteOBJ(output, my_strdup(s.c_str()), GLM_NONE);
 	}
 }
@@ -1121,7 +1121,6 @@ void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeco
 			vec3 voxel_p = all_voxel.at(i).position;
 			
 			Point judge_p(voxel_p[0], voxel_p[1], voxel_p[2]);
-			//cout << judge_p << endl;
 
 			bool judge = is_pointInside(check_poly, judge_p);
 
@@ -1163,11 +1162,8 @@ void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeco
 	for (int i = 0; i < 2; i += 1){
 		#pragma omp parallel for
 		for (int j = 0; j < test_connect.at(i).size(); j += 1){
-			//cout << "(" << i << " , " << j << ") " << endl;
 			vec3 from_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
-			//cout << "from" << test_connect.at(i).at(j).fromindex[0] << " , " << test_connect.at(i).at(j).fromindex[1] << endl;
 			vec3 toward_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
-			//cout << "toward" << test_connect.at(i).at(j).towardindex[0] << " , " << test_connect.at(i).at(j).towardindex[1] << endl;
 			
 			#pragma omp parallel for
 			for (int k = 0; k < 8; k += 1){
@@ -1191,4 +1187,44 @@ void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeco
 			}
 		}
 	}
+}
+
+void voxelization(GLMmodel *model, std::string &model_file)
+{
+	vec3 obb_max;
+	vec3 obb_min;
+	vec3 obb_size;
+	vec3 obb_center;
+	vec3 obb_angle;
+
+	std::vector<std::vector<zomeconn>> zome_queue(4);
+	std::vector<voxel> all_voxel;
+
+	computeSimpleBB(model->numvertices, model->vertices, obb_size, obb_max, obb_min, obb_center);
+	voxelization(model, all_voxel, zome_queue, obb_max, obb_min, obb_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
+
+	vector<vector<zomeconn>> output_ans(4);
+	combine_zome_ztruc(output_ans, zome_queue);
+
+	output_zometool(output_ans, model_file + std::string("_out.obj"));
+	output_struc(output_ans, model_file + std::string("_out.txt"));
+}
+
+void voxel_inner_shell(GLMmodel *model, std::string &model_file)
+{
+	vec3 obb_max;
+	vec3 obb_min;
+	vec3 obb_size;
+	vec3 obb_center;
+	vec3 obb_angle;
+
+	std::vector<voxel> all_voxel;
+
+	computeSimpleBB(model->numvertices, model->vertices, obb_size, obb_max, obb_min, obb_center);
+	simple_voxelization(model, all_voxel, obb_max, obb_min, obb_center, vec3(0.0, 0.0, 0.0), 5.40f);
+	cout << "output piece " << 0 + 1 << endl;
+	output_voxel(all_voxel, 540, model_file);
+	voxel_txt(all_voxel, model_file + std::string("voxel_5.40.txt"));
+
+	voxel_shell(all_voxel, model_file);
 }
