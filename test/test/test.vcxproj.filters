@@ -42,9 +42,6 @@
     <ClCompile Include="main.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
-    <ClCompile Include="shell.cpp">
-      <Filter>原始程式檔</Filter>
-    </ClCompile>
     <ClCompile Include="voxel.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
@@ -176,9 +173,6 @@
     <ClInclude Include="glui_internal.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="shell.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="voxel.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
@@ -290,15 +284,15 @@
     <ClInclude Include="plane.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="ImportOBJ.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="zome_merge.txt">
       <Filter>資源檔</Filter>
     </Text>
     <Text Include="zome_splite.txt">
+      <Filter>資源檔</Filter>
+    </Text>
+    <Text Include="ZomeFab input.txt">
       <Filter>資源檔</Filter>
     </Text>
   </ItemGroup>

@@ -5,11 +5,8 @@
 #include <omp.h>
 #include "voxel.h"
 #include "zomedir.h"
-#include "shell.h"
 #include "bestfitobb.h"
 #include "global.h"
-
-using namespace std;
 
 voxel::voxel(int t_color, int t_size, float t_scale)
 {
@@ -815,7 +812,7 @@ void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &b
 
 	start.position += (float)(max_d - 1) * (start.toward_vector.at(1) + start.toward_vector.at(3) + start.toward_vector.at(5)) * start.scale * 2.0f;
 
-	cout << max_d * 2 << endl;
+	std::cout << max_d * 2 << std::endl;
 
 	for (int i = 0; i < max_d * 2; i += 1){
 		for (int j = 0; j < max_d * 2; j += 1){
@@ -960,7 +957,7 @@ void output_voxel(std::vector<voxel> &all_voxel, int piece_id, std::string model
 		}
 	}	
 
-	cout << "num : " << num << endl;
+	std::cout << "num : " << num << std::endl;
 	if (num != 0){
 		std::string s = model_file + "_voxel_" + std::to_string(piece_id) + ".obj";
 		glmWriteOBJ(output, my_strdup(s.c_str()), GLM_NONE);
@@ -1060,136 +1057,7 @@ void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename)
 	oct_tree(all_voxel, 0, all_voxel.size(), 0, origin, -1);
 }
 
-void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &test_connect)
-{
-	std::vector<int> obj_index;
-	for (int i = 0; i < test_connect.at(COLOR_WHITE).size(); i += 1){
-		if (test_connect.at(COLOR_WHITE).at(i).exist){
-			if (test_connect.at(COLOR_WHITE).at(i).outer){
-				obj_index.push_back(i);
-			}
-		}
-	}
-
-	std::vector<Point> points;
-	for (unsigned int i = 0; i < obj_index.size(); i += 1){
-		Point temp(test_connect.at(COLOR_WHITE).at(obj_index.at(i)).position[0], test_connect.at(COLOR_WHITE).at(obj_index.at(i)).position[1], test_connect.at(COLOR_WHITE).at(obj_index.at(i)).position[2]);
-		points.push_back(temp);
-	}
-
-	Polyhedron_3 poly;
-	if (points.size() > 3){
-		CGAL::convex_hull_3(points.begin(), points.end(), poly);
-	}
-
-	std::ofstream os;
-	os.open("outtttttt.obj");
-	
-	Vertex_iterator v = poly.vertices_begin();
-	for (int i = 0; i < poly.size_of_vertices(); i += 1){
-		os << "v " << v->point() << std::endl;
-		v++;
-	}
-
-	Face_iterator f = poly.facets_begin();
-	for (int i = 0; i < poly.size_of_facets(); i += 1){
-		Halfedge_facet_circulator edge = f->facet_begin();
-		os << "f ";
-		for (int j = 0; j < CGAL::circulator_size(edge); j += 1){
-			os << distance(poly.vertices_begin(), edge->vertex()) + 1 << " ";
-			edge++;
-		}
-		os << std::endl;
-		f++;
-	}
-	os.close();
-
-	GLMmodel *outer = glmReadOBJ("outtttttt.obj");
-	recount_normal(outer);
-	GLMmodel *new_outer = glmCopy(outer);
-	process_inner(outer, new_outer, -NODE_DIAMETER / 2.5f);
-	glmWriteOBJ(new_outer, "outtttttt_test2.obj", GLM_NONE);
-	
-	Polyhedron_3 check_poly;
-	SMeshLib::IO::importOBJ("outtttttt_test2.obj", &check_poly);
-	remove("outtttttt.obj");
-	remove("outtttttt_test2.obj");
-
-	for (int i = 0; i < all_voxel.size(); i += 1){
-		if (all_voxel.at(i).show){
-			//Point
-			vec3 voxel_p = all_voxel.at(i).position;
-			
-			Point judge_p(voxel_p[0], voxel_p[1], voxel_p[2]);
-
-			bool judge = is_pointInside(check_poly, judge_p);
-
-			if (judge){
-				all_voxel.at(i).show = false;
-			}
-		}
-	}
-	
-	#pragma omp parallel for
-	for (int i = 0; i < all_voxel.size(); i += 1){
-		if (all_voxel.at(i).show){
-			vec3 voxel_p = all_voxel.at(i).position;
-			for (int j = 0; j < test_connect.at(COLOR_WHITE).size(); j += 1){
-				if ((voxel_p - test_connect.at(COLOR_WHITE).at(j).position).length() < NODE_DIAMETER * 0.9){
-					all_voxel.at(i).show = false;
-					break;
-				}
-			}
-		}
-	}
-
-	#pragma omp parallel for
-	for (int i = 0; i < all_voxel.size(); i += 1){
-		if (all_voxel.at(i).show){
-			int kill = 0;
-			for (int j = 0; j < 6; j += 1){
-				if (!all_voxel.at(all_voxel.at(i).face_toward[j]).show){
-					kill += 1;
-				}
-			}
-			if (kill == 6){
-				all_voxel.at(i).show = false;
-			}
-		}
-	}
-
-	#pragma omp parallel for
-	for (int i = 0; i < 2; i += 1){
-		#pragma omp parallel for
-		for (int j = 0; j < test_connect.at(i).size(); j += 1){
-			vec3 from_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).fromindex[1]).position;
-			vec3 toward_p = test_connect.at(COLOR_WHITE).at(test_connect.at(i).at(j).towardindex[1]).position;
-			
-			#pragma omp parallel for
-			for (int k = 0; k < 8; k += 1){
-				int dx = 0;
-				int dy = 2;
-				int dz = 4;
-
-				if (k % 2 == 1)
-					dx = 1;
-				if ((k / 2) % 2 == 1)
-					dy = 3;
-				if (k / 4 == 1)
-					dz = 5;
-
-				vec3 stick_error = (all_voxel.at(0).toward_vector.at(dx) + all_voxel.at(0).toward_vector.at(dy) + all_voxel.at(0).toward_vector.at(dz)) * ERROR_THICKNESS * 2;
-
-				int from_voxel_index = search_coord(all_voxel, 0, all_voxel.size(), from_p, 0, stick_error);
-				int toward_voxel_index = search_coord(all_voxel, 0, all_voxel.size(), toward_p, 0, stick_error);
-
-				cross_edge(all_voxel, from_p, toward_p, from_voxel_index, toward_voxel_index, stick_error);
-			}
-		}
-	}
-}
-
-void voxelization(GLMmodel *model, std::string &model_file)
+void struct_voxelization(GLMmodel *model, std::string &model_file)
 {
 	vec3 obb_max;
 	vec3 obb_min;
@@ -1203,14 +1071,301 @@ void voxelization(GLMmodel *model, std::string &model_file)
 	computeSimpleBB(model->numvertices, model->vertices, obb_size, obb_max, obb_min, obb_center);
 	voxelization(model, all_voxel, zome_queue, obb_max, obb_min, obb_center, vec3(0.0, 0.0, 0.0), COLOR_BLUE, SIZE_S);
 
-	vector<vector<zomeconn>> output_ans(4);
+	std::vector<std::vector<zomeconn>> output_ans(4);
 	combine_zome_ztruc(output_ans, zome_queue);
 
 	output_zometool(output_ans, model_file + std::string("_out.obj"));
 	output_struc(output_ans, model_file + std::string("_out.txt"));
 }
 
-void voxel_inner_shell(GLMmodel *model, std::string &model_file)
+void voxel_shell(std::vector<voxel> &all_voxel, std::string model_file)
+{
+	std::vector<int> exist_index;
+	int edge_length = pow(all_voxel.size(), 1.0 / 3);
+	std::vector<std::vector<std::vector<int>>> convert_vertex(edge_length + 1);
+	for (int i = 0; i < edge_length + 1; i += 1){
+		convert_vertex.at(i).resize(edge_length + 1);
+
+		for (int j = 0; j < edge_length + 1; j += 1){
+			convert_vertex.at(i).at(j).resize(edge_length + 1);
+
+			for (int k = 0; k < edge_length + 1; k += 1){
+				convert_vertex.at(i).at(j).at(k) = -1;
+			}
+		}
+	}
+
+	std::vector<vec3> search_index;
+	for (int i = 0; i < all_voxel.size(); i += 1){
+		if (all_voxel.at(i).show){
+			for (int j = 0; j < 6; j += 1){
+				if (all_voxel.at(i).face_toward[j] != -1){
+					if (!all_voxel.at(all_voxel.at(i).face_toward[j]).show){
+						exist_index.push_back(i);
+						break;
+					}
+				}
+				else{
+					exist_index.push_back(i);
+					break;
+				}
+			}
+		}
+
+		vec3 index;
+		for (int j = 0; j < all_voxel.at(i).coord.size(); j += 1){
+
+			if ((all_voxel.at(i).coord.at(j) % 2) == 1){
+				index[0] += pow(2.0f, all_voxel.at(i).coord.size() - 1 - j);
+			}
+
+			if ((all_voxel.at(i).coord.at(j) / 2) % 2 == 1){
+				index[1] += pow(2.0f, all_voxel.at(i).coord.size() - 1 - j);
+			}
+
+			if (all_voxel.at(i).coord.at(j) > 3){
+				index[2] += pow(2.0f, all_voxel.at(i).coord.size() - 1 - j);
+			}
+		}
+
+		search_index.push_back(index);
+	}
+
+	GLMmodel surface;
+	empty_model(&surface);
+	int numvertex = 0;
+
+	for (int i = 0; i < exist_index.size(); i += 1){
+		voxel now = all_voxel.at(exist_index.at(i));
+
+		if (now.face_toward[0] == -1 || !all_voxel.at(now.face_toward[0]).show){
+			vec3 index[4];
+			int use_point[4] = { 0, 2, 6, 4 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[1] == -1 || !all_voxel.at(now.face_toward[1]).show){
+			vec3 index[4];
+			int use_point[4] = { 1, 5, 7, 3 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 1.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 0.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[2] == -1 || !all_voxel.at(now.face_toward[2]).show){
+			vec3 index[4];
+			int use_point[4] = { 0, 4, 5, 1 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[3] == -1 || !all_voxel.at(now.face_toward[3]).show){
+			vec3 index[4];
+			int use_point[4] = { 2, 3, 7, 6 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 0.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 1.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[4] == -1 || !all_voxel.at(now.face_toward[4]).show){
+			vec3 index[4];
+			int use_point[4] = { 0, 1, 3, 2 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 0.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 0.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 0.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 0.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+		if (now.face_toward[5] == -1 || !all_voxel.at(now.face_toward[5]).show){
+			vec3 index[4];
+			int use_point[4] = { 4, 6, 7, 5 };
+			index[0] = search_index.at(exist_index.at(i)) + vec3(0.0f, 0.0f, 1.0f);
+			index[1] = search_index.at(exist_index.at(i)) + vec3(0.0f, 1.0f, 1.0f);
+			index[2] = search_index.at(exist_index.at(i)) + vec3(1.0f, 1.0f, 1.0f);
+			index[3] = search_index.at(exist_index.at(i)) + vec3(1.0f, 0.0f, 1.0f);
+			int model_index[4];
+
+			for (int j = 0; j < 4; j += 1){
+				if (convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) == -1){
+					numvertex += 1;
+					convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]) = numvertex;
+					model_index[j] = numvertex;
+					surface.vertices->push_back(now.vertex_p[use_point[j]][0]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][1]);
+					surface.vertices->push_back(now.vertex_p[use_point[j]][2]);
+				}
+				else{
+					model_index[j] = convert_vertex.at(index[j][0]).at(index[j][1]).at(index[j][2]);
+				}
+			}
+
+			GLMtriangle temp_tri1;
+			temp_tri1.vindices[0] = model_index[0];
+			temp_tri1.vindices[1] = model_index[1];
+			temp_tri1.vindices[2] = model_index[2];
+
+			GLMtriangle temp_tri2;
+			temp_tri2.vindices[0] = model_index[2];
+			temp_tri2.vindices[1] = model_index[3];
+			temp_tri2.vindices[2] = model_index[0];
+
+			surface.numtriangles += 2;
+			surface.triangles->push_back(temp_tri1);
+			surface.triangles->push_back(temp_tri2);
+		}
+	}
+	surface.numvertices = numvertex;
+	glmWriteOBJ(&surface, my_strdup((model_file + std::string("_voxel_shell.obj")).c_str()), GLM_NONE);
+}
+
+void voxel_inner_shell(GLMmodel *model, std::string &model_file, float inner_shell_edge)
 {
 	vec3 obb_max;
 	vec3 obb_min;
@@ -1221,10 +1376,9 @@ void voxel_inner_shell(GLMmodel *model, std::string &model_file)
 	std::vector<voxel> all_voxel;
 
 	computeSimpleBB(model->numvertices, model->vertices, obb_size, obb_max, obb_min, obb_center);
-	simple_voxelization(model, all_voxel, obb_max, obb_min, obb_center, vec3(0.0, 0.0, 0.0), 5.40f);
-	cout << "output piece " << 0 + 1 << endl;
-	output_voxel(all_voxel, 540, model_file);
-	voxel_txt(all_voxel, model_file + std::string("voxel_5.40.txt"));
+	simple_voxelization(model, all_voxel, obb_max, obb_min, obb_center, vec3(0.0, 0.0, 0.0), inner_shell_edge);
+	//output_voxel(all_voxel, 540, model_file);
+	voxel_txt(all_voxel, model_file + std::string("voxel_" + std::to_string(inner_shell_edge) + ".txt"));
 
 	voxel_shell(all_voxel, model_file);
 }

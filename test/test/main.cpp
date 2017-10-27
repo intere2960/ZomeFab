@@ -30,6 +30,7 @@ int main(int argc, char **argv)
 	float label;
 	float salient;
 	int plane_tune;
+	float inner_shell_edge;
 
 	ifstream is("ZomeFab input.txt");
 	is >> model_file;
@@ -40,6 +41,7 @@ int main(int argc, char **argv)
 	is >> label;
 	is >> salient;
 	is >> plane_tune;
+	is >> inner_shell_edge;
 	is >> mode;
 	is.close();
 
@@ -51,7 +53,7 @@ int main(int argc, char **argv)
 	switch (mode){
 		case VOXELIZATION:
 			cout << "Voxelizaton" << endl;
-			voxelization(myObj, model_file);
+			struct_voxelization(myObj, model_file);
 			break;
 		case SA:
 			cout << "Simulated annealing" << endl;
@@ -68,7 +70,7 @@ int main(int argc, char **argv)
 			break;
 		case INNER_SHELL:
 			cout << "Inner shell" << endl;
-			voxel_inner_shell(myObj, model_file);
+			voxel_inner_shell(myObj, model_file, inner_shell_edge);
 			break;
 		case CUT_MESH:
 			cout << "Cut mesh" << endl;

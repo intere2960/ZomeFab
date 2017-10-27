@@ -2,8 +2,6 @@
 #include "plane.h"
 
 #include <CGAL/Cartesian_d.h>
-#include <iostream>
-#include <cstdlib>
 #include <CGAL/Random.h>
 #include <CGAL/Min_sphere_annulus_d_traits_d.h>
 #include <CGAL/Min_sphere_d.h>
@@ -11,8 +9,6 @@ typedef CGAL::Cartesian_d<double>              K;
 typedef CGAL::Min_sphere_annulus_d_traits_d<K> Traits;
 typedef CGAL::Min_sphere_d<Traits>             Min_sphere;
 typedef K::Point_d                             Point;
-
-using namespace std;
 
 plane::plane(){
 	plane_par[0] = 0.0;
@@ -31,7 +27,7 @@ plane::plane(float a, float b, float c, float d, int e){
 }
 
 void plane_parser_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_plane){
-	ifstream is(file_plane);
+	std::ifstream is(file_plane);
 	int part, num_plane, plane_dir;
 	float plane_info[4];
 
@@ -49,78 +45,9 @@ void plane_parser_SVM(std::vector<std::vector<plane>> &all_planes, std::string &
 	is.close();
 }
 
-void plane_parser_voronoi(std::vector<std::vector<plane>> &all_planes, std::string &file_plane){
-	ifstream is(file_plane);
-	int part, num_plane, plane_dir;
-	float plane_info[4];
-
-	is >> part;
-	all_planes.resize(part);
-	for (int i = 0; i < part; i += 1){
-		is >> num_plane;
-		for (int j = 0; j < num_plane; j += 1){
-			is >> plane_info[0] >> plane_info[1] >> plane_info[2] >> plane_info[3] >> plane_dir;
-
-			float length = plane_info[0] * plane_info[0] + plane_info[1] * plane_info[1] + plane_info[2] * plane_info[2];
-			plane temp(plane_info[0] / length, plane_info[1] / length, plane_info[2] / length, plane_info[3] / length, plane_dir);
-			is >> temp.mid_point[0] >> temp.mid_point[1] >> temp.mid_point[2] >> temp.length;
-			all_planes.at(i).push_back(temp);
-		}
-	}
-
-	is.close();
-}
-
-void output_plane_voronoi(std::vector<std::vector<plane>> &all_planes, std::string &file_tag)
-{
-	for (unsigned int i = 0; i < all_planes.size(); i += 1){
-		GLMmodel *planes = NULL;
-		for (unsigned int j = 0; j < all_planes.at(i).size(); j += 1){
-			
-			GLMmodel *temp_plane = glmReadOBJ("test_model/cube.obj");
-			
-			glmScale_y(temp_plane, all_planes.at(i).at(j).length / 2.0f);
-			glmScale_z(temp_plane, all_planes.at(i).at(j).length / 2.0f);
-
-			vec3 n_vector;
-			n_vector[0] = all_planes.at(i).at(j).plane_par[0];
-			n_vector[1] = all_planes.at(i).at(j).plane_par[1];
-			n_vector[2] = all_planes.at(i).at(j).plane_par[2];
-			float d = all_planes.at(i).at(j).plane_par[3];
-			
-			vec3 axis = vec3(1.0f, 0.0f, 0.0f) ^ n_vector;
-			axis = axis.normalize();
-			float dot_angle = vec3(1.0f, 0.0f, 0.0f) * n_vector;
-			float angle = acos(dot_angle);
-			
-			mat4 R = rotation3Drad(axis, angle);
-
-			for (unsigned int a = 1; a <= temp_plane->numvertices; a += 1) {
-				vec3 temp(temp_plane->vertices->at(3 * a + 0), temp_plane->vertices->at(3 * a + 1), temp_plane->vertices->at(3 * a + 2));
-				temp = R * temp;
-				temp_plane->vertices->at(3 * a + 0) = temp[0];
-				temp_plane->vertices->at(3 * a + 1) = temp[1];
-				temp_plane->vertices->at(3 * a + 2) = temp[2];
-			}
-
-			glmT(temp_plane, all_planes.at(i).at(j).mid_point);
-
-			if (j == 0){
-				planes = glmCopy(temp_plane);
-			}
-			else{
-				glmCombine(planes, temp_plane);
-			}
-		}
-
-		std::string filename = file_tag + "_" + to_string(i) + ".obj";
-		glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);
-	}
-}
-
 void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_neighbor)
 {
-	ifstream neighbor(file_neighbor);
+	std::ifstream neighbor(file_neighbor);
 	std::vector<std::vector<int>> neighbor_info(all_planes.size());
 	std::vector<std::vector<vec3>> vertex_info(all_planes.size());
 	int temp_ne;
@@ -132,8 +59,8 @@ void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &
 			}
 		}
 
-		string file_vertex = to_string(i) + ".txt";
-		ifstream vertex(file_vertex);
+		std::string file_vertex = std::to_string(i) + ".txt";
+		std::ifstream vertex(file_vertex);
 		vec3 temp_v;
 		while (vertex >> temp_v[0] >> temp_v[1] >> temp_v[2])
 		{
@@ -199,7 +126,7 @@ void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &
 			}			
 		}
 
-		std::string filename = "SVM_plane" + to_string(i) + ".obj";
+		std::string filename = "SVM_plane" + std::to_string(i) + ".obj";
 		glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);
 	}
 }
@@ -238,6 +165,23 @@ void plane_dist_edge(edge &temp, plane &plane, float dist[2])
 
 	dist[0] = fabs(judge1) / sqrt(pow(plane.plane_par[0], 2) + pow(plane.plane_par[1], 2) + pow(plane.plane_par[2], 2));
 	dist[1] = fabs(judge2) / sqrt(pow(plane.plane_par[0], 2) + pow(plane.plane_par[1], 2) + pow(plane.plane_par[2], 2));
+}
+
+bool plane_dir_face(GLMmodel *model, plane &plane, int face_id)
+{
+	vec3 point_dir;
+	int dir_count[3] = { 0, 0, 0 };
+	for (int j = 0; j < 3; j += 1){
+		vec3 temp(model->vertices->at(3 * (model->triangles->at(face_id).vindices[j]) + 0), model->vertices->at(3 * (model->triangles->at(face_id).vindices[j]) + 1), model->vertices->at(3 * (model->triangles->at(face_id).vindices[j]) + 2));
+		point_dir[j] = plane_dir_point(temp, plane);
+		dir_count[(int)point_dir[j] + 1] += 1;
+	}
+
+	if ((dir_count[plane.dir * (-1) + 1] + dir_count[1]) != 3){
+		return true;
+	}
+
+	return false;
 }
 
 vec3 point_project_plane(vec3 &point, plane &plane)

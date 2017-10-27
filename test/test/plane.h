@@ -30,13 +30,12 @@ public:
 };
 
 void plane_parser_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_plane);
-void plane_parser_voronoi(std::vector<std::vector<plane>> &all_planes, std::string &file_plane);
-void output_plane_voronoi(std::vector<std::vector<plane>> &all_planes, std::string &file_tag);
 void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_neighbor);
 float plane_dir_point(vec3 &point, plane &plane);
 float plane_dist_point(vec3 &point, plane &plane);
 void plane_dir_edge(edge &temp, plane &plane, int dir[2]);
 void plane_dist_edge(edge &temp, plane &plane, float dist[2]);
+bool plane_dir_face(GLMmodel *model, plane &plane, int face_id);
 vec3 point_project_plane(vec3 &point, plane &plane);
 void point_set_project_plane(std::vector<vec3> &point_set, plane &plane);
 

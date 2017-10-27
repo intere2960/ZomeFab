@@ -2,83 +2,91 @@
 #include <fstream>
 #include "glm.h"
 #include "bisect.h"
-#include "shell.h"
 #include "zomestruc.h"
 #include "fill.h"
 #include "global.h"
 
-neighbor_record::neighbor_record(std::vector<std::vector<plane>> &all_planes, std::string neighbor_file)
+void recount_normal(GLMmodel *myObj)
 {
-	std::ifstream neighbor(neighbor_file);
-	neighbor_info.resize(all_planes.size());
-	neighbor_table.resize(all_planes.size());
-	int temp_ne;
-	for (unsigned int i = 0; i < all_planes.size(); i += 1){
-		for (unsigned int j = 0; j < all_planes.size(); j += 1){
-			neighbor >> temp_ne;
-			neighbor_table.at(i).push_back(temp_ne);
-			if (temp_ne > 2){
-				neighbor_info.at(i).push_back(j);
-			}
-		}
-	}
-	neighbor.close();
-	
-	for (unsigned int i = 0; i < all_planes.size(); i += 1){
+	glmFacetNormals(myObj);
 
-		std::vector<std::vector<int>> temp_info(all_planes.at(i).size());
+	std::vector<int> *point_tri = new std::vector<int>[myObj->numvertices + 1];
 
-		for (unsigned int j = 0; j < neighbor_info.at(i).size(); j += 1){
-
-			int current_index = neighbor_info.at(i).at(j);
-
-			for (unsigned int k = 0; k < neighbor_info.at(i).size(); k += 1){
-				if (j == k)
-					continue;
-
-				int check_index = neighbor_info.at(i).at(k);
-				if (neighbor_table.at(current_index).at(check_index) > 2){
-					temp_info.at(j).push_back(k);
+	for (unsigned int i = 0; i < myObj->numtriangles; i += 1)
+	{
+		for (int j = 0; j < 3; j += 1)
+		{
+			bool add = true;
+			for (unsigned int k = 0; k < point_tri[myObj->triangles->at(i).vindices[j]].size(); k += 1)
+			{
+				GLfloat *temp = &myObj->facetnorms->at(3 * point_tri[myObj->triangles->at(i).vindices[j]][k]);
+				if (*temp == myObj->facetnorms->at(3 * (i + 1) + 0) && *(temp + 1) == myObj->facetnorms->at(3 * (i + 1) + 1) && *(temp + 2) == myObj->facetnorms->at(3 * (i + 1) + 2))
+				{
+					add = false;
+					break;
 				}
 			}
+			if (add)
+				point_tri[myObj->triangles->at(i).vindices[j]].push_back(i + 1);
 		}
-		plane_neighbor.push_back(temp_info);
 	}
 
-	for (unsigned int i = 0; i < all_planes.size(); i += 1){
-		vec3 sum(0.0f, 0.0f, 0.0f);
-		int num = 0;
-		std::string temp_file = std::to_string(i) + ".txt";
+	for (unsigned int i = 1; i <= myObj->numvertices; i += 1)
+	{
+		sort(point_tri[i].begin(), point_tri[i].begin() + point_tri[i].size());
+	}
 
-		std::ifstream is(temp_file);
-		vec3 temp_read;
-		while (is >> temp_read[0] >> temp_read[1] >> temp_read[2]){
-			sum += temp_read;
-			num += 1;
+	myObj->numnormals = myObj->numvertices;
+	myObj->normals = new GLfloat[3 * (myObj->numnormals + 1)];
+	for (unsigned int i = 1; i <= myObj->numnormals; i += 1)
+	{
+		GLfloat temp[3] = { 0.0, 0.0, 0.0 };
+		for (unsigned int j = 0; j < point_tri[i].size(); j += 1)
+		{
+			temp[0] += myObj->facetnorms->at(3 * point_tri[i].at(j) + 0);
+			temp[1] += myObj->facetnorms->at(3 * point_tri[i].at(j) + 1);
+			temp[2] += myObj->facetnorms->at(3 * point_tri[i].at(j) + 2);
 		}
-		is.close();
+		GLfloat normal_length = sqrt(pow(temp[0], 2) + pow(temp[1], 2) + pow(temp[2], 2));
+		temp[0] /= normal_length;
+		temp[1] /= normal_length;
+		temp[2] /= normal_length;
 
-		sum /= (float)num;
-
-		piece_center.push_back(sum);
+		myObj->normals[3 * i + 0] = temp[0];
+		myObj->normals[3 * i + 1] = temp[1];
+		myObj->normals[3 * i + 2] = temp[2];
 	}
 }
 
-bool plane_dir_face(GLMmodel *model, plane &plane, int face_id)
+void combine_inner_outfit(GLMmodel *myObj, GLMmodel *myObj_inner)
 {
-	vec3 point_dir;
-	int dir_count[3] = { 0, 0, 0 };
-	for (int j = 0; j < 3; j += 1){
-		vec3 temp(model->vertices->at(3 * (model->triangles->at(face_id).vindices[j]) + 0), model->vertices->at(3 * (model->triangles->at(face_id).vindices[j]) + 1), model->vertices->at(3 * (model->triangles->at(face_id).vindices[j]) + 2));
-		point_dir[j] = plane_dir_point(temp, plane);
-		dir_count[(int)point_dir[j] + 1] += 1;
+	for (unsigned int i = 0; i < myObj_inner->numtriangles; i += 1){
+		GLMtriangle temp = myObj_inner->triangles->at(i);
+		temp.vindices[0] += myObj->numvertices;
+		temp.vindices[1] += myObj->numvertices;
+		temp.vindices[2] += myObj->numvertices;
+		temp.findex += myObj->numfacetnorms;
+		temp.tag = INNER;
+		myObj->triangles->push_back(temp);
+		myObj->numtriangles += 1;
 	}
 
-	if ((dir_count[plane.dir * (-1) + 1] + dir_count[1]) != 3){
-		return true;
+	for (unsigned int i = 1; i <= myObj_inner->numvertices; i += 1){
+		myObj->vertices->push_back(myObj_inner->vertices->at(3 * i + 0));
+		myObj->vertices->push_back(myObj_inner->vertices->at(3 * i + 1));
+		myObj->vertices->push_back(myObj_inner->vertices->at(3 * i + 2));
+		myObj->numvertices += 1;
+
+		vertex new_vertex;
+		myObj->cut_loop->push_back(new_vertex);
 	}
 
-	return false;
+	for (unsigned int i = 1; i <= myObj_inner->numfacetnorms; i += 1){
+		myObj->facetnorms->push_back(myObj_inner->facetnorms->at(3 * i + 0));
+		myObj->facetnorms->push_back(myObj_inner->facetnorms->at(3 * i + 1));
+		myObj->facetnorms->push_back(myObj_inner->facetnorms->at(3 * i + 2));
+		myObj->numfacetnorms += 1;
+	}
 }
 
 void vertex_use_tri(GLMmodel *model)
@@ -169,290 +177,6 @@ void cut_intersection(GLMmodel *model, std::vector<plane> &planes, std::vector<i
         }
     }
 
-}
-
-void process_convex(GLMmodel *model, std::vector<plane> &planes, std::vector<int> &face_split_by_plane, int piece_id, neighbor_record &n_info)
-{
-	for (unsigned int i = 0; i < planes.size(); i += 1){
-		for (unsigned int j = 0; j < model->numtriangles; j += 1){
-			vec3 point_dir;
-			int dir_count[3] = { 0, 0, 0 };
-			for (int k = 0; k < 3; k += 1){
-				vec3 temp(model->vertices->at(3 * (model->triangles->at(j).vindices[k]) + 0), model->vertices->at(3 * (model->triangles->at(j).vindices[k]) + 1), model->vertices->at(3 * (model->triangles->at(j).vindices[k]) + 2));
-				point_dir[k] = plane_dir_point(temp, planes.at(i));
-				dir_count[(int)point_dir[k] + 1] += 1;
-			}
-
-			if ((dir_count[(planes.at(i).dir + 2) % 3] + dir_count[(planes.at(i).dir + 3) % 3]) != 3){
-				if (!((dir_count[(planes.at(i).dir) + 1] == 3) || (dir_count[(planes.at(i).dir) + 1] + dir_count[1] == 3))){
-					model->triangles->at(j).split_plane_id.push_back(i);
-				}
-			}
-		}
-	}
-
-	std::vector<std::vector<line>> all_lines(planes.size());
-	std::vector<std::vector<vec3>> split_centers(planes.size());
-
-	for (unsigned int i = 0; i < n_info.plane_neighbor.at(piece_id).size(); i += 1){
-	
-		vec3 p1_n(planes.at(i).plane_par[0], planes.at(i).plane_par[1], planes.at(i).plane_par[2]);
-		float p1_d = planes.at(i).plane_par[3];
-
-		for (unsigned int j = 0; j < n_info.plane_neighbor.at(piece_id).at(i).size(); j += 1){
-
-			vec3 p2_n(planes.at(n_info.plane_neighbor.at(piece_id).at(i).at(j)).plane_par[0], planes.at(n_info.plane_neighbor.at(piece_id).at(i).at(j)).plane_par[1], planes.at(n_info.plane_neighbor.at(piece_id).at(i).at(j)).plane_par[2]);
-			float p2_d = planes.at(n_info.plane_neighbor.at(piece_id).at(i).at(j)).plane_par[3];
-
-			line temp_line;
-			temp_line.dir = (p1_n ^ p2_n).normalize();
-
-			vec3 temp_p;
-			/*temp_p[2] = 0.0f;
-			temp_p[0] = (p2_n[1] * p1_d - p1_n[1] * p2_d) / (p1_n[0] * p2_n[1] - p1_n[1] * p2_n[0]);
-			temp_p[1] = (p2_n[0] * p1_d - p1_n[0] * p2_d) / (p1_n[1] * p2_n[0] - p1_n[0] * p2_n[1]);*/
-
-			float sign = 1.0f;
-
-			vec3 split_center = (n_info.piece_center.at(piece_id) + n_info.piece_center.at(n_info.neighbor_info.at(piece_id).at(n_info.plane_neighbor.at(piece_id).at(i).at(j)))) / 2.0f;
-			if (split_center[0] < 0.0f)
-				sign = -1.0f;
-
-			temp_p[0] = model->obb_center[0] + (model->obb_max[0] - model->obb_min[0]) / 2.0f;
-			temp_p[1] = ((p1_d - p1_n[0] * temp_p[0]) * p2_n[2] - (p2_d - p2_n[0] * temp_p[0]) * p1_n[2]) / (p1_n[1] * p2_n[2] - p1_n[2] * p2_n[1]);
-			temp_p[2] = ((p1_d - p1_n[0] * temp_p[0]) * p2_n[1] - (p2_d - p2_n[0] * temp_p[0]) * p1_n[1]) / (p1_n[2] * p2_n[1] - p1_n[1] * p2_n[2]);
-
-			temp_line.use_plane.push_back(i);
-			temp_line.use_plane.push_back(n_info.plane_neighbor.at(piece_id).at(i).at(j));
-			temp_line.start_point = temp_p;
-
-			all_lines.at(i).push_back(temp_line);
-			split_centers.at(i).push_back(split_center);
-		}
-
-		for (unsigned int b = 0; b < all_lines.at(i).size(); b += 1){
-			for (unsigned int a = 0; a < model->numtriangles; a += 1){
-				vec3 p1(model->vertices->at(3 * model->triangles->at(a).vindices[0] + 0), model->vertices->at(3 * model->triangles->at(a).vindices[0] + 1), model->vertices->at(3 * model->triangles->at(a).vindices[0] + 2));
-				vec3 p2(model->vertices->at(3 * model->triangles->at(a).vindices[1] + 0), model->vertices->at(3 * model->triangles->at(a).vindices[1] + 1), model->vertices->at(3 * model->triangles->at(a).vindices[1] + 2));
-				vec3 p3(model->vertices->at(3 * model->triangles->at(a).vindices[2] + 0), model->vertices->at(3 * model->triangles->at(a).vindices[2] + 1), model->vertices->at(3 * model->triangles->at(a).vindices[2] + 2));
-
-				vec3 tri_n = ((p2 - p1) ^ (p3 - p1)).normalize();
-				float tri_d = tri_n * p1;
-
-				float t = (tri_d - tri_n[0] * all_lines.at(i).at(b).start_point[0] - tri_n[1] * all_lines.at(i).at(b).start_point[1] - tri_n[2] * all_lines.at(i).at(b).start_point[2]) / (tri_n[0] * all_lines.at(i).at(b).dir[0] + tri_n[1] * all_lines.at(i).at(b).dir[1] + tri_n[2] * all_lines.at(i).at(b).dir[2]);
-
-				vec3 plane_point = all_lines.at(i).at(b).start_point + t * all_lines.at(i).at(b).dir;
-
-				float judge1 = ((p2 - p1) ^ (plane_point - p1)) * tri_n;
-				float judge2 = ((p3 - p2) ^ (plane_point - p2)) * tri_n;
-				float judge3 = ((p1 - p3) ^ (plane_point - p3)) * tri_n;
-
-				if ((judge1 > 0) && (judge2 > 0) && (judge3 > 0)){
-					vec3 now_dir = (plane_point - all_lines.at(i).at(b).start_point).normalize();
-
-					bool inside = ((find(face_split_by_plane.begin(), face_split_by_plane.end(), a) - face_split_by_plane.begin()) < face_split_by_plane.size());
-					
-					if (model->triangles->at(a).tag == OUTER){
-						all_lines.at(i).at(b).outer_insection.push_back(vec3(a, t, inside));
-					}
-					else{
-						all_lines.at(i).at(b).inner_insection.push_back(vec3(a, t, inside));
-					}
-				}
-
-				if (((plane_point - p1).length() <= 0.001f) || ((plane_point - p2).length() <= 0.001f) || ((plane_point - p3).length() <= 0.001f)){
-					vec3 now_dir = (plane_point - all_lines.at(i).at(b).start_point).normalize();
-
-					bool inside = ((find(face_split_by_plane.begin(), face_split_by_plane.end(), a) - face_split_by_plane.begin()) < face_split_by_plane.size());
-					
-					if (inside){
-
-						bool add = true;
-						for (unsigned int c = 0; c < all_lines.at(i).at(b).use_plane.size(); c += 1){
-							if (!plane_dir_face(model, planes.at(all_lines.at(i).at(b).use_plane.at(c)), a)){
-								add = false;
-								break;
-							}
-						}
-
-						if (add){
-							if (model->triangles->at(a).tag == OUTER){
-								all_lines.at(i).at(b).outer_insection.push_back(vec3(a, t, inside));
-							}
-							else{
-								all_lines.at(i).at(b).inner_insection.push_back(vec3(a, t, inside));
-							}
-						}
-					}
-				}
-			}
-		}
-
-		for (unsigned int j = 0; j < all_lines.at(i).size(); j += 1){
-
-			bool judge_outer = true;
-			bool judge_inner = true;
-
-			for (unsigned int k = 0; k < all_lines.at(i).at(j).outer_insection.size(); k += 1){
-				if (all_lines.at(i).at(j).outer_insection.at(k)[2] != 0){
-					judge_outer = false;
-					break;
-				}
-			}
-
-			for (unsigned int k = 0; k < all_lines.at(i).at(j).inner_insection.size(); k += 1){
-				if (all_lines.at(i).at(j).inner_insection.at(k)[2] != 0){
-					judge_inner = false;
-					break;
-				}
-			}
-
-			if (judge_outer && judge_inner){
-				if (all_lines.at(i).at(j).outer_insection.size() > 0){
-					std::sort(all_lines.at(i).at(j).outer_insection.begin(),
-						all_lines.at(i).at(j).outer_insection.end(),
-						[](vec3 a, vec3 b){
-						return b[1] > a[1];
-					});
-
-					vec3 p1 = all_lines.at(i).at(j).start_point + all_lines.at(i).at(j).dir * all_lines.at(i).at(j).outer_insection.at(0)[1];
-					vec3 p2 = all_lines.at(i).at(j).start_point + all_lines.at(i).at(j).dir * all_lines.at(i).at(j).outer_insection.at(all_lines.at(i).at(j).outer_insection.size() - 1)[1];
-
-					float length1 = (p1 - split_centers.at(i).at(j)).length();
-					float length2 = (p2 - split_centers.at(i).at(j)).length();
-
-					int start_face_id;
-					if (length1 < length2){
-						start_face_id = all_lines.at(i).at(j).outer_insection.at(0)[0];
-					}
-					else{
-						start_face_id = all_lines.at(i).at(j).outer_insection.at(all_lines.at(i).at(j).outer_insection.size() - 1)[0];
-					}
-
-					std::vector<int> restore_face;
-					if (model->triangles->at(start_face_id).material_id_graph_cut == -1){
-						restore_face.push_back(start_face_id);
-						model->triangles->at(start_face_id).material_id_graph_cut = piece_id;
-						face_split_by_plane.push_back(start_face_id);
-					}
-					else{
-						for (int k = 0; k < 3; k += 1){
-							if (model->triangles->at(model->triangles->at(start_face_id).near_tri[k]).material_id_graph_cut == -1){
-								restore_face.push_back(model->triangles->at(start_face_id).near_tri[k]);
-								model->triangles->at(model->triangles->at(start_face_id).near_tri[k]).material_id_graph_cut = piece_id;
-								face_split_by_plane.push_back(model->triangles->at(start_face_id).near_tri[k]);
-								break;
-							}
-						}
-					}
-
-					std::vector<unsigned int> judge_plane = all_lines.at(i).at(j).use_plane;
-
-					
-					for (unsigned int k = 0; k < restore_face.size(); k += 1){
-						for (int a = 0; a < 3; a += 1){
-							if (model->triangles->at(restore_face.at(k)).near_tri[a] != -1){
-								bool exist = ((find(face_split_by_plane.begin(), face_split_by_plane.end(), model->triangles->at(restore_face.at(k)).near_tri[a]) - face_split_by_plane.begin()) < face_split_by_plane.size());
-								if (!exist){
-									bool choose = true;
-					
-									for (unsigned int b = 0; b < judge_plane.size(); b += 1){
-										if (!plane_dir_face(model, planes.at(judge_plane.at(b)), model->triangles->at(restore_face.at(k)).near_tri[a])){
-											choose = false;
-											break;
-										}
-									}
-
-									if (choose){
-										if (model->triangles->at(model->triangles->at(restore_face.at(k)).near_tri[a]).material_id_graph_cut == -1){
-											restore_face.push_back(model->triangles->at(restore_face.at(k)).near_tri[a]);
-											face_split_by_plane.push_back(model->triangles->at(restore_face.at(k)).near_tri[a]);
-											model->triangles->at(model->triangles->at(restore_face.at(k)).near_tri[a]).material_id_graph_cut = piece_id;
-										}
-									}
-								}
-							}
-						}
-					}
-
-					for (unsigned int k = 0; k < restore_face.size(); k += 1){
-						model->triangles->at(restore_face.at(k)).split_by_process = true;
-					}
-				}
-
-				if (all_lines.at(i).at(j).inner_insection.size() > 0){
-					std::sort(all_lines.at(i).at(j).inner_insection.begin(),
-						all_lines.at(i).at(j).inner_insection.end(),
-						[](vec3 a, vec3 b){
-						return b[1] > a[1];
-					});
-
-					vec3 p1 = all_lines.at(i).at(j).start_point + all_lines.at(i).at(j).dir * all_lines.at(i).at(j).inner_insection.at(0)[1];
-					vec3 p2 = all_lines.at(i).at(j).start_point + all_lines.at(i).at(j).dir * all_lines.at(i).at(j).inner_insection.at(all_lines.at(i).at(j).inner_insection.size() - 1)[1];
-
-					float length1 = (p1 - split_centers.at(i).at(j)).length();
-					float length2 = (p2 - split_centers.at(i).at(j)).length();
-
-					int start_face_id;
-					if (length1 < length2){
-						start_face_id = all_lines.at(i).at(j).inner_insection.at(0)[0];
-					}
-					else{
-						start_face_id = all_lines.at(i).at(j).inner_insection.at(all_lines.at(i).at(j).inner_insection.size() - 1)[0];
-					}
-
-					std::vector<int> restore_face;
-					if (model->triangles->at(start_face_id).material_id_graph_cut == -1){
-						restore_face.push_back(start_face_id);
-						model->triangles->at(start_face_id).material_id_graph_cut = piece_id;
-						face_split_by_plane.push_back(start_face_id);
-					}
-					else{
-						for (int k = 0; k < 3; k += 1){
-							if (model->triangles->at(model->triangles->at(start_face_id).near_tri[k]).material_id_graph_cut == -1){
-								restore_face.push_back(model->triangles->at(start_face_id).near_tri[k]);
-								model->triangles->at(model->triangles->at(start_face_id).near_tri[k]).material_id_graph_cut = piece_id;
-								face_split_by_plane.push_back(model->triangles->at(start_face_id).near_tri[k]);
-								break;
-							}
-						}
-					}
-
-					std::vector<unsigned int> judge_plane = all_lines.at(i).at(j).use_plane;
-
-					for (unsigned int k = 0; k < restore_face.size(); k += 1){
-						for (int a = 0; a < 3; a += 1){
-							if (model->triangles->at(restore_face.at(k)).near_tri[a] != -1){
-								bool exist = ((find(face_split_by_plane.begin(), face_split_by_plane.end(), model->triangles->at(restore_face.at(k)).near_tri[a]) - face_split_by_plane.begin()) < face_split_by_plane.size());
-								if (!exist){
-									bool choose = true;
-									for (unsigned int b = 0; b < judge_plane.size(); b += 1){
-										if (!plane_dir_face(model, planes.at(judge_plane.at(b)), model->triangles->at(restore_face.at(k)).near_tri[a])){
-											choose = false;
-											break;
-										}
-									}
-
-									if (choose){
-										if (model->triangles->at(model->triangles->at(restore_face.at(k)).near_tri[a]).material_id_graph_cut == -1){
-											restore_face.push_back(model->triangles->at(restore_face.at(k)).near_tri[a]);
-											face_split_by_plane.push_back(model->triangles->at(restore_face.at(k)).near_tri[a]);
-											model->triangles->at(model->triangles->at(restore_face.at(k)).near_tri[a]).material_id_graph_cut = piece_id;
-										}
-									}
-								}
-							}
-						}
-					}
-
-					for (unsigned int k = 0; k < restore_face.size(); k += 1){
-						model->triangles->at(restore_face.at(k)).split_by_process = true;
-					}
-				}
-			}
-
-		}
-	}
 }
 
 void hole_split(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes, std::vector<std::vector<int>> &arrange_group)
@@ -1869,157 +1593,6 @@ void tri_poly(GLMmodel *model, std::vector<edge> &all_edge, int face_id, edge &s
     glmOneFacetNormals(model, face_id);
 }
 
-
-void find_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<plane> &planes)
-{
-	bool *use_plane = new bool[planes.size()];
-	for (unsigned int i = 0; i < planes.size(); i += 1){
-		use_plane[i] = false;
-	}
-
-	model->loop = new std::vector<Loop>(planes.size());
-	for (unsigned int i = 0; i < planes.size(); i += 1){
-		bool *use_vertex = new bool[model->numvertices + 1];
-		for (unsigned int j = 0; j < model->numvertices + 1; j += 1){
-			use_vertex[j] = false;
-		}
-
-		bool find_plane = false;
-		int start_index;
-		model->loop->at(i).plane_normal[0] = planes.at(i).plane_par[0];
-		model->loop->at(i).plane_normal[1] = planes.at(i).plane_par[1];
-		model->loop->at(i).plane_normal[2] = planes.at(i).plane_par[2];
-		model->loop->at(i).loop_line = new std::vector<int>();
-		for (unsigned int j = 0; j < model->multi_vertex->size(); j += 1){
-			if (model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(0) == i || model->cut_loop->at(model->multi_vertex->at(j)).align_plane.at(1) == i){
-				use_plane[i] = true;
-				model->loop->at(i).loop_line->push_back(model->multi_vertex->at(j));
-				start_index = model->multi_vertex->at(j);
-				use_vertex[model->multi_vertex->at(j)] = true;
-				find_plane = true;
-				break;
-			}
-		}
-
-		if (!find_plane)
-			continue;
-
-		int next_index;
-		int dir[2];
-		plane_dir_edge(all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)), planes.at(i), dir);
-		if (dir[0] == 0 && dir[1] == 0){
-			if (all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)).index[0] == start_index){
-				next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)).index[1];
-			}
-			else{
-				next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)).index[0];
-			}
-		}
-
-		plane_dir_edge(all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)), planes.at(i), dir);
-		if (dir[0] == 0 && dir[1] == 0){
-			if (all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)).index[0] == start_index){
-				next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)).index[1];
-			}
-			else{
-				next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)).index[0];
-			}
-		}
-
-		model->loop->at(i).loop_line->push_back(next_index);
-		use_vertex[next_index] = true;
-
-		while (model->cut_loop->at(next_index).align_plane.size() == 1){
-			for (unsigned j = 0; j < model->cut_loop->at(next_index).connect_edge.size(); j += 1){
-				if (all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[0] == next_index){
-					if (!use_vertex[all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[1]]){
-						next_index = all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[1];
-						break;
-					}
-				}
-				else{
-					if (!use_vertex[all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[0]]){
-						next_index = all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[0];
-						break;
-					}
-				}
-			}
-			use_vertex[next_index] = true;
-			model->loop->at(i).loop_line->push_back(next_index);
-		}
-	}
-
-	for (unsigned int i = 0; i < model->loop->size(); i += 1){
-		if (model->loop->at(i).loop_line->size() == 0){
-			continue;
-		}
-		else{
-			int end_index = model->loop->at(i).loop_line->at(model->loop->at(i).loop_line->size() - 1);
-			bool *use_vertex = new bool[model->numvertices + 1];
-			for (unsigned int j = 0; j < model->numvertices + 1; j += 1){
-				use_vertex[j] = false;
-			}
-
-			int start_index;
-			int next_index;
-			bool find_vertex = false;
-			for (unsigned int j = 0; j < model->multi_vertex->size(); j += 1){
-				if (model->multi_vertex->at(j) != (unsigned int)end_index && std::equal(model->cut_loop->at(end_index).align_plane.begin(), model->cut_loop->at(end_index).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin())){
-					start_index = model->multi_vertex->at(j);
-					model->loop->at(i).loop_line->push_back(start_index);
-					use_vertex[start_index] = true;
-					find_vertex = true;
-					break;
-				}
-			}
-
-			if (!find_vertex)
-				continue;
-
-			int dir[2];
-			plane_dir_edge(all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)), planes.at(i), dir);
-			if (dir[0] == 0 && dir[1] == 0){
-				if (all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)).index[0] == start_index){
-					next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)).index[1];
-				}
-				else{
-					next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(0)).index[0];
-				}
-			}
-
-			plane_dir_edge(all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)), planes.at(i), dir);
-			if (dir[0] == 0 && dir[1] == 0){
-				if (all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)).index[0] == start_index){
-					next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)).index[1];
-				}
-				else{
-					next_index = all_edge.at(model->cut_loop->at(start_index).connect_edge.at(1)).index[0];
-				}
-			}
-			model->loop->at(i).loop_line->push_back(next_index);
-			use_vertex[next_index] = true;
-			while (model->cut_loop->at(next_index).align_plane.size() == 1){
-				for (unsigned j = 0; j < model->cut_loop->at(next_index).connect_edge.size(); j += 1){
-					if (all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[0] == next_index){
-						if (!use_vertex[all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[1]]){
-							next_index = all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[1];
-							break;
-						}
-					}
-					else{
-						if (!use_vertex[all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[0]]){
-							next_index = all_edge.at(model->cut_loop->at(next_index).connect_edge.at(j)).index[0];
-							break;
-						}
-					}
-				}
-				use_vertex[next_index] = true;
-				model->loop->at(i).loop_line->push_back(next_index);
-			}
-		}
-	}
-}
-
 void find_easy_loop(GLMmodel *model, std::vector<edge> &all_edge, std::vector<int> &single_use)
 {
 	int num_l = 1;
@@ -2697,112 +2270,6 @@ void generate_fake_inner(GLMmodel &temp_piece, std::vector<plane> &planes, std::
 	}
 }
 
-bool shell_valid(GLMmodel *model, std::vector<int> &face_split_by_plane)
-{
-	GLMmodel *test_model = glmCopy(model);
-
-	std::vector<edge> inner_edge;
-	collect_edge(test_model, inner_edge);
-
-	for (int i = 0; i < face_split_by_plane.size(); i += 1){
-
-		vec3 p1(test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[0] + 0), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[0] + 1), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[0] + 2));
-		vec3 p2(test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[1] + 0), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[1] + 1), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[1] + 2));
-		vec3 p3(test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[2] + 0), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[2] + 1), test_model->vertices->at(3 * test_model->triangles->at(face_split_by_plane.at(i)).vindices[2] + 2));
-
-		vec3 v1 = p1 - p2;
-		vec3 v2 = p3 - p2;
-
-		vec3 n = (v2 ^ v1).normalize();
-		float d = n * p1;
-
-		for (unsigned int j = 0; j < inner_edge.size(); j += 1){
-
-			bool check = false;
-			for (int k = 0; k < 3; k += 1){
-				if (test_model->triangles->at(face_split_by_plane.at(i)).vindices[k] == inner_edge.at(j).index[0]){
-					check = true;
-					break;
-				}
-				if (test_model->triangles->at(face_split_by_plane.at(i)).vindices[k] == inner_edge.at(j).index[1]){
-					check = true;
-					break;
-				}
-			}
-
-			if (check)
-				continue;
-
-			int dir[3] = { 0.0, 0.0, 0.0 };
-			for (int k = 0; k < 2; k += 1){
-				vec3 now_p(test_model->vertices->at(3 * inner_edge.at(j).index[k] + 0), test_model->vertices->at(3 * inner_edge.at(j).index[k] + 1), test_model->vertices->at(3 * inner_edge.at(j).index[k] + 2));
-				float judge = n * now_p - d;
-
-				if (judge > 0.0001)
-					dir[2] += 1;
-				else if (judge < -0.0001)
-					dir[0] += 1;
-				else
-					dir[1] += 1;
-			}
-
-			if ((dir[0] == dir[2]) && (dir[0] == 1)){
-
-				vec3 edge_p1(test_model->vertices->at(3 * inner_edge.at(j).index[0] + 0), test_model->vertices->at(3 * inner_edge.at(j).index[0] + 1), test_model->vertices->at(3 * inner_edge.at(j).index[0] + 2));
-				vec3 edge_p2(test_model->vertices->at(3 * inner_edge.at(j).index[1] + 0), test_model->vertices->at(3 * inner_edge.at(j).index[1] + 1), test_model->vertices->at(3 * inner_edge.at(j).index[1] + 2));
-
-				vec3 e_dir = (edge_p2 - edge_p1).normalize();
-				float times = (d - (edge_p1 * n)) / (e_dir * n);
-				vec3 insect_p = edge_p1 + times * e_dir;
-
-				vec3 edge1 = p2 - p1;
-				vec3 edge2 = p3 - p2;
-				vec3 edge3 = p1 - p3;
-				vec3 judge1 = insect_p - p1;
-				vec3 judge2 = insect_p - p2;
-				vec3 judge3 = insect_p - p3;
-
-				if (((edge1 ^ judge1) * n > 0.001f) && ((edge2 ^ judge2) * n > 0.001f) && ((edge3 ^ judge3) * n > 0.001f)){
-					return false;
-				}
-			}
-		}
-	}
-	return true;
-}
-
-bool split_valid(GLMmodel *model)
-{
-	int *use_times = new int[model->multi_vertex->size()];
-	for (int i = 0; i < model->multi_vertex->size(); i += 1){
-		use_times[i] = 0;
-	}
-
-	for (int i = 0; i < model->multi_vertex->size(); i += 1){
-		for (int j = i + 1; j < model->multi_vertex->size(); j += 1){
-			int judge = 0;
-			for (int k = 0; k < model->cut_loop->at(model->multi_vertex->at(i)).align_plane.size(); k += 1){
-				int index = find(model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin(), model->cut_loop->at(model->multi_vertex->at(j)).align_plane.end(), model->cut_loop->at(model->multi_vertex->at(i)).align_plane.at(k)) - model->cut_loop->at(model->multi_vertex->at(j)).align_plane.begin();
-				if (index < model->cut_loop->at(model->multi_vertex->at(j)).align_plane.size()){
-					judge += 1;
-				}
-			}
-
-			if (judge >= 2){
-				use_times[i] += 1;
-				use_times[j] += 1;
-			}
-		}
-	}
-
-	for (int i = 0; i < model->multi_vertex->size(); i += 1){
-		if (use_times[i] != 1){
-			return false;
-		}
-	}
-	return true;
-}
-
 void cut_mesh(GLMmodel *model, std::string &model_file, std::string &shell_file, std::string &zome_file, int plane_tune)
 {
 	std::vector<std::vector<plane>> all_planes;
@@ -2945,7 +2412,7 @@ void cut_mesh(GLMmodel *model, std::string &model_file, std::string &shell_file,
 			std::vector<std::vector<vec3>> solt_dist(62);
 
 			int solt = near_solt(&piece, test_connect, solt_ball, solt_dist);
-			generate_tenon(&piece, test_connect, solt, solt_ball.at(solt), solt_dist.at(solt), std::string("test_model/out" + model_file + "_tenon"), i);
+			generate_tenon(&piece, test_connect, solt, solt_ball.at(solt), solt_dist.at(solt), std::string("test_model/out/" + model_file + "_tenon"), i);
 		}
 
 		std::string file_name = "test_model/out/" + model_file + "_" + std::to_string(i) + ".obj";

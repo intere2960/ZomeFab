@@ -139,7 +139,6 @@
     <ClCompile Include="RNBasics\RNSvd.cpp" />
     <ClCompile Include="RNBasics\RNTime.cpp" />
     <ClCompile Include="RNBasics\RNType.cpp" />
-    <ClCompile Include="shell.cpp" />
     <ClCompile Include="VKGraph.cpp" />
     <ClCompile Include="voxel.cpp" />
     <ClCompile Include="zomedir.cpp" />
@@ -160,7 +159,6 @@
     <ClInclude Include="glui_internal.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="graphcut.h" />
-    <ClInclude Include="ImportOBJ.h" />
     <ClInclude Include="LinAlg.h" />
     <ClInclude Include="LinkedBlockList.h" />
     <ClInclude Include="MRFGraphCut.h" />
@@ -187,7 +185,6 @@
     <ClInclude Include="RNBasics\RNSvd.h" />
     <ClInclude Include="RNBasics\RNTime.h" />
     <ClInclude Include="RNBasics\RNType.h" />
-    <ClInclude Include="shell.h" />
     <ClInclude Include="Sortable.h" />
     <ClInclude Include="VkFunctions.h" />
     <ClInclude Include="VKGraph.h" />
@@ -196,6 +193,7 @@
     <ClInclude Include="zomestruc.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="ZomeFab input.txt" />
     <Text Include="zome_merge.txt" />
     <Text Include="zome_splite.txt" />
   </ItemGroup>

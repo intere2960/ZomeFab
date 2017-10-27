@@ -773,6 +773,8 @@ void simulated_annealing(GLMmodel *model, std::string &model_file, float total_n
 	for (int i = 0; i < num_iteration; i += 1){
 		float now_t = inital_t * decrease_t(i);
 
+		os << i << " :" << std::endl;
+
 		std::vector<std::vector<zomeconn>> temp_connect(4);
 		temp_connect = test_connect;
 

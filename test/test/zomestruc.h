@@ -36,7 +36,6 @@ class zomeconn
 {
 public:
 	zomeconn();
-	~zomeconn();
 	int getmodelnumber();
 
 	int index;
@@ -71,7 +70,6 @@ class zomestruc
 {
 public:
 	zomestruc();
-	~zomestruc();
 	int index;
 	vec3 position;
 };

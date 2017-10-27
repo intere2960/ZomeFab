@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "shell.h"
 #include "operation.h"
 
 float color_material[20][3]
@@ -243,6 +242,8 @@ void graph_cut(GLMmodel *model, std::string &model_file, std::string &zome_file,
 		generatePointCloud(cloud, model);
 		float origin_term[4];
 		float origin_e = compute_energy(test_connect, model, cloud, origin_term, total_num);
+
+		output_nearest_point(model, split_name + std::string("_nearest_point.txt"));
 	}
 
 	std::vector<std::vector<int>> vertex_color(model->numvertices + 1);

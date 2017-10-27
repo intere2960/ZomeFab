@@ -2,7 +2,6 @@
 #include <omp.h>
 #include "zomestruc.h"
 #include "zomedir.h"
-#include "operation.h"
 #include "global.h"
 
 zomeconn::zomeconn()
@@ -29,10 +28,6 @@ zomeconn::zomeconn()
 	for (int i = 0; i < 62; i += 1){
 		connect_stick[i] = vec2(-1.0f, -1.0f);
 	}
-}
-
-zomeconn::~zomeconn()
-{
 }
 
 int zomeconn::getmodelnumber()
@@ -63,10 +58,6 @@ int zomeconn::getmodelnumber()
 zomestruc::zomestruc()
 {
 	position.set(0.0, 0.0, 0.0);
-}
-
-zomestruc::~zomestruc()
-{
 }
 
 void combine_zome_ztruc(std::vector<std::vector<zomeconn>> &target, std::vector<std::vector<zomeconn>> &source)

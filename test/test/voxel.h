@@ -5,7 +5,6 @@
 #include <string>
 #include "algebra3.h"
 #include "zomestruc.h"
-#include "ImportOBJ.h"
 #include "glm.h"
 
 class voxel
@@ -47,8 +46,8 @@ void simple_voxelization(GLMmodel *model, std::vector<voxel> &all_voxel, vec3 &b
 void output_voxel(std::vector<voxel> &all_voxel, int piece_id, std::string model_file);
 void voxel_txt(std::vector<voxel> &all_voxel, std::string &filename);
 void voxel_parser(std::vector<voxel> &all_voxel, std::string &filename);
-void kill_inner_SA(std::vector<voxel> &all_voxel, std::vector<std::vector<zomeconn>> &zome_queue);
-void voxelization(GLMmodel *model, std::string &model_file);
-void voxel_inner_shell(GLMmodel *model, std::string &model_file);
+void struct_voxelization(GLMmodel *model, std::string &model_file);
+void voxel_shell(std::vector<voxel> &all_voxel, std::string model_file);
+void voxel_inner_shell(GLMmodel *model, std::string &model_file, float inner_shell_edge);
 
 #endif // VOXEL_H_INCLUDED

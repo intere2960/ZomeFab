@@ -1,12 +1,13 @@
-doraemon
+lion
 1500
 1000
 0.1
 1.0
 0.0
 1.0
-0
-3
+8
+5.4
+5
 
 // file name
 // SA total num
@@ -16,4 +17,5 @@ doraemon
 // label
 // salient
 // plane tune
+// inner shell edge
 // mode :: 0 (voxelization) 1 (SA) 2 //(fake saliency) 3 (graph cut) 4 (voxelization inner shell) 5 (cut_mesh) 6 (OUTPUT)
