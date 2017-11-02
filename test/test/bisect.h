@@ -7,6 +7,18 @@
 #include "edge.h"
 #include "plane.h"
 
+class neighbor_record
+{
+public:
+	neighbor_record(){}
+	neighbor_record(std::vector<std::vector<plane>> &all_planes, std::string neighbor_file);
+
+	std::vector<std::vector<int>> neighbor_info;
+	std::vector<std::vector<int>> neighbor_table;
+	std::vector<std::vector<std::vector<int>>> plane_neighbor;
+	std::vector<vec3> piece_center;
+};
+
 void recount_normal(GLMmodel *myObj);
 void combine_inner_outfit(GLMmodel *myObj, GLMmodel *myObj_inner);
 void vertex_use_tri(GLMmodel *model);

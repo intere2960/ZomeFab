@@ -6,6 +6,63 @@
 #include "fill.h"
 #include "global.h"
 
+neighbor_record::neighbor_record(std::vector<std::vector<plane>> &all_planes, std::string neighbor_file)
+{
+	std::ifstream neighbor(neighbor_file);
+	neighbor_info.resize(all_planes.size());
+	neighbor_table.resize(all_planes.size());
+	int temp_ne;
+	for (unsigned int i = 0; i < all_planes.size(); i += 1){
+		for (unsigned int j = 0; j < all_planes.size(); j += 1){
+			neighbor >> temp_ne;
+			neighbor_table.at(i).push_back(temp_ne);
+			if (temp_ne > 2){
+				neighbor_info.at(i).push_back(j);
+			}
+		}
+	}
+	neighbor.close();
+
+	for (unsigned int i = 0; i < all_planes.size(); i += 1){
+
+		std::vector<std::vector<int>> temp_info(all_planes.at(i).size());
+
+		for (unsigned int j = 0; j < neighbor_info.at(i).size(); j += 1){
+
+			int current_index = neighbor_info.at(i).at(j);
+
+			for (unsigned int k = 0; k < neighbor_info.at(i).size(); k += 1){
+				if (j == k)
+					continue;
+
+				int check_index = neighbor_info.at(i).at(k);
+				if (neighbor_table.at(current_index).at(check_index) > 2){
+					temp_info.at(j).push_back(k);
+				}
+			}
+		}
+		plane_neighbor.push_back(temp_info);
+	}
+
+	for (unsigned int i = 0; i < all_planes.size(); i += 1){
+		vec3 sum(0.0f, 0.0f, 0.0f);
+		int num = 0;
+		std::string temp_file = std::to_string(i) + ".txt";
+
+		std::ifstream is(temp_file);
+		vec3 temp_read;
+		while (is >> temp_read[0] >> temp_read[1] >> temp_read[2]){
+			sum += temp_read;
+			num += 1;
+		}
+		is.close();
+
+		sum /= (float)num;
+
+		piece_center.push_back(sum);
+	}
+}
+
 void recount_normal(GLMmodel *myObj)
 {
 	glmFacetNormals(myObj);
@@ -2296,6 +2353,8 @@ void cut_mesh(GLMmodel *model, std::string &model_file, std::string &shell_file,
 	}
 
 	plane_parser_SVM(all_planes, plane_file);
+
+	output_plane_SVM(all_planes, model_file, std::string(model_file + "_neighbor.txt"));
 
 	for (unsigned int i = 0; i < all_planes.size(); i += 1){
 

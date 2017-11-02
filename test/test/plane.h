@@ -30,7 +30,7 @@ public:
 };
 
 void plane_parser_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_plane);
-void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_neighbor);
+void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &model_file, std::string &file_neighbor);
 float plane_dir_point(vec3 &point, plane &plane);
 float plane_dist_point(vec3 &point, plane &plane);
 void plane_dir_edge(edge &temp, plane &plane, int dir[2]);

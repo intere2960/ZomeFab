@@ -45,7 +45,7 @@ void plane_parser_SVM(std::vector<std::vector<plane>> &all_planes, std::string &
 	is.close();
 }
 
-void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &file_neighbor)
+void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &model_file, std::string &file_neighbor)
 {
 	std::ifstream neighbor(file_neighbor);
 	std::vector<std::vector<int>> neighbor_info(all_planes.size());
@@ -59,7 +59,7 @@ void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &
 			}
 		}
 
-		std::string file_vertex = std::to_string(i) + ".txt";
+		std::string file_vertex = model_file + "_" + std::to_string(i) + ".txt";
 		std::ifstream vertex(file_vertex);
 		vec3 temp_v;
 		while (vertex >> temp_v[0] >> temp_v[1] >> temp_v[2])
@@ -126,7 +126,7 @@ void output_plane_SVM(std::vector<std::vector<plane>> &all_planes, std::string &
 			}			
 		}
 
-		std::string filename = "SVM_plane" + std::to_string(i) + ".obj";
+		std::string filename = model_file + "_SVM_plane" + std::to_string(i) + ".obj";
 		glmWriteOBJ(planes, my_strdup(filename.c_str()), GLM_NONE);
 	}
 }
